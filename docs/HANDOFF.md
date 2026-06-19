@@ -51,9 +51,15 @@ generated `BETTER_AUTH_SECRET` (other secrets still blank — see BUILD-STATUS).
 
 Local toolchain note: Node/pnpm run via asdf. Prefix commands with
 `ASDF_NODEJS_VERSION=24.13.1` (or `asdf shell nodejs 24.13.1`) and use
-`corepack pnpm`. Generators that need env (`db:migrate`, `db:seed`, the OpenAPI
-route) read `.env.local`; the snapshot was taken from `http://localhost:3030`
-(the `https://devrijehond.local` host in `package.json`/`input.ts` assumes a
+`corepack pnpm`. Next reads env from `apps/web` (its CWD), not the repo root, so
+`apps/web/.env.local` is a symlink to the root `../../.env.local` — that single
+file then supplies the server vars (DATABASE*URL, BETTER_AUTH*_) and the browser
+`NEXT*PUBLIC*_`(e.g. the Google Maps key) to`pnpm --filter web dev`. The
+symlink is gitignored, so recreate it on a fresh clone:
+`ln -sf ../../.env.local apps/web/.env.local`. Note `NEXT*PUBLIC*\*` is inlined at
+dev-server start, so restart after changing the key. Other generators that need
+env (`db:migrate`, `db:seed`, the OpenAPI route) read the root `.env.local`; the
+snapshot was taken from `http://localhost:3030`(the`https://devrijehond.local` host in `package.json`/`input.ts` assumes a
 reverse proxy that isn't set up locally).
 
 ## What's fully implemented vs stubbed
