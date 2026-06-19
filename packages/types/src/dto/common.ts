@@ -18,39 +18,39 @@ import '../registry'; // side-effect: extendZodWithOpenApi(z)
  * `schema.zmodel` shows up in the API contract automatically.
  */
 
-export const UserRoleSchema = DbUserRoleSchema.openapi({
+export const UserRoleSchema = DbUserRoleSchema.openapi('UserRole', {
   description: 'Application role. `USER` = mobile app + website. `ADMIN` = moderation safety-net.',
   example: 'USER',
 });
 
-export const SpotTypeSchema = DbSpotTypeSchema.openapi({
+export const SpotTypeSchema = DbSpotTypeSchema.openapi('SpotType', {
   description: 'Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point.',
   example: 'REGION',
 });
 
-export const SpotStatusSchema = DbSpotStatusSchema.openapi({
+export const SpotStatusSchema = DbSpotStatusSchema.openapi('SpotStatus', {
   description:
     'Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only.',
   example: 'UNVERIFIED',
 });
 
-export const VoteValueSchema = DbVoteValueSchema.openapi({
+export const VoteValueSchema = DbVoteValueSchema.openapi('VoteValue', {
   description: 'Community verification vote. `CONFIRM` raises the score, `DENY` lowers it.',
   example: 'CONFIRM',
 });
 
-export const ReportReasonSchema = DbReportReasonSchema.openapi({
+export const ReportReasonSchema = DbReportReasonSchema.openapi('ReportReason', {
   description: 'Why a piece of content was reported.',
   example: 'WRONG_INFO',
 });
 
-export const FeatureStatusSchema = DbFeatureStatusSchema.openapi({
+export const FeatureStatusSchema = DbFeatureStatusSchema.openapi('FeatureStatus', {
   description: 'Product-roadmap state of a community feature request.',
   example: 'CONSIDERING',
 });
 
 // Enums NOT exported by @devrijehond/db/zod — defined here to match the ZModel.
-export const ReportTargetSchema = z.enum(['SPOT', 'PHOTO', 'REVIEW']).openapi({
+export const ReportTargetSchema = z.enum(['SPOT', 'PHOTO', 'REVIEW']).openapi('ReportTarget', {
   description: 'What kind of entity a report targets.',
   example: 'SPOT',
 });
@@ -78,18 +78,18 @@ export const LatSchema = z
   .number()
   .min(-90)
   .max(90)
-  .openapi({ description: 'Latitude in decimal degrees (WGS84 / EPSG:4326).', example: 52.300600 });
+  .openapi({ description: 'Latitude in decimal degrees (WGS84 / EPSG:4326).', example: 52.3006 });
 
 export const LngSchema = z
   .number()
   .min(-180)
   .max(180)
-  .openapi({ description: 'Longitude in decimal degrees (WGS84 / EPSG:4326).', example: 4.836800 });
+  .openapi({ description: 'Longitude in decimal degrees (WGS84 / EPSG:4326).', example: 4.8368 });
 
 /** Single lat/lng pair (decimal degrees, WGS84). */
 export const GeoPointSchema = z
   .object({ lat: LatSchema, lng: LngSchema })
-  .openapi({ description: 'A geographic point — latitude/longitude in WGS84.' });
+  .openapi('GeoPoint', { description: 'A geographic point — latitude/longitude in WGS84.' });
 export type GeoPointDto = z.infer<typeof GeoPointSchema>;
 
 /**
@@ -99,7 +99,8 @@ export type GeoPointDto = z.infer<typeof GeoPointSchema>;
 export const PaginationQuerySchema = z
   .object({
     cursor: z.string().nullish().openapi({
-      description: 'Opaque cursor returned as `nextCursor` from the previous page. Omit for page 1.',
+      description:
+        'Opaque cursor returned as `nextCursor` from the previous page. Omit for page 1.',
     }),
     since: IsoDateTimeSchema.nullish().openapi({
       description:
@@ -130,9 +131,9 @@ export function paginatedSchema<T extends z.ZodTypeAny>(item: T) {
  */
 export const MapBboxQuerySchema = z
   .object({
-    minLng: LngSchema.openapi({ description: 'West edge of the viewport.', example: 4.80 }),
+    minLng: LngSchema.openapi({ description: 'West edge of the viewport.', example: 4.8 }),
     minLat: LatSchema.openapi({ description: 'South edge of the viewport.', example: 52.28 }),
-    maxLng: LngSchema.openapi({ description: 'East edge of the viewport.', example: 4.90 }),
+    maxLng: LngSchema.openapi({ description: 'East edge of the viewport.', example: 4.9 }),
     maxLat: LatSchema.openapi({ description: 'North edge of the viewport.', example: 52.34 }),
     since: IsoDateTimeSchema.nullish().openapi({
       description: 'Return only spots changed at or after this timestamp (delta refresh).',
@@ -162,7 +163,7 @@ export const ApiErrorSchema = z
         'Optional structured detail payload. For validation errors this is the Zod `flatten()` output.',
     }),
   })
-  .openapi({
+  .openapi('ApiError', {
     description: 'Uniform error envelope used by every API endpoint.',
     example: { error: 'VALIDATION_FAILED', message: 'categoryId is required' },
   });

@@ -24,21 +24,11 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  DeleteApiV1MeDogsId400,
-  DeleteApiV1MeDogsId401,
-  DeleteApiV1MeDogsId404,
-  GetApiV1MeDogs200,
-  GetApiV1MeDogs401,
-  PatchApiV1MeDogsId200,
-  PatchApiV1MeDogsId400,
-  PatchApiV1MeDogsId401,
-  PatchApiV1MeDogsId404,
-  PatchApiV1MeDogsIdBody,
-  PostApiV1MeDogs201,
-  PostApiV1MeDogs400,
-  PostApiV1MeDogs401,
-  PostApiV1MeDogs404,
-  PostApiV1MeDogsBody,
+  ApiError,
+  CreateDogRequest,
+  Dog,
+  DogsResponse,
+  UpdateDogRequest,
 } from '../client.schemas';
 
 import { customFetcher } from '../../custom-fetcher';
@@ -47,7 +37,7 @@ import { customFetcher } from '../../custom-fetcher';
  * @summary List my dogs
  */
 export const getApiV1MeDogs = (signal?: AbortSignal) => {
-  return customFetcher<GetApiV1MeDogs200>({ url: `/api/v1/me/dogs`, method: 'GET', signal });
+  return customFetcher<DogsResponse>({ url: `/api/v1/me/dogs`, method: 'GET', signal });
 };
 
 export const getGetApiV1MeDogsQueryKey = () => {
@@ -56,7 +46,7 @@ export const getGetApiV1MeDogsQueryKey = () => {
 
 export const getGetApiV1MeDogsQueryOptions = <
   TData = Awaited<ReturnType<typeof getApiV1MeDogs>>,
-  TError = GetApiV1MeDogs401,
+  TError = ApiError,
 >(options?: {
   query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1MeDogs>>, TError, TData>>;
 }) => {
@@ -75,11 +65,11 @@ export const getGetApiV1MeDogsQueryOptions = <
 };
 
 export type GetApiV1MeDogsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1MeDogs>>>;
-export type GetApiV1MeDogsQueryError = GetApiV1MeDogs401;
+export type GetApiV1MeDogsQueryError = ApiError;
 
 export function useGetApiV1MeDogs<
   TData = Awaited<ReturnType<typeof getApiV1MeDogs>>,
-  TError = GetApiV1MeDogs401,
+  TError = ApiError,
 >(
   options: {
     query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1MeDogs>>, TError, TData>> &
@@ -96,7 +86,7 @@ export function useGetApiV1MeDogs<
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetApiV1MeDogs<
   TData = Awaited<ReturnType<typeof getApiV1MeDogs>>,
-  TError = GetApiV1MeDogs401,
+  TError = ApiError,
 >(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1MeDogs>>, TError, TData>> &
@@ -113,7 +103,7 @@ export function useGetApiV1MeDogs<
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetApiV1MeDogs<
   TData = Awaited<ReturnType<typeof getApiV1MeDogs>>,
-  TError = GetApiV1MeDogs401,
+  TError = ApiError,
 >(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1MeDogs>>, TError, TData>>;
@@ -126,7 +116,7 @@ export function useGetApiV1MeDogs<
 
 export function useGetApiV1MeDogs<
   TData = Awaited<ReturnType<typeof getApiV1MeDogs>>,
-  TError = GetApiV1MeDogs401,
+  TError = ApiError,
 >(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1MeDogs>>, TError, TData>>;
@@ -146,7 +136,7 @@ export function useGetApiV1MeDogs<
 
 export const getGetApiV1MeDogsSuspenseQueryOptions = <
   TData = Awaited<ReturnType<typeof getApiV1MeDogs>>,
-  TError = GetApiV1MeDogs401,
+  TError = ApiError,
 >(options?: {
   query?: Partial<
     UseSuspenseQueryOptions<Awaited<ReturnType<typeof getApiV1MeDogs>>, TError, TData>
@@ -169,11 +159,11 @@ export const getGetApiV1MeDogsSuspenseQueryOptions = <
 export type GetApiV1MeDogsSuspenseQueryResult = NonNullable<
   Awaited<ReturnType<typeof getApiV1MeDogs>>
 >;
-export type GetApiV1MeDogsSuspenseQueryError = GetApiV1MeDogs401;
+export type GetApiV1MeDogsSuspenseQueryError = ApiError;
 
 export function useGetApiV1MeDogsSuspense<
   TData = Awaited<ReturnType<typeof getApiV1MeDogs>>,
-  TError = GetApiV1MeDogs401,
+  TError = ApiError,
 >(
   options: {
     query: Partial<
@@ -184,7 +174,7 @@ export function useGetApiV1MeDogsSuspense<
 ): UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetApiV1MeDogsSuspense<
   TData = Awaited<ReturnType<typeof getApiV1MeDogs>>,
-  TError = GetApiV1MeDogs401,
+  TError = ApiError,
 >(
   options?: {
     query?: Partial<
@@ -195,7 +185,7 @@ export function useGetApiV1MeDogsSuspense<
 ): UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetApiV1MeDogsSuspense<
   TData = Awaited<ReturnType<typeof getApiV1MeDogs>>,
-  TError = GetApiV1MeDogs401,
+  TError = ApiError,
 >(
   options?: {
     query?: Partial<
@@ -210,7 +200,7 @@ export function useGetApiV1MeDogsSuspense<
 
 export function useGetApiV1MeDogsSuspense<
   TData = Awaited<ReturnType<typeof getApiV1MeDogs>>,
-  TError = GetApiV1MeDogs401,
+  TError = ApiError,
 >(
   options?: {
     query?: Partial<
@@ -234,30 +224,27 @@ export function useGetApiV1MeDogsSuspense<
 /**
  * @summary Add a dog
  */
-export const postApiV1MeDogs = (postApiV1MeDogsBody: PostApiV1MeDogsBody, signal?: AbortSignal) => {
-  return customFetcher<PostApiV1MeDogs201>({
+export const postApiV1MeDogs = (createDogRequest: CreateDogRequest, signal?: AbortSignal) => {
+  return customFetcher<Dog>({
     url: `/api/v1/me/dogs`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    data: postApiV1MeDogsBody,
+    data: createDogRequest,
     signal,
   });
 };
 
-export const getPostApiV1MeDogsMutationOptions = <
-  TError = PostApiV1MeDogs400 | PostApiV1MeDogs401 | PostApiV1MeDogs404,
-  TContext = unknown,
->(options?: {
+export const getPostApiV1MeDogsMutationOptions = <TError = ApiError, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiV1MeDogs>>,
     TError,
-    { data: PostApiV1MeDogsBody },
+    { data: CreateDogRequest },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiV1MeDogs>>,
   TError,
-  { data: PostApiV1MeDogsBody },
+  { data: CreateDogRequest },
   TContext
 > => {
   const mutationKey = ['postApiV1MeDogs'];
@@ -269,7 +256,7 @@ export const getPostApiV1MeDogsMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiV1MeDogs>>,
-    { data: PostApiV1MeDogsBody }
+    { data: CreateDogRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -282,24 +269,18 @@ export const getPostApiV1MeDogsMutationOptions = <
 export type PostApiV1MeDogsMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiV1MeDogs>>
 >;
-export type PostApiV1MeDogsMutationBody = PostApiV1MeDogsBody;
-export type PostApiV1MeDogsMutationError =
-  | PostApiV1MeDogs400
-  | PostApiV1MeDogs401
-  | PostApiV1MeDogs404;
+export type PostApiV1MeDogsMutationBody = CreateDogRequest;
+export type PostApiV1MeDogsMutationError = ApiError;
 
 /**
  * @summary Add a dog
  */
-export const usePostApiV1MeDogs = <
-  TError = PostApiV1MeDogs400 | PostApiV1MeDogs401 | PostApiV1MeDogs404,
-  TContext = unknown,
->(
+export const usePostApiV1MeDogs = <TError = ApiError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiV1MeDogs>>,
       TError,
-      { data: PostApiV1MeDogsBody },
+      { data: CreateDogRequest },
       TContext
     >;
   },
@@ -307,7 +288,7 @@ export const usePostApiV1MeDogs = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiV1MeDogs>>,
   TError,
-  { data: PostApiV1MeDogsBody },
+  { data: CreateDogRequest },
   TContext
 > => {
   const mutationOptions = getPostApiV1MeDogsMutationOptions(options);
@@ -317,29 +298,29 @@ export const usePostApiV1MeDogs = <
 /**
  * @summary Update a dog
  */
-export const patchApiV1MeDogsId = (id: string, patchApiV1MeDogsIdBody: PatchApiV1MeDogsIdBody) => {
-  return customFetcher<PatchApiV1MeDogsId200>({
+export const patchApiV1MeDogsId = (id: string, updateDogRequest: UpdateDogRequest) => {
+  return customFetcher<Dog>({
     url: `/api/v1/me/dogs/${id}`,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    data: patchApiV1MeDogsIdBody,
+    data: updateDogRequest,
   });
 };
 
 export const getPatchApiV1MeDogsIdMutationOptions = <
-  TError = PatchApiV1MeDogsId400 | PatchApiV1MeDogsId401 | PatchApiV1MeDogsId404,
+  TError = ApiError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof patchApiV1MeDogsId>>,
     TError,
-    { id: string; data: PatchApiV1MeDogsIdBody },
+    { id: string; data: UpdateDogRequest },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof patchApiV1MeDogsId>>,
   TError,
-  { id: string; data: PatchApiV1MeDogsIdBody },
+  { id: string; data: UpdateDogRequest },
   TContext
 > => {
   const mutationKey = ['patchApiV1MeDogsId'];
@@ -351,7 +332,7 @@ export const getPatchApiV1MeDogsIdMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof patchApiV1MeDogsId>>,
-    { id: string; data: PatchApiV1MeDogsIdBody }
+    { id: string; data: UpdateDogRequest }
   > = (props) => {
     const { id, data } = props ?? {};
 
@@ -364,24 +345,18 @@ export const getPatchApiV1MeDogsIdMutationOptions = <
 export type PatchApiV1MeDogsIdMutationResult = NonNullable<
   Awaited<ReturnType<typeof patchApiV1MeDogsId>>
 >;
-export type PatchApiV1MeDogsIdMutationBody = PatchApiV1MeDogsIdBody;
-export type PatchApiV1MeDogsIdMutationError =
-  | PatchApiV1MeDogsId400
-  | PatchApiV1MeDogsId401
-  | PatchApiV1MeDogsId404;
+export type PatchApiV1MeDogsIdMutationBody = UpdateDogRequest;
+export type PatchApiV1MeDogsIdMutationError = ApiError;
 
 /**
  * @summary Update a dog
  */
-export const usePatchApiV1MeDogsId = <
-  TError = PatchApiV1MeDogsId400 | PatchApiV1MeDogsId401 | PatchApiV1MeDogsId404,
-  TContext = unknown,
->(
+export const usePatchApiV1MeDogsId = <TError = ApiError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof patchApiV1MeDogsId>>,
       TError,
-      { id: string; data: PatchApiV1MeDogsIdBody },
+      { id: string; data: UpdateDogRequest },
       TContext
     >;
   },
@@ -389,7 +364,7 @@ export const usePatchApiV1MeDogsId = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof patchApiV1MeDogsId>>,
   TError,
-  { id: string; data: PatchApiV1MeDogsIdBody },
+  { id: string; data: UpdateDogRequest },
   TContext
 > => {
   const mutationOptions = getPatchApiV1MeDogsIdMutationOptions(options);
@@ -404,7 +379,7 @@ export const deleteApiV1MeDogsId = (id: string) => {
 };
 
 export const getDeleteApiV1MeDogsIdMutationOptions = <
-  TError = DeleteApiV1MeDogsId400 | DeleteApiV1MeDogsId401 | DeleteApiV1MeDogsId404,
+  TError = ApiError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -442,18 +417,12 @@ export type DeleteApiV1MeDogsIdMutationResult = NonNullable<
   Awaited<ReturnType<typeof deleteApiV1MeDogsId>>
 >;
 
-export type DeleteApiV1MeDogsIdMutationError =
-  | DeleteApiV1MeDogsId400
-  | DeleteApiV1MeDogsId401
-  | DeleteApiV1MeDogsId404;
+export type DeleteApiV1MeDogsIdMutationError = ApiError;
 
 /**
  * @summary Delete a dog
  */
-export const useDeleteApiV1MeDogsId = <
-  TError = DeleteApiV1MeDogsId400 | DeleteApiV1MeDogsId401 | DeleteApiV1MeDogsId404,
-  TContext = unknown,
->(
+export const useDeleteApiV1MeDogsId = <TError = ApiError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof deleteApiV1MeDogsId>>,

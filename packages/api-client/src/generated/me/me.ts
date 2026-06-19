@@ -23,15 +23,7 @@ import type {
   UseSuspenseQueryResult,
 } from '@tanstack/react-query';
 
-import type {
-  GetApiV1Me200,
-  GetApiV1Me401,
-  PatchApiV1Me200,
-  PatchApiV1Me400,
-  PatchApiV1Me401,
-  PatchApiV1Me404,
-  PatchApiV1MeBody,
-} from '../client.schemas';
+import type { ApiError, MeProfile, MeProfilePatch } from '../client.schemas';
 
 import { customFetcher } from '../../custom-fetcher';
 
@@ -39,7 +31,7 @@ import { customFetcher } from '../../custom-fetcher';
  * @summary Get my profile
  */
 export const getApiV1Me = (signal?: AbortSignal) => {
-  return customFetcher<GetApiV1Me200>({ url: `/api/v1/me`, method: 'GET', signal });
+  return customFetcher<MeProfile>({ url: `/api/v1/me`, method: 'GET', signal });
 };
 
 export const getGetApiV1MeQueryKey = () => {
@@ -48,7 +40,7 @@ export const getGetApiV1MeQueryKey = () => {
 
 export const getGetApiV1MeQueryOptions = <
   TData = Awaited<ReturnType<typeof getApiV1Me>>,
-  TError = GetApiV1Me401,
+  TError = ApiError,
 >(options?: {
   query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Me>>, TError, TData>>;
 }) => {
@@ -67,12 +59,9 @@ export const getGetApiV1MeQueryOptions = <
 };
 
 export type GetApiV1MeQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1Me>>>;
-export type GetApiV1MeQueryError = GetApiV1Me401;
+export type GetApiV1MeQueryError = ApiError;
 
-export function useGetApiV1Me<
-  TData = Awaited<ReturnType<typeof getApiV1Me>>,
-  TError = GetApiV1Me401,
->(
+export function useGetApiV1Me<TData = Awaited<ReturnType<typeof getApiV1Me>>, TError = ApiError>(
   options: {
     query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Me>>, TError, TData>> &
       Pick<
@@ -86,10 +75,7 @@ export function useGetApiV1Me<
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-export function useGetApiV1Me<
-  TData = Awaited<ReturnType<typeof getApiV1Me>>,
-  TError = GetApiV1Me401,
->(
+export function useGetApiV1Me<TData = Awaited<ReturnType<typeof getApiV1Me>>, TError = ApiError>(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Me>>, TError, TData>> &
       Pick<
@@ -103,10 +89,7 @@ export function useGetApiV1Me<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-export function useGetApiV1Me<
-  TData = Awaited<ReturnType<typeof getApiV1Me>>,
-  TError = GetApiV1Me401,
->(
+export function useGetApiV1Me<TData = Awaited<ReturnType<typeof getApiV1Me>>, TError = ApiError>(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Me>>, TError, TData>>;
   },
@@ -116,10 +99,7 @@ export function useGetApiV1Me<
  * @summary Get my profile
  */
 
-export function useGetApiV1Me<
-  TData = Awaited<ReturnType<typeof getApiV1Me>>,
-  TError = GetApiV1Me401,
->(
+export function useGetApiV1Me<TData = Awaited<ReturnType<typeof getApiV1Me>>, TError = ApiError>(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Me>>, TError, TData>>;
   },
@@ -138,7 +118,7 @@ export function useGetApiV1Me<
 
 export const getGetApiV1MeSuspenseQueryOptions = <
   TData = Awaited<ReturnType<typeof getApiV1Me>>,
-  TError = GetApiV1Me401,
+  TError = ApiError,
 >(options?: {
   query?: Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getApiV1Me>>, TError, TData>>;
 }) => {
@@ -157,11 +137,11 @@ export const getGetApiV1MeSuspenseQueryOptions = <
 };
 
 export type GetApiV1MeSuspenseQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1Me>>>;
-export type GetApiV1MeSuspenseQueryError = GetApiV1Me401;
+export type GetApiV1MeSuspenseQueryError = ApiError;
 
 export function useGetApiV1MeSuspense<
   TData = Awaited<ReturnType<typeof getApiV1Me>>,
-  TError = GetApiV1Me401,
+  TError = ApiError,
 >(
   options: {
     query: Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getApiV1Me>>, TError, TData>>;
@@ -170,7 +150,7 @@ export function useGetApiV1MeSuspense<
 ): UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetApiV1MeSuspense<
   TData = Awaited<ReturnType<typeof getApiV1Me>>,
-  TError = GetApiV1Me401,
+  TError = ApiError,
 >(
   options?: {
     query?: Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getApiV1Me>>, TError, TData>>;
@@ -179,7 +159,7 @@ export function useGetApiV1MeSuspense<
 ): UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetApiV1MeSuspense<
   TData = Awaited<ReturnType<typeof getApiV1Me>>,
-  TError = GetApiV1Me401,
+  TError = ApiError,
 >(
   options?: {
     query?: Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getApiV1Me>>, TError, TData>>;
@@ -192,7 +172,7 @@ export function useGetApiV1MeSuspense<
 
 export function useGetApiV1MeSuspense<
   TData = Awaited<ReturnType<typeof getApiV1Me>>,
-  TError = GetApiV1Me401,
+  TError = ApiError,
 >(
   options?: {
     query?: Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getApiV1Me>>, TError, TData>>;
@@ -214,29 +194,26 @@ export function useGetApiV1MeSuspense<
 /**
  * @summary Update my profile
  */
-export const patchApiV1Me = (patchApiV1MeBody: PatchApiV1MeBody) => {
-  return customFetcher<PatchApiV1Me200>({
+export const patchApiV1Me = (meProfilePatch: MeProfilePatch) => {
+  return customFetcher<MeProfile>({
     url: `/api/v1/me`,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    data: patchApiV1MeBody,
+    data: meProfilePatch,
   });
 };
 
-export const getPatchApiV1MeMutationOptions = <
-  TError = PatchApiV1Me400 | PatchApiV1Me401 | PatchApiV1Me404,
-  TContext = unknown,
->(options?: {
+export const getPatchApiV1MeMutationOptions = <TError = ApiError, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof patchApiV1Me>>,
     TError,
-    { data: PatchApiV1MeBody },
+    { data: MeProfilePatch },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof patchApiV1Me>>,
   TError,
-  { data: PatchApiV1MeBody },
+  { data: MeProfilePatch },
   TContext
 > => {
   const mutationKey = ['patchApiV1Me'];
@@ -248,7 +225,7 @@ export const getPatchApiV1MeMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof patchApiV1Me>>,
-    { data: PatchApiV1MeBody }
+    { data: MeProfilePatch }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -259,21 +236,18 @@ export const getPatchApiV1MeMutationOptions = <
 };
 
 export type PatchApiV1MeMutationResult = NonNullable<Awaited<ReturnType<typeof patchApiV1Me>>>;
-export type PatchApiV1MeMutationBody = PatchApiV1MeBody;
-export type PatchApiV1MeMutationError = PatchApiV1Me400 | PatchApiV1Me401 | PatchApiV1Me404;
+export type PatchApiV1MeMutationBody = MeProfilePatch;
+export type PatchApiV1MeMutationError = ApiError;
 
 /**
  * @summary Update my profile
  */
-export const usePatchApiV1Me = <
-  TError = PatchApiV1Me400 | PatchApiV1Me401 | PatchApiV1Me404,
-  TContext = unknown,
->(
+export const usePatchApiV1Me = <TError = ApiError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof patchApiV1Me>>,
       TError,
-      { data: PatchApiV1MeBody },
+      { data: MeProfilePatch },
       TContext
     >;
   },
@@ -281,7 +255,7 @@ export const usePatchApiV1Me = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof patchApiV1Me>>,
   TError,
-  { data: PatchApiV1MeBody },
+  { data: MeProfilePatch },
   TContext
 > => {
   const mutationOptions = getPatchApiV1MeMutationOptions(options);

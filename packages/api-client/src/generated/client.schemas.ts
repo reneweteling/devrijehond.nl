@@ -121,17 +121,6 @@ export interface ApiError {
 }
 
 /**
- * Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point.
- */
-export type CategoryType = (typeof CategoryType)[keyof typeof CategoryType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const CategoryType = {
-  REGION: 'REGION',
-  POI: 'POI',
-} as const;
-
-/**
  * Icon name (Tabler on web, mapped to SF Symbol / Material on mobile).
  */
 export type CategoryIcon = string | null;
@@ -149,8 +138,7 @@ export interface Category {
   id: string;
   slug: string;
   label: string;
-  /** Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point. */
-  type: CategoryType;
+  type: SpotType;
   /** Icon name (Tabler on web, mapped to SF Symbol / Material on mobile). */
   icon: CategoryIcon;
   /** Pin colour (hex). */
@@ -159,49 +147,10 @@ export interface Category {
 }
 
 /**
- * Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point.
- */
-export type CategoriesResponseItemsItemType =
-  (typeof CategoriesResponseItemsItemType)[keyof typeof CategoriesResponseItemsItemType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const CategoriesResponseItemsItemType = {
-  REGION: 'REGION',
-  POI: 'POI',
-} as const;
-
-/**
- * Icon name (Tabler on web, mapped to SF Symbol / Material on mobile).
- */
-export type CategoriesResponseItemsItemIcon = string | null;
-
-/**
- * Pin colour (hex).
- */
-export type CategoriesResponseItemsItemColor = string | null;
-
-/**
- * A spot category.
- */
-export type CategoriesResponseItemsItem = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  slug: string;
-  label: string;
-  /** Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point. */
-  type: CategoriesResponseItemsItemType;
-  /** Icon name (Tabler on web, mapped to SF Symbol / Material on mobile). */
-  icon: CategoriesResponseItemsItemIcon;
-  /** Pin colour (hex). */
-  color: CategoriesResponseItemsItemColor;
-  sortOrder: number;
-};
-
-/**
  * All visible, active categories.
  */
 export interface CategoriesResponse {
-  items: CategoriesResponseItemsItem[];
+  items: Category[];
 }
 
 /**
@@ -225,30 +174,10 @@ export interface Amenity {
 }
 
 /**
- * Icon name (Tabler / SF Symbol / Material).
- */
-export type AmenitiesResponseItemsItemIcon = string | null;
-
-/**
- * A spot amenity / facility tag.
- */
-export type AmenitiesResponseItemsItem = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  slug: string;
-  label: string;
-  /** Icon name (Tabler / SF Symbol / Material). */
-  icon: AmenitiesResponseItemsItemIcon;
-  sortOrder: number;
-  /** Categories this amenity applies to (from `AmenityOnCategory`). Empty = applicable everywhere. */
-  categoryIds: string[];
-};
-
-/**
  * All visible, active amenities with their category mapping.
  */
 export interface AmenitiesResponse {
-  items: AmenitiesResponseItemsItem[];
+  items: Amenity[];
 }
 
 /**
@@ -302,20 +231,6 @@ export interface SpotRating {
 }
 
 /**
- * Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only.
- */
-export type SpotVerificationStatus =
-  (typeof SpotVerificationStatus)[keyof typeof SpotVerificationStatus];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const SpotVerificationStatus = {
-  UNVERIFIED: 'UNVERIFIED',
-  VERIFIED: 'VERIFIED',
-  HIDDEN: 'HIDDEN',
-  REMOVED: 'REMOVED',
-} as const;
-
-/**
  * When the spot reached VERIFIED, or null.
  */
 export type SpotVerificationVerifiedAt = string | null;
@@ -324,8 +239,7 @@ export type SpotVerificationVerifiedAt = string | null;
  * Community-verification status + denormalised vote score.
  */
 export interface SpotVerification {
-  /** Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only. */
-  status: SpotVerificationStatus;
+  status: SpotStatus;
   /** Weighted confirm − deny score. */
   netScore: number;
   /** @minimum 0 */
@@ -354,30 +268,6 @@ export interface SpotAuthor {
 }
 
 /**
- * Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point.
- */
-export type SpotSummaryType = (typeof SpotSummaryType)[keyof typeof SpotSummaryType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const SpotSummaryType = {
-  REGION: 'REGION',
-  POI: 'POI',
-} as const;
-
-/**
- * Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only.
- */
-export type SpotSummaryStatus = (typeof SpotSummaryStatus)[keyof typeof SpotSummaryStatus];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const SpotSummaryStatus = {
-  UNVERIFIED: 'UNVERIFIED',
-  VERIFIED: 'VERIFIED',
-  HIDDEN: 'HIDDEN',
-  REMOVED: 'REMOVED',
-} as const;
-
-/**
  * Latitude in decimal degrees (WGS84 / EPSG:4326).
  * @minimum -90
  * @maximum 90
@@ -390,23 +280,6 @@ export type SpotSummaryLat = number | null;
  * @maximum 180
  */
 export type SpotSummaryLng = number | null;
-
-/**
- * Denormalised review aggregate.
- */
-export type SpotSummaryRating = {
-  /**
-   * Mean star rating (0–5).
-   * @minimum 0
-   * @maximum 5
-   */
-  average: number;
-  /**
-   * Number of reviews.
-   * @minimum 0
-   */
-  count: number;
-};
 
 /**
  * First photo URL for the list thumbnail, or null.
@@ -424,13 +297,11 @@ export interface SpotSummary {
    * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
    */
   slug: string;
-  /** Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point. */
-  type: SpotSummaryType;
+  type: SpotType;
   name: string;
   /** RFC 4122 UUID (v4). */
   categoryId: string;
-  /** Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only. */
-  status: SpotSummaryStatus;
+  status: SpotStatus;
   /**
    * Latitude in decimal degrees (WGS84 / EPSG:4326).
    * @minimum -90
@@ -443,113 +314,12 @@ export interface SpotSummary {
    * @maximum 180
    */
   lng: SpotSummaryLng;
-  /** Denormalised review aggregate. */
-  rating: SpotSummaryRating;
+  rating: SpotRating;
   /** First photo URL for the list thumbnail, or null. */
   photoUrl: SpotSummaryPhotoUrl;
   /** RFC 3339 datetime in UTC. */
   updatedAt: string;
 }
-
-/**
- * Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point.
- */
-export type SpotsResponseItemsItemType =
-  (typeof SpotsResponseItemsItemType)[keyof typeof SpotsResponseItemsItemType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const SpotsResponseItemsItemType = {
-  REGION: 'REGION',
-  POI: 'POI',
-} as const;
-
-/**
- * Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only.
- */
-export type SpotsResponseItemsItemStatus =
-  (typeof SpotsResponseItemsItemStatus)[keyof typeof SpotsResponseItemsItemStatus];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const SpotsResponseItemsItemStatus = {
-  UNVERIFIED: 'UNVERIFIED',
-  VERIFIED: 'VERIFIED',
-  HIDDEN: 'HIDDEN',
-  REMOVED: 'REMOVED',
-} as const;
-
-/**
- * Latitude in decimal degrees (WGS84 / EPSG:4326).
- * @minimum -90
- * @maximum 90
- */
-export type SpotsResponseItemsItemLat = number | null;
-
-/**
- * Longitude in decimal degrees (WGS84 / EPSG:4326).
- * @minimum -180
- * @maximum 180
- */
-export type SpotsResponseItemsItemLng = number | null;
-
-/**
- * Denormalised review aggregate.
- */
-export type SpotsResponseItemsItemRating = {
-  /**
-   * Mean star rating (0–5).
-   * @minimum 0
-   * @maximum 5
-   */
-  average: number;
-  /**
-   * Number of reviews.
-   * @minimum 0
-   */
-  count: number;
-};
-
-/**
- * First photo URL for the list thumbnail, or null.
- */
-export type SpotsResponseItemsItemPhotoUrl = string | null;
-
-/**
- * Lightweight spot summary for map markers + list rows.
- */
-export type SpotsResponseItemsItem = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  /**
-   * URL-safe slug (lowercase, hyphenated).
-   * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-   */
-  slug: string;
-  /** Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point. */
-  type: SpotsResponseItemsItemType;
-  name: string;
-  /** RFC 4122 UUID (v4). */
-  categoryId: string;
-  /** Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only. */
-  status: SpotsResponseItemsItemStatus;
-  /**
-   * Latitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -90
-   * @maximum 90
-   */
-  lat: SpotsResponseItemsItemLat;
-  /**
-   * Longitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -180
-   * @maximum 180
-   */
-  lng: SpotsResponseItemsItemLng;
-  /** Denormalised review aggregate. */
-  rating: SpotsResponseItemsItemRating;
-  /** First photo URL for the list thumbnail, or null. */
-  photoUrl: SpotsResponseItemsItemPhotoUrl;
-  /** RFC 3339 datetime in UTC. */
-  updatedAt: string;
-};
 
 /**
  * Cursor for the next page, or null when this is the last page.
@@ -560,209 +330,25 @@ export type SpotsResponseNextCursor = string | null;
  * Cursor-paginated list of spots.
  */
 export interface SpotsResponse {
-  items: SpotsResponseItemsItem[];
+  items: SpotSummary[];
   /** Cursor for the next page, or null when this is the last page. */
   nextCursor: SpotsResponseNextCursor;
 }
 
 /**
- * Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point.
- */
-export type SpotsMapResponseItemsItemType =
-  (typeof SpotsMapResponseItemsItemType)[keyof typeof SpotsMapResponseItemsItemType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const SpotsMapResponseItemsItemType = {
-  REGION: 'REGION',
-  POI: 'POI',
-} as const;
-
-/**
- * Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only.
- */
-export type SpotsMapResponseItemsItemStatus =
-  (typeof SpotsMapResponseItemsItemStatus)[keyof typeof SpotsMapResponseItemsItemStatus];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const SpotsMapResponseItemsItemStatus = {
-  UNVERIFIED: 'UNVERIFIED',
-  VERIFIED: 'VERIFIED',
-  HIDDEN: 'HIDDEN',
-  REMOVED: 'REMOVED',
-} as const;
-
-/**
- * Latitude in decimal degrees (WGS84 / EPSG:4326).
- * @minimum -90
- * @maximum 90
- */
-export type SpotsMapResponseItemsItemLat = number | null;
-
-/**
- * Longitude in decimal degrees (WGS84 / EPSG:4326).
- * @minimum -180
- * @maximum 180
- */
-export type SpotsMapResponseItemsItemLng = number | null;
-
-/**
- * Denormalised review aggregate.
- */
-export type SpotsMapResponseItemsItemRating = {
-  /**
-   * Mean star rating (0–5).
-   * @minimum 0
-   * @maximum 5
-   */
-  average: number;
-  /**
-   * Number of reviews.
-   * @minimum 0
-   */
-  count: number;
-};
-
-/**
- * First photo URL for the list thumbnail, or null.
- */
-export type SpotsMapResponseItemsItemPhotoUrl = string | null;
-
-/**
- * Lightweight spot summary for map markers + list rows.
- */
-export type SpotsMapResponseItemsItem = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  /**
-   * URL-safe slug (lowercase, hyphenated).
-   * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-   */
-  slug: string;
-  /** Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point. */
-  type: SpotsMapResponseItemsItemType;
-  name: string;
-  /** RFC 4122 UUID (v4). */
-  categoryId: string;
-  /** Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only. */
-  status: SpotsMapResponseItemsItemStatus;
-  /**
-   * Latitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -90
-   * @maximum 90
-   */
-  lat: SpotsMapResponseItemsItemLat;
-  /**
-   * Longitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -180
-   * @maximum 180
-   */
-  lng: SpotsMapResponseItemsItemLng;
-  /** Denormalised review aggregate. */
-  rating: SpotsMapResponseItemsItemRating;
-  /** First photo URL for the list thumbnail, or null. */
-  photoUrl: SpotsMapResponseItemsItemPhotoUrl;
-  /** RFC 3339 datetime in UTC. */
-  updatedAt: string;
-};
-
-/**
  * Spots whose geometry intersects the requested viewport.
  */
 export interface SpotsMapResponse {
-  items: SpotsMapResponseItemsItem[];
+  items: SpotSummary[];
 }
-
-/**
- * Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point.
- */
-export type SpotDetailType = (typeof SpotDetailType)[keyof typeof SpotDetailType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const SpotDetailType = {
-  REGION: 'REGION',
-  POI: 'POI',
-} as const;
 
 export type SpotDetailDescription = string | null;
 
-/**
- * Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point.
- */
-export type SpotDetailCategoryType =
-  (typeof SpotDetailCategoryType)[keyof typeof SpotDetailCategoryType];
+export type SpotDetailGeometryAllOfAnyOf = { [key: string]: unknown };
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const SpotDetailCategoryType = {
-  REGION: 'REGION',
-  POI: 'POI',
-} as const;
+export type SpotDetailGeometryAllOf = SpotDetailGeometryAllOfAnyOf | null;
 
-/**
- * Icon name (Tabler on web, mapped to SF Symbol / Material on mobile).
- */
-export type SpotDetailCategoryIcon = string | null;
-
-/**
- * Pin colour (hex).
- */
-export type SpotDetailCategoryColor = string | null;
-
-/**
- * A spot category.
- */
-export type SpotDetailCategory = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  slug: string;
-  label: string;
-  /** Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point. */
-  type: SpotDetailCategoryType;
-  /** Icon name (Tabler on web, mapped to SF Symbol / Material on mobile). */
-  icon: SpotDetailCategoryIcon;
-  /** Pin colour (hex). */
-  color: SpotDetailCategoryColor;
-  sortOrder: number;
-};
-
-/**
- * Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only.
- */
-export type SpotDetailStatus = (typeof SpotDetailStatus)[keyof typeof SpotDetailStatus];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const SpotDetailStatus = {
-  UNVERIFIED: 'UNVERIFIED',
-  VERIFIED: 'VERIFIED',
-  HIDDEN: 'HIDDEN',
-  REMOVED: 'REMOVED',
-} as const;
-
-/**
- * GeoJSON geometry type.
- */
-export type SpotDetailGeometryAnyOfType =
-  (typeof SpotDetailGeometryAnyOfType)[keyof typeof SpotDetailGeometryAnyOfType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const SpotDetailGeometryAnyOfType = {
-  Point: 'Point',
-  Polygon: 'Polygon',
-} as const;
-
-/**
- * GeoJSON geometry (WGS84). Point for a POI, Polygon for a REGION. Coordinate order is [longitude, latitude].
- */
-export type SpotDetailGeometryAnyOf = {
-  /** GeoJSON geometry type. */
-  type: SpotDetailGeometryAnyOfType;
-  /** GeoJSON coordinates. Point → `[lng, lat]`. Polygon → `[[[lng, lat], …]]` (one or more linear rings, first/last point equal). */
-  coordinates?: unknown;
-};
-
-/**
- * GeoJSON geometry (WGS84). Point for a POI, Polygon for a REGION. Coordinate order is [longitude, latitude].
- */
-export type SpotDetailGeometry = SpotDetailGeometryAnyOf | null;
+export type SpotDetailGeometry = SpotGeometry & SpotDetailGeometryAllOf;
 
 /**
  * Latitude in decimal degrees (WGS84 / EPSG:4326).
@@ -785,107 +371,6 @@ export type SpotDetailPhone = string | null;
 export type SpotDetailWebsite = string | null;
 
 /**
- * Icon name (Tabler / SF Symbol / Material).
- */
-export type SpotDetailAmenitiesItemIcon = string | null;
-
-/**
- * A spot amenity / facility tag.
- */
-export type SpotDetailAmenitiesItem = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  slug: string;
-  label: string;
-  /** Icon name (Tabler / SF Symbol / Material). */
-  icon: SpotDetailAmenitiesItemIcon;
-  sortOrder: number;
-  /** Categories this amenity applies to (from `AmenityOnCategory`). Empty = applicable everywhere. */
-  categoryIds: string[];
-};
-
-/**
- * One photo attached to a spot.
- */
-export type SpotDetailPhotosItem = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  url: string;
-  sortOrder: number;
-  /** RFC 3339 datetime in UTC. */
-  createdAt: string;
-};
-
-/**
- * Denormalised review aggregate.
- */
-export type SpotDetailRating = {
-  /**
-   * Mean star rating (0–5).
-   * @minimum 0
-   * @maximum 5
-   */
-  average: number;
-  /**
-   * Number of reviews.
-   * @minimum 0
-   */
-  count: number;
-};
-
-/**
- * Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only.
- */
-export type SpotDetailVerificationStatus =
-  (typeof SpotDetailVerificationStatus)[keyof typeof SpotDetailVerificationStatus];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const SpotDetailVerificationStatus = {
-  UNVERIFIED: 'UNVERIFIED',
-  VERIFIED: 'VERIFIED',
-  HIDDEN: 'HIDDEN',
-  REMOVED: 'REMOVED',
-} as const;
-
-/**
- * When the spot reached VERIFIED, or null.
- */
-export type SpotDetailVerificationVerifiedAt = string | null;
-
-/**
- * Community-verification status + denormalised vote score.
- */
-export type SpotDetailVerification = {
-  /** Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only. */
-  status: SpotDetailVerificationStatus;
-  /** Weighted confirm − deny score. */
-  netScore: number;
-  /** @minimum 0 */
-  confirmCount: number;
-  /** @minimum 0 */
-  denyCount: number;
-  /** When the spot reached VERIFIED, or null. */
-  verifiedAt: SpotDetailVerificationVerifiedAt;
-};
-
-export type SpotDetailSubmittedByHandle = string | null;
-
-export type SpotDetailSubmittedByName = string | null;
-
-export type SpotDetailSubmittedByImage = string | null;
-
-/**
- * Public reference to the user who submitted the spot.
- */
-export type SpotDetailSubmittedBy = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  handle: SpotDetailSubmittedByHandle;
-  name: SpotDetailSubmittedByName;
-  image: SpotDetailSubmittedByImage;
-};
-
-/**
  * Full spot detail. Server-rendered as the crawlable spot page.
  */
 export interface SpotDetail {
@@ -896,15 +381,11 @@ export interface SpotDetail {
    * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
    */
   slug: string;
-  /** Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point. */
-  type: SpotDetailType;
+  type: SpotType;
   name: string;
   description: SpotDetailDescription;
-  /** A spot category. */
-  category: SpotDetailCategory;
-  /** Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only. */
-  status: SpotDetailStatus;
-  /** GeoJSON geometry (WGS84). Point for a POI, Polygon for a REGION. Coordinate order is [longitude, latitude]. */
+  category: Category;
+  status: SpotStatus;
   geometry: SpotDetailGeometry;
   /**
    * Latitude in decimal degrees (WGS84 / EPSG:4326).
@@ -923,31 +404,16 @@ export interface SpotDetail {
   hours?: unknown;
   phone: SpotDetailPhone;
   website: SpotDetailWebsite;
-  amenities: SpotDetailAmenitiesItem[];
-  photos: SpotDetailPhotosItem[];
-  /** Denormalised review aggregate. */
-  rating: SpotDetailRating;
-  /** Community-verification status + denormalised vote score. */
-  verification: SpotDetailVerification;
-  /** Public reference to the user who submitted the spot. */
-  submittedBy: SpotDetailSubmittedBy;
+  amenities: Amenity[];
+  photos: SpotPhoto[];
+  rating: SpotRating;
+  verification: SpotVerification;
+  submittedBy: SpotAuthor;
   /** RFC 3339 datetime in UTC. */
   createdAt: string;
   /** RFC 3339 datetime in UTC. */
   updatedAt: string;
 }
-
-/**
- * Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point.
- */
-export type SubmitSpotRequestType =
-  (typeof SubmitSpotRequestType)[keyof typeof SubmitSpotRequestType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const SubmitSpotRequestType = {
-  REGION: 'REGION',
-  POI: 'POI',
-} as const;
 
 export type SubmitSpotRequestGeometryType =
   (typeof SubmitSpotRequestGeometryType)[keyof typeof SubmitSpotRequestGeometryType];
@@ -967,48 +433,13 @@ export type SubmitSpotRequestGeometry = {
   coordinates?: unknown;
 };
 
-/**
- * Single lat/lng for a POI. Alternative to `geometry`.
- */
-export type SubmitSpotRequestPoint = {
-  /**
-   * Latitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -90
-   * @maximum 90
-   */
-  lat: number;
-  /**
-   * Longitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -180
-   * @maximum 180
-   */
-  lng: number;
-};
-
-/**
- * A geographic point — latitude/longitude in WGS84.
- */
-export type SubmitSpotRequestPolygonItem = {
-  /**
-   * Latitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -90
-   * @maximum 90
-   */
-  lat: number;
-  /**
-   * Longitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -180
-   * @maximum 180
-   */
-  lng: number;
-};
+export type SubmitSpotRequestPoint = GeoPoint & unknown;
 
 /**
  * Body for `POST /api/v1/me/spots`. A submitted spot goes live immediately as UNVERIFIED.
  */
 export interface SubmitSpotRequest {
-  /** Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point. */
-  type: SubmitSpotRequestType;
+  type: SpotType;
   /** Category the spot belongs to. */
   categoryId: string;
   /**
@@ -1020,13 +451,12 @@ export interface SubmitSpotRequest {
   description?: string;
   /** GeoJSON geometry. Provide this OR `point`/`polygon`. */
   geometry?: SubmitSpotRequestGeometry;
-  /** Single lat/lng for a POI. Alternative to `geometry`. */
   point?: SubmitSpotRequestPoint;
   /**
    * Polygon ring (≥ 3 lat/lng points) for a REGION. Alternative to `geometry`. The API closes the ring.
    * @minItems 3
    */
-  polygon?: SubmitSpotRequestPolygonItem[];
+  polygon?: GeoPoint[];
   /** Amenities offered at this spot. */
   amenityIds?: string[];
   /**
@@ -1043,99 +473,13 @@ export interface SubmitSpotRequest {
   hours?: unknown;
 }
 
-/**
- * Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point.
- */
-export type SubmitSpotResponseType =
-  (typeof SubmitSpotResponseType)[keyof typeof SubmitSpotResponseType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const SubmitSpotResponseType = {
-  REGION: 'REGION',
-  POI: 'POI',
-} as const;
-
 export type SubmitSpotResponseDescription = string | null;
 
-/**
- * Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point.
- */
-export type SubmitSpotResponseCategoryType =
-  (typeof SubmitSpotResponseCategoryType)[keyof typeof SubmitSpotResponseCategoryType];
+export type SubmitSpotResponseGeometryAllOfAnyOf = { [key: string]: unknown };
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const SubmitSpotResponseCategoryType = {
-  REGION: 'REGION',
-  POI: 'POI',
-} as const;
+export type SubmitSpotResponseGeometryAllOf = SubmitSpotResponseGeometryAllOfAnyOf | null;
 
-/**
- * Icon name (Tabler on web, mapped to SF Symbol / Material on mobile).
- */
-export type SubmitSpotResponseCategoryIcon = string | null;
-
-/**
- * Pin colour (hex).
- */
-export type SubmitSpotResponseCategoryColor = string | null;
-
-/**
- * A spot category.
- */
-export type SubmitSpotResponseCategory = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  slug: string;
-  label: string;
-  /** Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point. */
-  type: SubmitSpotResponseCategoryType;
-  /** Icon name (Tabler on web, mapped to SF Symbol / Material on mobile). */
-  icon: SubmitSpotResponseCategoryIcon;
-  /** Pin colour (hex). */
-  color: SubmitSpotResponseCategoryColor;
-  sortOrder: number;
-};
-
-/**
- * Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only.
- */
-export type SubmitSpotResponseStatus =
-  (typeof SubmitSpotResponseStatus)[keyof typeof SubmitSpotResponseStatus];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const SubmitSpotResponseStatus = {
-  UNVERIFIED: 'UNVERIFIED',
-  VERIFIED: 'VERIFIED',
-  HIDDEN: 'HIDDEN',
-  REMOVED: 'REMOVED',
-} as const;
-
-/**
- * GeoJSON geometry type.
- */
-export type SubmitSpotResponseGeometryAnyOfType =
-  (typeof SubmitSpotResponseGeometryAnyOfType)[keyof typeof SubmitSpotResponseGeometryAnyOfType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const SubmitSpotResponseGeometryAnyOfType = {
-  Point: 'Point',
-  Polygon: 'Polygon',
-} as const;
-
-/**
- * GeoJSON geometry (WGS84). Point for a POI, Polygon for a REGION. Coordinate order is [longitude, latitude].
- */
-export type SubmitSpotResponseGeometryAnyOf = {
-  /** GeoJSON geometry type. */
-  type: SubmitSpotResponseGeometryAnyOfType;
-  /** GeoJSON coordinates. Point → `[lng, lat]`. Polygon → `[[[lng, lat], …]]` (one or more linear rings, first/last point equal). */
-  coordinates?: unknown;
-};
-
-/**
- * GeoJSON geometry (WGS84). Point for a POI, Polygon for a REGION. Coordinate order is [longitude, latitude].
- */
-export type SubmitSpotResponseGeometry = SubmitSpotResponseGeometryAnyOf | null;
+export type SubmitSpotResponseGeometry = SpotGeometry & SubmitSpotResponseGeometryAllOf;
 
 /**
  * Latitude in decimal degrees (WGS84 / EPSG:4326).
@@ -1158,107 +502,6 @@ export type SubmitSpotResponsePhone = string | null;
 export type SubmitSpotResponseWebsite = string | null;
 
 /**
- * Icon name (Tabler / SF Symbol / Material).
- */
-export type SubmitSpotResponseAmenitiesItemIcon = string | null;
-
-/**
- * A spot amenity / facility tag.
- */
-export type SubmitSpotResponseAmenitiesItem = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  slug: string;
-  label: string;
-  /** Icon name (Tabler / SF Symbol / Material). */
-  icon: SubmitSpotResponseAmenitiesItemIcon;
-  sortOrder: number;
-  /** Categories this amenity applies to (from `AmenityOnCategory`). Empty = applicable everywhere. */
-  categoryIds: string[];
-};
-
-/**
- * One photo attached to a spot.
- */
-export type SubmitSpotResponsePhotosItem = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  url: string;
-  sortOrder: number;
-  /** RFC 3339 datetime in UTC. */
-  createdAt: string;
-};
-
-/**
- * Denormalised review aggregate.
- */
-export type SubmitSpotResponseRating = {
-  /**
-   * Mean star rating (0–5).
-   * @minimum 0
-   * @maximum 5
-   */
-  average: number;
-  /**
-   * Number of reviews.
-   * @minimum 0
-   */
-  count: number;
-};
-
-/**
- * Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only.
- */
-export type SubmitSpotResponseVerificationStatus =
-  (typeof SubmitSpotResponseVerificationStatus)[keyof typeof SubmitSpotResponseVerificationStatus];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const SubmitSpotResponseVerificationStatus = {
-  UNVERIFIED: 'UNVERIFIED',
-  VERIFIED: 'VERIFIED',
-  HIDDEN: 'HIDDEN',
-  REMOVED: 'REMOVED',
-} as const;
-
-/**
- * When the spot reached VERIFIED, or null.
- */
-export type SubmitSpotResponseVerificationVerifiedAt = string | null;
-
-/**
- * Community-verification status + denormalised vote score.
- */
-export type SubmitSpotResponseVerification = {
-  /** Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only. */
-  status: SubmitSpotResponseVerificationStatus;
-  /** Weighted confirm − deny score. */
-  netScore: number;
-  /** @minimum 0 */
-  confirmCount: number;
-  /** @minimum 0 */
-  denyCount: number;
-  /** When the spot reached VERIFIED, or null. */
-  verifiedAt: SubmitSpotResponseVerificationVerifiedAt;
-};
-
-export type SubmitSpotResponseSubmittedByHandle = string | null;
-
-export type SubmitSpotResponseSubmittedByName = string | null;
-
-export type SubmitSpotResponseSubmittedByImage = string | null;
-
-/**
- * Public reference to the user who submitted the spot.
- */
-export type SubmitSpotResponseSubmittedBy = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  handle: SubmitSpotResponseSubmittedByHandle;
-  name: SubmitSpotResponseSubmittedByName;
-  image: SubmitSpotResponseSubmittedByImage;
-};
-
-/**
  * The created spot (status UNVERIFIED).
  */
 export interface SubmitSpotResponse {
@@ -1269,15 +512,11 @@ export interface SubmitSpotResponse {
    * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
    */
   slug: string;
-  /** Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point. */
-  type: SubmitSpotResponseType;
+  type: SpotType;
   name: string;
   description: SubmitSpotResponseDescription;
-  /** A spot category. */
-  category: SubmitSpotResponseCategory;
-  /** Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only. */
-  status: SubmitSpotResponseStatus;
-  /** GeoJSON geometry (WGS84). Point for a POI, Polygon for a REGION. Coordinate order is [longitude, latitude]. */
+  category: Category;
+  status: SpotStatus;
   geometry: SubmitSpotResponseGeometry;
   /**
    * Latitude in decimal degrees (WGS84 / EPSG:4326).
@@ -1296,14 +535,11 @@ export interface SubmitSpotResponse {
   hours?: unknown;
   phone: SubmitSpotResponsePhone;
   website: SubmitSpotResponseWebsite;
-  amenities: SubmitSpotResponseAmenitiesItem[];
-  photos: SubmitSpotResponsePhotosItem[];
-  /** Denormalised review aggregate. */
-  rating: SubmitSpotResponseRating;
-  /** Community-verification status + denormalised vote score. */
-  verification: SubmitSpotResponseVerification;
-  /** Public reference to the user who submitted the spot. */
-  submittedBy: SubmitSpotResponseSubmittedBy;
+  amenities: Amenity[];
+  photos: SpotPhoto[];
+  rating: SpotRating;
+  verification: SpotVerification;
+  submittedBy: SpotAuthor;
   /** RFC 3339 datetime in UTC. */
   createdAt: string;
   /** RFC 3339 datetime in UTC. */
@@ -1334,42 +570,6 @@ export type UpdateSpotRequestGeometry = {
 };
 
 /**
- * A geographic point — latitude/longitude in WGS84.
- */
-export type UpdateSpotRequestPoint = {
-  /**
-   * Latitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -90
-   * @maximum 90
-   */
-  lat: number;
-  /**
-   * Longitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -180
-   * @maximum 180
-   */
-  lng: number;
-};
-
-/**
- * A geographic point — latitude/longitude in WGS84.
- */
-export type UpdateSpotRequestPolygonItem = {
-  /**
-   * Latitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -90
-   * @maximum 90
-   */
-  lat: number;
-  /**
-   * Longitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -180
-   * @maximum 180
-   */
-  lng: number;
-};
-
-/**
  * @maxLength 240
  */
 export type UpdateSpotRequestAddress = string | null;
@@ -1397,10 +597,9 @@ export interface UpdateSpotRequest {
   amenityIds?: string[];
   /** Raw GeoJSON geometry (WGS84, [lng, lat] order). */
   geometry?: UpdateSpotRequestGeometry;
-  /** A geographic point — latitude/longitude in WGS84. */
-  point?: UpdateSpotRequestPoint;
+  point?: GeoPoint;
   /** @minItems 3 */
-  polygon?: UpdateSpotRequestPolygonItem[];
+  polygon?: GeoPoint[];
   /** @maxLength 240 */
   address?: UpdateSpotRequestAddress;
   /** @maxLength 40 */
@@ -1409,56 +608,15 @@ export interface UpdateSpotRequest {
   hours?: unknown;
 }
 
-/**
- * Community verification vote. `CONFIRM` raises the score, `DENY` lowers it.
- */
-export type SubmitVoteRequestValue =
-  (typeof SubmitVoteRequestValue)[keyof typeof SubmitVoteRequestValue];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const SubmitVoteRequestValue = {
-  CONFIRM: 'CONFIRM',
-  DENY: 'DENY',
-} as const;
-
-/**
- * Voter's current location, used for the proximity gate. When present and within range the vote is marked `proximityVerified` and weighted more heavily.
- */
-export type SubmitVoteRequestProof = {
-  /**
-   * Latitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -90
-   * @maximum 90
-   */
-  lat: number;
-  /**
-   * Longitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -180
-   * @maximum 180
-   */
-  lng: number;
-};
+export type SubmitVoteRequestProof = GeoPoint & unknown;
 
 /**
  * Body for `POST /api/v1/me/spots/:id/vote`.
  */
 export interface SubmitVoteRequest {
-  /** Community verification vote. `CONFIRM` raises the score, `DENY` lowers it. */
-  value: SubmitVoteRequestValue;
-  /** Voter's current location, used for the proximity gate. When present and within range the vote is marked `proximityVerified` and weighted more heavily. */
+  value: VoteValue;
   proof?: SubmitVoteRequestProof;
 }
-
-/**
- * Community verification vote. `CONFIRM` raises the score, `DENY` lowers it.
- */
-export type VoteValueProperty = (typeof VoteValueProperty)[keyof typeof VoteValueProperty];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const VoteValueProperty = {
-  CONFIRM: 'CONFIRM',
-  DENY: 'DENY',
-} as const;
 
 /**
  * The signed-in user's vote on a spot.
@@ -1468,46 +626,17 @@ export interface Vote {
   id: string;
   /** RFC 4122 UUID (v4). */
   spotId: string;
-  /** Community verification vote. `CONFIRM` raises the score, `DENY` lowers it. */
-  value: VoteValueProperty;
+  value: VoteValue;
   proximityVerified: boolean;
   /** RFC 3339 datetime in UTC. */
   createdAt: string;
 }
 
 /**
- * Community verification vote. `CONFIRM` raises the score, `DENY` lowers it.
- */
-export type VoteResponseVoteValue =
-  (typeof VoteResponseVoteValue)[keyof typeof VoteResponseVoteValue];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const VoteResponseVoteValue = {
-  CONFIRM: 'CONFIRM',
-  DENY: 'DENY',
-} as const;
-
-/**
- * The signed-in user's vote on a spot.
- */
-export type VoteResponseVote = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  /** RFC 4122 UUID (v4). */
-  spotId: string;
-  /** Community verification vote. `CONFIRM` raises the score, `DENY` lowers it. */
-  value: VoteResponseVoteValue;
-  proximityVerified: boolean;
-  /** RFC 3339 datetime in UTC. */
-  createdAt: string;
-};
-
-/**
  * Result of casting a verification vote.
  */
 export interface VoteResponse {
-  /** The signed-in user's vote on a spot. */
-  vote: VoteResponseVote;
+  vote: Vote;
   /** Spot net weighted score after this vote. */
   netScore: number;
   /** @minimum 0 */
@@ -1560,48 +689,6 @@ export interface Review {
   createdAt: string;
 }
 
-export type ReviewsResponseItemsItemBody = string | null;
-
-export type ReviewsResponseItemsItemAuthorHandle = string | null;
-
-export type ReviewsResponseItemsItemAuthorName = string | null;
-
-export type ReviewsResponseItemsItemAuthorImage = string | null;
-
-/**
- * Public reference to the review author.
- */
-export type ReviewsResponseItemsItemAuthor = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  handle: ReviewsResponseItemsItemAuthorHandle;
-  name: ReviewsResponseItemsItemAuthorName;
-  image: ReviewsResponseItemsItemAuthorImage;
-};
-
-/**
- * A spot review.
- */
-export type ReviewsResponseItemsItem = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  /** RFC 4122 UUID (v4). */
-  spotId: string;
-  /**
-   * Star rating, 0–5.
-   * @minimum 0
-   * @maximum 5
-   */
-  stars: number;
-  body: ReviewsResponseItemsItemBody;
-  /** @minimum 0 */
-  helpfulCount: number;
-  /** Public reference to the review author. */
-  author: ReviewsResponseItemsItemAuthor;
-  /** RFC 3339 datetime in UTC. */
-  createdAt: string;
-};
-
 /**
  * Cursor for the next page, or null when this is the last page.
  */
@@ -1611,7 +698,7 @@ export type ReviewsResponseNextCursor = string | null;
  * Cursor-paginated reviews for a spot.
  */
 export interface ReviewsResponse {
-  items: ReviewsResponseItemsItem[];
+  items: Review[];
   /** Cursor for the next page, or null when this is the last page. */
   nextCursor: ReviewsResponseNextCursor;
 }
@@ -1631,43 +718,13 @@ export interface SubmitReviewRequest {
 }
 
 /**
- * What kind of entity a report targets.
- */
-export type SubmitReportRequestTargetType =
-  (typeof SubmitReportRequestTargetType)[keyof typeof SubmitReportRequestTargetType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const SubmitReportRequestTargetType = {
-  SPOT: 'SPOT',
-  PHOTO: 'PHOTO',
-  REVIEW: 'REVIEW',
-} as const;
-
-/**
- * Why a piece of content was reported.
- */
-export type SubmitReportRequestReason =
-  (typeof SubmitReportRequestReason)[keyof typeof SubmitReportRequestReason];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const SubmitReportRequestReason = {
-  DUPLICATE: 'DUPLICATE',
-  SPAM: 'SPAM',
-  WRONG_INFO: 'WRONG_INFO',
-  INAPPROPRIATE: 'INAPPROPRIATE',
-  OTHER: 'OTHER',
-} as const;
-
-/**
  * Body for `POST /api/v1/me/reports`.
  */
 export interface SubmitReportRequest {
-  /** What kind of entity a report targets. */
-  targetType: SubmitReportRequestTargetType;
+  targetType: ReportTarget;
   /** Id of the spot / photo / review being reported. */
   targetId: string;
-  /** Why a piece of content was reported. */
-  reason: SubmitReportRequestReason;
+  reason: ReportReason;
   /** @maxLength 2000 */
   note?: string;
 }
@@ -1707,36 +764,11 @@ export interface Dog {
   updatedAt: string;
 }
 
-export type DogsResponseItemsItemBreed = string | null;
-
-export type DogsResponseItemsItemBirthYear = number | null;
-
-export type DogsResponseItemsItemPhotoUrl = string | null;
-
-export type DogsResponseItemsItemNote = string | null;
-
-/**
- * A dog profile.
- */
-export type DogsResponseItemsItem = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  name: string;
-  breed: DogsResponseItemsItemBreed;
-  birthYear: DogsResponseItemsItemBirthYear;
-  photoUrl: DogsResponseItemsItemPhotoUrl;
-  note: DogsResponseItemsItemNote;
-  /** RFC 3339 datetime in UTC. */
-  createdAt: string;
-  /** RFC 3339 datetime in UTC. */
-  updatedAt: string;
-};
-
 /**
  * The signed-in user's dogs.
  */
 export interface DogsResponse {
-  items: DogsResponseItemsItem[];
+  items: Dog[];
 }
 
 /**
@@ -1798,42 +830,6 @@ export type MeProfileBio = string | null;
 export type MeProfileImage = string | null;
 
 /**
- * Application role. `USER` = mobile app + website. `ADMIN` = moderation safety-net.
- */
-export type MeProfileRole = (typeof MeProfileRole)[keyof typeof MeProfileRole];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const MeProfileRole = {
-  USER: 'USER',
-  ADMIN: 'ADMIN',
-} as const;
-
-export type MeProfileDogsItemBreed = string | null;
-
-export type MeProfileDogsItemBirthYear = number | null;
-
-export type MeProfileDogsItemPhotoUrl = string | null;
-
-export type MeProfileDogsItemNote = string | null;
-
-/**
- * A dog profile.
- */
-export type MeProfileDogsItem = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  name: string;
-  breed: MeProfileDogsItemBreed;
-  birthYear: MeProfileDogsItemBirthYear;
-  photoUrl: MeProfileDogsItemPhotoUrl;
-  note: MeProfileDogsItemNote;
-  /** RFC 3339 datetime in UTC. */
-  createdAt: string;
-  /** RFC 3339 datetime in UTC. */
-  updatedAt: string;
-};
-
-/**
  * Authenticated user profile (`GET /api/v1/me`).
  */
 export interface MeProfile {
@@ -1846,11 +842,10 @@ export interface MeProfile {
   bio: MeProfileBio;
   /** Avatar URL. */
   image: MeProfileImage;
-  /** Application role. `USER` = mobile app + website. `ADMIN` = moderation safety-net. */
-  role: MeProfileRole;
+  role: UserRole;
   /** Contribution reputation score. */
   reputation: number;
-  dogs: MeProfileDogsItem[];
+  dogs: Dog[];
   /** RFC 3339 datetime in UTC. */
   createdAt: string;
 }
@@ -1909,19 +904,6 @@ export type FeatureRequestBody = string | null;
 export type FeatureRequestComponent = string | null;
 
 /**
- * Product-roadmap state of a community feature request.
- */
-export type FeatureRequestStatus = (typeof FeatureRequestStatus)[keyof typeof FeatureRequestStatus];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const FeatureRequestStatus = {
-  CONSIDERING: 'CONSIDERING',
-  PLANNED: 'PLANNED',
-  DONE: 'DONE',
-  DECLINED: 'DECLINED',
-} as const;
-
-/**
  * A community feature request.
  */
 export interface FeatureRequest {
@@ -1931,8 +913,7 @@ export interface FeatureRequest {
   body: FeatureRequestBody;
   /** Area of the app this concerns. */
   component: FeatureRequestComponent;
-  /** Product-roadmap state of a community feature request. */
-  status: FeatureRequestStatus;
+  status: FeatureStatus;
   /** @minimum 0 */
   upvoteCount: number;
   /** Whether the signed-in user has upvoted. False for anonymous reads. */
@@ -1940,47 +921,6 @@ export interface FeatureRequest {
   /** RFC 3339 datetime in UTC. */
   createdAt: string;
 }
-
-export type FeatureRequestsResponseItemsItemBody = string | null;
-
-/**
- * Area of the app this concerns.
- */
-export type FeatureRequestsResponseItemsItemComponent = string | null;
-
-/**
- * Product-roadmap state of a community feature request.
- */
-export type FeatureRequestsResponseItemsItemStatus =
-  (typeof FeatureRequestsResponseItemsItemStatus)[keyof typeof FeatureRequestsResponseItemsItemStatus];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const FeatureRequestsResponseItemsItemStatus = {
-  CONSIDERING: 'CONSIDERING',
-  PLANNED: 'PLANNED',
-  DONE: 'DONE',
-  DECLINED: 'DECLINED',
-} as const;
-
-/**
- * A community feature request.
- */
-export type FeatureRequestsResponseItemsItem = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  title: string;
-  body: FeatureRequestsResponseItemsItemBody;
-  /** Area of the app this concerns. */
-  component: FeatureRequestsResponseItemsItemComponent;
-  /** Product-roadmap state of a community feature request. */
-  status: FeatureRequestsResponseItemsItemStatus;
-  /** @minimum 0 */
-  upvoteCount: number;
-  /** Whether the signed-in user has upvoted. False for anonymous reads. */
-  viewerHasVoted: boolean;
-  /** RFC 3339 datetime in UTC. */
-  createdAt: string;
-};
 
 /**
  * Cursor for the next page, or null when this is the last page.
@@ -1991,7 +931,7 @@ export type FeatureRequestsResponseNextCursor = string | null;
  * Cursor-paginated feature requests.
  */
 export interface FeatureRequestsResponse {
-  items: FeatureRequestsResponseItemsItem[];
+  items: FeatureRequest[];
   /** Cursor for the next page, or null when this is the last page. */
   nextCursor: FeatureRequestsResponseNextCursor;
 }
@@ -2029,100 +969,18 @@ export type GetApiV1CategoriesParams = {
   /**
    * Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point.
    */
-  type?: GetApiV1CategoriesType;
-};
-
-export type GetApiV1CategoriesType =
-  (typeof GetApiV1CategoriesType)[keyof typeof GetApiV1CategoriesType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiV1CategoriesType = {
-  REGION: 'REGION',
-  POI: 'POI',
-} as const;
-
-/**
- * Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point.
- */
-export type GetApiV1Categories200ItemsItemType =
-  (typeof GetApiV1Categories200ItemsItemType)[keyof typeof GetApiV1Categories200ItemsItemType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiV1Categories200ItemsItemType = {
-  REGION: 'REGION',
-  POI: 'POI',
-} as const;
-
-/**
- * Icon name (Tabler on web, mapped to SF Symbol / Material on mobile).
- */
-export type GetApiV1Categories200ItemsItemIcon = string | null;
-
-/**
- * Pin colour (hex).
- */
-export type GetApiV1Categories200ItemsItemColor = string | null;
-
-/**
- * A spot category.
- */
-export type GetApiV1Categories200ItemsItem = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  slug: string;
-  label: string;
-  /** Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point. */
-  type: GetApiV1Categories200ItemsItemType;
-  /** Icon name (Tabler on web, mapped to SF Symbol / Material on mobile). */
-  icon: GetApiV1Categories200ItemsItemIcon;
-  /** Pin colour (hex). */
-  color: GetApiV1Categories200ItemsItemColor;
-  sortOrder: number;
-};
-
-/**
- * All visible, active categories.
- */
-export type GetApiV1Categories200 = {
-  items: GetApiV1Categories200ItemsItem[];
+  type?: SpotType;
 };
 
 export type GetApiV1AmenitiesParams = {
   categoryId?: string;
 };
 
-/**
- * Icon name (Tabler / SF Symbol / Material).
- */
-export type GetApiV1Amenities200ItemsItemIcon = string | null;
-
-/**
- * A spot amenity / facility tag.
- */
-export type GetApiV1Amenities200ItemsItem = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  slug: string;
-  label: string;
-  /** Icon name (Tabler / SF Symbol / Material). */
-  icon: GetApiV1Amenities200ItemsItemIcon;
-  sortOrder: number;
-  /** Categories this amenity applies to (from `AmenityOnCategory`). Empty = applicable everywhere. */
-  categoryIds: string[];
-};
-
-/**
- * All visible, active amenities with their category mapping.
- */
-export type GetApiV1Amenities200 = {
-  items: GetApiV1Amenities200ItemsItem[];
-};
-
 export type GetApiV1SpotsParams = {
   /**
    * Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point.
    */
-  type?: GetApiV1SpotsType;
+  type?: SpotType;
   /**
    * RFC 4122 UUID (v4).
    */
@@ -2137,128 +995,6 @@ export type GetApiV1SpotsParams = {
    * @maximum 200
    */
   limit?: number;
-};
-
-export type GetApiV1SpotsType = (typeof GetApiV1SpotsType)[keyof typeof GetApiV1SpotsType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiV1SpotsType = {
-  REGION: 'REGION',
-  POI: 'POI',
-} as const;
-
-/**
- * Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point.
- */
-export type GetApiV1Spots200ItemsItemType =
-  (typeof GetApiV1Spots200ItemsItemType)[keyof typeof GetApiV1Spots200ItemsItemType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiV1Spots200ItemsItemType = {
-  REGION: 'REGION',
-  POI: 'POI',
-} as const;
-
-/**
- * Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only.
- */
-export type GetApiV1Spots200ItemsItemStatus =
-  (typeof GetApiV1Spots200ItemsItemStatus)[keyof typeof GetApiV1Spots200ItemsItemStatus];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiV1Spots200ItemsItemStatus = {
-  UNVERIFIED: 'UNVERIFIED',
-  VERIFIED: 'VERIFIED',
-  HIDDEN: 'HIDDEN',
-  REMOVED: 'REMOVED',
-} as const;
-
-/**
- * Latitude in decimal degrees (WGS84 / EPSG:4326).
- * @minimum -90
- * @maximum 90
- */
-export type GetApiV1Spots200ItemsItemLat = number | null;
-
-/**
- * Longitude in decimal degrees (WGS84 / EPSG:4326).
- * @minimum -180
- * @maximum 180
- */
-export type GetApiV1Spots200ItemsItemLng = number | null;
-
-/**
- * Denormalised review aggregate.
- */
-export type GetApiV1Spots200ItemsItemRating = {
-  /**
-   * Mean star rating (0–5).
-   * @minimum 0
-   * @maximum 5
-   */
-  average: number;
-  /**
-   * Number of reviews.
-   * @minimum 0
-   */
-  count: number;
-};
-
-/**
- * First photo URL for the list thumbnail, or null.
- */
-export type GetApiV1Spots200ItemsItemPhotoUrl = string | null;
-
-/**
- * Lightweight spot summary for map markers + list rows.
- */
-export type GetApiV1Spots200ItemsItem = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  /**
-   * URL-safe slug (lowercase, hyphenated).
-   * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-   */
-  slug: string;
-  /** Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point. */
-  type: GetApiV1Spots200ItemsItemType;
-  name: string;
-  /** RFC 4122 UUID (v4). */
-  categoryId: string;
-  /** Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only. */
-  status: GetApiV1Spots200ItemsItemStatus;
-  /**
-   * Latitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -90
-   * @maximum 90
-   */
-  lat: GetApiV1Spots200ItemsItemLat;
-  /**
-   * Longitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -180
-   * @maximum 180
-   */
-  lng: GetApiV1Spots200ItemsItemLng;
-  /** Denormalised review aggregate. */
-  rating: GetApiV1Spots200ItemsItemRating;
-  /** First photo URL for the list thumbnail, or null. */
-  photoUrl: GetApiV1Spots200ItemsItemPhotoUrl;
-  /** RFC 3339 datetime in UTC. */
-  updatedAt: string;
-};
-
-/**
- * Cursor for the next page, or null when this is the last page.
- */
-export type GetApiV1Spots200NextCursor = string | null;
-
-/**
- * Cursor-paginated list of spots.
- */
-export type GetApiV1Spots200 = {
-  items: GetApiV1Spots200ItemsItem[];
-  /** Cursor for the next page, or null when this is the last page. */
-  nextCursor: GetApiV1Spots200NextCursor;
 };
 
 export type GetApiV1SpotsMapParams = {
@@ -2293,2272 +1029,20 @@ export type GetApiV1SpotsMapParams = {
   /**
    * Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point.
    */
-  type?: GetApiV1SpotsMapType;
+  type?: SpotType;
   /**
    * RFC 4122 UUID (v4).
    */
   categoryId?: string;
 };
 
-export type GetApiV1SpotsMapType = (typeof GetApiV1SpotsMapType)[keyof typeof GetApiV1SpotsMapType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiV1SpotsMapType = {
-  REGION: 'REGION',
-  POI: 'POI',
-} as const;
-
-/**
- * Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point.
- */
-export type GetApiV1SpotsMap200ItemsItemType =
-  (typeof GetApiV1SpotsMap200ItemsItemType)[keyof typeof GetApiV1SpotsMap200ItemsItemType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiV1SpotsMap200ItemsItemType = {
-  REGION: 'REGION',
-  POI: 'POI',
-} as const;
-
-/**
- * Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only.
- */
-export type GetApiV1SpotsMap200ItemsItemStatus =
-  (typeof GetApiV1SpotsMap200ItemsItemStatus)[keyof typeof GetApiV1SpotsMap200ItemsItemStatus];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiV1SpotsMap200ItemsItemStatus = {
-  UNVERIFIED: 'UNVERIFIED',
-  VERIFIED: 'VERIFIED',
-  HIDDEN: 'HIDDEN',
-  REMOVED: 'REMOVED',
-} as const;
-
-/**
- * Latitude in decimal degrees (WGS84 / EPSG:4326).
- * @minimum -90
- * @maximum 90
- */
-export type GetApiV1SpotsMap200ItemsItemLat = number | null;
-
-/**
- * Longitude in decimal degrees (WGS84 / EPSG:4326).
- * @minimum -180
- * @maximum 180
- */
-export type GetApiV1SpotsMap200ItemsItemLng = number | null;
-
-/**
- * Denormalised review aggregate.
- */
-export type GetApiV1SpotsMap200ItemsItemRating = {
-  /**
-   * Mean star rating (0–5).
-   * @minimum 0
-   * @maximum 5
-   */
-  average: number;
-  /**
-   * Number of reviews.
-   * @minimum 0
-   */
-  count: number;
-};
-
-/**
- * First photo URL for the list thumbnail, or null.
- */
-export type GetApiV1SpotsMap200ItemsItemPhotoUrl = string | null;
-
-/**
- * Lightweight spot summary for map markers + list rows.
- */
-export type GetApiV1SpotsMap200ItemsItem = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  /**
-   * URL-safe slug (lowercase, hyphenated).
-   * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-   */
-  slug: string;
-  /** Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point. */
-  type: GetApiV1SpotsMap200ItemsItemType;
-  name: string;
-  /** RFC 4122 UUID (v4). */
-  categoryId: string;
-  /** Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only. */
-  status: GetApiV1SpotsMap200ItemsItemStatus;
-  /**
-   * Latitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -90
-   * @maximum 90
-   */
-  lat: GetApiV1SpotsMap200ItemsItemLat;
-  /**
-   * Longitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -180
-   * @maximum 180
-   */
-  lng: GetApiV1SpotsMap200ItemsItemLng;
-  /** Denormalised review aggregate. */
-  rating: GetApiV1SpotsMap200ItemsItemRating;
-  /** First photo URL for the list thumbnail, or null. */
-  photoUrl: GetApiV1SpotsMap200ItemsItemPhotoUrl;
-  /** RFC 3339 datetime in UTC. */
-  updatedAt: string;
-};
-
-/**
- * Spots whose geometry intersects the requested viewport.
- */
-export type GetApiV1SpotsMap200 = {
-  items: GetApiV1SpotsMap200ItemsItem[];
-};
-
-/**
- * Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point.
- */
-export type GetApiV1SpotsSlug200Type =
-  (typeof GetApiV1SpotsSlug200Type)[keyof typeof GetApiV1SpotsSlug200Type];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiV1SpotsSlug200Type = {
-  REGION: 'REGION',
-  POI: 'POI',
-} as const;
-
-export type GetApiV1SpotsSlug200Description = string | null;
-
-/**
- * Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point.
- */
-export type GetApiV1SpotsSlug200CategoryType =
-  (typeof GetApiV1SpotsSlug200CategoryType)[keyof typeof GetApiV1SpotsSlug200CategoryType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiV1SpotsSlug200CategoryType = {
-  REGION: 'REGION',
-  POI: 'POI',
-} as const;
-
-/**
- * Icon name (Tabler on web, mapped to SF Symbol / Material on mobile).
- */
-export type GetApiV1SpotsSlug200CategoryIcon = string | null;
-
-/**
- * Pin colour (hex).
- */
-export type GetApiV1SpotsSlug200CategoryColor = string | null;
-
-/**
- * A spot category.
- */
-export type GetApiV1SpotsSlug200Category = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  slug: string;
-  label: string;
-  /** Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point. */
-  type: GetApiV1SpotsSlug200CategoryType;
-  /** Icon name (Tabler on web, mapped to SF Symbol / Material on mobile). */
-  icon: GetApiV1SpotsSlug200CategoryIcon;
-  /** Pin colour (hex). */
-  color: GetApiV1SpotsSlug200CategoryColor;
-  sortOrder: number;
-};
-
-/**
- * Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only.
- */
-export type GetApiV1SpotsSlug200Status =
-  (typeof GetApiV1SpotsSlug200Status)[keyof typeof GetApiV1SpotsSlug200Status];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiV1SpotsSlug200Status = {
-  UNVERIFIED: 'UNVERIFIED',
-  VERIFIED: 'VERIFIED',
-  HIDDEN: 'HIDDEN',
-  REMOVED: 'REMOVED',
-} as const;
-
-/**
- * GeoJSON geometry type.
- */
-export type GetApiV1SpotsSlug200GeometryAnyOfType =
-  (typeof GetApiV1SpotsSlug200GeometryAnyOfType)[keyof typeof GetApiV1SpotsSlug200GeometryAnyOfType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiV1SpotsSlug200GeometryAnyOfType = {
-  Point: 'Point',
-  Polygon: 'Polygon',
-} as const;
-
-/**
- * GeoJSON geometry (WGS84). Point for a POI, Polygon for a REGION. Coordinate order is [longitude, latitude].
- */
-export type GetApiV1SpotsSlug200GeometryAnyOf = {
-  /** GeoJSON geometry type. */
-  type: GetApiV1SpotsSlug200GeometryAnyOfType;
-  /** GeoJSON coordinates. Point → `[lng, lat]`. Polygon → `[[[lng, lat], …]]` (one or more linear rings, first/last point equal). */
-  coordinates?: unknown;
-};
-
-/**
- * GeoJSON geometry (WGS84). Point for a POI, Polygon for a REGION. Coordinate order is [longitude, latitude].
- */
-export type GetApiV1SpotsSlug200Geometry = GetApiV1SpotsSlug200GeometryAnyOf | null;
-
-/**
- * Latitude in decimal degrees (WGS84 / EPSG:4326).
- * @minimum -90
- * @maximum 90
- */
-export type GetApiV1SpotsSlug200Lat = number | null;
-
-/**
- * Longitude in decimal degrees (WGS84 / EPSG:4326).
- * @minimum -180
- * @maximum 180
- */
-export type GetApiV1SpotsSlug200Lng = number | null;
-
-export type GetApiV1SpotsSlug200Address = string | null;
-
-export type GetApiV1SpotsSlug200Phone = string | null;
-
-export type GetApiV1SpotsSlug200Website = string | null;
-
-/**
- * Icon name (Tabler / SF Symbol / Material).
- */
-export type GetApiV1SpotsSlug200AmenitiesItemIcon = string | null;
-
-/**
- * A spot amenity / facility tag.
- */
-export type GetApiV1SpotsSlug200AmenitiesItem = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  slug: string;
-  label: string;
-  /** Icon name (Tabler / SF Symbol / Material). */
-  icon: GetApiV1SpotsSlug200AmenitiesItemIcon;
-  sortOrder: number;
-  /** Categories this amenity applies to (from `AmenityOnCategory`). Empty = applicable everywhere. */
-  categoryIds: string[];
-};
-
-/**
- * One photo attached to a spot.
- */
-export type GetApiV1SpotsSlug200PhotosItem = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  url: string;
-  sortOrder: number;
-  /** RFC 3339 datetime in UTC. */
-  createdAt: string;
-};
-
-/**
- * Denormalised review aggregate.
- */
-export type GetApiV1SpotsSlug200Rating = {
-  /**
-   * Mean star rating (0–5).
-   * @minimum 0
-   * @maximum 5
-   */
-  average: number;
-  /**
-   * Number of reviews.
-   * @minimum 0
-   */
-  count: number;
-};
-
-/**
- * Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only.
- */
-export type GetApiV1SpotsSlug200VerificationStatus =
-  (typeof GetApiV1SpotsSlug200VerificationStatus)[keyof typeof GetApiV1SpotsSlug200VerificationStatus];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiV1SpotsSlug200VerificationStatus = {
-  UNVERIFIED: 'UNVERIFIED',
-  VERIFIED: 'VERIFIED',
-  HIDDEN: 'HIDDEN',
-  REMOVED: 'REMOVED',
-} as const;
-
-/**
- * When the spot reached VERIFIED, or null.
- */
-export type GetApiV1SpotsSlug200VerificationVerifiedAt = string | null;
-
-/**
- * Community-verification status + denormalised vote score.
- */
-export type GetApiV1SpotsSlug200Verification = {
-  /** Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only. */
-  status: GetApiV1SpotsSlug200VerificationStatus;
-  /** Weighted confirm − deny score. */
-  netScore: number;
-  /** @minimum 0 */
-  confirmCount: number;
-  /** @minimum 0 */
-  denyCount: number;
-  /** When the spot reached VERIFIED, or null. */
-  verifiedAt: GetApiV1SpotsSlug200VerificationVerifiedAt;
-};
-
-export type GetApiV1SpotsSlug200SubmittedByHandle = string | null;
-
-export type GetApiV1SpotsSlug200SubmittedByName = string | null;
-
-export type GetApiV1SpotsSlug200SubmittedByImage = string | null;
-
-/**
- * Public reference to the user who submitted the spot.
- */
-export type GetApiV1SpotsSlug200SubmittedBy = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  handle: GetApiV1SpotsSlug200SubmittedByHandle;
-  name: GetApiV1SpotsSlug200SubmittedByName;
-  image: GetApiV1SpotsSlug200SubmittedByImage;
-};
-
-/**
- * Full spot detail. Server-rendered as the crawlable spot page.
- */
-export type GetApiV1SpotsSlug200 = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  /**
-   * URL-safe slug (lowercase, hyphenated).
-   * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-   */
-  slug: string;
-  /** Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point. */
-  type: GetApiV1SpotsSlug200Type;
-  name: string;
-  description: GetApiV1SpotsSlug200Description;
-  /** A spot category. */
-  category: GetApiV1SpotsSlug200Category;
-  /** Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only. */
-  status: GetApiV1SpotsSlug200Status;
-  /** GeoJSON geometry (WGS84). Point for a POI, Polygon for a REGION. Coordinate order is [longitude, latitude]. */
-  geometry: GetApiV1SpotsSlug200Geometry;
-  /**
-   * Latitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -90
-   * @maximum 90
-   */
-  lat: GetApiV1SpotsSlug200Lat;
-  /**
-   * Longitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -180
-   * @maximum 180
-   */
-  lng: GetApiV1SpotsSlug200Lng;
-  address: GetApiV1SpotsSlug200Address;
-  /** Opening-hours structure (loose JSON, validated at the API boundary). */
-  hours?: unknown;
-  phone: GetApiV1SpotsSlug200Phone;
-  website: GetApiV1SpotsSlug200Website;
-  amenities: GetApiV1SpotsSlug200AmenitiesItem[];
-  photos: GetApiV1SpotsSlug200PhotosItem[];
-  /** Denormalised review aggregate. */
-  rating: GetApiV1SpotsSlug200Rating;
-  /** Community-verification status + denormalised vote score. */
-  verification: GetApiV1SpotsSlug200Verification;
-  /** Public reference to the user who submitted the spot. */
-  submittedBy: GetApiV1SpotsSlug200SubmittedBy;
-  /** RFC 3339 datetime in UTC. */
-  createdAt: string;
-  /** RFC 3339 datetime in UTC. */
-  updatedAt: string;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type GetApiV1SpotsSlug404 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
 export type GetApiV1SpotsSlugReviewsParams = {
   cursor?: string;
-};
-
-export type GetApiV1SpotsSlugReviews200ItemsItemBody = string | null;
-
-export type GetApiV1SpotsSlugReviews200ItemsItemAuthorHandle = string | null;
-
-export type GetApiV1SpotsSlugReviews200ItemsItemAuthorName = string | null;
-
-export type GetApiV1SpotsSlugReviews200ItemsItemAuthorImage = string | null;
-
-/**
- * Public reference to the review author.
- */
-export type GetApiV1SpotsSlugReviews200ItemsItemAuthor = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  handle: GetApiV1SpotsSlugReviews200ItemsItemAuthorHandle;
-  name: GetApiV1SpotsSlugReviews200ItemsItemAuthorName;
-  image: GetApiV1SpotsSlugReviews200ItemsItemAuthorImage;
-};
-
-/**
- * A spot review.
- */
-export type GetApiV1SpotsSlugReviews200ItemsItem = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  /** RFC 4122 UUID (v4). */
-  spotId: string;
-  /**
-   * Star rating, 0–5.
-   * @minimum 0
-   * @maximum 5
-   */
-  stars: number;
-  body: GetApiV1SpotsSlugReviews200ItemsItemBody;
-  /** @minimum 0 */
-  helpfulCount: number;
-  /** Public reference to the review author. */
-  author: GetApiV1SpotsSlugReviews200ItemsItemAuthor;
-  /** RFC 3339 datetime in UTC. */
-  createdAt: string;
-};
-
-/**
- * Cursor for the next page, or null when this is the last page.
- */
-export type GetApiV1SpotsSlugReviews200NextCursor = string | null;
-
-/**
- * Cursor-paginated reviews for a spot.
- */
-export type GetApiV1SpotsSlugReviews200 = {
-  items: GetApiV1SpotsSlugReviews200ItemsItem[];
-  /** Cursor for the next page, or null when this is the last page. */
-  nextCursor: GetApiV1SpotsSlugReviews200NextCursor;
 };
 
 export type GetApiV1FeatureRequestsParams = {
   /**
    * Product-roadmap state of a community feature request.
    */
-  status?: GetApiV1FeatureRequestsStatus;
-};
-
-export type GetApiV1FeatureRequestsStatus =
-  (typeof GetApiV1FeatureRequestsStatus)[keyof typeof GetApiV1FeatureRequestsStatus];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiV1FeatureRequestsStatus = {
-  CONSIDERING: 'CONSIDERING',
-  PLANNED: 'PLANNED',
-  DONE: 'DONE',
-  DECLINED: 'DECLINED',
-} as const;
-
-export type GetApiV1FeatureRequests200ItemsItemBody = string | null;
-
-/**
- * Area of the app this concerns.
- */
-export type GetApiV1FeatureRequests200ItemsItemComponent = string | null;
-
-/**
- * Product-roadmap state of a community feature request.
- */
-export type GetApiV1FeatureRequests200ItemsItemStatus =
-  (typeof GetApiV1FeatureRequests200ItemsItemStatus)[keyof typeof GetApiV1FeatureRequests200ItemsItemStatus];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiV1FeatureRequests200ItemsItemStatus = {
-  CONSIDERING: 'CONSIDERING',
-  PLANNED: 'PLANNED',
-  DONE: 'DONE',
-  DECLINED: 'DECLINED',
-} as const;
-
-/**
- * A community feature request.
- */
-export type GetApiV1FeatureRequests200ItemsItem = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  title: string;
-  body: GetApiV1FeatureRequests200ItemsItemBody;
-  /** Area of the app this concerns. */
-  component: GetApiV1FeatureRequests200ItemsItemComponent;
-  /** Product-roadmap state of a community feature request. */
-  status: GetApiV1FeatureRequests200ItemsItemStatus;
-  /** @minimum 0 */
-  upvoteCount: number;
-  /** Whether the signed-in user has upvoted. False for anonymous reads. */
-  viewerHasVoted: boolean;
-  /** RFC 3339 datetime in UTC. */
-  createdAt: string;
-};
-
-/**
- * Cursor for the next page, or null when this is the last page.
- */
-export type GetApiV1FeatureRequests200NextCursor = string | null;
-
-/**
- * Cursor-paginated feature requests.
- */
-export type GetApiV1FeatureRequests200 = {
-  items: GetApiV1FeatureRequests200ItemsItem[];
-  /** Cursor for the next page, or null when this is the last page. */
-  nextCursor: GetApiV1FeatureRequests200NextCursor;
-};
-
-export type GetApiV1Me200Name = string | null;
-
-/**
- * @username.
- */
-export type GetApiV1Me200Handle = string | null;
-
-export type GetApiV1Me200Bio = string | null;
-
-/**
- * Avatar URL.
- */
-export type GetApiV1Me200Image = string | null;
-
-/**
- * Application role. `USER` = mobile app + website. `ADMIN` = moderation safety-net.
- */
-export type GetApiV1Me200Role = (typeof GetApiV1Me200Role)[keyof typeof GetApiV1Me200Role];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiV1Me200Role = {
-  USER: 'USER',
-  ADMIN: 'ADMIN',
-} as const;
-
-export type GetApiV1Me200DogsItemBreed = string | null;
-
-export type GetApiV1Me200DogsItemBirthYear = number | null;
-
-export type GetApiV1Me200DogsItemPhotoUrl = string | null;
-
-export type GetApiV1Me200DogsItemNote = string | null;
-
-/**
- * A dog profile.
- */
-export type GetApiV1Me200DogsItem = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  name: string;
-  breed: GetApiV1Me200DogsItemBreed;
-  birthYear: GetApiV1Me200DogsItemBirthYear;
-  photoUrl: GetApiV1Me200DogsItemPhotoUrl;
-  note: GetApiV1Me200DogsItemNote;
-  /** RFC 3339 datetime in UTC. */
-  createdAt: string;
-  /** RFC 3339 datetime in UTC. */
-  updatedAt: string;
-};
-
-/**
- * Authenticated user profile (`GET /api/v1/me`).
- */
-export type GetApiV1Me200 = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  email: string;
-  name: GetApiV1Me200Name;
-  /** @username. */
-  handle: GetApiV1Me200Handle;
-  bio: GetApiV1Me200Bio;
-  /** Avatar URL. */
-  image: GetApiV1Me200Image;
-  /** Application role. `USER` = mobile app + website. `ADMIN` = moderation safety-net. */
-  role: GetApiV1Me200Role;
-  /** Contribution reputation score. */
-  reputation: number;
-  dogs: GetApiV1Me200DogsItem[];
-  /** RFC 3339 datetime in UTC. */
-  createdAt: string;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type GetApiV1Me401 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * @minLength 1
- * @maxLength 80
- */
-export type PatchApiV1MeBodyName = string | null;
-
-/**
- * Unique @username (lowercase, 3–30 chars).
- * @minLength 3
- * @maxLength 30
- * @pattern ^[a-z0-9_]+$
- */
-export type PatchApiV1MeBodyHandle = string | null;
-
-/**
- * @maxLength 280
- */
-export type PatchApiV1MeBodyBio = string | null;
-
-/**
- * Avatar URL (uploaded to S3 first).
- */
-export type PatchApiV1MeBodyImage = string | null;
-
-/**
- * Body for `PATCH /api/v1/me`.
- */
-export type PatchApiV1MeBody = {
-  /**
-   * @minLength 1
-   * @maxLength 80
-   */
-  name?: PatchApiV1MeBodyName;
-  /**
-   * Unique @username (lowercase, 3–30 chars).
-   * @minLength 3
-   * @maxLength 30
-   * @pattern ^[a-z0-9_]+$
-   */
-  handle?: PatchApiV1MeBodyHandle;
-  /** @maxLength 280 */
-  bio?: PatchApiV1MeBodyBio;
-  /** Avatar URL (uploaded to S3 first). */
-  image?: PatchApiV1MeBodyImage;
-};
-
-export type PatchApiV1Me200Name = string | null;
-
-/**
- * @username.
- */
-export type PatchApiV1Me200Handle = string | null;
-
-export type PatchApiV1Me200Bio = string | null;
-
-/**
- * Avatar URL.
- */
-export type PatchApiV1Me200Image = string | null;
-
-/**
- * Application role. `USER` = mobile app + website. `ADMIN` = moderation safety-net.
- */
-export type PatchApiV1Me200Role = (typeof PatchApiV1Me200Role)[keyof typeof PatchApiV1Me200Role];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PatchApiV1Me200Role = {
-  USER: 'USER',
-  ADMIN: 'ADMIN',
-} as const;
-
-export type PatchApiV1Me200DogsItemBreed = string | null;
-
-export type PatchApiV1Me200DogsItemBirthYear = number | null;
-
-export type PatchApiV1Me200DogsItemPhotoUrl = string | null;
-
-export type PatchApiV1Me200DogsItemNote = string | null;
-
-/**
- * A dog profile.
- */
-export type PatchApiV1Me200DogsItem = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  name: string;
-  breed: PatchApiV1Me200DogsItemBreed;
-  birthYear: PatchApiV1Me200DogsItemBirthYear;
-  photoUrl: PatchApiV1Me200DogsItemPhotoUrl;
-  note: PatchApiV1Me200DogsItemNote;
-  /** RFC 3339 datetime in UTC. */
-  createdAt: string;
-  /** RFC 3339 datetime in UTC. */
-  updatedAt: string;
-};
-
-/**
- * Authenticated user profile (`GET /api/v1/me`).
- */
-export type PatchApiV1Me200 = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  email: string;
-  name: PatchApiV1Me200Name;
-  /** @username. */
-  handle: PatchApiV1Me200Handle;
-  bio: PatchApiV1Me200Bio;
-  /** Avatar URL. */
-  image: PatchApiV1Me200Image;
-  /** Application role. `USER` = mobile app + website. `ADMIN` = moderation safety-net. */
-  role: PatchApiV1Me200Role;
-  /** Contribution reputation score. */
-  reputation: number;
-  dogs: PatchApiV1Me200DogsItem[];
-  /** RFC 3339 datetime in UTC. */
-  createdAt: string;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type PatchApiV1Me400 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type PatchApiV1Me401 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type PatchApiV1Me404 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-export type GetApiV1MeDogs200ItemsItemBreed = string | null;
-
-export type GetApiV1MeDogs200ItemsItemBirthYear = number | null;
-
-export type GetApiV1MeDogs200ItemsItemPhotoUrl = string | null;
-
-export type GetApiV1MeDogs200ItemsItemNote = string | null;
-
-/**
- * A dog profile.
- */
-export type GetApiV1MeDogs200ItemsItem = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  name: string;
-  breed: GetApiV1MeDogs200ItemsItemBreed;
-  birthYear: GetApiV1MeDogs200ItemsItemBirthYear;
-  photoUrl: GetApiV1MeDogs200ItemsItemPhotoUrl;
-  note: GetApiV1MeDogs200ItemsItemNote;
-  /** RFC 3339 datetime in UTC. */
-  createdAt: string;
-  /** RFC 3339 datetime in UTC. */
-  updatedAt: string;
-};
-
-/**
- * The signed-in user's dogs.
- */
-export type GetApiV1MeDogs200 = {
-  items: GetApiV1MeDogs200ItemsItem[];
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type GetApiV1MeDogs401 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * Body for `POST /api/v1/me/dogs`.
- */
-export type PostApiV1MeDogsBody = {
-  /**
-   * @minLength 1
-   * @maxLength 60
-   */
-  name: string;
-  /** @maxLength 80 */
-  breed?: string;
-  /**
-   * Year of birth.
-   * @minimum 1990
-   * @maximum 2026
-   */
-  birthYear?: number;
-  photoUrl?: string;
-  /** @maxLength 500 */
-  note?: string;
-};
-
-export type PostApiV1MeDogs201Breed = string | null;
-
-export type PostApiV1MeDogs201BirthYear = number | null;
-
-export type PostApiV1MeDogs201PhotoUrl = string | null;
-
-export type PostApiV1MeDogs201Note = string | null;
-
-/**
- * A dog profile.
- */
-export type PostApiV1MeDogs201 = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  name: string;
-  breed: PostApiV1MeDogs201Breed;
-  birthYear: PostApiV1MeDogs201BirthYear;
-  photoUrl: PostApiV1MeDogs201PhotoUrl;
-  note: PostApiV1MeDogs201Note;
-  /** RFC 3339 datetime in UTC. */
-  createdAt: string;
-  /** RFC 3339 datetime in UTC. */
-  updatedAt: string;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type PostApiV1MeDogs400 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type PostApiV1MeDogs401 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type PostApiV1MeDogs404 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * Body for `PATCH /api/v1/me/dogs/:id`.
- */
-export type PatchApiV1MeDogsIdBody = {
-  /**
-   * @minLength 1
-   * @maxLength 60
-   */
-  name?: string;
-  /** @maxLength 80 */
-  breed?: string;
-  /**
-   * Year of birth.
-   * @minimum 1990
-   * @maximum 2026
-   */
-  birthYear?: number;
-  photoUrl?: string;
-  /** @maxLength 500 */
-  note?: string;
-};
-
-export type PatchApiV1MeDogsId200Breed = string | null;
-
-export type PatchApiV1MeDogsId200BirthYear = number | null;
-
-export type PatchApiV1MeDogsId200PhotoUrl = string | null;
-
-export type PatchApiV1MeDogsId200Note = string | null;
-
-/**
- * A dog profile.
- */
-export type PatchApiV1MeDogsId200 = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  name: string;
-  breed: PatchApiV1MeDogsId200Breed;
-  birthYear: PatchApiV1MeDogsId200BirthYear;
-  photoUrl: PatchApiV1MeDogsId200PhotoUrl;
-  note: PatchApiV1MeDogsId200Note;
-  /** RFC 3339 datetime in UTC. */
-  createdAt: string;
-  /** RFC 3339 datetime in UTC. */
-  updatedAt: string;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type PatchApiV1MeDogsId400 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type PatchApiV1MeDogsId401 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type PatchApiV1MeDogsId404 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type DeleteApiV1MeDogsId400 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type DeleteApiV1MeDogsId401 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type DeleteApiV1MeDogsId404 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point.
- */
-export type PostApiV1MeSpotsBodyType =
-  (typeof PostApiV1MeSpotsBodyType)[keyof typeof PostApiV1MeSpotsBodyType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PostApiV1MeSpotsBodyType = {
-  REGION: 'REGION',
-  POI: 'POI',
-} as const;
-
-export type PostApiV1MeSpotsBodyGeometryType =
-  (typeof PostApiV1MeSpotsBodyGeometryType)[keyof typeof PostApiV1MeSpotsBodyGeometryType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PostApiV1MeSpotsBodyGeometryType = {
-  Point: 'Point',
-  Polygon: 'Polygon',
-} as const;
-
-/**
- * GeoJSON geometry. Provide this OR `point`/`polygon`.
- */
-export type PostApiV1MeSpotsBodyGeometry = {
-  type: PostApiV1MeSpotsBodyGeometryType;
-  /** GeoJSON coordinates. Point → `[lng, lat]`; Polygon → `[[[lng, lat], …]]`. */
-  coordinates?: unknown;
-};
-
-/**
- * Single lat/lng for a POI. Alternative to `geometry`.
- */
-export type PostApiV1MeSpotsBodyPoint = {
-  /**
-   * Latitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -90
-   * @maximum 90
-   */
-  lat: number;
-  /**
-   * Longitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -180
-   * @maximum 180
-   */
-  lng: number;
-};
-
-/**
- * A geographic point — latitude/longitude in WGS84.
- */
-export type PostApiV1MeSpotsBodyPolygonItem = {
-  /**
-   * Latitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -90
-   * @maximum 90
-   */
-  lat: number;
-  /**
-   * Longitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -180
-   * @maximum 180
-   */
-  lng: number;
-};
-
-/**
- * Body for `POST /api/v1/me/spots`. A submitted spot goes live immediately as UNVERIFIED.
- */
-export type PostApiV1MeSpotsBody = {
-  /** Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point. */
-  type: PostApiV1MeSpotsBodyType;
-  /** Category the spot belongs to. */
-  categoryId: string;
-  /**
-   * @minLength 2
-   * @maxLength 120
-   */
-  name: string;
-  /** @maxLength 4000 */
-  description?: string;
-  /** GeoJSON geometry. Provide this OR `point`/`polygon`. */
-  geometry?: PostApiV1MeSpotsBodyGeometry;
-  /** Single lat/lng for a POI. Alternative to `geometry`. */
-  point?: PostApiV1MeSpotsBodyPoint;
-  /**
-   * Polygon ring (≥ 3 lat/lng points) for a REGION. Alternative to `geometry`. The API closes the ring.
-   * @minItems 3
-   */
-  polygon?: PostApiV1MeSpotsBodyPolygonItem[];
-  /** Amenities offered at this spot. */
-  amenityIds?: string[];
-  /**
-   * Uploaded photo URLs (the client uploads to S3 first, then submits the resulting URLs).
-   * @maxItems 10
-   */
-  photos?: string[];
-  /** @maxLength 240 */
-  address?: string;
-  /** @maxLength 40 */
-  phone?: string;
-  website?: string;
-  /** Opening-hours structure (loose JSON, validated at the boundary). */
-  hours?: unknown;
-};
-
-/**
- * Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point.
- */
-export type PostApiV1MeSpots201Type =
-  (typeof PostApiV1MeSpots201Type)[keyof typeof PostApiV1MeSpots201Type];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PostApiV1MeSpots201Type = {
-  REGION: 'REGION',
-  POI: 'POI',
-} as const;
-
-export type PostApiV1MeSpots201Description = string | null;
-
-/**
- * Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point.
- */
-export type PostApiV1MeSpots201CategoryType =
-  (typeof PostApiV1MeSpots201CategoryType)[keyof typeof PostApiV1MeSpots201CategoryType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PostApiV1MeSpots201CategoryType = {
-  REGION: 'REGION',
-  POI: 'POI',
-} as const;
-
-/**
- * Icon name (Tabler on web, mapped to SF Symbol / Material on mobile).
- */
-export type PostApiV1MeSpots201CategoryIcon = string | null;
-
-/**
- * Pin colour (hex).
- */
-export type PostApiV1MeSpots201CategoryColor = string | null;
-
-/**
- * A spot category.
- */
-export type PostApiV1MeSpots201Category = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  slug: string;
-  label: string;
-  /** Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point. */
-  type: PostApiV1MeSpots201CategoryType;
-  /** Icon name (Tabler on web, mapped to SF Symbol / Material on mobile). */
-  icon: PostApiV1MeSpots201CategoryIcon;
-  /** Pin colour (hex). */
-  color: PostApiV1MeSpots201CategoryColor;
-  sortOrder: number;
-};
-
-/**
- * Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only.
- */
-export type PostApiV1MeSpots201Status =
-  (typeof PostApiV1MeSpots201Status)[keyof typeof PostApiV1MeSpots201Status];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PostApiV1MeSpots201Status = {
-  UNVERIFIED: 'UNVERIFIED',
-  VERIFIED: 'VERIFIED',
-  HIDDEN: 'HIDDEN',
-  REMOVED: 'REMOVED',
-} as const;
-
-/**
- * GeoJSON geometry type.
- */
-export type PostApiV1MeSpots201GeometryAnyOfType =
-  (typeof PostApiV1MeSpots201GeometryAnyOfType)[keyof typeof PostApiV1MeSpots201GeometryAnyOfType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PostApiV1MeSpots201GeometryAnyOfType = {
-  Point: 'Point',
-  Polygon: 'Polygon',
-} as const;
-
-/**
- * GeoJSON geometry (WGS84). Point for a POI, Polygon for a REGION. Coordinate order is [longitude, latitude].
- */
-export type PostApiV1MeSpots201GeometryAnyOf = {
-  /** GeoJSON geometry type. */
-  type: PostApiV1MeSpots201GeometryAnyOfType;
-  /** GeoJSON coordinates. Point → `[lng, lat]`. Polygon → `[[[lng, lat], …]]` (one or more linear rings, first/last point equal). */
-  coordinates?: unknown;
-};
-
-/**
- * GeoJSON geometry (WGS84). Point for a POI, Polygon for a REGION. Coordinate order is [longitude, latitude].
- */
-export type PostApiV1MeSpots201Geometry = PostApiV1MeSpots201GeometryAnyOf | null;
-
-/**
- * Latitude in decimal degrees (WGS84 / EPSG:4326).
- * @minimum -90
- * @maximum 90
- */
-export type PostApiV1MeSpots201Lat = number | null;
-
-/**
- * Longitude in decimal degrees (WGS84 / EPSG:4326).
- * @minimum -180
- * @maximum 180
- */
-export type PostApiV1MeSpots201Lng = number | null;
-
-export type PostApiV1MeSpots201Address = string | null;
-
-export type PostApiV1MeSpots201Phone = string | null;
-
-export type PostApiV1MeSpots201Website = string | null;
-
-/**
- * Icon name (Tabler / SF Symbol / Material).
- */
-export type PostApiV1MeSpots201AmenitiesItemIcon = string | null;
-
-/**
- * A spot amenity / facility tag.
- */
-export type PostApiV1MeSpots201AmenitiesItem = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  slug: string;
-  label: string;
-  /** Icon name (Tabler / SF Symbol / Material). */
-  icon: PostApiV1MeSpots201AmenitiesItemIcon;
-  sortOrder: number;
-  /** Categories this amenity applies to (from `AmenityOnCategory`). Empty = applicable everywhere. */
-  categoryIds: string[];
-};
-
-/**
- * One photo attached to a spot.
- */
-export type PostApiV1MeSpots201PhotosItem = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  url: string;
-  sortOrder: number;
-  /** RFC 3339 datetime in UTC. */
-  createdAt: string;
-};
-
-/**
- * Denormalised review aggregate.
- */
-export type PostApiV1MeSpots201Rating = {
-  /**
-   * Mean star rating (0–5).
-   * @minimum 0
-   * @maximum 5
-   */
-  average: number;
-  /**
-   * Number of reviews.
-   * @minimum 0
-   */
-  count: number;
-};
-
-/**
- * Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only.
- */
-export type PostApiV1MeSpots201VerificationStatus =
-  (typeof PostApiV1MeSpots201VerificationStatus)[keyof typeof PostApiV1MeSpots201VerificationStatus];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PostApiV1MeSpots201VerificationStatus = {
-  UNVERIFIED: 'UNVERIFIED',
-  VERIFIED: 'VERIFIED',
-  HIDDEN: 'HIDDEN',
-  REMOVED: 'REMOVED',
-} as const;
-
-/**
- * When the spot reached VERIFIED, or null.
- */
-export type PostApiV1MeSpots201VerificationVerifiedAt = string | null;
-
-/**
- * Community-verification status + denormalised vote score.
- */
-export type PostApiV1MeSpots201Verification = {
-  /** Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only. */
-  status: PostApiV1MeSpots201VerificationStatus;
-  /** Weighted confirm − deny score. */
-  netScore: number;
-  /** @minimum 0 */
-  confirmCount: number;
-  /** @minimum 0 */
-  denyCount: number;
-  /** When the spot reached VERIFIED, or null. */
-  verifiedAt: PostApiV1MeSpots201VerificationVerifiedAt;
-};
-
-export type PostApiV1MeSpots201SubmittedByHandle = string | null;
-
-export type PostApiV1MeSpots201SubmittedByName = string | null;
-
-export type PostApiV1MeSpots201SubmittedByImage = string | null;
-
-/**
- * Public reference to the user who submitted the spot.
- */
-export type PostApiV1MeSpots201SubmittedBy = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  handle: PostApiV1MeSpots201SubmittedByHandle;
-  name: PostApiV1MeSpots201SubmittedByName;
-  image: PostApiV1MeSpots201SubmittedByImage;
-};
-
-/**
- * The created spot (status UNVERIFIED).
- */
-export type PostApiV1MeSpots201 = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  /**
-   * URL-safe slug (lowercase, hyphenated).
-   * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-   */
-  slug: string;
-  /** Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point. */
-  type: PostApiV1MeSpots201Type;
-  name: string;
-  description: PostApiV1MeSpots201Description;
-  /** A spot category. */
-  category: PostApiV1MeSpots201Category;
-  /** Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only. */
-  status: PostApiV1MeSpots201Status;
-  /** GeoJSON geometry (WGS84). Point for a POI, Polygon for a REGION. Coordinate order is [longitude, latitude]. */
-  geometry: PostApiV1MeSpots201Geometry;
-  /**
-   * Latitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -90
-   * @maximum 90
-   */
-  lat: PostApiV1MeSpots201Lat;
-  /**
-   * Longitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -180
-   * @maximum 180
-   */
-  lng: PostApiV1MeSpots201Lng;
-  address: PostApiV1MeSpots201Address;
-  /** Opening-hours structure (loose JSON, validated at the API boundary). */
-  hours?: unknown;
-  phone: PostApiV1MeSpots201Phone;
-  website: PostApiV1MeSpots201Website;
-  amenities: PostApiV1MeSpots201AmenitiesItem[];
-  photos: PostApiV1MeSpots201PhotosItem[];
-  /** Denormalised review aggregate. */
-  rating: PostApiV1MeSpots201Rating;
-  /** Community-verification status + denormalised vote score. */
-  verification: PostApiV1MeSpots201Verification;
-  /** Public reference to the user who submitted the spot. */
-  submittedBy: PostApiV1MeSpots201SubmittedBy;
-  /** RFC 3339 datetime in UTC. */
-  createdAt: string;
-  /** RFC 3339 datetime in UTC. */
-  updatedAt: string;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type PostApiV1MeSpots400 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type PostApiV1MeSpots401 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type PostApiV1MeSpots404 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * @maxLength 4000
- */
-export type PatchApiV1MeSpotsIdBodyDescription = string | null;
-
-export type PatchApiV1MeSpotsIdBodyGeometryType =
-  (typeof PatchApiV1MeSpotsIdBodyGeometryType)[keyof typeof PatchApiV1MeSpotsIdBodyGeometryType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PatchApiV1MeSpotsIdBodyGeometryType = {
-  Point: 'Point',
-  Polygon: 'Polygon',
-} as const;
-
-/**
- * Raw GeoJSON geometry (WGS84, [lng, lat] order).
- */
-export type PatchApiV1MeSpotsIdBodyGeometry = {
-  type: PatchApiV1MeSpotsIdBodyGeometryType;
-  /** GeoJSON coordinates. Point → `[lng, lat]`; Polygon → `[[[lng, lat], …]]`. */
-  coordinates?: unknown;
-};
-
-/**
- * A geographic point — latitude/longitude in WGS84.
- */
-export type PatchApiV1MeSpotsIdBodyPoint = {
-  /**
-   * Latitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -90
-   * @maximum 90
-   */
-  lat: number;
-  /**
-   * Longitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -180
-   * @maximum 180
-   */
-  lng: number;
-};
-
-/**
- * A geographic point — latitude/longitude in WGS84.
- */
-export type PatchApiV1MeSpotsIdBodyPolygonItem = {
-  /**
-   * Latitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -90
-   * @maximum 90
-   */
-  lat: number;
-  /**
-   * Longitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -180
-   * @maximum 180
-   */
-  lng: number;
-};
-
-/**
- * @maxLength 240
- */
-export type PatchApiV1MeSpotsIdBodyAddress = string | null;
-
-/**
- * @maxLength 40
- */
-export type PatchApiV1MeSpotsIdBodyPhone = string | null;
-
-export type PatchApiV1MeSpotsIdBodyWebsite = string | null;
-
-/**
- * Body for `PATCH /api/v1/me/spots/:id` (owner edit while UNVERIFIED).
- */
-export type PatchApiV1MeSpotsIdBody = {
-  /**
-   * @minLength 2
-   * @maxLength 120
-   */
-  name?: string;
-  /** @maxLength 4000 */
-  description?: PatchApiV1MeSpotsIdBodyDescription;
-  /** RFC 4122 UUID (v4). */
-  categoryId?: string;
-  amenityIds?: string[];
-  /** Raw GeoJSON geometry (WGS84, [lng, lat] order). */
-  geometry?: PatchApiV1MeSpotsIdBodyGeometry;
-  /** A geographic point — latitude/longitude in WGS84. */
-  point?: PatchApiV1MeSpotsIdBodyPoint;
-  /** @minItems 3 */
-  polygon?: PatchApiV1MeSpotsIdBodyPolygonItem[];
-  /** @maxLength 240 */
-  address?: PatchApiV1MeSpotsIdBodyAddress;
-  /** @maxLength 40 */
-  phone?: PatchApiV1MeSpotsIdBodyPhone;
-  website?: PatchApiV1MeSpotsIdBodyWebsite;
-  hours?: unknown;
-};
-
-/**
- * Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point.
- */
-export type PatchApiV1MeSpotsId200Type =
-  (typeof PatchApiV1MeSpotsId200Type)[keyof typeof PatchApiV1MeSpotsId200Type];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PatchApiV1MeSpotsId200Type = {
-  REGION: 'REGION',
-  POI: 'POI',
-} as const;
-
-export type PatchApiV1MeSpotsId200Description = string | null;
-
-/**
- * Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point.
- */
-export type PatchApiV1MeSpotsId200CategoryType =
-  (typeof PatchApiV1MeSpotsId200CategoryType)[keyof typeof PatchApiV1MeSpotsId200CategoryType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PatchApiV1MeSpotsId200CategoryType = {
-  REGION: 'REGION',
-  POI: 'POI',
-} as const;
-
-/**
- * Icon name (Tabler on web, mapped to SF Symbol / Material on mobile).
- */
-export type PatchApiV1MeSpotsId200CategoryIcon = string | null;
-
-/**
- * Pin colour (hex).
- */
-export type PatchApiV1MeSpotsId200CategoryColor = string | null;
-
-/**
- * A spot category.
- */
-export type PatchApiV1MeSpotsId200Category = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  slug: string;
-  label: string;
-  /** Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point. */
-  type: PatchApiV1MeSpotsId200CategoryType;
-  /** Icon name (Tabler on web, mapped to SF Symbol / Material on mobile). */
-  icon: PatchApiV1MeSpotsId200CategoryIcon;
-  /** Pin colour (hex). */
-  color: PatchApiV1MeSpotsId200CategoryColor;
-  sortOrder: number;
-};
-
-/**
- * Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only.
- */
-export type PatchApiV1MeSpotsId200Status =
-  (typeof PatchApiV1MeSpotsId200Status)[keyof typeof PatchApiV1MeSpotsId200Status];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PatchApiV1MeSpotsId200Status = {
-  UNVERIFIED: 'UNVERIFIED',
-  VERIFIED: 'VERIFIED',
-  HIDDEN: 'HIDDEN',
-  REMOVED: 'REMOVED',
-} as const;
-
-/**
- * GeoJSON geometry type.
- */
-export type PatchApiV1MeSpotsId200GeometryAnyOfType =
-  (typeof PatchApiV1MeSpotsId200GeometryAnyOfType)[keyof typeof PatchApiV1MeSpotsId200GeometryAnyOfType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PatchApiV1MeSpotsId200GeometryAnyOfType = {
-  Point: 'Point',
-  Polygon: 'Polygon',
-} as const;
-
-/**
- * GeoJSON geometry (WGS84). Point for a POI, Polygon for a REGION. Coordinate order is [longitude, latitude].
- */
-export type PatchApiV1MeSpotsId200GeometryAnyOf = {
-  /** GeoJSON geometry type. */
-  type: PatchApiV1MeSpotsId200GeometryAnyOfType;
-  /** GeoJSON coordinates. Point → `[lng, lat]`. Polygon → `[[[lng, lat], …]]` (one or more linear rings, first/last point equal). */
-  coordinates?: unknown;
-};
-
-/**
- * GeoJSON geometry (WGS84). Point for a POI, Polygon for a REGION. Coordinate order is [longitude, latitude].
- */
-export type PatchApiV1MeSpotsId200Geometry = PatchApiV1MeSpotsId200GeometryAnyOf | null;
-
-/**
- * Latitude in decimal degrees (WGS84 / EPSG:4326).
- * @minimum -90
- * @maximum 90
- */
-export type PatchApiV1MeSpotsId200Lat = number | null;
-
-/**
- * Longitude in decimal degrees (WGS84 / EPSG:4326).
- * @minimum -180
- * @maximum 180
- */
-export type PatchApiV1MeSpotsId200Lng = number | null;
-
-export type PatchApiV1MeSpotsId200Address = string | null;
-
-export type PatchApiV1MeSpotsId200Phone = string | null;
-
-export type PatchApiV1MeSpotsId200Website = string | null;
-
-/**
- * Icon name (Tabler / SF Symbol / Material).
- */
-export type PatchApiV1MeSpotsId200AmenitiesItemIcon = string | null;
-
-/**
- * A spot amenity / facility tag.
- */
-export type PatchApiV1MeSpotsId200AmenitiesItem = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  slug: string;
-  label: string;
-  /** Icon name (Tabler / SF Symbol / Material). */
-  icon: PatchApiV1MeSpotsId200AmenitiesItemIcon;
-  sortOrder: number;
-  /** Categories this amenity applies to (from `AmenityOnCategory`). Empty = applicable everywhere. */
-  categoryIds: string[];
-};
-
-/**
- * One photo attached to a spot.
- */
-export type PatchApiV1MeSpotsId200PhotosItem = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  url: string;
-  sortOrder: number;
-  /** RFC 3339 datetime in UTC. */
-  createdAt: string;
-};
-
-/**
- * Denormalised review aggregate.
- */
-export type PatchApiV1MeSpotsId200Rating = {
-  /**
-   * Mean star rating (0–5).
-   * @minimum 0
-   * @maximum 5
-   */
-  average: number;
-  /**
-   * Number of reviews.
-   * @minimum 0
-   */
-  count: number;
-};
-
-/**
- * Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only.
- */
-export type PatchApiV1MeSpotsId200VerificationStatus =
-  (typeof PatchApiV1MeSpotsId200VerificationStatus)[keyof typeof PatchApiV1MeSpotsId200VerificationStatus];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PatchApiV1MeSpotsId200VerificationStatus = {
-  UNVERIFIED: 'UNVERIFIED',
-  VERIFIED: 'VERIFIED',
-  HIDDEN: 'HIDDEN',
-  REMOVED: 'REMOVED',
-} as const;
-
-/**
- * When the spot reached VERIFIED, or null.
- */
-export type PatchApiV1MeSpotsId200VerificationVerifiedAt = string | null;
-
-/**
- * Community-verification status + denormalised vote score.
- */
-export type PatchApiV1MeSpotsId200Verification = {
-  /** Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only. */
-  status: PatchApiV1MeSpotsId200VerificationStatus;
-  /** Weighted confirm − deny score. */
-  netScore: number;
-  /** @minimum 0 */
-  confirmCount: number;
-  /** @minimum 0 */
-  denyCount: number;
-  /** When the spot reached VERIFIED, or null. */
-  verifiedAt: PatchApiV1MeSpotsId200VerificationVerifiedAt;
-};
-
-export type PatchApiV1MeSpotsId200SubmittedByHandle = string | null;
-
-export type PatchApiV1MeSpotsId200SubmittedByName = string | null;
-
-export type PatchApiV1MeSpotsId200SubmittedByImage = string | null;
-
-/**
- * Public reference to the user who submitted the spot.
- */
-export type PatchApiV1MeSpotsId200SubmittedBy = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  handle: PatchApiV1MeSpotsId200SubmittedByHandle;
-  name: PatchApiV1MeSpotsId200SubmittedByName;
-  image: PatchApiV1MeSpotsId200SubmittedByImage;
-};
-
-/**
- * The created spot (status UNVERIFIED).
- */
-export type PatchApiV1MeSpotsId200 = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  /**
-   * URL-safe slug (lowercase, hyphenated).
-   * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-   */
-  slug: string;
-  /** Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point. */
-  type: PatchApiV1MeSpotsId200Type;
-  name: string;
-  description: PatchApiV1MeSpotsId200Description;
-  /** A spot category. */
-  category: PatchApiV1MeSpotsId200Category;
-  /** Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only. */
-  status: PatchApiV1MeSpotsId200Status;
-  /** GeoJSON geometry (WGS84). Point for a POI, Polygon for a REGION. Coordinate order is [longitude, latitude]. */
-  geometry: PatchApiV1MeSpotsId200Geometry;
-  /**
-   * Latitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -90
-   * @maximum 90
-   */
-  lat: PatchApiV1MeSpotsId200Lat;
-  /**
-   * Longitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -180
-   * @maximum 180
-   */
-  lng: PatchApiV1MeSpotsId200Lng;
-  address: PatchApiV1MeSpotsId200Address;
-  /** Opening-hours structure (loose JSON, validated at the API boundary). */
-  hours?: unknown;
-  phone: PatchApiV1MeSpotsId200Phone;
-  website: PatchApiV1MeSpotsId200Website;
-  amenities: PatchApiV1MeSpotsId200AmenitiesItem[];
-  photos: PatchApiV1MeSpotsId200PhotosItem[];
-  /** Denormalised review aggregate. */
-  rating: PatchApiV1MeSpotsId200Rating;
-  /** Community-verification status + denormalised vote score. */
-  verification: PatchApiV1MeSpotsId200Verification;
-  /** Public reference to the user who submitted the spot. */
-  submittedBy: PatchApiV1MeSpotsId200SubmittedBy;
-  /** RFC 3339 datetime in UTC. */
-  createdAt: string;
-  /** RFC 3339 datetime in UTC. */
-  updatedAt: string;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type PatchApiV1MeSpotsId400 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type PatchApiV1MeSpotsId401 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type PatchApiV1MeSpotsId404 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * Community verification vote. `CONFIRM` raises the score, `DENY` lowers it.
- */
-export type PostApiV1MeSpotsIdVoteBodyValue =
-  (typeof PostApiV1MeSpotsIdVoteBodyValue)[keyof typeof PostApiV1MeSpotsIdVoteBodyValue];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PostApiV1MeSpotsIdVoteBodyValue = {
-  CONFIRM: 'CONFIRM',
-  DENY: 'DENY',
-} as const;
-
-/**
- * Voter's current location, used for the proximity gate. When present and within range the vote is marked `proximityVerified` and weighted more heavily.
- */
-export type PostApiV1MeSpotsIdVoteBodyProof = {
-  /**
-   * Latitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -90
-   * @maximum 90
-   */
-  lat: number;
-  /**
-   * Longitude in decimal degrees (WGS84 / EPSG:4326).
-   * @minimum -180
-   * @maximum 180
-   */
-  lng: number;
-};
-
-/**
- * Body for `POST /api/v1/me/spots/:id/vote`.
- */
-export type PostApiV1MeSpotsIdVoteBody = {
-  /** Community verification vote. `CONFIRM` raises the score, `DENY` lowers it. */
-  value: PostApiV1MeSpotsIdVoteBodyValue;
-  /** Voter's current location, used for the proximity gate. When present and within range the vote is marked `proximityVerified` and weighted more heavily. */
-  proof?: PostApiV1MeSpotsIdVoteBodyProof;
-};
-
-/**
- * Community verification vote. `CONFIRM` raises the score, `DENY` lowers it.
- */
-export type PostApiV1MeSpotsIdVote200VoteValue =
-  (typeof PostApiV1MeSpotsIdVote200VoteValue)[keyof typeof PostApiV1MeSpotsIdVote200VoteValue];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PostApiV1MeSpotsIdVote200VoteValue = {
-  CONFIRM: 'CONFIRM',
-  DENY: 'DENY',
-} as const;
-
-/**
- * The signed-in user's vote on a spot.
- */
-export type PostApiV1MeSpotsIdVote200Vote = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  /** RFC 4122 UUID (v4). */
-  spotId: string;
-  /** Community verification vote. `CONFIRM` raises the score, `DENY` lowers it. */
-  value: PostApiV1MeSpotsIdVote200VoteValue;
-  proximityVerified: boolean;
-  /** RFC 3339 datetime in UTC. */
-  createdAt: string;
-};
-
-/**
- * Result of casting a verification vote.
- */
-export type PostApiV1MeSpotsIdVote200 = {
-  /** The signed-in user's vote on a spot. */
-  vote: PostApiV1MeSpotsIdVote200Vote;
-  /** Spot net weighted score after this vote. */
-  netScore: number;
-  /** @minimum 0 */
-  confirmCount: number;
-  /** @minimum 0 */
-  denyCount: number;
-  /** Spot status after recompute (may flip to VERIFIED / HIDDEN). */
-  status: string;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type PostApiV1MeSpotsIdVote400 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type PostApiV1MeSpotsIdVote401 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type PostApiV1MeSpotsIdVote404 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * Body for `POST /api/v1/me/spots/:id/reviews`.
- */
-export type PostApiV1MeSpotsIdReviewsBody = {
-  /**
-   * Star rating, 0–5.
-   * @minimum 0
-   * @maximum 5
-   */
-  stars: number;
-  /** @maxLength 4000 */
-  body?: string;
-};
-
-export type PostApiV1MeSpotsIdReviews201Body = string | null;
-
-export type PostApiV1MeSpotsIdReviews201AuthorHandle = string | null;
-
-export type PostApiV1MeSpotsIdReviews201AuthorName = string | null;
-
-export type PostApiV1MeSpotsIdReviews201AuthorImage = string | null;
-
-/**
- * Public reference to the review author.
- */
-export type PostApiV1MeSpotsIdReviews201Author = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  handle: PostApiV1MeSpotsIdReviews201AuthorHandle;
-  name: PostApiV1MeSpotsIdReviews201AuthorName;
-  image: PostApiV1MeSpotsIdReviews201AuthorImage;
-};
-
-/**
- * A spot review.
- */
-export type PostApiV1MeSpotsIdReviews201 = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  /** RFC 4122 UUID (v4). */
-  spotId: string;
-  /**
-   * Star rating, 0–5.
-   * @minimum 0
-   * @maximum 5
-   */
-  stars: number;
-  body: PostApiV1MeSpotsIdReviews201Body;
-  /** @minimum 0 */
-  helpfulCount: number;
-  /** Public reference to the review author. */
-  author: PostApiV1MeSpotsIdReviews201Author;
-  /** RFC 3339 datetime in UTC. */
-  createdAt: string;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type PostApiV1MeSpotsIdReviews400 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type PostApiV1MeSpotsIdReviews401 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type PostApiV1MeSpotsIdReviews404 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * What kind of entity a report targets.
- */
-export type PostApiV1MeReportsBodyTargetType =
-  (typeof PostApiV1MeReportsBodyTargetType)[keyof typeof PostApiV1MeReportsBodyTargetType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PostApiV1MeReportsBodyTargetType = {
-  SPOT: 'SPOT',
-  PHOTO: 'PHOTO',
-  REVIEW: 'REVIEW',
-} as const;
-
-/**
- * Why a piece of content was reported.
- */
-export type PostApiV1MeReportsBodyReason =
-  (typeof PostApiV1MeReportsBodyReason)[keyof typeof PostApiV1MeReportsBodyReason];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PostApiV1MeReportsBodyReason = {
-  DUPLICATE: 'DUPLICATE',
-  SPAM: 'SPAM',
-  WRONG_INFO: 'WRONG_INFO',
-  INAPPROPRIATE: 'INAPPROPRIATE',
-  OTHER: 'OTHER',
-} as const;
-
-/**
- * Body for `POST /api/v1/me/reports`.
- */
-export type PostApiV1MeReportsBody = {
-  /** What kind of entity a report targets. */
-  targetType: PostApiV1MeReportsBodyTargetType;
-  /** Id of the spot / photo / review being reported. */
-  targetId: string;
-  /** Why a piece of content was reported. */
-  reason: PostApiV1MeReportsBodyReason;
-  /** @maxLength 2000 */
-  note?: string;
-};
-
-/**
- * Acknowledgement that a report was filed.
- */
-export type PostApiV1MeReports201 = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  /** RFC 3339 datetime in UTC. */
-  createdAt: string;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type PostApiV1MeReports400 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type PostApiV1MeReports401 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type PostApiV1MeReports404 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * Body for `POST /api/v1/me/feature-requests`.
- */
-export type PostApiV1MeFeatureRequestsBody = {
-  /**
-   * @minLength 4
-   * @maxLength 140
-   */
-  title: string;
-  /** @maxLength 4000 */
-  body?: string;
-  /**
-   * Area of the app: Kaart / Inzenden / Profiel / Anders.
-   * @maxLength 40
-   */
-  component?: string;
-};
-
-export type PostApiV1MeFeatureRequests201Body = string | null;
-
-/**
- * Area of the app this concerns.
- */
-export type PostApiV1MeFeatureRequests201Component = string | null;
-
-/**
- * Product-roadmap state of a community feature request.
- */
-export type PostApiV1MeFeatureRequests201Status =
-  (typeof PostApiV1MeFeatureRequests201Status)[keyof typeof PostApiV1MeFeatureRequests201Status];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PostApiV1MeFeatureRequests201Status = {
-  CONSIDERING: 'CONSIDERING',
-  PLANNED: 'PLANNED',
-  DONE: 'DONE',
-  DECLINED: 'DECLINED',
-} as const;
-
-/**
- * A community feature request.
- */
-export type PostApiV1MeFeatureRequests201 = {
-  /** RFC 4122 UUID (v4). */
-  id: string;
-  title: string;
-  body: PostApiV1MeFeatureRequests201Body;
-  /** Area of the app this concerns. */
-  component: PostApiV1MeFeatureRequests201Component;
-  /** Product-roadmap state of a community feature request. */
-  status: PostApiV1MeFeatureRequests201Status;
-  /** @minimum 0 */
-  upvoteCount: number;
-  /** Whether the signed-in user has upvoted. False for anonymous reads. */
-  viewerHasVoted: boolean;
-  /** RFC 3339 datetime in UTC. */
-  createdAt: string;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type PostApiV1MeFeatureRequests400 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type PostApiV1MeFeatureRequests401 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type PostApiV1MeFeatureRequests404 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * Result of toggling an upvote on a feature request.
- */
-export type PostApiV1MeFeatureRequestsIdVote200 = {
-  /** RFC 4122 UUID (v4). */
-  requestId: string;
-  /** @minimum 0 */
-  upvoteCount: number;
-  viewerHasVoted: boolean;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type PostApiV1MeFeatureRequestsIdVote400 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type PostApiV1MeFeatureRequestsIdVote401 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
-};
-
-/**
- * Uniform error envelope used by every API endpoint.
- */
-export type PostApiV1MeFeatureRequestsIdVote404 = {
-  /** Machine-readable error code in UPPER_SNAKE_CASE. */
-  error: string;
-  /** Human-readable explanation. Safe to display to end users. */
-  message: string;
-  /** Optional structured detail payload. For validation errors this is the Zod `flatten()` output. */
-  details?: unknown;
+  status?: FeatureStatus;
 };

@@ -13,13 +13,7 @@ import type {
   UseMutationResult,
 } from '@tanstack/react-query';
 
-import type {
-  PostApiV1MeReports201,
-  PostApiV1MeReports400,
-  PostApiV1MeReports401,
-  PostApiV1MeReports404,
-  PostApiV1MeReportsBody,
-} from '../client.schemas';
+import type { ApiError, ReportResponse, SubmitReportRequest } from '../client.schemas';
 
 import { customFetcher } from '../../custom-fetcher';
 
@@ -27,32 +21,32 @@ import { customFetcher } from '../../custom-fetcher';
  * @summary Report content
  */
 export const postApiV1MeReports = (
-  postApiV1MeReportsBody: PostApiV1MeReportsBody,
+  submitReportRequest: SubmitReportRequest,
   signal?: AbortSignal,
 ) => {
-  return customFetcher<PostApiV1MeReports201>({
+  return customFetcher<ReportResponse>({
     url: `/api/v1/me/reports`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    data: postApiV1MeReportsBody,
+    data: submitReportRequest,
     signal,
   });
 };
 
 export const getPostApiV1MeReportsMutationOptions = <
-  TError = PostApiV1MeReports400 | PostApiV1MeReports401 | PostApiV1MeReports404,
+  TError = ApiError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiV1MeReports>>,
     TError,
-    { data: PostApiV1MeReportsBody },
+    { data: SubmitReportRequest },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiV1MeReports>>,
   TError,
-  { data: PostApiV1MeReportsBody },
+  { data: SubmitReportRequest },
   TContext
 > => {
   const mutationKey = ['postApiV1MeReports'];
@@ -64,7 +58,7 @@ export const getPostApiV1MeReportsMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiV1MeReports>>,
-    { data: PostApiV1MeReportsBody }
+    { data: SubmitReportRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -77,24 +71,18 @@ export const getPostApiV1MeReportsMutationOptions = <
 export type PostApiV1MeReportsMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiV1MeReports>>
 >;
-export type PostApiV1MeReportsMutationBody = PostApiV1MeReportsBody;
-export type PostApiV1MeReportsMutationError =
-  | PostApiV1MeReports400
-  | PostApiV1MeReports401
-  | PostApiV1MeReports404;
+export type PostApiV1MeReportsMutationBody = SubmitReportRequest;
+export type PostApiV1MeReportsMutationError = ApiError;
 
 /**
  * @summary Report content
  */
-export const usePostApiV1MeReports = <
-  TError = PostApiV1MeReports400 | PostApiV1MeReports401 | PostApiV1MeReports404,
-  TContext = unknown,
->(
+export const usePostApiV1MeReports = <TError = ApiError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiV1MeReports>>,
       TError,
-      { data: PostApiV1MeReportsBody },
+      { data: SubmitReportRequest },
       TContext
     >;
   },
@@ -102,7 +90,7 @@ export const usePostApiV1MeReports = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiV1MeReports>>,
   TError,
-  { data: PostApiV1MeReportsBody },
+  { data: SubmitReportRequest },
   TContext
 > => {
   const mutationOptions = getPostApiV1MeReportsMutationOptions(options);

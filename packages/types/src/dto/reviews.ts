@@ -31,11 +31,11 @@ export const ReviewSchema = z
       .openapi({ description: 'Public reference to the review author.' }),
     createdAt: IsoDateTimeSchema,
   })
-  .openapi({ description: 'A spot review.' });
+  .openapi('Review', { description: 'A spot review.' });
 export type ReviewDto = z.infer<typeof ReviewSchema>;
 
 /** GET /api/v1/spots/:slug/reviews — paginated list. */
-export const ReviewsResponseSchema = paginatedSchema(ReviewSchema).openapi({
+export const ReviewsResponseSchema = paginatedSchema(ReviewSchema).openapi('ReviewsResponse', {
   description: 'Cursor-paginated reviews for a spot.',
 });
 export type ReviewsResponseDto = z.infer<typeof ReviewsResponseSchema>;
@@ -46,7 +46,7 @@ export const SubmitReviewRequestSchema = z
     stars: StarsSchema,
     body: z.string().max(4000).optional(),
   })
-  .openapi({ description: 'Body for `POST /api/v1/me/spots/:id/reviews`.' });
+  .openapi('SubmitReviewRequest', { description: 'Body for `POST /api/v1/me/spots/:id/reviews`.' });
 export type SubmitReviewRequestDto = z.infer<typeof SubmitReviewRequestSchema>;
 
 /** Path params for the per-spot review endpoints. */

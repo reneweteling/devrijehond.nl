@@ -20,7 +20,7 @@ import type {
   UseSuspenseQueryResult,
 } from '@tanstack/react-query';
 
-import type { GetApiV1Amenities200, GetApiV1AmenitiesParams } from '../client.schemas';
+import type { AmenitiesResponse, GetApiV1AmenitiesParams } from '../client.schemas';
 
 import { customFetcher } from '../../custom-fetcher';
 
@@ -28,7 +28,7 @@ import { customFetcher } from '../../custom-fetcher';
  * @summary List amenities
  */
 export const getApiV1Amenities = (params?: GetApiV1AmenitiesParams, signal?: AbortSignal) => {
-  return customFetcher<GetApiV1Amenities200>({
+  return customFetcher<AmenitiesResponse>({
     url: `/api/v1/amenities`,
     method: 'GET',
     params,

@@ -37,27 +37,19 @@ export const SubmitSpotRequestSchema = z
     point: GeoPointSchema.optional().openapi({
       description: 'Single lat/lng for a POI. Alternative to `geometry`.',
     }),
-    polygon: z
-      .array(GeoPointSchema)
-      .min(3)
-      .optional()
-      .openapi({
-        description:
-          'Polygon ring (≥ 3 lat/lng points) for a REGION. Alternative to `geometry`. The API closes the ring.',
-      }),
+    polygon: z.array(GeoPointSchema).min(3).optional().openapi({
+      description:
+        'Polygon ring (≥ 3 lat/lng points) for a REGION. Alternative to `geometry`. The API closes the ring.',
+    }),
 
     amenityIds: z
       .array(UuidSchema)
       .default([])
       .openapi({ description: 'Amenities offered at this spot.' }),
-    photos: z
-      .array(z.string().url())
-      .max(10)
-      .default([])
-      .openapi({
-        description:
-          'Uploaded photo URLs (the client uploads to S3 first, then submits the resulting URLs).',
-      }),
+    photos: z.array(z.string().url()).max(10).default([]).openapi({
+      description:
+        'Uploaded photo URLs (the client uploads to S3 first, then submits the resulting URLs).',
+    }),
 
     // POI extras (ignored for REGION).
     address: z.string().max(240).optional(),
@@ -70,14 +62,14 @@ export const SubmitSpotRequestSchema = z
   .refine((v) => v.geometry || v.point || (v.polygon && v.polygon.length >= 3), {
     message: 'A spot requires geometry: provide `geometry`, `point`, or `polygon`.',
   })
-  .openapi({
+  .openapi('SubmitSpotRequest', {
     description:
       'Body for `POST /api/v1/me/spots`. A submitted spot goes live immediately as UNVERIFIED.',
   });
 export type SubmitSpotRequestDto = z.infer<typeof SubmitSpotRequestSchema>;
 
 /** Response: the freshly-created spot detail. */
-export const SubmitSpotResponseSchema = SpotDetailSchema.openapi({
+export const SubmitSpotResponseSchema = SpotDetailSchema.openapi('SubmitSpotResponse', {
   description: 'The created spot (status UNVERIFIED).',
 });
 export type SubmitSpotResponseDto = z.infer<typeof SubmitSpotResponseSchema>;
@@ -100,5 +92,7 @@ export const UpdateSpotRequestSchema = z
     website: z.string().url().nullish(),
     hours: z.unknown().optional(),
   })
-  .openapi({ description: 'Body for `PATCH /api/v1/me/spots/:id` (owner edit while UNVERIFIED).' });
+  .openapi('UpdateSpotRequest', {
+    description: 'Body for `PATCH /api/v1/me/spots/:id` (owner edit while UNVERIFIED).',
+  });
 export type UpdateSpotRequestDto = z.infer<typeof UpdateSpotRequestSchema>;

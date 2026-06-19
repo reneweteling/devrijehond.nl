@@ -17,13 +17,13 @@ export const DogSchema = z
     createdAt: IsoDateTimeSchema,
     updatedAt: IsoDateTimeSchema,
   })
-  .openapi({ description: 'A dog profile.' });
+  .openapi('Dog', { description: 'A dog profile.' });
 export type DogDto = z.infer<typeof DogSchema>;
 
 /** GET /api/v1/me/dogs */
 export const DogsResponseSchema = z
   .object({ items: z.array(DogSchema) })
-  .openapi({ description: "The signed-in user's dogs." });
+  .openapi('DogsResponse', { description: "The signed-in user's dogs." });
 export type DogsResponseDto = z.infer<typeof DogsResponseSchema>;
 
 /** POST /api/v1/me/dogs — create. */
@@ -41,11 +41,11 @@ export const CreateDogRequestSchema = z
     photoUrl: z.string().url().optional(),
     note: z.string().max(500).optional(),
   })
-  .openapi({ description: 'Body for `POST /api/v1/me/dogs`.' });
+  .openapi('CreateDogRequest', { description: 'Body for `POST /api/v1/me/dogs`.' });
 export type CreateDogRequestDto = z.infer<typeof CreateDogRequestSchema>;
 
 /** PATCH /api/v1/me/dogs/:id — update. All fields optional. */
-export const UpdateDogRequestSchema = CreateDogRequestSchema.partial().openapi({
+export const UpdateDogRequestSchema = CreateDogRequestSchema.partial().openapi('UpdateDogRequest', {
   description: 'Body for `PATCH /api/v1/me/dogs/:id`.',
 });
 export type UpdateDogRequestDto = z.infer<typeof UpdateDogRequestSchema>;

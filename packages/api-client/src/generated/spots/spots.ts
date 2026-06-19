@@ -24,22 +24,15 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  GetApiV1Spots200,
-  GetApiV1SpotsMap200,
+  ApiError,
   GetApiV1SpotsMapParams,
   GetApiV1SpotsParams,
-  GetApiV1SpotsSlug200,
-  GetApiV1SpotsSlug404,
-  PatchApiV1MeSpotsId200,
-  PatchApiV1MeSpotsId400,
-  PatchApiV1MeSpotsId401,
-  PatchApiV1MeSpotsId404,
-  PatchApiV1MeSpotsIdBody,
-  PostApiV1MeSpots201,
-  PostApiV1MeSpots400,
-  PostApiV1MeSpots401,
-  PostApiV1MeSpots404,
-  PostApiV1MeSpotsBody,
+  SpotDetail,
+  SpotsMapResponse,
+  SpotsResponse,
+  SubmitSpotRequest,
+  SubmitSpotResponse,
+  UpdateSpotRequest,
 } from '../client.schemas';
 
 import { customFetcher } from '../../custom-fetcher';
@@ -48,7 +41,7 @@ import { customFetcher } from '../../custom-fetcher';
  * @summary List spots (paginated, delta-sync)
  */
 export const getApiV1Spots = (params?: GetApiV1SpotsParams, signal?: AbortSignal) => {
-  return customFetcher<GetApiV1Spots200>({ url: `/api/v1/spots`, method: 'GET', params, signal });
+  return customFetcher<SpotsResponse>({ url: `/api/v1/spots`, method: 'GET', params, signal });
 };
 
 export const getGetApiV1SpotsQueryKey = (params?: GetApiV1SpotsParams) => {
@@ -250,7 +243,7 @@ export function useGetApiV1SpotsSuspense<
  * @summary Spots within a map viewport (bbox)
  */
 export const getApiV1SpotsMap = (params: GetApiV1SpotsMapParams, signal?: AbortSignal) => {
-  return customFetcher<GetApiV1SpotsMap200>({
+  return customFetcher<SpotsMapResponse>({
     url: `/api/v1/spots/map`,
     method: 'GET',
     params,
@@ -457,11 +450,7 @@ export function useGetApiV1SpotsMapSuspense<
  * @summary Spot detail
  */
 export const getApiV1SpotsSlug = (slug: string, signal?: AbortSignal) => {
-  return customFetcher<GetApiV1SpotsSlug200>({
-    url: `/api/v1/spots/${slug}`,
-    method: 'GET',
-    signal,
-  });
+  return customFetcher<SpotDetail>({ url: `/api/v1/spots/${slug}`, method: 'GET', signal });
 };
 
 export const getGetApiV1SpotsSlugQueryKey = (slug?: string) => {
@@ -470,7 +459,7 @@ export const getGetApiV1SpotsSlugQueryKey = (slug?: string) => {
 
 export const getGetApiV1SpotsSlugQueryOptions = <
   TData = Awaited<ReturnType<typeof getApiV1SpotsSlug>>,
-  TError = GetApiV1SpotsSlug404,
+  TError = ApiError,
 >(
   slug: string,
   options?: {
@@ -494,11 +483,11 @@ export const getGetApiV1SpotsSlugQueryOptions = <
 export type GetApiV1SpotsSlugQueryResult = NonNullable<
   Awaited<ReturnType<typeof getApiV1SpotsSlug>>
 >;
-export type GetApiV1SpotsSlugQueryError = GetApiV1SpotsSlug404;
+export type GetApiV1SpotsSlugQueryError = ApiError;
 
 export function useGetApiV1SpotsSlug<
   TData = Awaited<ReturnType<typeof getApiV1SpotsSlug>>,
-  TError = GetApiV1SpotsSlug404,
+  TError = ApiError,
 >(
   slug: string,
   options: {
@@ -516,7 +505,7 @@ export function useGetApiV1SpotsSlug<
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetApiV1SpotsSlug<
   TData = Awaited<ReturnType<typeof getApiV1SpotsSlug>>,
-  TError = GetApiV1SpotsSlug404,
+  TError = ApiError,
 >(
   slug: string,
   options?: {
@@ -534,7 +523,7 @@ export function useGetApiV1SpotsSlug<
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetApiV1SpotsSlug<
   TData = Awaited<ReturnType<typeof getApiV1SpotsSlug>>,
-  TError = GetApiV1SpotsSlug404,
+  TError = ApiError,
 >(
   slug: string,
   options?: {
@@ -548,7 +537,7 @@ export function useGetApiV1SpotsSlug<
 
 export function useGetApiV1SpotsSlug<
   TData = Awaited<ReturnType<typeof getApiV1SpotsSlug>>,
-  TError = GetApiV1SpotsSlug404,
+  TError = ApiError,
 >(
   slug: string,
   options?: {
@@ -569,7 +558,7 @@ export function useGetApiV1SpotsSlug<
 
 export const getGetApiV1SpotsSlugSuspenseQueryOptions = <
   TData = Awaited<ReturnType<typeof getApiV1SpotsSlug>>,
-  TError = GetApiV1SpotsSlug404,
+  TError = ApiError,
 >(
   slug: string,
   options?: {
@@ -595,11 +584,11 @@ export const getGetApiV1SpotsSlugSuspenseQueryOptions = <
 export type GetApiV1SpotsSlugSuspenseQueryResult = NonNullable<
   Awaited<ReturnType<typeof getApiV1SpotsSlug>>
 >;
-export type GetApiV1SpotsSlugSuspenseQueryError = GetApiV1SpotsSlug404;
+export type GetApiV1SpotsSlugSuspenseQueryError = ApiError;
 
 export function useGetApiV1SpotsSlugSuspense<
   TData = Awaited<ReturnType<typeof getApiV1SpotsSlug>>,
-  TError = GetApiV1SpotsSlug404,
+  TError = ApiError,
 >(
   slug: string,
   options: {
@@ -611,7 +600,7 @@ export function useGetApiV1SpotsSlugSuspense<
 ): UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetApiV1SpotsSlugSuspense<
   TData = Awaited<ReturnType<typeof getApiV1SpotsSlug>>,
-  TError = GetApiV1SpotsSlug404,
+  TError = ApiError,
 >(
   slug: string,
   options?: {
@@ -623,7 +612,7 @@ export function useGetApiV1SpotsSlugSuspense<
 ): UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetApiV1SpotsSlugSuspense<
   TData = Awaited<ReturnType<typeof getApiV1SpotsSlug>>,
-  TError = GetApiV1SpotsSlug404,
+  TError = ApiError,
 >(
   slug: string,
   options?: {
@@ -639,7 +628,7 @@ export function useGetApiV1SpotsSlugSuspense<
 
 export function useGetApiV1SpotsSlugSuspense<
   TData = Awaited<ReturnType<typeof getApiV1SpotsSlug>>,
-  TError = GetApiV1SpotsSlug404,
+  TError = ApiError,
 >(
   slug: string,
   options?: {
@@ -664,33 +653,30 @@ export function useGetApiV1SpotsSlugSuspense<
 /**
  * @summary Submit a new spot
  */
-export const postApiV1MeSpots = (
-  postApiV1MeSpotsBody: PostApiV1MeSpotsBody,
-  signal?: AbortSignal,
-) => {
-  return customFetcher<PostApiV1MeSpots201>({
+export const postApiV1MeSpots = (submitSpotRequest: SubmitSpotRequest, signal?: AbortSignal) => {
+  return customFetcher<SubmitSpotResponse>({
     url: `/api/v1/me/spots`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    data: postApiV1MeSpotsBody,
+    data: submitSpotRequest,
     signal,
   });
 };
 
 export const getPostApiV1MeSpotsMutationOptions = <
-  TError = PostApiV1MeSpots400 | PostApiV1MeSpots401 | PostApiV1MeSpots404,
+  TError = ApiError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiV1MeSpots>>,
     TError,
-    { data: PostApiV1MeSpotsBody },
+    { data: SubmitSpotRequest },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiV1MeSpots>>,
   TError,
-  { data: PostApiV1MeSpotsBody },
+  { data: SubmitSpotRequest },
   TContext
 > => {
   const mutationKey = ['postApiV1MeSpots'];
@@ -702,7 +688,7 @@ export const getPostApiV1MeSpotsMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiV1MeSpots>>,
-    { data: PostApiV1MeSpotsBody }
+    { data: SubmitSpotRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -715,24 +701,18 @@ export const getPostApiV1MeSpotsMutationOptions = <
 export type PostApiV1MeSpotsMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiV1MeSpots>>
 >;
-export type PostApiV1MeSpotsMutationBody = PostApiV1MeSpotsBody;
-export type PostApiV1MeSpotsMutationError =
-  | PostApiV1MeSpots400
-  | PostApiV1MeSpots401
-  | PostApiV1MeSpots404;
+export type PostApiV1MeSpotsMutationBody = SubmitSpotRequest;
+export type PostApiV1MeSpotsMutationError = ApiError;
 
 /**
  * @summary Submit a new spot
  */
-export const usePostApiV1MeSpots = <
-  TError = PostApiV1MeSpots400 | PostApiV1MeSpots401 | PostApiV1MeSpots404,
-  TContext = unknown,
->(
+export const usePostApiV1MeSpots = <TError = ApiError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiV1MeSpots>>,
       TError,
-      { data: PostApiV1MeSpotsBody },
+      { data: SubmitSpotRequest },
       TContext
     >;
   },
@@ -740,7 +720,7 @@ export const usePostApiV1MeSpots = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiV1MeSpots>>,
   TError,
-  { data: PostApiV1MeSpotsBody },
+  { data: SubmitSpotRequest },
   TContext
 > => {
   const mutationOptions = getPostApiV1MeSpotsMutationOptions(options);
@@ -750,32 +730,29 @@ export const usePostApiV1MeSpots = <
 /**
  * @summary Edit my unverified spot
  */
-export const patchApiV1MeSpotsId = (
-  id: string,
-  patchApiV1MeSpotsIdBody: PatchApiV1MeSpotsIdBody,
-) => {
-  return customFetcher<PatchApiV1MeSpotsId200>({
+export const patchApiV1MeSpotsId = (id: string, updateSpotRequest: UpdateSpotRequest) => {
+  return customFetcher<SubmitSpotResponse>({
     url: `/api/v1/me/spots/${id}`,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    data: patchApiV1MeSpotsIdBody,
+    data: updateSpotRequest,
   });
 };
 
 export const getPatchApiV1MeSpotsIdMutationOptions = <
-  TError = PatchApiV1MeSpotsId400 | PatchApiV1MeSpotsId401 | PatchApiV1MeSpotsId404,
+  TError = ApiError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof patchApiV1MeSpotsId>>,
     TError,
-    { id: string; data: PatchApiV1MeSpotsIdBody },
+    { id: string; data: UpdateSpotRequest },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof patchApiV1MeSpotsId>>,
   TError,
-  { id: string; data: PatchApiV1MeSpotsIdBody },
+  { id: string; data: UpdateSpotRequest },
   TContext
 > => {
   const mutationKey = ['patchApiV1MeSpotsId'];
@@ -787,7 +764,7 @@ export const getPatchApiV1MeSpotsIdMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof patchApiV1MeSpotsId>>,
-    { id: string; data: PatchApiV1MeSpotsIdBody }
+    { id: string; data: UpdateSpotRequest }
   > = (props) => {
     const { id, data } = props ?? {};
 
@@ -800,24 +777,18 @@ export const getPatchApiV1MeSpotsIdMutationOptions = <
 export type PatchApiV1MeSpotsIdMutationResult = NonNullable<
   Awaited<ReturnType<typeof patchApiV1MeSpotsId>>
 >;
-export type PatchApiV1MeSpotsIdMutationBody = PatchApiV1MeSpotsIdBody;
-export type PatchApiV1MeSpotsIdMutationError =
-  | PatchApiV1MeSpotsId400
-  | PatchApiV1MeSpotsId401
-  | PatchApiV1MeSpotsId404;
+export type PatchApiV1MeSpotsIdMutationBody = UpdateSpotRequest;
+export type PatchApiV1MeSpotsIdMutationError = ApiError;
 
 /**
  * @summary Edit my unverified spot
  */
-export const usePatchApiV1MeSpotsId = <
-  TError = PatchApiV1MeSpotsId400 | PatchApiV1MeSpotsId401 | PatchApiV1MeSpotsId404,
-  TContext = unknown,
->(
+export const usePatchApiV1MeSpotsId = <TError = ApiError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof patchApiV1MeSpotsId>>,
       TError,
-      { id: string; data: PatchApiV1MeSpotsIdBody },
+      { id: string; data: UpdateSpotRequest },
       TContext
     >;
   },
@@ -825,7 +796,7 @@ export const usePatchApiV1MeSpotsId = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof patchApiV1MeSpotsId>>,
   TError,
-  { id: string; data: PatchApiV1MeSpotsIdBody },
+  { id: string; data: UpdateSpotRequest },
   TContext
 > => {
   const mutationOptions = getPatchApiV1MeSpotsIdMutationOptions(options);

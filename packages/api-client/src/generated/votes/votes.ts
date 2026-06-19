@@ -13,13 +13,7 @@ import type {
   UseMutationResult,
 } from '@tanstack/react-query';
 
-import type {
-  PostApiV1MeSpotsIdVote200,
-  PostApiV1MeSpotsIdVote400,
-  PostApiV1MeSpotsIdVote401,
-  PostApiV1MeSpotsIdVote404,
-  PostApiV1MeSpotsIdVoteBody,
-} from '../client.schemas';
+import type { ApiError, SubmitVoteRequest, VoteResponse } from '../client.schemas';
 
 import { customFetcher } from '../../custom-fetcher';
 
@@ -28,32 +22,32 @@ import { customFetcher } from '../../custom-fetcher';
  */
 export const postApiV1MeSpotsIdVote = (
   id: string,
-  postApiV1MeSpotsIdVoteBody: PostApiV1MeSpotsIdVoteBody,
+  submitVoteRequest: SubmitVoteRequest,
   signal?: AbortSignal,
 ) => {
-  return customFetcher<PostApiV1MeSpotsIdVote200>({
+  return customFetcher<VoteResponse>({
     url: `/api/v1/me/spots/${id}/vote`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    data: postApiV1MeSpotsIdVoteBody,
+    data: submitVoteRequest,
     signal,
   });
 };
 
 export const getPostApiV1MeSpotsIdVoteMutationOptions = <
-  TError = PostApiV1MeSpotsIdVote400 | PostApiV1MeSpotsIdVote401 | PostApiV1MeSpotsIdVote404,
+  TError = ApiError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiV1MeSpotsIdVote>>,
     TError,
-    { id: string; data: PostApiV1MeSpotsIdVoteBody },
+    { id: string; data: SubmitVoteRequest },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiV1MeSpotsIdVote>>,
   TError,
-  { id: string; data: PostApiV1MeSpotsIdVoteBody },
+  { id: string; data: SubmitVoteRequest },
   TContext
 > => {
   const mutationKey = ['postApiV1MeSpotsIdVote'];
@@ -65,7 +59,7 @@ export const getPostApiV1MeSpotsIdVoteMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiV1MeSpotsIdVote>>,
-    { id: string; data: PostApiV1MeSpotsIdVoteBody }
+    { id: string; data: SubmitVoteRequest }
   > = (props) => {
     const { id, data } = props ?? {};
 
@@ -78,24 +72,18 @@ export const getPostApiV1MeSpotsIdVoteMutationOptions = <
 export type PostApiV1MeSpotsIdVoteMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiV1MeSpotsIdVote>>
 >;
-export type PostApiV1MeSpotsIdVoteMutationBody = PostApiV1MeSpotsIdVoteBody;
-export type PostApiV1MeSpotsIdVoteMutationError =
-  | PostApiV1MeSpotsIdVote400
-  | PostApiV1MeSpotsIdVote401
-  | PostApiV1MeSpotsIdVote404;
+export type PostApiV1MeSpotsIdVoteMutationBody = SubmitVoteRequest;
+export type PostApiV1MeSpotsIdVoteMutationError = ApiError;
 
 /**
  * @summary Cast a verification vote
  */
-export const usePostApiV1MeSpotsIdVote = <
-  TError = PostApiV1MeSpotsIdVote400 | PostApiV1MeSpotsIdVote401 | PostApiV1MeSpotsIdVote404,
-  TContext = unknown,
->(
+export const usePostApiV1MeSpotsIdVote = <TError = ApiError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiV1MeSpotsIdVote>>,
       TError,
-      { id: string; data: PostApiV1MeSpotsIdVoteBody },
+      { id: string; data: SubmitVoteRequest },
       TContext
     >;
   },
@@ -103,7 +91,7 @@ export const usePostApiV1MeSpotsIdVote = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiV1MeSpotsIdVote>>,
   TError,
-  { id: string; data: PostApiV1MeSpotsIdVoteBody },
+  { id: string; data: SubmitVoteRequest },
   TContext
 > => {
   const mutationOptions = getPostApiV1MeSpotsIdVoteMutationOptions(options);

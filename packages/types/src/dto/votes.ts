@@ -18,7 +18,7 @@ export const SubmitVoteRequestSchema = z
         "Voter's current location, used for the proximity gate. When present and within range the vote is marked `proximityVerified` and weighted more heavily.",
     }),
   })
-  .openapi({ description: 'Body for `POST /api/v1/me/spots/:id/vote`.' });
+  .openapi('SubmitVoteRequest', { description: 'Body for `POST /api/v1/me/spots/:id/vote`.' });
 export type SubmitVoteRequestDto = z.infer<typeof SubmitVoteRequestSchema>;
 
 /** Path params for the vote endpoint. */
@@ -36,7 +36,7 @@ export const VoteSchema = z
     proximityVerified: z.boolean(),
     createdAt: IsoDateTimeSchema,
   })
-  .openapi({ description: "The signed-in user's vote on a spot." });
+  .openapi('Vote', { description: "The signed-in user's vote on a spot." });
 export type VoteDto = z.infer<typeof VoteSchema>;
 
 /** Response to a cast vote — echoes the vote + the recomputed spot tally. */
@@ -51,5 +51,5 @@ export const VoteResponseSchema = z
       example: 'VERIFIED',
     }),
   })
-  .openapi({ description: 'Result of casting a verification vote.' });
+  .openapi('VoteResponse', { description: 'Result of casting a verification vote.' });
 export type VoteResponseDto = z.infer<typeof VoteResponseSchema>;

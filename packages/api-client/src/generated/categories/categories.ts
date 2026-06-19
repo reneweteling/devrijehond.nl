@@ -20,7 +20,7 @@ import type {
   UseSuspenseQueryResult,
 } from '@tanstack/react-query';
 
-import type { GetApiV1Categories200, GetApiV1CategoriesParams } from '../client.schemas';
+import type { CategoriesResponse, GetApiV1CategoriesParams } from '../client.schemas';
 
 import { customFetcher } from '../../custom-fetcher';
 
@@ -28,7 +28,7 @@ import { customFetcher } from '../../custom-fetcher';
  * @summary List spot categories
  */
 export const getApiV1Categories = (params?: GetApiV1CategoriesParams, signal?: AbortSignal) => {
-  return customFetcher<GetApiV1Categories200>({
+  return customFetcher<CategoriesResponse>({
     url: `/api/v1/categories`,
     method: 'GET',
     params,

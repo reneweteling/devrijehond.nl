@@ -33,7 +33,7 @@ export const SpotGeometrySchema = z
         'GeoJSON coordinates. Point → `[lng, lat]`. Polygon → `[[[lng, lat], …]]` (one or more linear rings, first/last point equal).',
     }),
   })
-  .openapi({
+  .openapi('SpotGeometry', {
     description:
       'GeoJSON geometry (WGS84). Point for a POI, Polygon for a REGION. Coordinate order is [longitude, latitude].',
   });
@@ -47,16 +47,24 @@ export const SpotPhotoSchema = z
     sortOrder: z.number().int(),
     createdAt: IsoDateTimeSchema,
   })
-  .openapi({ description: 'One photo attached to a spot.' });
+  .openapi('SpotPhoto', { description: 'One photo attached to a spot.' });
 export type SpotPhotoDto = z.infer<typeof SpotPhotoSchema>;
 
 /** Aggregate review rating for a spot. */
 export const SpotRatingSchema = z
   .object({
-    average: z.number().min(0).max(5).openapi({ description: 'Mean star rating (0–5).', example: 4.3 }),
-    count: z.number().int().nonnegative().openapi({ description: 'Number of reviews.', example: 27 }),
+    average: z
+      .number()
+      .min(0)
+      .max(5)
+      .openapi({ description: 'Mean star rating (0–5).', example: 4.3 }),
+    count: z
+      .number()
+      .int()
+      .nonnegative()
+      .openapi({ description: 'Number of reviews.', example: 27 }),
   })
-  .openapi({ description: 'Denormalised review aggregate.' });
+  .openapi('SpotRating', { description: 'Denormalised review aggregate.' });
 export type SpotRatingDto = z.infer<typeof SpotRatingSchema>;
 
 /**
@@ -74,7 +82,9 @@ export const SpotVerificationSchema = z
       description: 'When the spot reached VERIFIED, or null.',
     }),
   })
-  .openapi({ description: 'Community-verification status + denormalised vote score.' });
+  .openapi('SpotVerification', {
+    description: 'Community-verification status + denormalised vote score.',
+  });
 export type SpotVerificationDto = z.infer<typeof SpotVerificationSchema>;
 
 /**
@@ -97,11 +107,11 @@ export const SpotSummarySchema = z
     }),
     updatedAt: IsoDateTimeSchema,
   })
-  .openapi({ description: 'Lightweight spot summary for map markers + list rows.' });
+  .openapi('SpotSummary', { description: 'Lightweight spot summary for map markers + list rows.' });
 export type SpotSummaryDto = z.infer<typeof SpotSummarySchema>;
 
 /** GET /api/v1/spots — paginated list response. */
-export const SpotsResponseSchema = paginatedSchema(SpotSummarySchema).openapi({
+export const SpotsResponseSchema = paginatedSchema(SpotSummarySchema).openapi('SpotsResponse', {
   description: 'Cursor-paginated list of spots.',
 });
 export type SpotsResponseDto = z.infer<typeof SpotsResponseSchema>;
@@ -133,7 +143,9 @@ export type SpotsMapQueryDto = z.infer<typeof SpotsMapQuerySchema>;
 /** GET /api/v1/spots/map — response. Markers within the viewport. */
 export const SpotsMapResponseSchema = z
   .object({ items: z.array(SpotSummarySchema) })
-  .openapi({ description: 'Spots whose geometry intersects the requested viewport.' });
+  .openapi('SpotsMapResponse', {
+    description: 'Spots whose geometry intersects the requested viewport.',
+  });
 export type SpotsMapResponseDto = z.infer<typeof SpotsMapResponseSchema>;
 
 /** Minimal author reference embedded in spot detail. */
@@ -144,7 +156,7 @@ export const SpotAuthorSchema = z
     name: z.string().nullable(),
     image: z.string().url().nullable(),
   })
-  .openapi({ description: 'Public reference to the user who submitted the spot.' });
+  .openapi('SpotAuthor', { description: 'Public reference to the user who submitted the spot.' });
 export type SpotAuthorDto = z.infer<typeof SpotAuthorSchema>;
 
 /**
@@ -183,7 +195,9 @@ export const SpotDetailSchema = z
     createdAt: IsoDateTimeSchema,
     updatedAt: IsoDateTimeSchema,
   })
-  .openapi({ description: 'Full spot detail. Server-rendered as the crawlable spot page.' });
+  .openapi('SpotDetail', {
+    description: 'Full spot detail. Server-rendered as the crawlable spot page.',
+  });
 export type SpotDetailDto = z.infer<typeof SpotDetailSchema>;
 
 /** Path params for `GET /api/v1/spots/:slug`. */

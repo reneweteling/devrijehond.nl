@@ -12,20 +12,25 @@ export const AmenitySchema = z
     id: UuidSchema,
     slug: z.string(),
     label: z.string(),
-    icon: z.string().nullable().openapi({ description: 'Icon name (Tabler / SF Symbol / Material).' }),
+    icon: z
+      .string()
+      .nullable()
+      .openapi({ description: 'Icon name (Tabler / SF Symbol / Material).' }),
     sortOrder: z.number().int(),
     categoryIds: z.array(UuidSchema).openapi({
       description:
         'Categories this amenity applies to (from `AmenityOnCategory`). Empty = applicable everywhere.',
     }),
   })
-  .openapi({ description: 'A spot amenity / facility tag.' });
+  .openapi('Amenity', { description: 'A spot amenity / facility tag.' });
 export type AmenityDto = z.infer<typeof AmenitySchema>;
 
 /** GET /api/v1/amenities */
 export const AmenitiesResponseSchema = z
   .object({ items: z.array(AmenitySchema) })
-  .openapi({ description: 'All visible, active amenities with their category mapping.' });
+  .openapi('AmenitiesResponse', {
+    description: 'All visible, active amenities with their category mapping.',
+  });
 export type AmenitiesResponseDto = z.infer<typeof AmenitiesResponseSchema>;
 
 /** GET /api/v1/amenities — query parameters. */

@@ -9,11 +9,13 @@ import '../registry';
 export const SubmitReportRequestSchema = z
   .object({
     targetType: ReportTargetSchema,
-    targetId: UuidSchema.openapi({ description: 'Id of the spot / photo / review being reported.' }),
+    targetId: UuidSchema.openapi({
+      description: 'Id of the spot / photo / review being reported.',
+    }),
     reason: ReportReasonSchema,
     note: z.string().max(2000).optional(),
   })
-  .openapi({ description: 'Body for `POST /api/v1/me/reports`.' });
+  .openapi('SubmitReportRequest', { description: 'Body for `POST /api/v1/me/reports`.' });
 export type SubmitReportRequestDto = z.infer<typeof SubmitReportRequestSchema>;
 
 /** Acknowledgement of a filed report. */
@@ -22,5 +24,5 @@ export const ReportResponseSchema = z
     id: UuidSchema,
     createdAt: IsoDateTimeSchema,
   })
-  .openapi({ description: 'Acknowledgement that a report was filed.' });
+  .openapi('ReportResponse', { description: 'Acknowledgement that a report was filed.' });
 export type ReportResponseDto = z.infer<typeof ReportResponseSchema>;

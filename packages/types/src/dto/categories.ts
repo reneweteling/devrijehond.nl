@@ -19,13 +19,13 @@ export const CategorySchema = z
     color: z.string().nullable().openapi({ description: 'Pin colour (hex).', example: '#3F6B4C' }),
     sortOrder: z.number().int(),
   })
-  .openapi({ description: 'A spot category.' });
+  .openapi('Category', { description: 'A spot category.' });
 export type CategoryDto = z.infer<typeof CategorySchema>;
 
 /** GET /api/v1/categories */
 export const CategoriesResponseSchema = z
   .object({ items: z.array(CategorySchema) })
-  .openapi({ description: 'All visible, active categories.' });
+  .openapi('CategoriesResponse', { description: 'All visible, active categories.' });
 export type CategoriesResponseDto = z.infer<typeof CategoriesResponseSchema>;
 
 /** GET /api/v1/categories — query parameters. */

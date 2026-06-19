@@ -19,17 +19,20 @@ export const FeatureRequestSchema = z
     status: FeatureStatusSchema,
     upvoteCount: z.number().int().nonnegative(),
     viewerHasVoted: z.boolean().openapi({
-      description: "Whether the signed-in user has upvoted. False for anonymous reads.",
+      description: 'Whether the signed-in user has upvoted. False for anonymous reads.',
     }),
     createdAt: IsoDateTimeSchema,
   })
-  .openapi({ description: 'A community feature request.' });
+  .openapi('FeatureRequest', { description: 'A community feature request.' });
 export type FeatureRequestDto = z.infer<typeof FeatureRequestSchema>;
 
 /** GET /api/v1/feature-requests — paginated list. */
-export const FeatureRequestsResponseSchema = paginatedSchema(FeatureRequestSchema).openapi({
-  description: 'Cursor-paginated feature requests.',
-});
+export const FeatureRequestsResponseSchema = paginatedSchema(FeatureRequestSchema).openapi(
+  'FeatureRequestsResponse',
+  {
+    description: 'Cursor-paginated feature requests.',
+  },
+);
 export type FeatureRequestsResponseDto = z.infer<typeof FeatureRequestsResponseSchema>;
 
 /** GET /api/v1/feature-requests — query parameters. */
@@ -51,7 +54,7 @@ export const CreateFeatureRequestRequestSchema = z
       description: 'Area of the app: Kaart / Inzenden / Profiel / Anders.',
     }),
   })
-  .openapi({ description: 'Body for `POST /api/v1/me/feature-requests`.' });
+  .openapi('CreateFeatureRequest', { description: 'Body for `POST /api/v1/me/feature-requests`.' });
 export type CreateFeatureRequestRequestDto = z.infer<typeof CreateFeatureRequestRequestSchema>;
 
 /** Path params for the per-request endpoints (vote). */
@@ -67,5 +70,7 @@ export const FeatureVoteResponseSchema = z
     upvoteCount: z.number().int().nonnegative(),
     viewerHasVoted: z.boolean(),
   })
-  .openapi({ description: 'Result of toggling an upvote on a feature request.' });
+  .openapi('FeatureVoteResponse', {
+    description: 'Result of toggling an upvote on a feature request.',
+  });
 export type FeatureVoteResponseDto = z.infer<typeof FeatureVoteResponseSchema>;

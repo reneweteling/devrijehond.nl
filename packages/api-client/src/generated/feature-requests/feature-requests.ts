@@ -24,17 +24,12 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  GetApiV1FeatureRequests200,
+  ApiError,
+  CreateFeatureRequest,
+  FeatureRequest,
+  FeatureRequestsResponse,
+  FeatureVoteResponse,
   GetApiV1FeatureRequestsParams,
-  PostApiV1MeFeatureRequests201,
-  PostApiV1MeFeatureRequests400,
-  PostApiV1MeFeatureRequests401,
-  PostApiV1MeFeatureRequests404,
-  PostApiV1MeFeatureRequestsBody,
-  PostApiV1MeFeatureRequestsIdVote200,
-  PostApiV1MeFeatureRequestsIdVote400,
-  PostApiV1MeFeatureRequestsIdVote401,
-  PostApiV1MeFeatureRequestsIdVote404,
 } from '../client.schemas';
 
 import { customFetcher } from '../../custom-fetcher';
@@ -46,7 +41,7 @@ export const getApiV1FeatureRequests = (
   params?: GetApiV1FeatureRequestsParams,
   signal?: AbortSignal,
 ) => {
-  return customFetcher<GetApiV1FeatureRequests200>({
+  return customFetcher<FeatureRequestsResponse>({
     url: `/api/v1/feature-requests`,
     method: 'GET',
     params,
@@ -267,35 +262,32 @@ export function useGetApiV1FeatureRequestsSuspense<
  * @summary Create a feature request
  */
 export const postApiV1MeFeatureRequests = (
-  postApiV1MeFeatureRequestsBody: PostApiV1MeFeatureRequestsBody,
+  createFeatureRequest: CreateFeatureRequest,
   signal?: AbortSignal,
 ) => {
-  return customFetcher<PostApiV1MeFeatureRequests201>({
+  return customFetcher<FeatureRequest>({
     url: `/api/v1/me/feature-requests`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    data: postApiV1MeFeatureRequestsBody,
+    data: createFeatureRequest,
     signal,
   });
 };
 
 export const getPostApiV1MeFeatureRequestsMutationOptions = <
-  TError =
-    | PostApiV1MeFeatureRequests400
-    | PostApiV1MeFeatureRequests401
-    | PostApiV1MeFeatureRequests404,
+  TError = ApiError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiV1MeFeatureRequests>>,
     TError,
-    { data: PostApiV1MeFeatureRequestsBody },
+    { data: CreateFeatureRequest },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiV1MeFeatureRequests>>,
   TError,
-  { data: PostApiV1MeFeatureRequestsBody },
+  { data: CreateFeatureRequest },
   TContext
 > => {
   const mutationKey = ['postApiV1MeFeatureRequests'];
@@ -307,7 +299,7 @@ export const getPostApiV1MeFeatureRequestsMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiV1MeFeatureRequests>>,
-    { data: PostApiV1MeFeatureRequestsBody }
+    { data: CreateFeatureRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -320,27 +312,18 @@ export const getPostApiV1MeFeatureRequestsMutationOptions = <
 export type PostApiV1MeFeatureRequestsMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiV1MeFeatureRequests>>
 >;
-export type PostApiV1MeFeatureRequestsMutationBody = PostApiV1MeFeatureRequestsBody;
-export type PostApiV1MeFeatureRequestsMutationError =
-  | PostApiV1MeFeatureRequests400
-  | PostApiV1MeFeatureRequests401
-  | PostApiV1MeFeatureRequests404;
+export type PostApiV1MeFeatureRequestsMutationBody = CreateFeatureRequest;
+export type PostApiV1MeFeatureRequestsMutationError = ApiError;
 
 /**
  * @summary Create a feature request
  */
-export const usePostApiV1MeFeatureRequests = <
-  TError =
-    | PostApiV1MeFeatureRequests400
-    | PostApiV1MeFeatureRequests401
-    | PostApiV1MeFeatureRequests404,
-  TContext = unknown,
->(
+export const usePostApiV1MeFeatureRequests = <TError = ApiError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiV1MeFeatureRequests>>,
       TError,
-      { data: PostApiV1MeFeatureRequestsBody },
+      { data: CreateFeatureRequest },
       TContext
     >;
   },
@@ -348,7 +331,7 @@ export const usePostApiV1MeFeatureRequests = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiV1MeFeatureRequests>>,
   TError,
-  { data: PostApiV1MeFeatureRequestsBody },
+  { data: CreateFeatureRequest },
   TContext
 > => {
   const mutationOptions = getPostApiV1MeFeatureRequestsMutationOptions(options);
@@ -359,7 +342,7 @@ export const usePostApiV1MeFeatureRequests = <
  * @summary Toggle an upvote on a feature request
  */
 export const postApiV1MeFeatureRequestsIdVote = (id: string, signal?: AbortSignal) => {
-  return customFetcher<PostApiV1MeFeatureRequestsIdVote200>({
+  return customFetcher<FeatureVoteResponse>({
     url: `/api/v1/me/feature-requests/${id}/vote`,
     method: 'POST',
     signal,
@@ -367,10 +350,7 @@ export const postApiV1MeFeatureRequestsIdVote = (id: string, signal?: AbortSigna
 };
 
 export const getPostApiV1MeFeatureRequestsIdVoteMutationOptions = <
-  TError =
-    | PostApiV1MeFeatureRequestsIdVote400
-    | PostApiV1MeFeatureRequestsIdVote401
-    | PostApiV1MeFeatureRequestsIdVote404,
+  TError = ApiError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -408,21 +388,12 @@ export type PostApiV1MeFeatureRequestsIdVoteMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiV1MeFeatureRequestsIdVote>>
 >;
 
-export type PostApiV1MeFeatureRequestsIdVoteMutationError =
-  | PostApiV1MeFeatureRequestsIdVote400
-  | PostApiV1MeFeatureRequestsIdVote401
-  | PostApiV1MeFeatureRequestsIdVote404;
+export type PostApiV1MeFeatureRequestsIdVoteMutationError = ApiError;
 
 /**
  * @summary Toggle an upvote on a feature request
  */
-export const usePostApiV1MeFeatureRequestsIdVote = <
-  TError =
-    | PostApiV1MeFeatureRequestsIdVote400
-    | PostApiV1MeFeatureRequestsIdVote401
-    | PostApiV1MeFeatureRequestsIdVote404,
-  TContext = unknown,
->(
+export const usePostApiV1MeFeatureRequestsIdVote = <TError = ApiError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiV1MeFeatureRequestsIdVote>>,

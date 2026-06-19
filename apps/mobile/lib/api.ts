@@ -1,186 +1,94 @@
 /**
- * Thin typed data layer over the generated client's `customFetcher`.
+ * Mobile data layer — domain-named TanStack Query hooks over the generated
+ * `@devrijehond/api-client`.
  *
- * The Orval client (tags-split → TanStack Query hooks) is regenerated from the
- * committed OpenAPI snapshot. Until generation has run, the hook names are not
- * known here, so every screen goes through `customFetcher` against the
- * documented `/api/v1/*` paths and we keep our own thin `useQuery` wrappers.
- *
- * TODO(verify): once `pnpm --filter @devrijehond/api-client generate` has run,
- * swap these wrappers for the generated hooks — e.g.
- *   import { useGetApiV1SpotsMap, useGetApiV1SpotsSlug } from '@devrijehond/api-client'
- * The generated hook names follow Orval's `use<Method><PathPascalCase>` scheme;
- * confirm the exact identifiers in `packages/api-client/src/generated/spots/spots.ts`.
+ * Each hook wraps a generated fetcher (which calls `customFetcher` against the
+ * documented `/api/v1/*` paths), so the screens keep stable, readable names
+ * while the request/response types stay contract-driven: they come straight
+ * from the OpenAPI document via `client.schemas`, so they can't drift from the
+ * server. Regenerate the client with
+ * `pnpm --filter @devrijehond/api-client generate`.
  */
 
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { customFetcher } from '@devrijehond/api-client';
+import {
+  getApiV1Categories,
+  getApiV1Amenities,
+  getApiV1Spots,
+  getApiV1SpotsMap,
+  getApiV1SpotsSlug,
+  getApiV1SpotsSlugReviews,
+  getApiV1Me,
+  postApiV1MeSpots,
+  postApiV1MeSpotsIdVote,
+  postApiV1MeSpotsIdReviews,
+  postApiV1MeReports,
+  type Category,
+  type Amenity,
+  type SpotSummary,
+  type SpotDetail,
+  type SpotPhoto,
+  type SpotRating,
+  type SpotVerification,
+  type SpotAuthor,
+  type SpotGeometry,
+  type Review,
+  type Dog,
+  type MeProfile,
+  type Vote,
+  type VoteResponse,
+  type GeoPoint,
+  type SpotType,
+  type SpotStatus,
+  type VoteValue,
+  type SubmitSpotRequest,
+  type SubmitReportRequest,
+} from '@devrijehond/api-client';
 
-// ---------------------------------------------------------------------------
-// Response shapes. These mirror @devrijehond/types DTOs. We re-declare the
-// minimal subset the screens read rather than importing @devrijehond/types
-// (mobile imports exclusively from @devrijehond/api-client, which re-exports
-// the generated `client.schemas` types once generation has run). Keep in sync
-// with packages/types/src/dto/*.
-// ---------------------------------------------------------------------------
-
-export type SpotType = 'REGION' | 'POI';
-export type SpotStatus = 'UNVERIFIED' | 'VERIFIED' | 'HIDDEN' | 'REMOVED';
-export type VoteValue = 'CONFIRM' | 'DENY';
-
-export type GeoPoint = { lat: number; lng: number };
-
-export type SpotGeometry = {
-  type: 'Point' | 'Polygon';
-  coordinates: unknown; // Point → [lng,lat]; Polygon → [[[lng,lat],…]]
+// Re-export the contract types under the names the screens import. These are
+// the OpenAPI components, so there's a single source of truth.
+export type {
+  Category,
+  Amenity,
+  SpotSummary,
+  SpotDetail,
+  SpotPhoto,
+  SpotRating,
+  SpotVerification,
+  SpotAuthor,
+  SpotGeometry,
+  Review,
+  Dog,
+  MeProfile,
+  Vote,
+  VoteResponse,
+  GeoPoint,
+  SpotType,
+  SpotStatus,
+  VoteValue,
 };
 
-export type SpotRating = { average: number; count: number };
+/** Body for `useSubmitSpot` — the generated submit-spot request shape. */
+export type SubmitSpotBody = SubmitSpotRequest;
 
-export type SpotVerification = {
-  status: SpotStatus;
-  netScore: number;
-  confirmCount: number;
-  denyCount: number;
-  verifiedAt: string | null;
-};
-
-export type Category = {
-  id: string;
-  slug: string;
-  label: string;
-  type: SpotType;
-  icon: string | null;
-  color: string | null;
-  sortOrder: number;
-};
-
-export type Amenity = {
-  id: string;
-  slug: string;
-  label: string;
-  icon: string | null;
-  sortOrder: number;
-  categoryIds: string[];
-};
-
-export type SpotSummary = {
-  id: string;
-  slug: string;
-  type: SpotType;
-  name: string;
-  categoryId: string;
-  status: SpotStatus;
-  lat: number | null;
-  lng: number | null;
-  rating: SpotRating;
-  photoUrl: string | null;
-  updatedAt: string;
-};
-
-export type SpotPhoto = { id: string; url: string; sortOrder: number; createdAt: string };
-
-export type SpotAuthor = {
-  id: string;
-  handle: string | null;
-  name: string | null;
-  image: string | null;
-};
-
-export type SpotDetail = {
-  id: string;
-  slug: string;
-  type: SpotType;
-  name: string;
-  description: string | null;
-  category: Category;
-  status: SpotStatus;
-  geometry: SpotGeometry | null;
-  lat: number | null;
-  lng: number | null;
-  address: string | null;
-  hours: unknown;
-  phone: string | null;
-  website: string | null;
-  amenities: Amenity[];
-  photos: SpotPhoto[];
-  rating: SpotRating;
-  verification: SpotVerification;
-  submittedBy: SpotAuthor;
-  createdAt: string;
-  updatedAt: string;
-};
-
-export type Review = {
-  id: string;
-  spotId: string;
-  stars: number;
-  body: string | null;
-  helpfulCount: number;
-  author: { id: string; handle: string | null; name: string | null; image: string | null };
-  createdAt: string;
-};
-
-export type Dog = {
-  id: string;
-  name: string;
-  breed: string | null;
-  birthYear: number | null;
-  photoUrl: string | null;
-  note: string | null;
-  createdAt: string;
-  updatedAt: string;
-};
-
-export type MeProfile = {
-  id: string;
-  email: string;
-  name: string | null;
-  handle: string | null;
-  bio: string | null;
-  image: string | null;
-  role: 'USER' | 'ADMIN';
-  reputation: number;
-  dogs: Dog[];
-  createdAt: string;
-};
-
-export type VoteResponse = {
-  vote: { id: string; spotId: string; value: VoteValue; proximityVerified: boolean; createdAt: string };
-  netScore: number;
-  confirmCount: number;
-  denyCount: number;
-  status: string;
-};
-
-export type Paginated<T> = { items: T[]; nextCursor: string | null };
+/** Map viewport bounding box (mirrors the server's MapBboxQuery). */
 export type Bbox = { minLng: number; minLat: number; maxLng: number; maxLat: number };
 
 // ---------------------------------------------------------------------------
-// Query / mutation wrappers. Each hits a documented path via customFetcher.
+// Queries / mutations. Each delegates to the generated fetcher.
 // ---------------------------------------------------------------------------
 
 export function useCategories(type?: SpotType) {
   return useQuery({
     queryKey: ['categories', type ?? 'all'],
-    queryFn: () =>
-      customFetcher<{ items: Category[] }>({
-        url: '/api/v1/categories',
-        method: 'GET',
-        params: type ? { type } : undefined,
-      }),
+    queryFn: ({ signal }) => getApiV1Categories(type ? { type } : undefined, signal),
   });
 }
 
 export function useAmenities(categoryId?: string) {
   return useQuery({
     queryKey: ['amenities', categoryId ?? 'all'],
-    queryFn: () =>
-      customFetcher<{ items: Amenity[] }>({
-        url: '/api/v1/amenities',
-        method: 'GET',
-        params: categoryId ? { categoryId } : undefined,
-      }),
+    queryFn: ({ signal }) => getApiV1Amenities(categoryId ? { categoryId } : undefined, signal),
   });
 }
 
@@ -192,12 +100,11 @@ export function useSpotsInViewport(
   return useQuery({
     queryKey: ['spots-map', bbox, opts?.type, opts?.categoryId],
     enabled: bbox != null,
-    queryFn: () =>
-      customFetcher<{ items: SpotSummary[] }>({
-        url: '/api/v1/spots/map',
-        method: 'GET',
-        params: { ...(bbox as Bbox), type: opts?.type, categoryId: opts?.categoryId },
-      }),
+    queryFn: ({ signal }) =>
+      getApiV1SpotsMap(
+        { ...(bbox as Bbox), type: opts?.type, categoryId: opts?.categoryId },
+        signal,
+      ),
   });
 }
 
@@ -205,12 +112,11 @@ export function useSpotsInViewport(
 export function useSpots(opts?: { type?: SpotType; categoryId?: string; limit?: number }) {
   return useQuery({
     queryKey: ['spots', opts?.type, opts?.categoryId, opts?.limit],
-    queryFn: () =>
-      customFetcher<Paginated<SpotSummary>>({
-        url: '/api/v1/spots',
-        method: 'GET',
-        params: { type: opts?.type, categoryId: opts?.categoryId, limit: opts?.limit ?? 50 },
-      }),
+    queryFn: ({ signal }) =>
+      getApiV1Spots(
+        { type: opts?.type, categoryId: opts?.categoryId, limit: opts?.limit ?? 50 },
+        signal,
+      ),
   });
 }
 
@@ -219,7 +125,7 @@ export function useSpotDetail(slug: string | undefined) {
   return useQuery({
     queryKey: ['spot', slug],
     enabled: !!slug,
-    queryFn: () => customFetcher<SpotDetail>({ url: `/api/v1/spots/${slug}`, method: 'GET' }),
+    queryFn: ({ signal }) => getApiV1SpotsSlug(slug as string, signal),
   });
 }
 
@@ -228,11 +134,7 @@ export function useSpotReviews(slug: string | undefined) {
   return useQuery({
     queryKey: ['spot-reviews', slug],
     enabled: !!slug,
-    queryFn: () =>
-      customFetcher<Paginated<Review>>({
-        url: `/api/v1/spots/${slug}/reviews`,
-        method: 'GET',
-      }),
+    queryFn: ({ signal }) => getApiV1SpotsSlugReviews(slug as string, undefined, signal),
   });
 }
 
@@ -241,7 +143,7 @@ export function useMe(enabled = true) {
   return useQuery({
     queryKey: ['me'],
     enabled,
-    queryFn: () => customFetcher<MeProfile>({ url: '/api/v1/me', method: 'GET' }),
+    queryFn: ({ signal }) => getApiV1Me(signal),
   });
 }
 
@@ -249,11 +151,7 @@ export function useMe(enabled = true) {
 export function useCastVote() {
   return useMutation({
     mutationFn: (args: { spotId: string; value: VoteValue; proof?: GeoPoint }) =>
-      customFetcher<VoteResponse>({
-        url: `/api/v1/me/spots/${args.spotId}/vote`,
-        method: 'POST',
-        data: { value: args.value, proof: args.proof },
-      }),
+      postApiV1MeSpotsIdVote(args.spotId, { value: args.value, proof: args.proof }),
   });
 }
 
@@ -261,33 +159,14 @@ export function useCastVote() {
 export function useSubmitReview() {
   return useMutation({
     mutationFn: (args: { spotId: string; stars: number; body?: string }) =>
-      customFetcher<Review>({
-        url: `/api/v1/me/spots/${args.spotId}/reviews`,
-        method: 'POST',
-        data: { stars: args.stars, body: args.body },
-      }),
+      postApiV1MeSpotsIdReviews(args.spotId, { stars: args.stars, body: args.body }),
   });
 }
-
-export type SubmitSpotBody = {
-  type: SpotType;
-  categoryId: string;
-  name: string;
-  description?: string;
-  point?: GeoPoint;
-  polygon?: GeoPoint[];
-  amenityIds?: string[];
-  photos?: string[];
-  address?: string;
-  phone?: string;
-  website?: string;
-};
 
 /** POST /api/v1/me/spots — submit a new spot (goes live UNVERIFIED). */
 export function useSubmitSpot() {
   return useMutation({
-    mutationFn: (body: SubmitSpotBody) =>
-      customFetcher<SpotDetail>({ url: '/api/v1/me/spots', method: 'POST', data: body }),
+    mutationFn: (body: SubmitSpotBody) => postApiV1MeSpots(body),
   });
 }
 
@@ -300,10 +179,11 @@ export function useSubmitReport() {
       reason: string;
       note?: string;
     }) =>
-      customFetcher<{ id: string; createdAt: string }>({
-        url: '/api/v1/me/reports',
-        method: 'POST',
-        data: args,
+      postApiV1MeReports({
+        targetType: args.targetType,
+        targetId: args.targetId,
+        reason: args.reason as SubmitReportRequest['reason'],
+        note: args.note,
       }),
   });
 }

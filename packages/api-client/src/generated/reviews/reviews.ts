@@ -24,13 +24,11 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  GetApiV1SpotsSlugReviews200,
+  ApiError,
   GetApiV1SpotsSlugReviewsParams,
-  PostApiV1MeSpotsIdReviews201,
-  PostApiV1MeSpotsIdReviews400,
-  PostApiV1MeSpotsIdReviews401,
-  PostApiV1MeSpotsIdReviews404,
-  PostApiV1MeSpotsIdReviewsBody,
+  Review,
+  ReviewsResponse,
+  SubmitReviewRequest,
 } from '../client.schemas';
 
 import { customFetcher } from '../../custom-fetcher';
@@ -43,7 +41,7 @@ export const getApiV1SpotsSlugReviews = (
   params?: GetApiV1SpotsSlugReviewsParams,
   signal?: AbortSignal,
 ) => {
-  return customFetcher<GetApiV1SpotsSlugReviews200>({
+  return customFetcher<ReviewsResponse>({
     url: `/api/v1/spots/${slug}/reviews`,
     method: 'GET',
     params,
@@ -278,35 +276,32 @@ export function useGetApiV1SpotsSlugReviewsSuspense<
  */
 export const postApiV1MeSpotsIdReviews = (
   id: string,
-  postApiV1MeSpotsIdReviewsBody: PostApiV1MeSpotsIdReviewsBody,
+  submitReviewRequest: SubmitReviewRequest,
   signal?: AbortSignal,
 ) => {
-  return customFetcher<PostApiV1MeSpotsIdReviews201>({
+  return customFetcher<Review>({
     url: `/api/v1/me/spots/${id}/reviews`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    data: postApiV1MeSpotsIdReviewsBody,
+    data: submitReviewRequest,
     signal,
   });
 };
 
 export const getPostApiV1MeSpotsIdReviewsMutationOptions = <
-  TError =
-    | PostApiV1MeSpotsIdReviews400
-    | PostApiV1MeSpotsIdReviews401
-    | PostApiV1MeSpotsIdReviews404,
+  TError = ApiError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiV1MeSpotsIdReviews>>,
     TError,
-    { id: string; data: PostApiV1MeSpotsIdReviewsBody },
+    { id: string; data: SubmitReviewRequest },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiV1MeSpotsIdReviews>>,
   TError,
-  { id: string; data: PostApiV1MeSpotsIdReviewsBody },
+  { id: string; data: SubmitReviewRequest },
   TContext
 > => {
   const mutationKey = ['postApiV1MeSpotsIdReviews'];
@@ -318,7 +313,7 @@ export const getPostApiV1MeSpotsIdReviewsMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiV1MeSpotsIdReviews>>,
-    { id: string; data: PostApiV1MeSpotsIdReviewsBody }
+    { id: string; data: SubmitReviewRequest }
   > = (props) => {
     const { id, data } = props ?? {};
 
@@ -331,27 +326,18 @@ export const getPostApiV1MeSpotsIdReviewsMutationOptions = <
 export type PostApiV1MeSpotsIdReviewsMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiV1MeSpotsIdReviews>>
 >;
-export type PostApiV1MeSpotsIdReviewsMutationBody = PostApiV1MeSpotsIdReviewsBody;
-export type PostApiV1MeSpotsIdReviewsMutationError =
-  | PostApiV1MeSpotsIdReviews400
-  | PostApiV1MeSpotsIdReviews401
-  | PostApiV1MeSpotsIdReviews404;
+export type PostApiV1MeSpotsIdReviewsMutationBody = SubmitReviewRequest;
+export type PostApiV1MeSpotsIdReviewsMutationError = ApiError;
 
 /**
  * @summary Write a review
  */
-export const usePostApiV1MeSpotsIdReviews = <
-  TError =
-    | PostApiV1MeSpotsIdReviews400
-    | PostApiV1MeSpotsIdReviews401
-    | PostApiV1MeSpotsIdReviews404,
-  TContext = unknown,
->(
+export const usePostApiV1MeSpotsIdReviews = <TError = ApiError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiV1MeSpotsIdReviews>>,
       TError,
-      { id: string; data: PostApiV1MeSpotsIdReviewsBody },
+      { id: string; data: SubmitReviewRequest },
       TContext
     >;
   },
@@ -359,7 +345,7 @@ export const usePostApiV1MeSpotsIdReviews = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiV1MeSpotsIdReviews>>,
   TError,
-  { id: string; data: PostApiV1MeSpotsIdReviewsBody },
+  { id: string; data: SubmitReviewRequest },
   TContext
 > => {
   const mutationOptions = getPostApiV1MeSpotsIdReviewsMutationOptions(options);
