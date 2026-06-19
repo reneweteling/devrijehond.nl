@@ -71,7 +71,7 @@ export default function NearbyScreen() {
           {item.name}
         </Text>
         <Text style={styles.meta}>
-          {catById.get(item.categoryId)?.label ?? ', '}
+          {catById.get(item.categoryId)?.label ?? ''}
           {item._distanceM != null ? ` · ${formatDistance(item._distanceM)}` : ''}
         </Text>
         <View style={styles.metaRow}>

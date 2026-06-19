@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "De Vrije Hond",
-    "slug": "devrijehond",
+    "slug": "de-vrije-hond",
     "scheme": "vrijehond",
     "version": "0.1.0",
     "orientation": "portrait",
@@ -32,7 +32,12 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#F3EFE3"
       },
-      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "bundler": "metro"
@@ -68,7 +73,11 @@
       "typedRoutes": true
     },
     "extra": {
-      "router": {}
-    }
+      "router": {},
+      "eas": {
+        "projectId": "8ef7822a-5635-49a1-b133-432651cd9c3e"
+      }
+    },
+    "owner": "reneweteling"
   }
 }

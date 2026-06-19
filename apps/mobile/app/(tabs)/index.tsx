@@ -11,10 +11,10 @@
  * Markers are loaded for the current viewport via GET /api/v1/spots/map.
  */
 
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import MapView, { Marker, type Region } from 'react-native-maps';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -56,10 +56,27 @@ function catColor(category: Category | undefined): string {
 export default function MapScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const mapRef = useRef<MapView>(null);
+  // Search can hand us a location to fly to (e.g. "Hilversum"); see lib/geocode.
+  const params = useLocalSearchParams<{ lat?: string; lng?: string }>();
   const [bbox, setBbox] = useState<Bbox>(() => regionToBbox(INITIAL_REGION));
   const [activeCat, setActiveCat] = useState<string | undefined>(undefined);
   const [selected, setSelected] = useState<SpotSummary | null>(null);
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Fly to a location handed in by search (e.g. "Hilversum"). Runs both on
+  // param change and once the map is ready, so it never races the map mount.
+  const flyToParams = () => {
+    const lat = params.lat ? Number(params.lat) : NaN;
+    const lng = params.lng ? Number(params.lng) : NaN;
+    if (Number.isFinite(lat) && Number.isFinite(lng)) {
+      mapRef.current?.animateToRegion(
+        { latitude: lat, longitude: lng, latitudeDelta: 0.08, longitudeDelta: 0.08 },
+        700,
+      );
+    }
+  };
+  useEffect(flyToParams, [params.lat, params.lng]);
 
   const { data: categoriesData } = useCategories();
   const categories = categoriesData?.items ?? [];
@@ -76,8 +93,10 @@ export default function MapScreen() {
   return (
     <View style={styles.root}>
       <MapView
+        ref={mapRef}
         style={StyleSheet.absoluteFill}
         initialRegion={INITIAL_REGION}
+        onMapReady={flyToParams}
         onRegionChangeComplete={onRegionChange}
         showsUserLocation
         showsMyLocationButton={false}
@@ -195,7 +214,7 @@ export default function MapScreen() {
                 {selected.name}
               </Text>
               <Text style={styles.sheetMeta} numberOfLines={1}>
-                {catById.get(selected.categoryId)?.label ?? ', '}
+                {catById.get(selected.categoryId)?.label ?? ''}
               </Text>
               <View style={styles.sheetMetaRow}>
                 <VerifiedBadge status={selected.status} />

@@ -5,13 +5,14 @@
  * spot detail.
  */
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FlatList, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useCategories, useSpots, type SpotSummary } from '@/lib/api';
+import { geocodePlace, type GeoResult } from '@/lib/geocode';
 import { colors, font, radius, space } from '@/lib/theme';
 import { Stars, VerifiedBadge } from '@/components/ui';
 
@@ -28,6 +29,33 @@ export default function SearchScreen() {
 
   const { data } = useSpots({ limit: 200 });
   const all = data?.items ?? [];
+
+  // Geocode the query (debounced) so you can also jump to a place on the map,
+  // e.g. "Hilversum", even when no spot matches.
+  const [geo, setGeo] = useState<GeoResult | null>(null);
+  useEffect(() => {
+    const term = q.trim();
+    if (term.length < 2) {
+      setGeo(null);
+      return;
+    }
+    let cancelled = false;
+    const t = setTimeout(async () => {
+      const result = await geocodePlace(term);
+      if (!cancelled) setGeo(result);
+    }, 400);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [q]);
+
+  const goToLocation = (g: GeoResult) => {
+    router.replace({
+      pathname: '/(tabs)',
+      params: { lat: String(g.lat), lng: String(g.lng) },
+    });
+  };
 
   const query = q.trim().toLowerCase();
   const results = useMemo(() => {
@@ -51,7 +79,7 @@ export default function SearchScreen() {
         <Text style={styles.title} numberOfLines={1}>
           {item.name}
         </Text>
-        <Text style={styles.meta}>{catById.get(item.categoryId)?.label ?? ', '}</Text>
+        <Text style={styles.meta}>{catById.get(item.categoryId)?.label ?? ''}</Text>
         <View style={styles.metaRow}>
           <VerifiedBadge status={item.status} />
           {item.rating.count > 0 ? (
@@ -99,9 +127,25 @@ export default function SearchScreen() {
         keyExtractor={(s) => s.id}
         renderItem={renderItem}
         keyboardShouldPersistTaps="handled"
+        ListHeaderComponent={
+          geo ? (
+            <Pressable style={styles.locRow} onPress={() => goToLocation(geo)}>
+              <View style={styles.locIcon}>
+                <SymbolView name="mappin.and.ellipse" size={18} tintColor={colors.mossDark} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.locTitle} numberOfLines={1}>
+                  Ga naar {geo.label}
+                </Text>
+                <Text style={styles.locMeta}>Open deze plek op de kaart</Text>
+              </View>
+              <SymbolView name="arrow.up.right" size={15} tintColor={colors.ink3} />
+            </Pressable>
+          ) : null
+        }
         ListEmptyComponent={
           <Text style={styles.empty}>
-            {query ? 'Geen plekken gevonden.' : 'Typ om te zoeken op naam of categorie.'}
+            {query ? 'Geen plekken gevonden.' : 'Typ om te zoeken op naam, categorie of plaats.'}
           </Text>
         }
         contentContainerStyle={{ paddingTop: space.md, paddingBottom: insets.bottom + 40 }}
@@ -127,6 +171,26 @@ const styles = StyleSheet.create({
   },
   input: { flex: 1, fontFamily: font.body, fontSize: 14, color: colors.ink, padding: 0 },
   cancel: { fontFamily: font.bodyMedium, fontSize: 14, color: colors.mossDark },
+  locRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: colors.mossSoft,
+    borderRadius: radius.card,
+    padding: 12,
+    marginHorizontal: space.lg,
+    marginBottom: space.md,
+  },
+  locIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  locTitle: { fontFamily: font.heading, fontSize: 15, lineHeight: 20, color: colors.ink },
+  locMeta: { fontFamily: font.body, fontSize: 12, color: colors.ink2, marginTop: 1 },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
