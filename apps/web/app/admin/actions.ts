@@ -147,3 +147,19 @@ export async function updateAmenity(
   await logAction(ctx, 'EDIT', 'AMENITY', amenityId);
   revalidatePath('/admin/taxonomy');
 }
+
+// ---------------------------------------------------------------------------
+// Feature requests
+// ---------------------------------------------------------------------------
+
+/** Set the status of a community feature request (the public "Wensen" board). */
+export async function setFeatureStatus(
+  requestId: string,
+  status: 'CONSIDERING' | 'PLANNED' | 'DONE' | 'DECLINED',
+): Promise<void> {
+  const ctx = await adminContext();
+  const db = authDb(ctx.user);
+  await db.featureRequest.update({ where: { id: requestId }, data: { status } });
+  await logAction(ctx, 'SET_FEATURE_STATUS', 'FEATURE_REQUEST', requestId, status);
+  revalidatePath('/admin/feature-requests');
+}

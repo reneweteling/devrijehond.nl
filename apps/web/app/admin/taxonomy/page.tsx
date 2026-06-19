@@ -2,10 +2,9 @@ import { adminDb } from '@/lib/admin-db';
 import { promoteCategory, promoteAmenity, updateCategory, updateAmenity } from '../actions';
 
 /**
- * Admin, taxonomy curation. Lists categories + amenities with their
- * visibility / sort order / status, and lets an admin promote a PROPOSED
- * (community-suggested) entry to ACTIVE or toggle visibility. All mutations go
- * through the server actions in `../actions.ts`.
+ * Admin taxonomy curation. Lists categories + amenities with their visibility /
+ * status, and lets an admin promote a PROPOSED (community-suggested) entry to
+ * ACTIVE or toggle visibility. Mutations go through the server actions.
  */
 export const dynamic = 'force-dynamic';
 
@@ -18,72 +17,104 @@ export default async function TaxonomyPage() {
   ]);
 
   return (
-    <main style={{ maxWidth: 880, margin: '0 auto', padding: '32px 20px' }}>
-      <h1>Taxonomy</h1>
+    <div>
+      <span className="eyebrow">Beheer</span>
+      <h1 style={{ fontSize: 'clamp(26px, 4vw, 36px)', margin: '8px 0 8px' }}>Taxonomie</h1>
+      <p className="muted" style={{ maxWidth: '60ch', marginBottom: 8 }}>
+        Categorieën en voorzieningen groeien mee met de community. Nieuwe voorstellen komen binnen
+        als PROPOSED; promoot ze of verberg ze hier.
+      </p>
 
-      <section style={{ marginTop: 24 }}>
-        <h2>Categories</h2>
-        <ul style={{ listStyle: 'none', padding: 0, display: 'grid', gap: 8 }}>
+      <section style={{ marginTop: 28 }}>
+        <h2 style={{ fontSize: 20, marginBottom: 14 }}>Categorieën</h2>
+        <div style={{ display: 'grid', gap: 10 }}>
           {categories.map((c) => (
-            <li key={c.id} style={rowStyle}>
-              <span>
-                {c.label} <small style={{ color: '#4a5a4d' }}>· {c.type}</small>
-                {c.status === 'PROPOSED' ? (
-                  <small style={{ color: '#9a7b3f' }}> · PROPOSED</small>
-                ) : null}
-                {!c.visible ? <small style={{ color: '#b04a3a' }}> · hidden</small> : null}
+            <div key={c.id} className="admin-row">
+              <span style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <strong>{c.label}</strong>
+                <small className="muted">{c.type}</small>
+                <StatusBadges status={c.status} visible={c.visible} />
               </span>
-              <span style={{ display: 'flex', gap: 8 }}>
+              <span className="actions">
                 {c.status === 'PROPOSED' ? (
-                  <form action={promoteCategory.bind(null, c.id)}>
-                    <button type="submit">Promote</button>
-                  </form>
+                  <Action
+                    action={promoteCategory.bind(null, c.id)}
+                    label="Promoten"
+                    variant="primary"
+                  />
                 ) : null}
-                <form action={updateCategory.bind(null, c.id, { visible: !c.visible })}>
-                  <button type="submit">{c.visible ? 'Hide' : 'Show'}</button>
-                </form>
+                <Action
+                  action={updateCategory.bind(null, c.id, { visible: !c.visible })}
+                  label={c.visible ? 'Verbergen' : 'Tonen'}
+                  variant="soft"
+                />
               </span>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       </section>
 
-      <section style={{ marginTop: 24 }}>
-        <h2>Amenities</h2>
-        <ul style={{ listStyle: 'none', padding: 0, display: 'grid', gap: 8 }}>
+      <section style={{ marginTop: 32 }}>
+        <h2 style={{ fontSize: 20, marginBottom: 14 }}>Voorzieningen</h2>
+        <div style={{ display: 'grid', gap: 10 }}>
           {amenities.map((a) => (
-            <li key={a.id} style={rowStyle}>
-              <span>
-                {a.label}
-                {a.status === 'PROPOSED' ? (
-                  <small style={{ color: '#9a7b3f' }}> · PROPOSED</small>
-                ) : null}
-                {!a.visible ? <small style={{ color: '#b04a3a' }}> · hidden</small> : null}
+            <div key={a.id} className="admin-row">
+              <span style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <strong>{a.label}</strong>
+                <StatusBadges status={a.status} visible={a.visible} />
               </span>
-              <span style={{ display: 'flex', gap: 8 }}>
+              <span className="actions">
                 {a.status === 'PROPOSED' ? (
-                  <form action={promoteAmenity.bind(null, a.id)}>
-                    <button type="submit">Promote</button>
-                  </form>
+                  <Action
+                    action={promoteAmenity.bind(null, a.id)}
+                    label="Promoten"
+                    variant="primary"
+                  />
                 ) : null}
-                <form action={updateAmenity.bind(null, a.id, { visible: !a.visible })}>
-                  <button type="submit">{a.visible ? 'Hide' : 'Show'}</button>
-                </form>
+                <Action
+                  action={updateAmenity.bind(null, a.id, { visible: !a.visible })}
+                  label={a.visible ? 'Verbergen' : 'Tonen'}
+                  variant="soft"
+                />
               </span>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       </section>
-    </main>
+    </div>
   );
 }
 
-const rowStyle: React.CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  padding: '10px 12px',
-  borderRadius: 8,
-  backgroundColor: '#fff',
-  border: '1px solid #e3e3da',
-};
+function StatusBadges({ status, visible }: { status: string; visible: boolean }) {
+  return (
+    <>
+      {status === 'PROPOSED' ? <span className="badge badge-unverified">Voorstel</span> : null}
+      {!visible ? (
+        <span className="badge" style={{ background: '#eee', color: '#8a8a76' }}>
+          Verborgen
+        </span>
+      ) : null}
+    </>
+  );
+}
+
+function Action({
+  action,
+  label,
+  variant,
+}: {
+  action: () => Promise<void>;
+  label: string;
+  variant: 'primary' | 'soft';
+}) {
+  return (
+    <form action={action}>
+      <button
+        type="submit"
+        className={`btn btn-sm ${variant === 'primary' ? 'btn-primary' : 'btn-soft'}`}
+      >
+        {label}
+      </button>
+    </form>
+  );
+}

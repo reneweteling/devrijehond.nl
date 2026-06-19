@@ -169,6 +169,105 @@ img {
 .btn-ghost:hover {
   background: rgba(255, 255, 255, 0.6);
 }
+.btn-sm {
+  padding: 7px 13px;
+  font-size: 13px;
+}
+.btn-soft {
+  background: var(--moss-soft);
+  color: var(--moss-700);
+}
+.btn-soft:hover {
+  background: #dde0c6;
+}
+.btn-danger {
+  background: var(--rust, #a33b2d);
+  color: #fff;
+}
+
+/* ---- Admin -------------------------------------------------------------- */
+.admin-header {
+  background: var(--moss-900);
+  color: #e7e9d5;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.admin-header nav {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  height: 60px;
+}
+.admin-header .admin-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--font-display-stack);
+  font-weight: 600;
+  font-size: 17px;
+  color: #fff;
+}
+.admin-header .admin-brand .tag {
+  font-family: var(--font-body-stack);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: var(--terra);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.admin-header .admin-nav {
+  margin-left: auto;
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+.admin-header .admin-nav a {
+  color: #c4c9ad;
+  font-size: 14.5px;
+  font-weight: 500;
+}
+.admin-header .admin-nav a.active {
+  color: #fff;
+}
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 14px;
+  margin: 8px 0 8px;
+}
+.admin-stat {
+  background: var(--cream);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+}
+.admin-stat .n {
+  font-family: var(--font-display-stack);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.admin-stat .l {
+  font-size: 13px;
+  color: var(--ink-2);
+}
+.admin-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--cream);
+  border: 1px solid var(--line);
+}
+.admin-row .actions {
+  display: flex;
+  gap: 8px;
+  flex: none;
+}
 
 /* App-store buttons */
 .store-btn {
