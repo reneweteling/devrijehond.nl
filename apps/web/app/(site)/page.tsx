@@ -26,6 +26,25 @@ const CATEGORY_EMOJI: Record<string, string> = {
   'drinking-point': '🚰',
 };
 
+const FAQS = [
+  {
+    q: 'Hoe voeg ik een plek toe?',
+    a: 'Download de app, tik op Toevoegen en zet de plek op de kaart, of teken het losloopgebied als een vlak. Hij staat meteen online en de community helpt hem bevestigen.',
+  },
+  {
+    q: 'Is De Vrije Hond gratis?',
+    a: 'Ja. De app en de kaart zijn gratis te gebruiken.',
+  },
+  {
+    q: 'Hoe weet ik of een plek klopt?',
+    a: 'De community houdt de kaart eerlijk. Een plek verschijnt meteen als nog niet geverifieerd; zodra genoeg hondenbazen in de buurt hem bevestigen, wordt hij geverifieerd.',
+  },
+  {
+    q: 'Welke plekken staan erop?',
+    a: 'Losloopgebieden en hondenstranden als gebieden, plus hondvriendelijke horeca, waterpunten, was- en spoelplekken en winkels, in heel Nederland.',
+  },
+];
+
 type CatRow = { slug: string; label: string; color: string; n: number };
 type FeaturedRow = {
   slug: string;
@@ -278,6 +297,47 @@ export default async function HomePage() {
             <MapIsland />
           </Reveal>
         </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="section">
+        <div className="container container-narrow">
+          <Reveal>
+            <span className="eyebrow">Veelgestelde vragen</span>
+            <h2 className="section-title">Goed om te weten</h2>
+            <div style={{ marginTop: 20, display: 'grid', gap: 14 }}>
+              {FAQS.map((f) => (
+                <details key={f.q} className="card" style={{ padding: '16px 20px' }}>
+                  <summary
+                    style={{
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                      fontSize: 16.5,
+                      color: 'var(--ink)',
+                    }}
+                  >
+                    {f.q}
+                  </summary>
+                  <p style={{ marginTop: 10, color: 'var(--ink-2)', lineHeight: 1.6 }}>{f.a}</p>
+                </details>
+              ))}
+            </div>
+          </Reveal>
+        </div>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'FAQPage',
+              mainEntity: FAQS.map((f) => ({
+                '@type': 'Question',
+                name: f.q,
+                acceptedAnswer: { '@type': 'Answer', text: f.a },
+              })),
+            }),
+          }}
+        />
       </section>
 
       <Reveal>
