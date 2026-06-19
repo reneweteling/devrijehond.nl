@@ -26,6 +26,9 @@ import {
   postApiV1MeReports,
   postApiV1MeFeatureRequests,
   postApiV1MeFeatureRequestsIdVote,
+  patchApiV1Me,
+  postApiV1MeDogs,
+  deleteApiV1MeDogsId,
   type Category,
   type Amenity,
   type SpotSummary,
@@ -48,6 +51,8 @@ import {
   type SubmitReportRequest,
   type FeatureRequest,
   type FeatureStatus,
+  type CreateDogRequest,
+  type MeProfilePatch,
 } from '@devrijehond/api-client';
 
 // Re-export the contract types under the names the screens import. These are
@@ -220,5 +225,30 @@ export function useCreateFeatureRequest() {
 export function useToggleFeatureVote() {
   return useMutation({
     mutationFn: (id: string) => postApiV1MeFeatureRequestsIdVote(id),
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Profile + dogs (edit profile S14b, add dog S14c). All require auth.
+// ---------------------------------------------------------------------------
+
+/** PATCH /api/v1/me, update the signed-in profile (name / handle / bio). */
+export function useUpdateMe() {
+  return useMutation({
+    mutationFn: (patch: MeProfilePatch) => patchApiV1Me(patch),
+  });
+}
+
+/** POST /api/v1/me/dogs, add a dog to the profile. */
+export function useCreateDog() {
+  return useMutation({
+    mutationFn: (dog: CreateDogRequest) => postApiV1MeDogs(dog),
+  });
+}
+
+/** DELETE /api/v1/me/dogs/:id, remove a dog. */
+export function useDeleteDog() {
+  return useMutation({
+    mutationFn: (id: string) => deleteApiV1MeDogsId(id),
   });
 }

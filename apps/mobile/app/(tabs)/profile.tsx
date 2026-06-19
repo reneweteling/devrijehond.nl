@@ -8,7 +8,7 @@
  * /me + /me/dogs are stubbed as CTAs.
  */
 
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -79,18 +79,16 @@ export default function ProfileScreen() {
             label="Profiel bewerken"
             variant="secondary"
             icon="pencil"
-            onPress={() => {
-              /* TODO(verify): route to (modal) edit-profile (S14b). */
-            }}
+            onPress={() => router.push('/edit-profile')}
           />
         </View>
       </View>
 
       <View style={styles.section}>
-        <View style={styles.sectionHead}>
+        <Pressable style={styles.sectionHead} onPress={() => router.push('/add-dog')} hitSlop={8}>
           <Text style={styles.sectionTitle}>Mijn honden</Text>
-          <SymbolView name="plus.circle" size={20} tintColor={colors.mossDark} />
-        </View>
+          <SymbolView name="plus.circle.fill" size={22} tintColor={colors.mossDark} />
+        </Pressable>
         {me?.dogs?.length ? (
           me.dogs.map((d: Dog) => (
             <View key={d.id} style={styles.dogRow}>
@@ -108,7 +106,11 @@ export default function ProfileScreen() {
             </View>
           ))
         ) : (
-          <Text style={styles.placeholder}>Nog geen honden toegevoegd.</Text>
+          <Pressable onPress={() => router.push('/add-dog')}>
+            <Text style={styles.placeholder}>
+              Nog geen honden. Tik op + om je hond toe te voegen.
+            </Text>
+          </Pressable>
         )}
       </View>
 

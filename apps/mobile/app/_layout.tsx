@@ -151,6 +151,24 @@ function RootNav() {
             contentStyle: { backgroundColor: colors.sand },
           }}
         />
+        <Stack.Screen
+          name="edit-profile"
+          options={{
+            presentation: 'card',
+            gestureEnabled: true,
+            animation: 'slide_from_right',
+            contentStyle: { backgroundColor: colors.surface },
+          }}
+        />
+        <Stack.Screen
+          name="add-dog"
+          options={{
+            presentation: 'card',
+            gestureEnabled: true,
+            animation: 'slide_from_right',
+            contentStyle: { backgroundColor: colors.surface },
+          }}
+        />
       </Stack>
       {/* Overlay while boot is pending. Absolute over the live Stack so any
           router action always has a navigator to land on. */}
