@@ -46,6 +46,10 @@ jobs:
     runs-on: macos-15
     env:
       TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      # Build Expo modules from source: SDK 56's precompiled XCFrameworks fail to
+      # resolve/build during a device archive on the runner (ExpoModulesJSI
+      # xcframework script + SPM "Could not resolve package dependencies").
+      EXPO_USE_SOURCE: '1'
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
