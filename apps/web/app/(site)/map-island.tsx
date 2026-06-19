@@ -1,10 +1,9 @@
 'use client';
 
 /**
- * Client map island. Holds the in-view spot set and renders one of two map
- * backends: Google Maps when `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is set, else the
- * free MapLibre + OpenStreetMap fallback. Both hydrate markers from the same
- * public viewport endpoint the mobile app uses (`GET /api/v1/spots/map`).
+ * Client map island. Holds the in-view spot set and renders the Google Maps
+ * backend, hydrating markers from the same public viewport endpoint the mobile
+ * app uses (`GET /api/v1/spots/map`).
  *
  * The crawlable `<ul>` of spot links below the map stays as real SSR-friendly
  * markup for SEO and as a no-JS fallback.
@@ -14,7 +13,6 @@ import { useCallback, useRef, useState } from 'react';
 import type { SpotSummaryDto } from '@devrijehond/types';
 import { type Bbox, spotHref } from './map-shared';
 import { GoogleMapView } from './google-map';
-import { MapLibreMapView } from './maplibre-map';
 
 const GOOGLE_MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '';
 
@@ -55,7 +53,17 @@ export function MapIsland() {
           {GOOGLE_MAPS_KEY ? (
             <GoogleMapView apiKey={GOOGLE_MAPS_KEY} spots={spots} onBoundsChange={handleBounds} />
           ) : (
-            <MapLibreMapView spots={spots} onBoundsChange={handleBounds} />
+            <div
+              style={{
+                display: 'grid',
+                placeItems: 'center',
+                height: '100%',
+                color: 'var(--ink-3)',
+                fontSize: 14,
+              }}
+            >
+              Kaart is tijdelijk niet beschikbaar.
+            </div>
           )}
         </div>
         <div

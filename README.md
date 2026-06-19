@@ -44,6 +44,6 @@ pnpm dev                   # turbo runs web + mobile
 dokku apps:create devrijehond
 dokku domains:set devrijehond www.devrijehond.nl devrijehond.nl
 dokku postgres:create devrijehond --image "postgis/postgis" --image-version "17-3.5-alpine"
-dokku postgres:link devrijehond-db devrijehond
+dokku postgres:link devrijehond devrijehond
 dokku ports:add devrijehond http:80:3000
 dokku letsencrypt:enable devrijehond

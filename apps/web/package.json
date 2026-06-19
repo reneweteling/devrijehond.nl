@@ -18,7 +18,6 @@
     "@devrijehond/types": "workspace:*",
     "@vis.gl/react-google-maps": "^1.8.3",
     "better-auth": "^1.2.0",
-    "maplibre-gl": "^5.24.0",
     "next": "^16.2.9",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",

@@ -3,8 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "description": "De Vrije Hond — community map of dog-friendly spots in the Netherlands. Expo app + Next.js API/website.",
-  "packageManager": "pnpm@9.15.9",
-  "engines": { "node": ">=22" },
+  "packageManager": "pnpm@11.8.0",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",

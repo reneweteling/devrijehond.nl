@@ -11,7 +11,11 @@ FROM node:24-bookworm-slim AS app
 ENV PNPM_HOME=/pnpm
 ENV PATH="$PNPM_HOME:$PATH"
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN corepack enable
+ENV CI=true
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+# Pin pnpm via corepack (reads packageManager from package.json) and pre-fetch
+# the exact version so the install step doesn't download it on first use.
+RUN corepack enable && corepack prepare pnpm@11.8.0 --activate
 WORKDIR /app
 
 # Copy the whole workspace (the .dockerignore keeps out node_modules, the 1GB
@@ -22,6 +26,7 @@ RUN pnpm install --frozen-lockfile
 
 # Browser-facing config (must be present at build; defaults are safe for prod).
 ARG NEXT_PUBLIC_APP_URL=https://www.devrijehond.nl
+ARG NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 ENV NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=$NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 

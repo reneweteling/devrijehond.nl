@@ -201,6 +201,13 @@ export const auth = betterAuth({
           // Fall through with the original url if anything is malformed.
         }
 
+        // Dev convenience: print the link to the server console so you can sign
+        // in locally (e.g. the admin section) without a working mailbox.
+        if (process.env.NODE_ENV !== 'production') {
+          // eslint-disable-next-line no-console
+          console.log(`\n[dev] Magic link for ${email}:\n${finalUrl}\n`);
+        }
+
         await sendMagicLink({ email, url: finalUrl });
       },
       // BetterAuth default is 5 min; short enough to mitigate forwarded-email
