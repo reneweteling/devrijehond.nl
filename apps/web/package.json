@@ -17,6 +17,7 @@
     "@devrijehond/server": "workspace:*",
     "@devrijehond/types": "workspace:*",
     "better-auth": "^1.2.0",
+    "maplibre-gl": "^5.24.0",
     "next": "^15.5.4",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
