@@ -1,5 +1,5 @@
 /**
- * S14 — Profile / My submissions. Shows avatar, name/handle, bio, reputation,
+ * S14, Profile / My submissions. Shows avatar, name/handle, bio, reputation,
  * the user's dogs, and a sign-out. Anonymous users see a sign-in prompt.
  *
  * TODO(verify): wire "My submissions" once a GET /api/v1/me/spots (mine) list

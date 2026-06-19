@@ -1,5 +1,5 @@
 /**
- * GET /api/docs — interactive API reference (Scalar) for the v1 OpenAPI document
+ * GET /api/docs, interactive API reference (Scalar) for the v1 OpenAPI document
  * served at /api/v1/openapi.json. Standalone HTML loading Scalar from a CDN, so
  * there's no build dependency. Public, no auth.
  */
@@ -11,7 +11,7 @@ const HTML = `<!doctype html>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>De Vrije Hond API — reference</title>
+    <title>De Vrije Hond API, reference</title>
     <link rel="icon" href="data:," />
   </head>
   <body>

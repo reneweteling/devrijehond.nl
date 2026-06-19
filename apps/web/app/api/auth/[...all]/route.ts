@@ -6,7 +6,7 @@
  * adapts the framework-agnostic handler to Next's Request/Response shape for
  * both GET and POST.
  *
- * PUBLIC — no `requireAuth` here. BetterAuth runs its own origin / CSRF /
+ * PUBLIC, no `requireAuth` here. BetterAuth runs its own origin / CSRF /
  * rate-limit checks per the config in `packages/auth/src/auth.ts`.
  */
 

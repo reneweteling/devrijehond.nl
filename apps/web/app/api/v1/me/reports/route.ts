@@ -5,7 +5,7 @@ import { SubmitReportRequestSchema, type ReportResponseDto } from '@devrijehond/
 import { ok, error, NO_STORE_CACHE_CONTROL } from '@/lib/api-response';
 
 /**
- * POST /api/v1/me/reports — file a report against a spot / photo / review (the
+ * POST /api/v1/me/reports, file a report against a spot / photo / review (the
  * moderation safety-net). Write-only for users; admins read/resolve them.
  *
  * Registered in the OpenAPI contract under `/me/*` because it requires a

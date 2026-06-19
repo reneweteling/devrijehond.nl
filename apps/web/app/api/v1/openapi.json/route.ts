@@ -7,7 +7,7 @@ import { buildOpenApiDocument } from '@devrijehond/types';
  * The path registry in `@devrijehond/types` is populated by side-effect: its
  * `index.ts` imports `./paths` (which calls `registry.registerPath(...)` for
  * every route). Importing `buildOpenApiDocument` therefore guarantees the
- * registry is fully populated — no per-route preload file is needed here (the
+ * registry is fully populated, no per-route preload file is needed here (the
  * contract is centralised in the types package, unlike dekmantel where each
  * handler self-registers).
  *

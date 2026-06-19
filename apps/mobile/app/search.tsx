@@ -1,6 +1,6 @@
 /**
- * S3 — Search. A name search over spots (typed + categorized). Reuses the public
- * spots list and filters client-side on name/category as the user types — enough
+ * S3, Search. A name search over spots (typed + categorized). Reuses the public
+ * spots list and filters client-side on name/category as the user types, enough
  * for the dataset size, and keeps reads anonymous + cacheable. Tap a result →
  * spot detail.
  */
@@ -51,7 +51,7 @@ export default function SearchScreen() {
         <Text style={styles.title} numberOfLines={1}>
           {item.name}
         </Text>
-        <Text style={styles.meta}>{catById.get(item.categoryId)?.label ?? '—'}</Text>
+        <Text style={styles.meta}>{catById.get(item.categoryId)?.label ?? ', '}</Text>
         <View style={styles.metaRow}>
           <VerifiedBadge status={item.status} />
           {item.rating.count > 0 ? (

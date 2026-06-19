@@ -1,5 +1,5 @@
 /**
- * `@devrijehond/api-client` — Orval-generated TypeScript client + TanStack
+ * `@devrijehond/api-client`, Orval-generated TypeScript client + TanStack
  * Query hooks for the De Vrije Hond API. Consumed exclusively by `apps/mobile`.
  *
  * Regenerate with: `pnpm --filter @devrijehond/api-client generate`.
@@ -12,7 +12,7 @@
  *
  * Before `pnpm generate` has run, the `./generated/**` files do not exist;
  * importers will get a TypeScript "Cannot find module" error. That's
- * intentional — CI fails closed if the client hasn't been regenerated. The
+ * intentional, CI fails closed if the client hasn't been regenerated. The
  * `@ts-ignore` lines below keep this barrel itself type-checkable in the
  * pre-generation state.
  */
@@ -24,7 +24,7 @@ export {
   FetcherError,
 } from './custom-fetcher';
 
-// Shared schema types (components.schemas) — enums as runtime constants plus
+// Shared schema types (components.schemas), enums as runtime constants plus
 // the TypeScript request / response shapes.
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-ignore -- generated file; does not exist until `pnpm generate` runs.

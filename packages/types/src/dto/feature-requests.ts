@@ -3,7 +3,7 @@ import { UuidSchema, FeatureStatusSchema, IsoDateTimeSchema, paginatedSchema } f
 import '../registry';
 
 /**
- * Feature requests — community product input. Public-readable list, create +
+ * Feature requests, community product input. Public-readable list, create +
  * upvote under `/me`. `viewerHasVoted` reflects the signed-in user's vote when
  * the read carries a session (anonymous reads omit it / return false).
  */
@@ -26,7 +26,7 @@ export const FeatureRequestSchema = z
   .openapi('FeatureRequest', { description: 'A community feature request.' });
 export type FeatureRequestDto = z.infer<typeof FeatureRequestSchema>;
 
-/** GET /api/v1/feature-requests — paginated list. */
+/** GET /api/v1/feature-requests, paginated list. */
 export const FeatureRequestsResponseSchema = paginatedSchema(FeatureRequestSchema).openapi(
   'FeatureRequestsResponse',
   {
@@ -35,7 +35,7 @@ export const FeatureRequestsResponseSchema = paginatedSchema(FeatureRequestSchem
 );
 export type FeatureRequestsResponseDto = z.infer<typeof FeatureRequestsResponseSchema>;
 
-/** GET /api/v1/feature-requests — query parameters. */
+/** GET /api/v1/feature-requests, query parameters. */
 export const FeatureRequestsQuerySchema = z
   .object({
     status: FeatureStatusSchema.optional(),
@@ -45,7 +45,7 @@ export const FeatureRequestsQuerySchema = z
   .openapi({ description: 'Query parameters for `GET /api/v1/feature-requests`.' });
 export type FeatureRequestsQueryDto = z.infer<typeof FeatureRequestsQuerySchema>;
 
-/** POST /api/v1/me/feature-requests — create. */
+/** POST /api/v1/me/feature-requests, create. */
 export const CreateFeatureRequestRequestSchema = z
   .object({
     title: z.string().min(4).max(140),

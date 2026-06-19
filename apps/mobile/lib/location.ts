@@ -25,7 +25,7 @@ export function useUserLocation(): LatLng | null {
         });
         if (!cancelled) setLoc({ lat: pos.coords.latitude, lng: pos.coords.longitude });
       } catch {
-        /* permission denied / location off — leave null */
+        /* permission denied / location off, leave null */
       }
     })();
     return () => {

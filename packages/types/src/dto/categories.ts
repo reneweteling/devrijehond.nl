@@ -3,7 +3,7 @@ import { UuidSchema, SpotTypeSchema } from './common';
 import '../registry';
 
 /**
- * Categories — the data-driven taxonomy that drives pin colours/icons and the
+ * Categories, the data-driven taxonomy that drives pin colours/icons and the
  * category-scoped submit form. Only `ACTIVE` + `visible` categories are
  * returned to anonymous clients.
  */
@@ -28,7 +28,7 @@ export const CategoriesResponseSchema = z
   .openapi('CategoriesResponse', { description: 'All visible, active categories.' });
 export type CategoriesResponseDto = z.infer<typeof CategoriesResponseSchema>;
 
-/** GET /api/v1/categories — query parameters. */
+/** GET /api/v1/categories, query parameters. */
 export const CategoriesQuerySchema = z
   .object({
     type: SpotTypeSchema.optional().openapi({

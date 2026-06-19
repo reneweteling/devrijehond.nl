@@ -74,7 +74,7 @@ export const auth = betterAuth({
   // (user / session / account / verification) on the raw DvhClient.
   database: zenstackAdapter(db, { provider: 'postgresql' }),
 
-  // Magic-link + social only — kill the email/password surface entirely so we
+  // Magic-link + social only, kill the email/password surface entirely so we
   // don't accidentally expose `/sign-up/email` etc.
   emailAndPassword: { enabled: false },
 
@@ -113,7 +113,7 @@ export const auth = betterAuth({
       appBundleIdentifier: process.env.APPLE_BUNDLE_ID ?? '',
     },
     // Native Google Sign-In. `clientId` MUST be the WEB OAuth client id the
-    // native SDK is configured with (`webClientId`) — that is the token's
+    // native SDK is configured with (`webClientId`), that is the token's
     // audience BetterAuth checks against.
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID ?? '',
@@ -141,7 +141,7 @@ export const auth = betterAuth({
     max: 5,
     customRules: {
       '/sign-in/magic-link': { window: 60, max: 5 },
-      // 20 req / hour ceiling — magic-link spam protection at the email level.
+      // 20 req / hour ceiling, magic-link spam protection at the email level.
       '/magic-link/verify': { window: 60 * 60, max: 20 },
     },
   },
@@ -191,7 +191,7 @@ export const auth = betterAuth({
               interstitial.searchParams.set('callback', originalCallback);
               finalUrl = interstitial.toString();
             } else {
-              // No baseURL configured (shouldn't happen in any deployed env) —
+              // No baseURL configured (shouldn't happen in any deployed env) ,
               // fall back to the direct deep link so we don't strand the user.
               const separator = originalCallback.includes('?') ? '&' : '?';
               finalUrl = `${originalCallback}${separator}token=${encodeURIComponent(t)}`;
@@ -209,7 +209,7 @@ export const auth = betterAuth({
     }),
 
     // Next.js cookie plumbing: sets / clears auth cookies on RSC responses
-    // without route-handler callers doing it manually. MUST be last — BetterAuth
+    // without route-handler callers doing it manually. MUST be last, BetterAuth
     // warns at boot if any plugin with `hooks.after` runs after nextCookies,
     // because their Set-Cookie headers would never reach the framework store.
     nextCookies(),

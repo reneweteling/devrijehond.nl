@@ -8,7 +8,7 @@ import { normaliseGeometry } from '@/lib/geo';
 import { loadSpotDetail } from '@/lib/spot-detail';
 
 /**
- * POST /api/v1/me/spots — submit a new spot (REGION polygon or POI point).
+ * POST /api/v1/me/spots, submit a new spot (REGION polygon or POI point).
  *
  * Flow:
  *   1. requireAuth → policy-bound `authDb(user)`.
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  // 4. Write the PostGIS geometry (raw — the geom column is Unsupported in ZenStack).
+  // 4. Write the PostGIS geometry (raw, the geom column is Unsupported in ZenStack).
   try {
     await pgQuery(
       `UPDATE "Spot"

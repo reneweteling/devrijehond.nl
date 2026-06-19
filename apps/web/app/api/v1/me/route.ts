@@ -5,7 +5,7 @@ import { MeProfilePatchSchema, type MeProfileDto } from '@devrijehond/types';
 import { ok, error, NO_STORE_CACHE_CONTROL } from '@/lib/api-response';
 
 /**
- * /api/v1/me — GET + PATCH the authenticated user's profile (avatar, bio,
+ * /api/v1/me, GET + PATCH the authenticated user's profile (avatar, bio,
  * handle, name) with their dogs embedded. `/me/*` → no-store.
  */
 export const runtime = 'nodejs';

@@ -8,7 +8,7 @@
  *     every path (deduplicates output and avoids `JSON.stringify` cycles when
  *     a DTO is referenced from several paths).
  *  2. Register every API PATH (`registry.registerPath`) so the compiled doc
- *     carries the full surface — public reads under `/api/v1/...`, user-scoped
+ *     carries the full surface, public reads under `/api/v1/...`, user-scoped
  *     writes under `/api/v1/me/...`.
  *
  * Imported for side-effects from `./index.ts`, AFTER the DTO modules so every
@@ -53,11 +53,7 @@ import {
   UpdateSpotRequestSchema,
 } from './dto/submit-spot';
 import { SubmitVoteRequestSchema, VoteSchema, VoteResponseSchema } from './dto/votes';
-import {
-  ReviewSchema,
-  ReviewsResponseSchema,
-  SubmitReviewRequestSchema,
-} from './dto/reviews';
+import { ReviewSchema, ReviewsResponseSchema, SubmitReviewRequestSchema } from './dto/reviews';
 import { SubmitReportRequestSchema, ReportResponseSchema } from './dto/reports';
 import {
   DogSchema,
@@ -236,7 +232,10 @@ registry.registerPath({
   summary: 'List community feature requests',
   request: { query: z.object({ status: FeatureStatusSchema.optional() }) },
   responses: {
-    200: { description: 'Cursor-paginated feature requests.', ...json(FeatureRequestsResponseSchema) },
+    200: {
+      description: 'Cursor-paginated feature requests.',
+      ...json(FeatureRequestsResponseSchema),
+    },
   },
 });
 

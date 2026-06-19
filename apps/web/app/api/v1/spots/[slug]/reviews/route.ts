@@ -4,7 +4,7 @@ import { type ReviewDto, type ReviewsResponseDto } from '@devrijehond/types';
 import { ok, error } from '@/lib/api-response';
 
 /**
- * GET /api/v1/spots/:slug/reviews — public, anonymous list of ACTIVE reviews for
+ * GET /api/v1/spots/:slug/reviews, public, anonymous list of ACTIVE reviews for
  * a spot, newest-first. Resolves the spot by slug through `anonDb()` so the
  * HIDDEN/REMOVED read policy is enforced (a hidden spot's reviews 404). Writing
  * a review lives under `POST /api/v1/me/spots/:id/reviews` (auth-gated).

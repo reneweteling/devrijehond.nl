@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * BetterAuth React client — consumed by the web/admin sign-in UI and, in a
+ * BetterAuth React client, consumed by the web/admin sign-in UI and, in a
  * wrapped form, by the Expo mobile app.
  *
  * Why a single client export:
@@ -12,7 +12,7 @@
  *     (`authClient.signIn.magicLink(...)`, `authClient.useSession()`) is the
  *     same.
  *   - Keeping the client here keeps the API-shape / types in lockstep with
- *     `src/auth.ts` — no drift between what the server advertises and what the
+ *     `src/auth.ts`, no drift between what the server advertises and what the
  *     client infers.
  */
 

@@ -1,5 +1,5 @@
 /**
- * `@devrijehond/types` — the typed contract between the De Vrije Hond API
+ * `@devrijehond/types`, the typed contract between the De Vrije Hond API
  * (apps/web) and the Expo mobile app (via the Orval-generated
  * `@devrijehond/api-client`).
  *
@@ -13,7 +13,7 @@
  *      served at `/api/v1/openapi.json` and consumed by Orval.
  *
  * `apps/web` imports from here. `apps/mobile` must NOT import from
- * `@devrijehond/types` — it imports exclusively from `@devrijehond/api-client`.
+ * `@devrijehond/types`, it imports exclusively from `@devrijehond/api-client`.
  */
 
 // 1. Generated model + input + enum schemas (re-export from @devrijehond/db),
@@ -53,6 +53,6 @@ export * from './dto/index';
 export { registry, buildOpenApiDocument, type OpenApiVersion } from './registry';
 
 // 4. Side-effect: register shared component schemas + every API path. MUST be
-//    last — it imports from `./dto/*` and depends on the DTO schemas being
+//    last, it imports from `./dto/*` and depends on the DTO schemas being
 //    fully evaluated.
 import './paths';

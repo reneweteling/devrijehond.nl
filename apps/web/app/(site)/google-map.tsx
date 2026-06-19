@@ -4,7 +4,7 @@
  * Google Maps map backend (used when `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is set).
  * Uses `@vis.gl/react-google-maps`. Markers are classic `Marker`s with a
  * coloured SVG data-URI pin, so this works with a plain Maps JavaScript API key
- * — no Map ID / vector map setup required.
+ *, no Map ID / vector map setup required.
  */
 
 import { APIProvider, Map, Marker } from '@vis.gl/react-google-maps';

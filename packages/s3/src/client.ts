@@ -22,7 +22,7 @@ export function bucketName(): string {
 }
 
 /**
- * The public base URL media is served from — a CloudFront/CDN domain in front
+ * The public base URL media is served from, a CloudFront/CDN domain in front
  * of the bucket, or the raw S3 website endpoint. No trailing slash.
  */
 export function publicBaseUrl(): string {

@@ -1,5 +1,5 @@
 /**
- * S5/S6 — Spot detail. Real screen.
+ * S5/S6, Spot detail. Real screen.
  *   - Photo hero (user photo → stock fallback) with a warm palette overlay.
  *   - Title + verified/unverified badge + rating aggregate.
  *   - Community-check block: net score + progress toward +5, "Klopt deze plek?"
@@ -108,14 +108,14 @@ export default function SpotDetailScreen() {
   const progress = Math.max(0, Math.min(1, v.netScore / 5));
   const isOwner = me?.id === spot.submittedBy.id;
   const canVote = !!me && !isOwner && v.status === 'UNVERIFIED';
-  // Buttons stay tappable for anonymous users on an open spot — the tap routes
+  // Buttons stay tappable for anonymous users on an open spot, the tap routes
   // to sign-in. Only an owner / already-resolved spot disables them.
   const canInteractVote = !isOwner && v.status === 'UNVERIFIED';
 
   const eligibilityLine = !me
     ? 'Log in om deze plek te bevestigen.'
     : isOwner
-      ? 'Dit is jouw inzending — je kunt niet op je eigen plek stemmen.'
+      ? 'Dit is jouw inzending, je kunt niet op je eigen plek stemmen.'
       : v.status !== 'UNVERIFIED'
         ? 'Deze plek is al door de community geverifieerd.'
         : 'Ben je hier geweest? Dan telt jouw stem mee.';

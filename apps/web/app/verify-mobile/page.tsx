@@ -7,7 +7,7 @@
  * Gmail/Outlook/Yahoo don't strip the href) with `?token=<one-time>&callback=
  * <deep-link-prefix>`. On a mobile browser we JS-redirect to
  * `<callback>?token=...` so the app picks up the token; on desktop we show an
- * "open this on your phone" fallback. No server-side token validation here —
+ * "open this on your phone" fallback. No server-side token validation here ,
  * that's BetterAuth's job once the app POSTs to `/api/auth/magic-link/verify`.
  *
  * Client component: platform detection needs `navigator`.

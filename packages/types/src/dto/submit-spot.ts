@@ -4,12 +4,12 @@ import { SpotDetailSchema } from './spots';
 import '../registry';
 
 /**
- * POST /api/v1/me/spots — community spot submission.
+ * POST /api/v1/me/spots, community spot submission.
  *
  * Geometry can be supplied two ways:
  *   - `geometry`: a GeoJSON Point (POI) or Polygon (REGION), OR
  *   - `point` (lat/lng) for a POI / `polygon` (array of lat/lng points) for a
- *     REGION — the friendlier shape the mobile map editor emits.
+ *     REGION, the friendlier shape the mobile map editor emits.
  * The API normalises either form into the PostGIS `geom` column + centroid.
  */
 
@@ -75,7 +75,7 @@ export const SubmitSpotResponseSchema = SpotDetailSchema.openapi('SubmitSpotResp
 export type SubmitSpotResponseDto = z.infer<typeof SubmitSpotResponseSchema>;
 
 /**
- * PATCH /api/v1/me/spots/:id — owner edit while still UNVERIFIED. All fields
+ * PATCH /api/v1/me/spots/:id, owner edit while still UNVERIFIED. All fields
  * optional; geometry edits reuse the submit shape.
  */
 export const UpdateSpotRequestSchema = z

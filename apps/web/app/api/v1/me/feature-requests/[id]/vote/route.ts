@@ -5,7 +5,7 @@ import { type FeatureVoteResponseDto } from '@devrijehond/types';
 import { ok, error, NO_STORE_CACHE_CONTROL } from '@/lib/api-response';
 
 /**
- * POST /api/v1/me/feature-requests/:id/vote — toggle the viewer's upvote.
+ * POST /api/v1/me/feature-requests/:id/vote, toggle the viewer's upvote.
  *
  * If the user has not voted, create a `FeatureVote` and increment
  * `upvoteCount`; if they have, remove it and decrement. The count is kept in
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     viewerHasVoted = true;
   }
 
-  // Recompute the denormalised count from the join table (raw client — the
+  // Recompute the denormalised count from the join table (raw client, the
   // FeatureRequest row isn't user-owned).
   const upvoteCount = await rawDb.featureVote.count({ where: { requestId } });
   await rawDb.featureRequest.update({ where: { id: requestId }, data: { upvoteCount } });

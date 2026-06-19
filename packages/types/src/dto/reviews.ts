@@ -3,7 +3,7 @@ import { UuidSchema, IsoDateTimeSchema, paginatedSchema } from './common';
 import '../registry';
 
 /**
- * Reviews — 0–5 star ratings + optional body, separate from verification votes.
+ * Reviews, 0–5 star ratings + optional body, separate from verification votes.
  */
 
 export const StarsSchema = z
@@ -34,13 +34,13 @@ export const ReviewSchema = z
   .openapi('Review', { description: 'A spot review.' });
 export type ReviewDto = z.infer<typeof ReviewSchema>;
 
-/** GET /api/v1/spots/:slug/reviews — paginated list. */
+/** GET /api/v1/spots/:slug/reviews, paginated list. */
 export const ReviewsResponseSchema = paginatedSchema(ReviewSchema).openapi('ReviewsResponse', {
   description: 'Cursor-paginated reviews for a spot.',
 });
 export type ReviewsResponseDto = z.infer<typeof ReviewsResponseSchema>;
 
-/** POST /api/v1/me/spots/:id/reviews — create. */
+/** POST /api/v1/me/spots/:id/reviews, create. */
 export const SubmitReviewRequestSchema = z
   .object({
     stars: StarsSchema,

@@ -2,10 +2,15 @@ import type { NextRequest } from 'next/server';
 import { anonDb } from '@devrijehond/db';
 import { getContext } from '@devrijehond/server';
 import { FeatureRequestsQuerySchema, type FeatureRequestsResponseDto } from '@devrijehond/types';
-import { ok, error, NO_STORE_CACHE_CONTROL, DEFAULT_PUBLIC_CACHE_CONTROL } from '@/lib/api-response';
+import {
+  ok,
+  error,
+  NO_STORE_CACHE_CONTROL,
+  DEFAULT_PUBLIC_CACHE_CONTROL,
+} from '@/lib/api-response';
 
 /**
- * GET /api/v1/feature-requests — public list of community feature requests.
+ * GET /api/v1/feature-requests, public list of community feature requests.
  *
  * Works signed-in and signed-out (like dekmantel's `POST /me/analytics`):
  * anonymous reads are CDN-cacheable and report `viewerHasVoted: false`; a

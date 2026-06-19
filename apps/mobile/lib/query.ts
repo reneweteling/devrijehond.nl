@@ -64,7 +64,7 @@ export async function bootApiClient(): Promise<BootResult> {
     setAuthToken(refreshed.token);
     return { authenticated: true };
   } catch {
-    // Best-effort boot — a corrupt SecureStore entry must not wedge the splash.
+    // Best-effort boot, a corrupt SecureStore entry must not wedge the splash.
     setAuthToken(null);
     return { authenticated: false };
   }

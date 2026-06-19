@@ -22,7 +22,15 @@ export function LegalPage({
       <p className="muted" style={{ fontSize: 13.5, marginTop: 8 }}>
         Laatst bijgewerkt: {updated}
       </p>
-      <div style={{ fontSize: 16, lineHeight: 1.7, color: 'var(--ink-2)', marginTop: 8 }}>
+      <div
+        style={{
+          fontSize: 16,
+          lineHeight: 1.7,
+          color: 'var(--ink-2)',
+          marginTop: 8,
+          maxWidth: '68ch',
+        }}
+      >
         {children}
       </div>
       <hr style={{ border: 'none', borderTop: '1px solid var(--line)', margin: '36px 0 16px' }} />
@@ -35,8 +43,8 @@ export function LegalPage({
 
 export function LegalSection({ heading, children }: { heading: string; children: ReactNode }) {
   return (
-    <section style={{ marginTop: 28 }}>
-      <h2 style={{ fontSize: 21, margin: '0 0 8px' }}>{heading}</h2>
+    <section style={{ marginTop: 38 }}>
+      <h2 style={{ fontSize: 25, margin: '0 0 11px' }}>{heading}</h2>
       {children}
     </section>
   );

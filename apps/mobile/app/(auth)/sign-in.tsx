@@ -1,5 +1,5 @@
 /**
- * S9 — Sign in / up. Three entry points:
+ * S9, Sign in / up. Three entry points:
  *   - Email magic link (requestMagicLink → "check your inbox" state),
  *   - Native Sign in with Apple (iOS),
  *   - Native Google Sign-In (Android picker).

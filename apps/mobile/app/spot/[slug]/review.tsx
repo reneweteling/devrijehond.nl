@@ -1,5 +1,5 @@
 /**
- * S7 — Write review. A 0–5 star selector + comment. Distinct from the
+ * S7, Write review. A 0–5 star selector + comment. Distinct from the
  * community-check vote (that answers "does this place exist / is the info
  * right?"; a review rates the experience). Auth required.
  *
@@ -27,7 +27,7 @@ export default function WriteReviewScreen() {
   const { status, isAuthenticated } = useAuth();
 
   // Writing a review needs an account (wireframe S7). Guard direct/deep-link
-  // access — the detail's "Schrijf review" CTA already gates, this covers the rest.
+  // access, the detail's "Schrijf review" CTA already gates, this covers the rest.
   useEffect(() => {
     if (status !== 'loading' && !isAuthenticated) router.replace('/(auth)/sign-in');
   }, [status, isAuthenticated, router]);

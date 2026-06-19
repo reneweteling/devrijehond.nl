@@ -3,7 +3,7 @@ import { UuidSchema } from './common';
 import '../registry';
 
 /**
- * Amenities — reusable facility tags (water bowl, off-leash, waste bags, …).
+ * Amenities, reusable facility tags (water bowl, off-leash, waste bags, …).
  * Which amenities are offered per category drives the category-scoped form;
  * `categoryIds` carries that mapping (from `AmenityOnCategory`).
  */
@@ -33,7 +33,7 @@ export const AmenitiesResponseSchema = z
   });
 export type AmenitiesResponseDto = z.infer<typeof AmenitiesResponseSchema>;
 
-/** GET /api/v1/amenities — query parameters. */
+/** GET /api/v1/amenities, query parameters. */
 export const AmenitiesQuerySchema = z
   .object({
     categoryId: UuidSchema.optional().openapi({

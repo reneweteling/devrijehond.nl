@@ -10,7 +10,7 @@ import {
 import { ok, error } from '@/lib/api-response';
 
 /**
- * GET /api/v1/spots — public, anonymous, CDN-cacheable list of spots.
+ * GET /api/v1/spots, public, anonymous, CDN-cacheable list of spots.
  *
  * Two filtering modes, combinable:
  *   - **Viewport bbox** (`minLng,minLat,maxLng,maxLat`): returns spots whose
@@ -19,7 +19,7 @@ import { ok, error } from '@/lib/api-response';
  *   - **Plain list** (no bbox): every visible spot, newest-first.
  *
  * Plus `type` / `categoryId` filters, a delta-sync `since` cursor (returns only
- * spots changed at/after that timestamp — every read model has an
+ * spots changed at/after that timestamp, every read model has an
  * `updated_at` index), an optional `verification` filter, and amenity filtering
  * (`amenity` = comma-separated amenity ids; a spot must have ALL of them).
  *
@@ -28,7 +28,7 @@ import { ok, error } from '@/lib/api-response';
  * the `Unsupported` geometry column. That SQL predicate reproduces the
  * `@@deny('read', HIDDEN/REMOVED …)` policy for the anonymous public case.
  *
- * Pagination is keyset on `(updatedAt, id)` — `cursor` is the base64 of the
+ * Pagination is keyset on `(updatedAt, id)`, `cursor` is the base64 of the
  * last row's `updatedAt|id`. Cheaper + stable under inserts vs OFFSET.
  */
 export const runtime = 'nodejs';
@@ -131,9 +131,7 @@ export async function GET(request: NextRequest) {
   if (q.cursor) {
     const cur = decodeCursor(q.cursor);
     if (cur) {
-      where.push(
-        `(s."updatedAt", s."id") < (${param(new Date(cur.updatedAt))}, ${param(cur.id)})`,
-      );
+      where.push(`(s."updatedAt", s."id") < (${param(new Date(cur.updatedAt))}, ${param(cur.id)})`);
     }
   }
 

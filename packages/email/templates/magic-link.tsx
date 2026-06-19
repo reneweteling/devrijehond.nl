@@ -1,7 +1,7 @@
 /**
  * Magic-link email template (React Email).
  *
- * The CTA href is always a plain HTTPS URL — `@devrijehond/auth` rewrites any
+ * The CTA href is always a plain HTTPS URL, `@devrijehond/auth` rewrites any
  * mobile deep link to an HTTPS interstitial before it reaches here, so Gmail /
  * Outlook / Yahoo never see a custom scheme to strip.
  */
@@ -38,17 +38,15 @@ export function MagicLinkEmail({ url }: MagicLinkEmailProps) {
           <Heading style={heading}>De Vrije Hond</Heading>
           <Text style={paragraph}>Hoi,</Text>
           <Text style={paragraph}>
-            Klik op de knop hieronder om in te loggen. Deze link is 5 minuten geldig en kan
-            maar één keer gebruikt worden.
+            Klik op de knop hieronder om in te loggen. Deze link is 5 minuten geldig en kan maar één
+            keer gebruikt worden.
           </Text>
           <Section style={buttonWrapper}>
             <Button style={button} href={url}>
               Inloggen
             </Button>
           </Section>
-          <Text style={paragraph}>
-            Werkt de knop niet? Kopieer dan deze link naar je browser:
-          </Text>
+          <Text style={paragraph}>Werkt de knop niet? Kopieer dan deze link naar je browser:</Text>
           <Link style={link} href={url}>
             {url}
           </Link>
@@ -65,8 +63,7 @@ export default MagicLinkEmail;
 
 const body: React.CSSProperties = {
   backgroundColor: '#f4f3ee',
-  fontFamily:
-    "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+  fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
 };
 
 const container: React.CSSProperties = {

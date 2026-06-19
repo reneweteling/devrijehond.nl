@@ -12,6 +12,34 @@ import { StoreButton } from './site-chrome';
 const IOS_URL = 'https://apps.apple.com/app/de-vrije-hond/id000000000';
 const ANDROID_URL = 'https://play.google.com/store/apps/details?id=nl.devrijehond.app';
 
+/* Small inline icons tinted with currentColor, in the PawMark line style. */
+function Ico({ d, size = 15 }: { d: string; size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      style={{ flex: 'none' }}
+    >
+      <path d={d} />
+    </svg>
+  );
+}
+const CHECK = 'M20 6 9 17l-5-5';
+const QUESTION =
+  'M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z';
+const PIN = 'M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0ZM12 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z';
+const PHONE =
+  'M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.5c.9.3 1.7.6 2.7.7a2 2 0 0 1 1.7 2Z';
+const LINK =
+  'M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1';
+
 export function SpotView({ spot }: { spot: SpotDetailDto }) {
   const verified = spot.verification.status === 'VERIFIED';
   const [lead, ...rest] = spot.photos;
@@ -30,7 +58,8 @@ export function SpotView({ spot }: { spot: SpotDetailDto }) {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
           <span className={`badge ${verified ? 'badge-verified' : 'badge-unverified'}`}>
-            {verified ? '✓ Geverifieerd' : '◌ Nog niet geverifieerd'}
+            <Ico d={verified ? CHECK : QUESTION} size={13} />
+            {verified ? 'Geverifieerd' : 'Nog niet geverifieerd'}
           </span>
           {spot.rating.count > 0 ? (
             <span className="muted" style={{ fontSize: 15 }}>
@@ -47,7 +76,7 @@ export function SpotView({ spot }: { spot: SpotDetailDto }) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={lead.url}
-            alt={spot.name}
+            alt={`Foto van ${spot.name}, ${spot.category.label}`}
             style={{
               width: '100%',
               maxHeight: 460,
@@ -60,19 +89,18 @@ export function SpotView({ spot }: { spot: SpotDetailDto }) {
       ) : null}
 
       {/* Two-column body */}
-      <div
-        className="container"
-        style={{
-          marginTop: 32,
-          display: 'grid',
-          gap: 32,
-          gridTemplateColumns: 'minmax(0, 1.6fr) minmax(260px, 1fr)',
-          alignItems: 'start',
-        }}
-      >
+      <div className="container spot-body" style={{ marginTop: 32 }}>
         <div>
           {spot.description ? (
-            <p style={{ fontSize: 18, lineHeight: 1.7, color: 'var(--ink-2)', margin: 0 }}>
+            <p
+              style={{
+                fontSize: 18,
+                lineHeight: 1.7,
+                color: 'var(--ink-2)',
+                margin: 0,
+                maxWidth: '64ch',
+              }}
+            >
               {spot.description}
             </p>
           ) : null}
@@ -90,7 +118,21 @@ export function SpotView({ spot }: { spot: SpotDetailDto }) {
             </section>
           ) : null}
 
-          {rest.length > 0 ? (
+          {rest.length === 1 ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={rest[0]!.url}
+              alt={`${spot.name}, foto 2`}
+              loading="lazy"
+              style={{
+                marginTop: 28,
+                width: '100%',
+                aspectRatio: '16 / 10',
+                objectFit: 'cover',
+                borderRadius: 'var(--radius)',
+              }}
+            />
+          ) : rest.length > 1 ? (
             <section
               style={{
                 marginTop: 28,
@@ -99,12 +141,12 @@ export function SpotView({ spot }: { spot: SpotDetailDto }) {
                 gap: 12,
               }}
             >
-              {rest.map((p) => (
+              {rest.map((p, i) => (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   key={p.id}
                   src={p.url}
-                  alt={spot.name}
+                  alt={`${spot.name}, foto ${i + 2}`}
                   loading="lazy"
                   style={{
                     width: '100%',
@@ -133,12 +175,20 @@ export function SpotView({ spot }: { spot: SpotDetailDto }) {
               >
                 Informatie
               </h3>
-              <div style={{ display: 'grid', gap: 8, fontSize: 15, color: 'var(--ink-2)' }}>
-                {spot.address ? <div>📍 {spot.address}</div> : null}
-                {spot.phone ? <div>📞 {spot.phone}</div> : null}
+              <div style={{ display: 'grid', gap: 10, fontSize: 15, color: 'var(--ink-2)' }}>
+                {spot.address ? (
+                  <div style={{ display: 'flex', gap: 9, alignItems: 'flex-start' }}>
+                    <Ico d={PIN} /> {spot.address}
+                  </div>
+                ) : null}
+                {spot.phone ? (
+                  <div style={{ display: 'flex', gap: 9, alignItems: 'center' }}>
+                    <Ico d={PHONE} /> {spot.phone}
+                  </div>
+                ) : null}
                 {spot.website ? (
-                  <div>
-                    🔗{' '}
+                  <div style={{ display: 'flex', gap: 9, alignItems: 'center' }}>
+                    <Ico d={LINK} />{' '}
                     <a href={spot.website} target="_blank" rel="noreferrer">
                       Website
                     </a>
@@ -158,7 +208,7 @@ export function SpotView({ spot }: { spot: SpotDetailDto }) {
             }}
           >
             <h3 style={{ color: '#fff', fontSize: 18, margin: '0 0 6px' }}>Open in de app</h3>
-            <p style={{ margin: '0 0 14px', fontSize: 14.5, color: 'rgba(255,255,255,.9)' }}>
+            <p style={{ margin: '0 0 14px', fontSize: 14.5, color: '#fff' }}>
               Routebeschrijving, bevestigen en beoordelen doe je in de app.
             </p>
             <div style={{ display: 'grid', gap: 10 }}>

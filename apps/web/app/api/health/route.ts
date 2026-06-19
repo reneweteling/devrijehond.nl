@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { pgQuery } from '@devrijehond/server';
 
 /**
- * GET /api/health — liveness + readiness probe for Dokku's zero-downtime
+ * GET /api/health, liveness + readiness probe for Dokku's zero-downtime
  * CHECKS (and any uptime monitor). Pings the database with a trivial query;
  * returns 200 when reachable, 503 otherwise. Never cached.
  */

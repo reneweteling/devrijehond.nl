@@ -4,7 +4,7 @@
  * `API_URL` is the canonical origin for the REST surface: public reads
  * (`/api/v1/*`) and the personalised `/me/*` writes, hit via
  * `@devrijehond/api-client` (which reads the same value from
- * `globalThis.__DEVRIJEHOND_API_URL__` — we mirror it there at app start).
+ * `globalThis.__DEVRIJEHOND_API_URL__`, we mirror it there at app start).
  *
  * `AUTH_URL` is the origin for every BetterAuth route (`/api/auth/*`). In local
  * dev a single Next server serves both, so it falls back to `API_URL`.

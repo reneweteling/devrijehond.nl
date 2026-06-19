@@ -1,5 +1,5 @@
 /* ============================================================================
-   De Vrije Hond — design system. Earthy "aarde & bos" palette, a warm display
+   De Vrije Hond, design system. Earthy "aarde & bos" palette, a warm display
    serif (Fraunces) over Inter, generous whitespace, soft cards, a recurring
    topographic-contour motif that ties the brand to maps + nature.
    ========================================================================== */
@@ -285,7 +285,7 @@ img {
 }
 
 /* ---- Textures ----------------------------------------------------------- */
-/* Soft topographic contour lines — the brand motif (maps + nature). */
+/* Soft topographic contour lines, the brand motif (maps + nature). */
 .topo {
   background-image: radial-gradient(
       120% 90% at 80% -10%,
@@ -318,6 +318,7 @@ img {
   font-weight: 600;
   font-size: 19px;
   color: var(--moss-700);
+  white-space: nowrap;
 }
 .brand:hover {
   text-decoration: none;
@@ -424,7 +425,15 @@ img {
 }
 .hero-stats .lbl {
   font-size: 13.5px;
-  color: var(--ink-3);
+  color: var(--ink-2);
+}
+
+/* ---- Spot detail -------------------------------------------------------- */
+.spot-body {
+  display: grid;
+  gap: 32px;
+  grid-template-columns: minmax(0, 1.6fr) minmax(260px, 1fr);
+  align-items: start;
 }
 
 /* Phone mockup */
@@ -501,7 +510,7 @@ img {
 @media (max-width: 860px) {
   .hero-grid {
     grid-template-columns: 1fr;
-    padding: 48px 0 56px;
+    padding: 48px 24px 56px;
   }
   .phone {
     display: none;
@@ -511,5 +520,29 @@ img {
   }
   .section {
     padding: 52px 0;
+  }
+  .spot-body {
+    grid-template-columns: 1fr;
+  }
+  .spot-body aside {
+    position: static;
+  }
+}
+
+/* Compact header on phones: keep only the brand + primary CTA so nothing
+   spills off-screen (the secondary links live in the footer too). */
+@media (max-width: 720px) {
+  .site-header nav {
+    gap: 10px;
+  }
+  .nav-links {
+    gap: 12px;
+  }
+  .nav-links a:not(.btn) {
+    display: none;
+  }
+  .nav-links a.btn {
+    padding: 9px 16px;
+    font-size: 14px;
   }
 }

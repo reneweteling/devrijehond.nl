@@ -3,11 +3,11 @@ import { ok, error } from '@/lib/api-response';
 import { loadSpotDetail } from '@/lib/spot-detail';
 
 /**
- * GET /api/v1/spots/:slug — public, anonymous, CDN-cacheable full spot detail.
+ * GET /api/v1/spots/:slug, public, anonymous, CDN-cacheable full spot detail.
  *
  * Geometry, amenities, photos, rating + verification status/netScore. Reads via
  * `anonDb()` (in `loadSpotDetail`) so the HIDDEN/REMOVED read policy is
- * enforced — a hidden spot returns 404 to anonymous callers.
+ * enforced, a hidden spot returns 404 to anonymous callers.
  */
 export const runtime = 'nodejs';
 

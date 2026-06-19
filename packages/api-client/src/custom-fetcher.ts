@@ -8,11 +8,11 @@
  *   - Browser: carry the session cookie via `credentials: "include"`.
  *   - React Native: inject the bearer token registered via `setAuthToken`.
  *   - Retry once on 5xx with a 500ms backoff.
- *   - Call the consumer-registered `onUnauthorized` callback on 401 — but only
+ *   - Call the consumer-registered `onUnauthorized` callback on 401, but only
  *     when we actually sent an Authorization header.
  *   - `no-store` caching on `/me/*`; default for everything else.
  *
- * This file is what Orval plugs in as its mutator — every generated hook
+ * This file is what Orval plugs in as its mutator, every generated hook
  * ultimately calls `customFetcher(...)` instead of `fetch(...)`.
  */
 
@@ -29,7 +29,7 @@ type ResolvedConfig = {
 };
 
 // --------------------------------------------------------------------------
-// Module state — configurable from the mobile app.
+// Module state, configurable from the mobile app.
 // --------------------------------------------------------------------------
 
 let authToken: string | null = null;
@@ -85,9 +85,8 @@ function resolveBaseUrl(): string {
 }
 
 function resolveClientVersion(): string {
-  const fromGlobal = (
-    globalThis as typeof globalThis & { __DEVRIJEHOND_CLIENT_VERSION__?: string }
-  ).__DEVRIJEHOND_CLIENT_VERSION__;
+  const fromGlobal = (globalThis as typeof globalThis & { __DEVRIJEHOND_CLIENT_VERSION__?: string })
+    .__DEVRIJEHOND_CLIENT_VERSION__;
   if (fromGlobal) return fromGlobal;
 
   if (typeof process !== 'undefined' && typeof process.env['npm_package_version'] === 'string') {
@@ -131,7 +130,7 @@ async function executeFetch(input: string, init: RequestInit): Promise<Response>
   const first = await fetch(input, init);
   if (!RETRYABLE_STATUS.has(first.status)) return first;
 
-  // One retry on 5xx with a 500ms backoff. Keep it simple — mobile carries its
+  // One retry on 5xx with a 500ms backoff. Keep it simple, mobile carries its
   // own offline/queue semantics; this is just a short-hop smoother.
   await new Promise((r) => setTimeout(r, 500));
   return fetch(input, init);
@@ -176,7 +175,7 @@ export async function customFetcher<T>(config: ResolvedConfig): Promise<T> {
   if (response.status === 401) {
     // Only treat a 401 as a session-invalidation signal when we actually sent
     // an Authorization header. A 401 from a /me/* endpoint without a token is
-    // just "anonymous denied" — expected on the cold-start race window where a
+    // just "anonymous denied", expected on the cold-start race window where a
     // /me component mounts before the bearer is loaded from SecureStore.
     if (headers['Authorization']) {
       unauthorizedHandler?.();
@@ -192,7 +191,7 @@ export async function customFetcher<T>(config: ResolvedConfig): Promise<T> {
     );
   }
 
-  // Empty bodies (204, HEAD) — return undefined cast to T.
+  // Empty bodies (204, HEAD), return undefined cast to T.
   if (response.status === 204) return undefined as T;
 
   const responseType = config.responseType ?? 'json';
@@ -233,5 +232,5 @@ export class FetcherError extends Error {
   }
 }
 
-// Orval mutators are commonly imported as default too — provide both.
+// Orval mutators are commonly imported as default too, provide both.
 export default customFetcher;

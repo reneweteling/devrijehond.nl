@@ -13,7 +13,7 @@ import type { SymbolViewProps } from 'expo-symbols';
 // What `SymbolView`'s `name` prop expects. `expo-symbols` types this as a fixed
 // `SFSymbols7_0` union that lags the real SF Symbols catalogue (it's missing
 // valid glyphs like `bowl.fill`, `sun.umbrella.fill`, `spigot.fill`), so the
-// icon maps below are plain `string` and the lookups cast on the way out — the
+// icon maps below are plain `string` and the lookups cast on the way out, the
 // runtime renders any valid symbol name regardless of the typed union.
 type SFName = SymbolViewProps['name'];
 

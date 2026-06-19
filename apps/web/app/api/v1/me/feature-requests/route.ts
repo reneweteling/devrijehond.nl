@@ -4,7 +4,7 @@ import { requireAuth } from '@devrijehond/server';
 import { CreateFeatureRequestRequestSchema, type FeatureRequestDto } from '@devrijehond/types';
 import { ok, error, NO_STORE_CACHE_CONTROL } from '@/lib/api-response';
 
-/** POST /api/v1/me/feature-requests — create a community feature request. */
+/** POST /api/v1/me/feature-requests, create a community feature request. */
 export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {

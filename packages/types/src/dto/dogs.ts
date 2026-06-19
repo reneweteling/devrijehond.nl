@@ -3,7 +3,7 @@ import { UuidSchema, IsoDateTimeSchema } from './common';
 import '../registry';
 
 /**
- * Dogs — the user's dog profiles. Public-readable, owner/admin-writable.
+ * Dogs, the user's dog profiles. Public-readable, owner/admin-writable.
  * Full CRUD under `/me/dogs`.
  */
 export const DogSchema = z
@@ -26,7 +26,7 @@ export const DogsResponseSchema = z
   .openapi('DogsResponse', { description: "The signed-in user's dogs." });
 export type DogsResponseDto = z.infer<typeof DogsResponseSchema>;
 
-/** POST /api/v1/me/dogs — create. */
+/** POST /api/v1/me/dogs, create. */
 export const CreateDogRequestSchema = z
   .object({
     name: z.string().min(1).max(60),
@@ -44,7 +44,7 @@ export const CreateDogRequestSchema = z
   .openapi('CreateDogRequest', { description: 'Body for `POST /api/v1/me/dogs`.' });
 export type CreateDogRequestDto = z.infer<typeof CreateDogRequestSchema>;
 
-/** PATCH /api/v1/me/dogs/:id — update. All fields optional. */
+/** PATCH /api/v1/me/dogs/:id, update. All fields optional. */
 export const UpdateDogRequestSchema = CreateDogRequestSchema.partial().openapi('UpdateDogRequest', {
   description: 'Body for `PATCH /api/v1/me/dogs/:id`.',
 });

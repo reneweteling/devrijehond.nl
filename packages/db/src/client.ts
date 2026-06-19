@@ -7,9 +7,9 @@ import { schema, type SchemaType } from '../schema';
 /**
  * ZenStack v3 clients for De Vrije Hond.
  *
- *   - `db`       — raw client, policies NOT enforced. Use ONLY for the
+ *   - `db`      , raw client, policies NOT enforced. Use ONLY for the
  *                  BetterAuth adapter and migrations/seed scripts.
- *   - `authDb(user)` — policy-bound client. ALL application data access goes
+ *   - `authDb(user)`, policy-bound client. ALL application data access goes
  *                  through here. Internally `policyDb.$setAuth({ id, role })`,
  *                  which exposes `auth()` to the @@allow/@@deny rules.
  *
@@ -53,14 +53,14 @@ function createClient(): DvhClient {
   });
 }
 
-/** Raw client — bypasses policies. BetterAuth adapter + migrations only. */
+/** Raw client, bypasses policies. BetterAuth adapter + migrations only. */
 export const db: DvhClient =
   globalForDb.dvhDb ??
   (process.env.NODE_ENV === 'production' ? createClient() : (globalForDb.dvhDb = createClient()));
 
 /**
  * Policy-enforcing client (no identity bound yet). Application code never uses
- * this directly — it goes through `authDb` / `anonDb`, which bind `auth()`.
+ * this directly, it goes through `authDb` / `anonDb`, which bind `auth()`.
  */
 const policyDb: DvhClient =
   globalForDb.dvhPolicyDb ??
@@ -82,7 +82,7 @@ export function authDb(user: AuthUser) {
 
 /**
  * Anonymous policy-bound client (public reads). Pass `undefined` (not `null`)
- * — the ORM rejects an explicit null. In policy rules `auth()` then reads as
+ *, the ORM rejects an explicit null. In policy rules `auth()` then reads as
  * null, so `auth() == null` / `auth() != null` behave as intended.
  */
 export function anonDb() {

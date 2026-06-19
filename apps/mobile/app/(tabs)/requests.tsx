@@ -1,5 +1,5 @@
 /**
- * S15 — Feature requests. Community product input: a list sorted by upvotes,
+ * S15, Feature requests. Community product input: a list sorted by upvotes,
  * each with a status tag and an upvote control. Filter by status. Viewing is
  * anonymous; upvoting + creating need an account (a tap routes to sign-in).
  */

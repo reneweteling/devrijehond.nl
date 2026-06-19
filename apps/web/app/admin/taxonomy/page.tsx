@@ -1,13 +1,8 @@
 import { adminDb } from '@/lib/admin-db';
-import {
-  promoteCategory,
-  promoteAmenity,
-  updateCategory,
-  updateAmenity,
-} from '../actions';
+import { promoteCategory, promoteAmenity, updateCategory, updateAmenity } from '../actions';
 
 /**
- * Admin — taxonomy curation. Lists categories + amenities with their
+ * Admin, taxonomy curation. Lists categories + amenities with their
  * visibility / sort order / status, and lets an admin promote a PROPOSED
  * (community-suggested) entry to ACTIVE or toggle visibility. All mutations go
  * through the server actions in `../actions.ts`.

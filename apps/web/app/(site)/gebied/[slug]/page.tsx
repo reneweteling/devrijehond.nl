@@ -4,7 +4,7 @@ import { loadSpotDetail } from '@/lib/spot-detail';
 import { SpotView } from '../../spot-view';
 
 /**
- * `/gebied/[slug]` — server-rendered REGION page (off-leash zone, dog beach,
+ * `/gebied/[slug]`, server-rendered REGION page (off-leash zone, dog beach,
  * …). Crawlable URL with its own metadata. Reads via `anonDb()`, so
  * HIDDEN/REMOVED spots 404.
  */
@@ -20,8 +20,7 @@ export async function generateMetadata({
   if (!spot) return { title: 'Gebied niet gevonden' };
 
   const desc =
-    spot.description?.slice(0, 160) ??
-    `${spot.category.label} in De Vrije Hond — ${spot.name}.`;
+    spot.description?.slice(0, 160) ?? `${spot.category.label} in De Vrije Hond, ${spot.name}.`;
   const url = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://devrijehond.nl'}/gebied/${spot.slug}`;
 
   return {

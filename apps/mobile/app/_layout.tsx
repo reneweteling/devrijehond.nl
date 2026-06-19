@@ -53,7 +53,7 @@ export default function RootLayout() {
 /**
  * Lives inside the providers so it can drive the shared auth state. Boots the
  * api-client (loads the persisted bearer), publishes the resulting auth status,
- * and keeps the Stack mounted from the first render — overlaying a sand View
+ * and keeps the Stack mounted from the first render, overlaying a sand View
  * while boot settles. NEVER `return null` (that tears ExpoRoot down in a remount
  * loop) and NEVER swap the root between a non-Stack and a Stack tree.
  */
@@ -72,7 +72,7 @@ function RootNav() {
     })();
 
     // A 401 from an authed request means the session lapsed: clear it and drop
-    // to anonymous. No hard redirect — the user stays on the map and auth-gated
+    // to anonymous. No hard redirect, the user stays on the map and auth-gated
     // screens fall back to their sign-in CTA.
     setUnauthorizedHandler(() => {
       void (async () => {

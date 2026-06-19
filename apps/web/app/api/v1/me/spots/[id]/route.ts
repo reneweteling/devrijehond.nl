@@ -7,7 +7,7 @@ import { normaliseGeometry } from '@/lib/geo';
 import { loadSpotDetail } from '@/lib/spot-detail';
 
 /**
- * PATCH /api/v1/me/spots/:id — owner edit while the spot is still UNVERIFIED.
+ * PATCH /api/v1/me/spots/:id, owner edit while the spot is still UNVERIFIED.
  *
  * The `@@allow('update', auth().id == submittedById && status == 'UNVERIFIED')`
  * policy enforces ownership + the unverified gate. Geometry edits reuse the

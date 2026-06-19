@@ -10,7 +10,7 @@
  * generated ring for REGIONs.
  *
  * Re-runnable: wipes spots + community users first, then rebuilds. Uses the raw
- * `db` client (policies bypassed) — seeding is a system action.
+ * `db` client (policies bypassed), seeding is a system action.
  */
 import { Pool } from 'pg';
 import { db } from './src/client';

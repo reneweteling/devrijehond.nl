@@ -7,7 +7,7 @@ import { tallyVotes, resolveStatus } from '@/lib/verification';
 import { haversineMeters, PROXIMITY_RADIUS_M } from '@/lib/geo';
 
 /**
- * POST /api/v1/me/spots/:id/vote — cast (or change) a verification vote.
+ * POST /api/v1/me/spots/:id/vote, cast (or change) a verification vote.
  *
  * Rules (docs/wireframes-mobile.md §verification):
  *   - Authenticated; one vote per user per spot (DB `@@unique([spotId,userId])`).
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     });
   }
 
-  // RECOMPUTE — sum all votes, derive status (HIDE precedence).
+  // RECOMPUTE, sum all votes, derive status (HIDE precedence).
   const allVotes = await db.vote.findMany({
     where: { spotId },
     select: { value: true, weight: true },
@@ -154,7 +154,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   // The submitter-edit policy only allows owner updates; recompute is a
   // system-driven status change, so write it through `authDb` as the voter
   // would be denied. Use the raw policy-bypassing path via update on the
-  // spot — but our schema's `@@allow('all', ADMIN)` blocks a USER update of
+  // spot, but our schema's `@@allow('all', ADMIN)` blocks a USER update of
   // another user's spot. So recompute through the unrestricted client.
   // TODO(verify): in release 1 this recompute moves to a queue job using the
   // raw `db` client / a SECURITY DEFINER trigger. For now we use authDb and
@@ -162,7 +162,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   try {
     await db.spot.update({ where: { id: spotId }, data });
   } catch {
-    // Policy rejected the cross-user status write — apply via the raw client.
+    // Policy rejected the cross-user status write, apply via the raw client.
     // (Imported lazily to keep the policy path as the default.)
     const { db: rawDb } = await import('@devrijehond/db');
     await rawDb.spot.update({ where: { id: spotId }, data });

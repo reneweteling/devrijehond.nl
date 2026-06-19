@@ -1,5 +1,5 @@
 /**
- * Orval input resolver — picks between the running web dev server and the
+ * Orval input resolver, picks between the running web dev server and the
  * committed snapshot via the `OPENAPI_SOURCE` env var.
  *
  * Why the snapshot exists: Orval runs in CI (drift-check job) without a running
@@ -8,7 +8,7 @@
  * server, then regenerates. See `./README.md` for the flow.
  *
  * This module is loaded synchronously by Orval at config time, so the resolver
- * returns a string — runtime HTTP probing is not possible here.
+ * returns a string, runtime HTTP probing is not possible here.
  */
 
 import { existsSync } from 'node:fs';

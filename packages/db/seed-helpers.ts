@@ -1,4 +1,4 @@
-/** Tally helper for the seed — mirrors apps/web/lib/verification.ts#tallyVotes. */
+/** Tally helper for the seed, mirrors apps/web/lib/verification.ts#tallyVotes. */
 export function tallyVotesLike(
   votes: ReadonlyArray<{ value: 'CONFIRM' | 'DENY'; weight: number }>,
 ) {

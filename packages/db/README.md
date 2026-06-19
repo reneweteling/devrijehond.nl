@@ -12,9 +12,9 @@ pnpm --filter @devrijehond/db db:seed          # taxonomy + admin + sample spot
 
 ## Clients
 
-- `db` — raw, policies bypassed. BetterAuth adapter + migrations/seed only.
-- `authDb(user)` — policy-bound (`$setAuth({ id, role })`). All app data access.
-- `anonDb()` — anonymous policy-bound (public reads).
+- `db`, raw, policies bypassed. BetterAuth adapter + migrations/seed only.
+- `authDb(user)`, policy-bound (`$setAuth({ id, role })`). All app data access.
+- `anonDb()`, anonymous policy-bound (public reads).
 
 ## PostGIS
 

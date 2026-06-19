@@ -14,12 +14,12 @@ const body = Inter({ subsets: ['latin'], variable: '--font-body', display: 'swap
 
 const SITE_NAME = 'De Vrije Hond';
 const DESCRIPTION =
-  'Ontdek losloopgebieden, hondenstranden, hondvriendelijke horeca en meer — community-gedreven en geverifieerd door hondenbezitters in heel Nederland.';
+  'Ontdek losloopgebieden, hondenstranden, hondvriendelijke horeca en meer. Community-gedreven en geverifieerd door hondenbezitters in heel Nederland.';
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.devrijehond.nl'),
   title: {
-    default: 'De Vrije Hond — de kaart van hondvriendelijke plekken',
+    default: 'De Vrije Hond: de kaart van hondvriendelijke plekken',
     template: '%s · De Vrije Hond',
   },
   description: DESCRIPTION,
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     type: 'website',
     siteName: SITE_NAME,
     locale: 'nl_NL',
-    title: 'De Vrije Hond — de kaart van hondvriendelijke plekken',
+    title: 'De Vrije Hond: de kaart van hondvriendelijke plekken',
     description: DESCRIPTION,
     url: '/',
   },

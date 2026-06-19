@@ -57,7 +57,7 @@ function makeCanI(user: AuthUser | null): CanI {
 
 /**
  * Resolve the (optional) session and build the request context. Never throws
- * on a missing session — anonymous callers get `user: null` + an `anonDb()`
+ * on a missing session, anonymous callers get `user: null` + an `anonDb()`
  * client. Use this for endpoints that work both signed-in and signed-out
  * (e.g. a public feature-request list that flags `viewerHasVoted`).
  */
@@ -82,10 +82,7 @@ export async function getSessionUser(request: Request): Promise<AuthUser | null>
   return user;
 }
 
-function errorResponse(
-  code: 'UNAUTHENTICATED' | 'FORBIDDEN',
-  status: 401 | 403,
-): Response {
+function errorResponse(code: 'UNAUTHENTICATED' | 'FORBIDDEN', status: 401 | 403): Response {
   return new Response(JSON.stringify({ error: code, message: code }), {
     status,
     headers: {

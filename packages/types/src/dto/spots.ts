@@ -15,13 +15,13 @@ import { AmenitySchema } from './amenities';
 import '../registry';
 
 /**
- * Spot DTOs — the core content type. A spot is either a `REGION` (polygon) or
+ * Spot DTOs, the core content type. A spot is either a `REGION` (polygon) or
  * a `POI` (point). Geometry crosses the wire as GeoJSON so map clients can
  * render it directly; `lat`/`lng` mirror the centroid for cheap list rendering.
  */
 
 /**
- * GeoJSON geometry — a `Point` (POI) or a `Polygon` (REGION). Coordinates are
+ * GeoJSON geometry, a `Point` (POI) or a `Polygon` (REGION). Coordinates are
  * `[lng, lat]` per the GeoJSON spec (note the order). Loosely typed so the OAS
  * stays renderable; the API validates the concrete shape at the boundary.
  */
@@ -88,7 +88,7 @@ export const SpotVerificationSchema = z
 export type SpotVerificationDto = z.infer<typeof SpotVerificationSchema>;
 
 /**
- * GET /api/v1/spots — list item (lightweight). Drives the map markers + list
+ * GET /api/v1/spots, list item (lightweight). Drives the map markers + list
  * rows. `lat`/`lng` are the centroid; full geometry is fetched on detail.
  */
 export const SpotSummarySchema = z
@@ -110,20 +110,20 @@ export const SpotSummarySchema = z
   .openapi('SpotSummary', { description: 'Lightweight spot summary for map markers + list rows.' });
 export type SpotSummaryDto = z.infer<typeof SpotSummarySchema>;
 
-/** GET /api/v1/spots — paginated list response. */
+/** GET /api/v1/spots, paginated list response. */
 export const SpotsResponseSchema = paginatedSchema(SpotSummarySchema).openapi('SpotsResponse', {
   description: 'Cursor-paginated list of spots.',
 });
 export type SpotsResponseDto = z.infer<typeof SpotsResponseSchema>;
 
-/** GET /api/v1/spots — query parameters. */
+/** GET /api/v1/spots, query parameters. */
 export const SpotsQuerySchema = z
   .object({
     type: SpotTypeSchema.optional(),
     categoryId: UuidSchema.optional(),
     cursor: z.string().nullish(),
     since: IsoDateTimeSchema.nullish().openapi({
-      description: 'Delta-sync cursor — return only spots changed at/after this timestamp.',
+      description: 'Delta-sync cursor, return only spots changed at/after this timestamp.',
     }),
     limit: z.coerce.number().int().min(1).max(200).default(50),
   })
@@ -131,7 +131,7 @@ export const SpotsQuerySchema = z
 export type SpotsQueryDto = z.infer<typeof SpotsQuerySchema>;
 
 /**
- * GET /api/v1/spots/map — bbox map query (extends the shared bbox with an
+ * GET /api/v1/spots/map, bbox map query (extends the shared bbox with an
  * optional category filter).
  */
 export const SpotsMapQuerySchema = MapBboxQuerySchema.extend({
@@ -140,7 +140,7 @@ export const SpotsMapQuerySchema = MapBboxQuerySchema.extend({
 }).openapi({ description: 'Viewport query for `GET /api/v1/spots/map`.' });
 export type SpotsMapQueryDto = z.infer<typeof SpotsMapQuerySchema>;
 
-/** GET /api/v1/spots/map — response. Markers within the viewport. */
+/** GET /api/v1/spots/map, response. Markers within the viewport. */
 export const SpotsMapResponseSchema = z
   .object({ items: z.array(SpotSummarySchema) })
   .openapi('SpotsMapResponse', {
@@ -160,7 +160,7 @@ export const SpotAuthorSchema = z
 export type SpotAuthorDto = z.infer<typeof SpotAuthorSchema>;
 
 /**
- * GET /api/v1/spots/:slug — full detail. Includes geometry, amenities, photos,
+ * GET /api/v1/spots/:slug, full detail. Includes geometry, amenities, photos,
  * rating + verification, and POI extras (address/hours/phone/website).
  */
 export const SpotDetailSchema = z

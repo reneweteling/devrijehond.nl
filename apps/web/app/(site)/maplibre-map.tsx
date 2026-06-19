@@ -6,7 +6,7 @@
  *
  * MapLibre is imported dynamically (its module touches `window`, so it must not
  * load during SSR) but the resolved module is cached in a ref, so the marker
- * sync runs synchronously — no per-render `await` racing with React 19's
+ * sync runs synchronously, no per-render `await` racing with React 19's
  * StrictMode double-mount.
  */
 
@@ -23,7 +23,7 @@ import {
 } from './map-shared';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-/** Free OpenStreetMap raster style — no API key required. */
+/** Free OpenStreetMap raster style, no API key required. */
 const OSM_STYLE = {
   version: 8 as const,
   sources: {

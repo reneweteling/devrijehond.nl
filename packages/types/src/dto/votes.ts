@@ -3,7 +3,7 @@ import { UuidSchema, VoteValueSchema, IsoDateTimeSchema, GeoPointSchema } from '
 import '../registry';
 
 /**
- * Community-verification votes — `POST /api/v1/me/spots/:id/vote`.
+ * Community-verification votes, `POST /api/v1/me/spots/:id/vote`.
  *
  * One vote per user per spot (DB-enforced). The submitter cannot vote on their
  * own spot. A `proof` location lets the API run the proximity gate (the voter
@@ -39,7 +39,7 @@ export const VoteSchema = z
   .openapi('Vote', { description: "The signed-in user's vote on a spot." });
 export type VoteDto = z.infer<typeof VoteSchema>;
 
-/** Response to a cast vote — echoes the vote + the recomputed spot tally. */
+/** Response to a cast vote, echoes the vote + the recomputed spot tally. */
 export const VoteResponseSchema = z
   .object({
     vote: VoteSchema,

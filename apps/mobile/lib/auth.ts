@@ -8,12 +8,12 @@
  * is allowed (the generated Orval client does not cover auth).
  *
  * Three flows:
- *   1. Magic link — `requestMagicLink(email)` POSTs to /sign-in/magic-link with
+ *   1. Magic link, `requestMagicLink(email)` POSTs to /sign-in/magic-link with
  *      a runtime-aware `callbackURL`, the email links to an HTTPS interstitial
  *      that hops back to the app, then `verifyMagicLink(token)` redeems it.
- *   2. Native Apple — `signInWithAppleNative()` runs the system sheet and
+ *   2. Native Apple, `signInWithAppleNative()` runs the system sheet and
  *      exchanges the identity token at /mobile/apple-native.
- *   3. Native Google — `signInWithGoogleNative()` runs the system picker and
+ *   3. Native Google, `signInWithGoogleNative()` runs the system picker and
  *      exchanges the id token at /mobile/google-native.
  */
 
@@ -33,7 +33,7 @@ const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
  * (Android) in Expo Go but our own `nl.devrijehond.app` in a dev client / prod
  * binary. `Constants.appOwnership` is deprecated (null in SDK 55),
  * `executionEnvironment` returns `bare` for projects with a prebuilt native
- * folder even inside Expo Go, and `expoGoConfig` is truthy in dev clients too —
+ * folder even inside Expo Go, and `expoGoConfig` is truthy in dev clients too ,
  * so the bundle id is the only clean discriminator.
  */
 function isExpoGo(): boolean {
@@ -66,7 +66,7 @@ export type MagicLinkRequestResult =
  * `callbackURL` is where BetterAuth's verify page redirects after a successful
  * verify. We pass the app deep link so the email's "open in app" button lands
  * back in Expo. The email itself links to an HTTPS interstitial (per the
- * architecture decision) that then hops to this deep link — Gmail/Outlook strip
+ * architecture decision) that then hops to this deep link, Gmail/Outlook strip
  * `href` on non-HTTP(S) schemes, so a raw `vrijehond://` link in the email body
  * would render dead.
  */
@@ -74,7 +74,7 @@ export async function requestMagicLink(email: string): Promise<MagicLinkRequestR
   try {
     const response = await fetch(`${AUTH_URL}/api/auth/sign-in/magic-link`, {
       method: 'POST',
-      // Mobile is bearer-only — never send the RN cookie jar. A stale session
+      // Mobile is bearer-only, never send the RN cookie jar. A stale session
       // cookie from a prior verify would make BetterAuth 403 a re-sign-in.
       credentials: 'omit',
       headers: { 'Content-Type': 'application/json' },
@@ -216,7 +216,7 @@ export async function signInWithAppleNative(): Promise<NativeSignInResult> {
  * `@react-native-google-signin`, then exchanges the returned id token at
  * /api/auth/mobile/google-native.
  *
- * Lazy `require` — NOT a top-level import: the native module is absent on a
+ * Lazy `require`, NOT a top-level import: the native module is absent on a
  * JS-only / not-yet-rebuilt dev client, and a static import would throw at
  * module-eval and cascade into every file that imports this one. The binding is
  * only touched when the flow actually runs, after a native rebuild.

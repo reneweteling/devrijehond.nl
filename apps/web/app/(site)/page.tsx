@@ -211,7 +211,7 @@ export default async function HomePage() {
                   <div className="card-media">
                     {s.photo ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={s.photo} alt={s.name} loading="lazy" />
+                      <img src={s.photo} alt={`${s.name}, ${s.cat_label}`} loading="lazy" />
                     ) : null}
                   </div>
                   <div className="card-body">

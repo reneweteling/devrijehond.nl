@@ -2,7 +2,7 @@ import { adminDb } from '@/lib/admin-db';
 import { restoreSpot, forceVerifySpot, removeSpot, resolveReport } from './actions';
 
 /**
- * Admin — needs-attention queue (the moderation safety-net).
+ * Admin, needs-attention queue (the moderation safety-net).
  *
  * Surfaces: auto-hidden spots, spots with open reports, and contested spots
  * (high deny count but not yet hidden). Each row offers restore / force-verify
@@ -75,8 +75,7 @@ export default async function AdminDashboardPage() {
           {contested.map((s) => (
             <li key={s.id} style={rowStyle}>
               <span>
-                {s.name}{' '}
-                <small style={{ color: '#9a7b3f' }}>deny {s.denyCount}</small>
+                {s.name} <small style={{ color: '#9a7b3f' }}>deny {s.denyCount}</small>
               </span>
               <form action={forceVerifySpot.bind(null, s.id)}>
                 <button type="submit">Force-verify</button>
@@ -93,7 +92,7 @@ export default async function AdminDashboardPage() {
             <li key={r.id} style={rowStyle}>
               <span>
                 {r.targetType} · {r.reason}
-                {r.note ? <small style={{ color: '#4a5a4d' }}> — {r.note}</small> : null}
+                {r.note ? <small style={{ color: '#4a5a4d' }}>, {r.note}</small> : null}
               </span>
               <form action={resolveReport.bind(null, r.id)}>
                 <button type="submit">Resolve</button>

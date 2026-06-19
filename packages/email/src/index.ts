@@ -1,9 +1,9 @@
 /**
- * @devrijehond/email — transactional email via Resend + React Email.
+ * @devrijehond/email, transactional email via Resend + React Email.
  *
  * Exports:
- *   - `sendEmail`     — generic send (subject + React node, or raw html/text).
- *   - `sendMagicLink` — renders the magic-link template and sends it.
+ *   - `sendEmail`    , generic send (subject + React node, or raw html/text).
+ *   - `sendMagicLink`, renders the magic-link template and sends it.
  */
 
 import { render } from '@react-email/render';
@@ -66,7 +66,7 @@ export interface SendMagicLinkOptions {
 
 /**
  * Render and send the magic-link email. The `url` must already be the final
- * HTTPS link — `@devrijehond/auth` performs the mobile deep-link rewrite to an
+ * HTTPS link, `@devrijehond/auth` performs the mobile deep-link rewrite to an
  * HTTPS interstitial before calling this.
  */
 export async function sendMagicLink({ email, url }: SendMagicLinkOptions) {

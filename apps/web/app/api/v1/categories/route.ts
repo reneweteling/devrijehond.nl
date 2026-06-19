@@ -4,7 +4,7 @@ import { CategoriesQuerySchema, type CategoriesResponseDto } from '@devrijehond/
 import { ok, error } from '@/lib/api-response';
 
 /**
- * GET /api/v1/categories — public, anonymous, CDN-cacheable.
+ * GET /api/v1/categories, public, anonymous, CDN-cacheable.
  *
  * `anonDb()` enforces the `@@allow('read', visible || ADMIN)` policy, so only
  * visible categories come back to anonymous callers. Optional `?type` filter.

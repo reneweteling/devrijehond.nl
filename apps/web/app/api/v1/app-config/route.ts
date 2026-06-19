@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 /**
- * GET /api/v1/app-config — runtime config the mobile app reads on boot. Drives
+ * GET /api/v1/app-config, runtime config the mobile app reads on boot. Drives
  * the force-update flow: if the running app's version is below
  * `minSupportedVersion`, the app shows a blocking "update required" screen.
  *

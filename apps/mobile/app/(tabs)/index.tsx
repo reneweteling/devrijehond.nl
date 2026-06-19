@@ -1,5 +1,5 @@
 /**
- * S1 — Map (home). The heavy interactive surface is a native map
+ * S1, Map (home). The heavy interactive surface is a native map
  * (`react-native-maps`). It draws:
  *   - REGION spots as circular moss centroid markers,
  *   - POI spots as teardrop pins coloured by category, solid when VERIFIED and
@@ -195,7 +195,7 @@ export default function MapScreen() {
                 {selected.name}
               </Text>
               <Text style={styles.sheetMeta} numberOfLines={1}>
-                {catById.get(selected.categoryId)?.label ?? '—'}
+                {catById.get(selected.categoryId)?.label ?? ', '}
               </Text>
               <View style={styles.sheetMetaRow}>
                 <VerifiedBadge status={selected.status} />

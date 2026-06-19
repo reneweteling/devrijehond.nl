@@ -1,5 +1,5 @@
 /**
- * S16 — New feature request. Title + description + component (area of the app).
+ * S16, New feature request. Title + description + component (area of the app).
  * Auth required. Created via POST /api/v1/me/feature-requests.
  */
 
@@ -95,7 +95,7 @@ export default function NewRequestScreen() {
         </View>
 
         <Note>
-          Tip: zoek eerst of je wens al bestaat en stem die omhoog — dan maken we hem sneller.
+          Tip: zoek eerst of je wens al bestaat en stem die omhoog, dan maken we hem sneller.
         </Note>
 
         <Button

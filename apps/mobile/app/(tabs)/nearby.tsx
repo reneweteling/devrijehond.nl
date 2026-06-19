@@ -1,9 +1,9 @@
 /**
- * S4 — Nabij (nearby list). The list counterpart to the map: a name/category
+ * S4, Nabij (nearby list). The list counterpart to the map: a name/category
  * search, a category filter, and rows showing thumbnail, title, category,
  * distance (when location is granted), rating and a verified badge. With
  * location the list is sorted nearest-first; otherwise newest-first from the
- * API. Search isn't limited to the viewport — you might be looking elsewhere.
+ * API. Search isn't limited to the viewport, you might be looking elsewhere.
  */
 
 import { useMemo, useState } from 'react';
@@ -71,7 +71,7 @@ export default function NearbyScreen() {
           {item.name}
         </Text>
         <Text style={styles.meta}>
-          {catById.get(item.categoryId)?.label ?? '—'}
+          {catById.get(item.categoryId)?.label ?? ', '}
           {item._distanceM != null ? ` · ${formatDistance(item._distanceM)}` : ''}
         </Text>
         <View style={styles.metaRow}>

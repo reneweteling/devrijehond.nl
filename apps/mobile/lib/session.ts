@@ -3,7 +3,7 @@
  *
  * The bearer is a long-lived credential (BetterAuth session, 30-day sliding
  * window), so it lives in `expo-secure-store` (Keychain on iOS,
- * EncryptedSharedPreferences on Android) — never AsyncStorage (plain text).
+ * EncryptedSharedPreferences on Android), never AsyncStorage (plain text).
  *
  * We store the server's `expiresAt` alongside the token so we can decide
  * locally whether to proactively refresh without a round-trip on every
@@ -106,13 +106,12 @@ export async function refreshSessionIfNeeded(
  * Parse a BetterAuth session token out of an HTTP response.
  *
  * Primary channel: the `set-auth-token` header emitted by BetterAuth's
- * `bearer()` plugin whenever a session cookie would be set — a reliable way to
+ * `bearer()` plugin whenever a session cookie would be set, a reliable way to
  * extract the token in RN, where HttpOnly `Set-Cookie` is opaque to JS.
  * Fallback: parse `Set-Cookie` for `*session_token=...`.
  */
 export function extractTokenFromResponse(response: Response): string | null {
-  const direct =
-    response.headers.get('set-auth-token') ?? response.headers.get('x-auth-token');
+  const direct = response.headers.get('set-auth-token') ?? response.headers.get('x-auth-token');
   if (direct) return direct;
 
   const setCookie = response.headers.get('set-cookie') ?? response.headers.get('Set-Cookie');

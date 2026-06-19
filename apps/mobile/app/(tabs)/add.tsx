@@ -1,5 +1,5 @@
 /**
- * S10–S13 — Submit flow as a single screen with three steps:
+ * S10–S13, Submit flow as a single screen with three steps:
  *   1. choose type (REGION vs POI),
  *   2. place on the map (drop a pin for a POI; a polygon editor is stubbed),
  *   3. details form (name, category, description, amenities) → submit.
@@ -7,7 +7,7 @@
  * A submitted spot goes live immediately as UNVERIFIED. Auth is required; an
  * unauthenticated user is routed to sign-in.
  *
- * TODO(verify): the polygon editor for REGION submissions is a stub — wire a
+ * TODO(verify): the polygon editor for REGION submissions is a stub, wire a
  * draggable-vertex editor over MapView. The amenity multi-select reads the
  * taxonomy from GET /api/v1/amenities filtered by the chosen category.
  */
@@ -128,7 +128,7 @@ export default function AddScreen() {
               <View style={{ flex: 1 }}>
                 <Text style={styles.typeTitle}>Gebied</Text>
                 <Text style={styles.typeSub}>
-                  Losloopgebied of zwemstrand — een vlak met een grens.
+                  Losloopgebied of zwemstrand, een vlak met een grens.
                 </Text>
               </View>
             </Pressable>
@@ -139,7 +139,7 @@ export default function AddScreen() {
               <SymbolView name="mappin.circle.fill" size={26} tintColor={colors.terra} />
               <View style={{ flex: 1 }}>
                 <Text style={styles.typeTitle}>Plek</Text>
-                <Text style={styles.typeSub}>Horeca, wasplek, winkel of drinkpunt — één punt.</Text>
+                <Text style={styles.typeSub}>Horeca, wasplek, winkel of drinkpunt, één punt.</Text>
               </View>
             </Pressable>
             <Button label="Volgende" onPress={() => setStep('place')} disabled={!type} />
@@ -252,7 +252,7 @@ export default function AddScreen() {
 
             <Note>
               Je plek staat meteen live als &quot;niet geverifieerd&quot; en wordt automatisch
-              geverifieerd bij netto +5 bevestigingen — geen moderator nodig.
+              geverifieerd bij netto +5 bevestigingen, geen moderator nodig.
             </Note>
 
             <Button

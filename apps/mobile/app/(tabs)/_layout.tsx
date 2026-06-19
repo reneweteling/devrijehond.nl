@@ -1,7 +1,7 @@
 /**
  * Bottom tabs via the Native Tabs API (UITabBar on iOS, BottomNavigationView on
  * Android). Each trigger declares both an SF Symbol (`sf`) and a Material icon
- * (`md`) — Apple's HIG forces an icon, so every tab needs one.
+ * (`md`), Apple's HIG forces an icon, so every tab needs one.
  *
  * Tabs: Map (kaart) · Nabij (nearby list) · Toevoegen (submit) · Wensen
  * (feature requests) · Profiel.

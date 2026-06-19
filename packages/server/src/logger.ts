@@ -3,7 +3,7 @@ import { pino, type Logger } from 'pino';
 import pinoPretty from 'pino-pretty';
 
 /**
- * Shared pino logger for the De Vrije Hond server surface — the API route
+ * Shared pino logger for the De Vrije Hond server surface, the API route
  * handlers, server actions and (eventually) workers.
  *
  * Mirrors dekmantel/packages/server/logger.ts:

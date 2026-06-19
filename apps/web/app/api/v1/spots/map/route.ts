@@ -9,11 +9,11 @@ import {
 import { ok, error } from '@/lib/api-response';
 
 /**
- * GET /api/v1/spots/map — public, anonymous markers within a map viewport.
+ * GET /api/v1/spots/map, public, anonymous markers within a map viewport.
  *
  * Unlike `GET /api/v1/spots` (keyset-paginated list), the map read returns
  * every visible spot whose geometry intersects the requested bbox in one shot
- * so the client can draw all markers — capped at MAP_MARKER_LIMIT as a safety
+ * so the client can draw all markers, capped at MAP_MARKER_LIMIT as a safety
  * valve. Bbox intersection runs against the GiST-indexed `geom` column.
  *
  * This lives at its own static segment so `/spots/map` isn't captured by the

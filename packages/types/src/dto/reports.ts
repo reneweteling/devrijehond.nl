@@ -3,7 +3,7 @@ import { UuidSchema, ReportTargetSchema, ReportReasonSchema, IsoDateTimeSchema }
 import '../registry';
 
 /**
- * Reports — the safety-net. Any authenticated user can report a spot, photo,
+ * Reports, the safety-net. Any authenticated user can report a spot, photo,
  * or review. Reports are write-only for users; only admins read/resolve them.
  */
 export const SubmitReportRequestSchema = z

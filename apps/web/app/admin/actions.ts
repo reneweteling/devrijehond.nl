@@ -6,7 +6,7 @@ import { authDb } from '@devrijehond/db';
 import { withContext } from '@devrijehond/server';
 
 /**
- * Admin server actions — the moderation safety-net + taxonomy curation.
+ * Admin server actions, the moderation safety-net + taxonomy curation.
  *
  * Each action:
  *   1. resolves the ADMIN context via `withContext` (throws 401/403 otherwise),
@@ -15,7 +15,7 @@ import { withContext } from '@devrijehond/server';
  *   3. writes an `AdminAction` log row (audit trail),
  *   4. revalidates the affected admin path.
  *
- * Mutations are server actions (not API routes) per the project convention —
+ * Mutations are server actions (not API routes) per the project convention ,
  * public/mobile APIs are the only route handlers.
  */
 
@@ -77,7 +77,7 @@ export async function forceVerifySpot(spotId: string): Promise<void> {
   revalidatePath('/admin');
 }
 
-/** Permanently remove a spot (admin hard-removal — terminal). */
+/** Permanently remove a spot (admin hard-removal, terminal). */
 export async function removeSpot(spotId: string, note?: string): Promise<void> {
   const ctx = await adminContext();
   const db = authDb(ctx.user);

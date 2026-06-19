@@ -1,9 +1,9 @@
 /**
- * @devrijehond/s3 — S3 upload helpers.
+ * @devrijehond/s3, S3 upload helpers.
  *
  * Exports:
- *   - `createUploadUrl` — presigned PUT URL for direct browser/app uploads.
- *   - `publicUrl`       — resolve a stored object key to its public URL.
+ *   - `createUploadUrl`, presigned PUT URL for direct browser/app uploads.
+ *   - `publicUrl`      , resolve a stored object key to its public URL.
  */
 
 import { PutObjectCommand } from '@aws-sdk/client-s3';

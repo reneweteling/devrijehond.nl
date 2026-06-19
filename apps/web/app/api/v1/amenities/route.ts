@@ -4,7 +4,7 @@ import { AmenitiesQuerySchema, type AmenitiesResponseDto } from '@devrijehond/ty
 import { ok, error } from '@/lib/api-response';
 
 /**
- * GET /api/v1/amenities — public, anonymous, CDN-cacheable.
+ * GET /api/v1/amenities, public, anonymous, CDN-cacheable.
  *
  * Returns visible amenities (policy-enforced via `anonDb()`) with their
  * category mapping (`categoryIds` from `AmenityOnCategory`). Optional

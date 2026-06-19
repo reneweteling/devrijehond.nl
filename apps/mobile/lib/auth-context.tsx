@@ -4,9 +4,9 @@
  * submit, vote, review, or open the profile.
  *
  * `status`:
- *   - 'loading'       — boot hasn't settled yet (SecureStore read in flight).
- *   - 'authenticated' — a valid bearer is registered with the api-client.
- *   - 'anonymous'     — no session; auth-gated actions show a sign-in CTA.
+ *   - 'loading'      , boot hasn't settled yet (SecureStore read in flight).
+ *   - 'authenticated', a valid bearer is registered with the api-client.
+ *   - 'anonymous'    , no session; auth-gated actions show a sign-in CTA.
  *
  * Screens read `useAuth()` to gate `useMe()` (so anonymous users never hit the
  * 401-only `/me` endpoint) and to switch between content and a login CTA.

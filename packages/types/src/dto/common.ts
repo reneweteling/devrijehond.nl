@@ -14,7 +14,7 @@ import '../registry'; // side-effect: extendZodWithOpenApi(z)
  * primitives shared across DTOs.
  *
  * Pulling the enum schemas from `@devrijehond/db` (which derives them from the
- * ZModel via `@zenstackhq/zod`) prevents drift — any value added in
+ * ZModel via `@zenstackhq/zod`) prevents drift, any value added in
  * `schema.zmodel` shows up in the API contract automatically.
  */
 
@@ -49,7 +49,7 @@ export const FeatureStatusSchema = DbFeatureStatusSchema.openapi('FeatureStatus'
   example: 'CONSIDERING',
 });
 
-// Enums NOT exported by @devrijehond/db/zod — defined here to match the ZModel.
+// Enums NOT exported by @devrijehond/db/zod, defined here to match the ZModel.
 export const ReportTargetSchema = z.enum(['SPOT', 'PHOTO', 'REVIEW']).openapi('ReportTarget', {
   description: 'What kind of entity a report targets.',
   example: 'SPOT',
@@ -89,11 +89,11 @@ export const LngSchema = z
 /** Single lat/lng pair (decimal degrees, WGS84). */
 export const GeoPointSchema = z
   .object({ lat: LatSchema, lng: LngSchema })
-  .openapi('GeoPoint', { description: 'A geographic point — latitude/longitude in WGS84.' });
+  .openapi('GeoPoint', { description: 'A geographic point, latitude/longitude in WGS84.' });
 export type GeoPointDto = z.infer<typeof GeoPointSchema>;
 
 /**
- * Cursor-pagination query — `since` is the delta-sync cursor (the highest
+ * Cursor-pagination query, `since` is the delta-sync cursor (the highest
  * `updated_at` the client has already seen). `limit` caps page size.
  */
 export const PaginationQuerySchema = z
@@ -104,7 +104,7 @@ export const PaginationQuerySchema = z
     }),
     since: IsoDateTimeSchema.nullish().openapi({
       description:
-        'Delta-sync cursor — return only items changed at or after this timestamp. Drives incremental offline sync on mobile.',
+        'Delta-sync cursor, return only items changed at or after this timestamp. Drives incremental offline sync on mobile.',
     }),
     limit: z.coerce.number().int().min(1).max(200).default(50).openapi({
       description: 'Maximum number of items to return (1–200).',

@@ -1,5 +1,5 @@
 /**
- * Mobile data layer — domain-named TanStack Query hooks over the generated
+ * Mobile data layer, domain-named TanStack Query hooks over the generated
  * `@devrijehond/api-client`.
  *
  * Each hook wraps a generated fetcher (which calls `customFetcher` against the
@@ -75,7 +75,7 @@ export type {
   FeatureStatus,
 };
 
-/** Body for `useSubmitSpot` — the generated submit-spot request shape. */
+/** Body for `useSubmitSpot`, the generated submit-spot request shape. */
 export type SubmitSpotBody = SubmitSpotRequest;
 
 /** Map viewport bounding box (mirrors the server's MapBboxQuery). */
@@ -99,7 +99,7 @@ export function useAmenities(categoryId?: string) {
   });
 }
 
-/** GET /api/v1/spots/map — markers within the viewport. */
+/** GET /api/v1/spots/map, markers within the viewport. */
 export function useSpotsInViewport(
   bbox: Bbox | null,
   opts?: { type?: SpotType; categoryId?: string },
@@ -115,7 +115,7 @@ export function useSpotsInViewport(
   });
 }
 
-/** GET /api/v1/spots — paginated list (the Nearby tab). */
+/** GET /api/v1/spots, paginated list (the Nearby tab). */
 export function useSpots(opts?: { type?: SpotType; categoryId?: string; limit?: number }) {
   return useQuery({
     queryKey: ['spots', opts?.type, opts?.categoryId, opts?.limit],
@@ -127,7 +127,7 @@ export function useSpots(opts?: { type?: SpotType; categoryId?: string; limit?: 
   });
 }
 
-/** GET /api/v1/spots/:slug — full detail. */
+/** GET /api/v1/spots/:slug, full detail. */
 export function useSpotDetail(slug: string | undefined) {
   return useQuery({
     queryKey: ['spot', slug],
@@ -145,7 +145,7 @@ export function useSpotReviews(slug: string | undefined) {
   });
 }
 
-/** GET /api/v1/me — the signed-in profile. */
+/** GET /api/v1/me, the signed-in profile. */
 export function useMe(enabled = true) {
   return useQuery({
     queryKey: ['me'],
@@ -154,7 +154,7 @@ export function useMe(enabled = true) {
   });
 }
 
-/** POST /api/v1/me/spots/:id/vote — cast a verification vote. */
+/** POST /api/v1/me/spots/:id/vote, cast a verification vote. */
 export function useCastVote() {
   return useMutation({
     mutationFn: (args: { spotId: string; value: VoteValue; proof?: GeoPoint }) =>
@@ -162,7 +162,7 @@ export function useCastVote() {
   });
 }
 
-/** POST /api/v1/me/spots/:id/reviews — write a review. */
+/** POST /api/v1/me/spots/:id/reviews, write a review. */
 export function useSubmitReview() {
   return useMutation({
     mutationFn: (args: { spotId: string; stars: number; body?: string }) =>
@@ -170,14 +170,14 @@ export function useSubmitReview() {
   });
 }
 
-/** POST /api/v1/me/spots — submit a new spot (goes live UNVERIFIED). */
+/** POST /api/v1/me/spots, submit a new spot (goes live UNVERIFIED). */
 export function useSubmitSpot() {
   return useMutation({
     mutationFn: (body: SubmitSpotBody) => postApiV1MeSpots(body),
   });
 }
 
-/** POST /api/v1/me/reports — report a spot / photo / review. */
+/** POST /api/v1/me/reports, report a spot / photo / review. */
 export function useSubmitReport() {
   return useMutation({
     mutationFn: (args: {
@@ -200,7 +200,7 @@ export function useSubmitReport() {
 // require auth.
 // ---------------------------------------------------------------------------
 
-/** GET /api/v1/feature-requests — public list, optionally filtered by status. */
+/** GET /api/v1/feature-requests, public list, optionally filtered by status. */
 export function useFeatureRequests(status?: FeatureStatus) {
   return useQuery({
     queryKey: ['feature-requests', status ?? 'all'],
@@ -208,7 +208,7 @@ export function useFeatureRequests(status?: FeatureStatus) {
   });
 }
 
-/** POST /api/v1/me/feature-requests — create a feature request. */
+/** POST /api/v1/me/feature-requests, create a feature request. */
 export function useCreateFeatureRequest() {
   return useMutation({
     mutationFn: (args: { title: string; body?: string; component?: string }) =>
@@ -216,7 +216,7 @@ export function useCreateFeatureRequest() {
   });
 }
 
-/** POST /api/v1/me/feature-requests/:id/vote — toggle an upvote. */
+/** POST /api/v1/me/feature-requests/:id/vote, toggle an upvote. */
 export function useToggleFeatureVote() {
   return useMutation({
     mutationFn: (id: string) => postApiV1MeFeatureRequestsIdVote(id),

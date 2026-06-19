@@ -2,23 +2,23 @@
 
 Orval-generated TypeScript client + TanStack Query hooks for the De Vrije Hond
 API. Consumed exclusively by `apps/mobile`. Web code must **not** import from
-this package — it uses `@devrijehond/types` + server actions / route handlers
+this package, it uses `@devrijehond/types` + server actions / route handlers
 and `authDb` directly.
 
 ## What's in here
 
-- `orval.config.ts` — Orval input/output configuration (tags-split,
+- `orval.config.ts`, Orval input/output configuration (tags-split,
   react-query, useQuery + useSuspenseQuery + signal).
-- `input.ts` — input resolver: committed `openapi.snapshot.json` by default,
+- `input.ts`, input resolver: committed `openapi.snapshot.json` by default,
   the running web dev server when `OPENAPI_SOURCE=dev`.
-- `src/custom-fetcher.ts` — fetch wrapper injected into every generated hook
+- `src/custom-fetcher.ts`, fetch wrapper injected into every generated hook
   (adds `X-Client-Version` + `X-API-Version`, session cookie / bearer token via
   `setAuthToken`, 5xx retry, 401 → `onUnauthorized`, no-cache for `/me/*`).
-- `src/index.ts` — re-exports the generated client + `setAuthToken` +
+- `src/index.ts`, re-exports the generated client + `setAuthToken` +
   `setUnauthorizedHandler` + `FetcherError`.
-- `src/generated/` — Orval's output. Do not hand-edit.
-- `openapi.snapshot.json` — committed snapshot seed (see below). **Not yet
-  generated** — produce it once the web API serves `/api/v1/openapi.json`.
+- `src/generated/`, Orval's output. Do not hand-edit.
+- `openapi.snapshot.json`, committed snapshot seed (see below). **Not yet
+  generated**, produce it once the web API serves `/api/v1/openapi.json`.
 
 ## Generating the client
 

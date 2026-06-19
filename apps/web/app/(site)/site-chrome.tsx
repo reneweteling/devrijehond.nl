@@ -102,7 +102,7 @@ export function AppCta() {
           <h2 style={{ color: '#fff', fontSize: 28, marginBottom: 10 }}>
             Neem de kaart mee op je wandeling
           </h2>
-          <p style={{ margin: 0, fontSize: 16.5, color: 'rgba(255,255,255,.9)', maxWidth: '48ch' }}>
+          <p style={{ margin: 0, fontSize: 16.5, color: '#fff', maxWidth: '48ch' }}>
             De Vrije Hond vindt losloopgebieden, hondenstranden en hondvriendelijke plekken bij jou
             in de buurt. En jij helpt mee verifiëren.
           </p>
@@ -170,8 +170,8 @@ function Footer() {
               style={{ fontWeight: 600 }}
             >
               René Weteling
-            </a>{' '}
-            — Felobo B.V.
+            </a>
+            , Felobo B.V.
             <br />
             Van idee tot productie: web, mobiel &amp; AI.
             <br />
@@ -183,7 +183,7 @@ function Footer() {
       </div>
       <div className="foot-bottom">
         <div className="container">
-          De Vrije Hond™ — © 2026 Felobo B.V. (KvK 80910483). Alle rechten voorbehouden.
+          De Vrije Hond™ · © 2026 Felobo B.V. (KvK 80910483). Alle rechten voorbehouden.
         </div>
       </div>
     </footer>

@@ -4,7 +4,7 @@ import { DogSchema } from './dogs';
 import '../registry';
 
 /**
- * `/me` — the authenticated user's own profile.
+ * `/me`, the authenticated user's own profile.
  *
  * NOTE: the API serialises every DateTime as an ISO-8601 string at the
  * boundary, so the wire shape uses `string` for timestamps.
@@ -25,7 +25,7 @@ export const MeProfileSchema = z
   .openapi('MeProfile', { description: 'Authenticated user profile (`GET /api/v1/me`).' });
 export type MeProfileDto = z.infer<typeof MeProfileSchema>;
 
-/** PATCH /api/v1/me — profile patch. */
+/** PATCH /api/v1/me, profile patch. */
 export const MeProfilePatchSchema = z
   .object({
     name: z.string().min(1).max(80).nullish(),

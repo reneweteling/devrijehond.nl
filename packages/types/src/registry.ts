@@ -6,7 +6,7 @@ import {
 import { z } from 'zod';
 
 /**
- * Shared OpenAPI registry — the API contract for De Vrije Hond.
+ * Shared OpenAPI registry, the API contract for De Vrije Hond.
  *
  * Every DTO schema in `./dto/**` attaches metadata via `.openapi({...})`.
  * Shared schemas + every path are registered here (see `./paths.ts`), and the
@@ -14,7 +14,7 @@ import { z } from 'zod';
  * Orval to generate `@devrijehond/api-client`.
  *
  * `extendZodWithOpenApi(z)` monkey-patches the zod instance with a `.openapi(...)`
- * method; calling it here — at the module that owns the registry — is the
+ * method; calling it here, at the module that owns the registry, is the
  * canonical pattern so every downstream `import { z } from "zod"` sees the
  * extension without caring about import order.
  */
@@ -58,7 +58,7 @@ export function buildOpenApiDocument(
       title: 'De Vrije Hond API',
       version,
       description:
-        'Typed contract between the De Vrije Hond website/API (apps/web) and the Expo mobile app. Generated from Zod schemas in @devrijehond/types. The community-driven map of dog-friendly spots — public reads are anonymous + CDN-cacheable; user-scoped writes live under `/me/*`.',
+        'Typed contract between the De Vrije Hond website/API (apps/web) and the Expo mobile app. Generated from Zod schemas in @devrijehond/types. The community-driven map of dog-friendly spots, public reads are anonymous + CDN-cacheable; user-scoped writes live under `/me/*`.',
     },
     servers: [
       { url: 'https://devrijehond.nl', description: 'production' },
