@@ -28,27 +28,18 @@ export default function EditProfileScreen() {
   const { data: me } = useMe(isAuthenticated);
   const update = useUpdateMe();
 
-  const [name, setName] = useState('');
-  const [handle, setHandle] = useState('');
-  const [bio, setBio] = useState('');
-  const [hydrated, setHydrated] = useState(false);
-
-  // Prefill once the profile loads.
-  useEffect(() => {
-    if (me && !hydrated) {
-      setName(me.name ?? '');
-      setHandle(me.handle ?? '');
-      setBio(me.bio ?? '');
-      setHydrated(true);
-    }
-  }, [me, hydrated]);
+  // Derive the form from a local draft, falling back to the loaded profile.
+  // (Avoids a prefill effect that would setState synchronously on load.)
+  const [draft, setDraft] = useState<{ name: string; handle: string; bio: string } | null>(null);
+  const v = draft ?? { name: me?.name ?? '', handle: me?.handle ?? '', bio: me?.bio ?? '' };
+  const setField = (patch: Partial<typeof v>) => setDraft({ ...v, ...patch });
 
   const onSave = () => {
     update.mutate(
       {
-        name: name.trim() || null,
-        handle: handle.trim() ? handle.trim().toLowerCase() : null,
-        bio: bio.trim() || null,
+        name: v.name.trim() || null,
+        handle: v.handle.trim() ? v.handle.trim().toLowerCase() : null,
+        bio: v.bio.trim() || null,
       },
       {
         onSuccess: () => {
@@ -73,8 +64,8 @@ export default function EditProfileScreen() {
         <Field label="Naam">
           <TextInput
             style={styles.input}
-            value={name}
-            onChangeText={setName}
+            value={v.name}
+            onChangeText={(t) => setField({ name: t })}
             placeholder="Je naam"
             placeholderTextColor={colors.ink3}
           />
@@ -85,8 +76,8 @@ export default function EditProfileScreen() {
             <Text style={styles.at}>@</Text>
             <TextInput
               style={[styles.input, { flex: 1, borderWidth: 0, paddingHorizontal: 0 }]}
-              value={handle}
-              onChangeText={setHandle}
+              value={v.handle}
+              onChangeText={(t) => setField({ handle: t })}
               placeholder="gebruikersnaam"
               placeholderTextColor={colors.ink3}
               autoCapitalize="none"
@@ -98,8 +89,8 @@ export default function EditProfileScreen() {
         <Field label="Bio">
           <TextInput
             style={[styles.input, styles.multiline]}
-            value={bio}
-            onChangeText={setBio}
+            value={v.bio}
+            onChangeText={(t) => setField({ bio: t })}
             placeholder="Vertel kort iets over jezelf en je hond(en)."
             placeholderTextColor={colors.ink3}
             multiline

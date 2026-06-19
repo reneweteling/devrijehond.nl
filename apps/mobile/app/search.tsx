@@ -35,12 +35,14 @@ export default function SearchScreen() {
   const [geo, setGeo] = useState<GeoResult | null>(null);
   useEffect(() => {
     const term = q.trim();
-    if (term.length < 2) {
-      setGeo(null);
-      return;
-    }
     let cancelled = false;
+    // All setState happens inside the async timeout (never synchronously in the
+    // effect body), and is debounced.
     const t = setTimeout(async () => {
+      if (term.length < 2) {
+        if (!cancelled) setGeo(null);
+        return;
+      }
       const result = await geocodePlace(term);
       if (!cancelled) setGeo(result);
     }, 400);

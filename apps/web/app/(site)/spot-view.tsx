@@ -73,7 +73,6 @@ export function SpotView({ spot }: { spot: SpotDetailDto }) {
       {/* Lead photo */}
       {lead ? (
         <div className="container" style={{ marginTop: 20 }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={lead.url}
             alt={`Foto van ${spot.name}, ${spot.category.label}`}
@@ -119,7 +118,6 @@ export function SpotView({ spot }: { spot: SpotDetailDto }) {
           ) : null}
 
           {rest.length === 1 ? (
-            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={rest[0]!.url}
               alt={`${spot.name}, foto 2`}
@@ -142,7 +140,6 @@ export function SpotView({ spot }: { spot: SpotDetailDto }) {
               }}
             >
               {rest.map((p, i) => (
-                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   key={p.id}
                   src={p.url}

@@ -1,6 +1,7 @@
 // Enable the PostGIS extension before migrations run (the initial migration
 // creates geometry columns, which require the extension to already exist).
 // Idempotent: CREATE EXTENSION IF NOT EXISTS.
+/* global process, console */
 import pg from 'pg';
 
 const url = process.env.DATABASE_URL;

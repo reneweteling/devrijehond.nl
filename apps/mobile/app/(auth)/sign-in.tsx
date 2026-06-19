@@ -22,6 +22,14 @@ import { useAuth } from '@/lib/auth-context';
 import { colors, font, radius, space } from '@/lib/theme';
 import { Button } from '@/components/ui';
 
+function CloseButton({ top, onClose }: { top: number; onClose: () => void }) {
+  return (
+    <Pressable onPress={onClose} hitSlop={12} style={[styles.close, { top }]}>
+      <SymbolView name="xmark" size={17} tintColor={colors.ink2} />
+    </Pressable>
+  );
+}
+
 export default function SignInScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -36,11 +44,6 @@ export default function SignInScreen() {
   // Dismiss back to wherever this was pushed from, or fall back to the map so
   // the user is never trapped on the auth screen.
   const onClose = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)'));
-  const CloseButton = () => (
-    <Pressable onPress={onClose} hitSlop={12} style={[styles.close, { top: insets.top + 8 }]}>
-      <SymbolView name="xmark" size={17} tintColor={colors.ink2} />
-    </Pressable>
-  );
 
   const onMagicLink = async () => {
     setError(null);
@@ -93,7 +96,7 @@ export default function SignInScreen() {
   if (sent) {
     return (
       <View style={[styles.root, styles.center, { paddingTop: insets.top }]}>
-        <CloseButton />
+        <CloseButton top={insets.top + 8} onClose={onClose} />
         <SymbolView name="envelope.badge.fill" size={48} tintColor={colors.moss} />
         <Text style={styles.title}>Check je inbox</Text>
         <Text style={styles.sub}>
@@ -111,7 +114,7 @@ export default function SignInScreen() {
       style={styles.root}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <CloseButton />
+      <CloseButton top={insets.top + 8} onClose={onClose} />
       <View
         style={[styles.inner, { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 24 }]}
       >
