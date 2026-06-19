@@ -462,7 +462,7 @@ function render(){
   const phone=`<div class="stage"><div class="phone">
     <div class="sbar ${s.overlay?'ov':''}"><span>9:41</span><span><i class="ti ti-wifi"></i> <i class="ti ti-battery-3"></i></span></div>
     ${s.html}${tabbar(s.tab)}</div></div>`;
-  document.getElementById('root').innerHTML='<div class="wm"><i class="ti ti-paw"></i> De Vrije Hond · hi-fi prototype</div>'+nav+phone+'<div class="cap">Klikbaar · tik op pins, kaarten, knoppen en de tabbalk. Echte stockfoto\\'s via place.dog (picsum als fallback).</div>';
+  document.getElementById('root').innerHTML='<div class="wm"><i class="ti ti-paw"></i> De Vrije Hond · hi-fi prototype</div>'+nav+phone+'<div class="cap">Klikbaar · tik op pins, kaarten, knoppen en de tabbalk. Echte stockfoto\'s via place.dog (picsum als fallback).</div>';
 }
 function go(id){if(SCREENS[id]){current=id;render();window.scrollTo({top:0,behavior:'smooth'});}}
 render();
