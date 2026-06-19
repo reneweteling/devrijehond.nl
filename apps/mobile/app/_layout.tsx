@@ -14,6 +14,8 @@ import { AppProviders } from '@/lib/providers';
 import { bootApiClient } from '@/lib/query';
 import { clearSession } from '@/lib/session';
 import { useAuth } from '@/lib/auth-context';
+import { fetchAppConfig, isUpdateRequired } from '@/lib/app-version';
+import { ForceUpdate } from '@/components/force-update';
 import { colors } from '@/lib/theme';
 
 // Anchor `/` to the tabs group (there is no app/index.tsx). The app is
@@ -58,9 +60,16 @@ export default function RootLayout() {
 function RootNav() {
   const { setAuthenticated } = useAuth();
   const [booted, setBooted] = useState(false);
+  const [updateUrl, setUpdateUrl] = useState<{ ios: string; android: string } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
+
+    // Force-update check (non-blocking on failure): cut off ancient builds.
+    void (async () => {
+      const config = await fetchAppConfig();
+      if (!cancelled && config && isUpdateRequired(config)) setUpdateUrl(config.updateUrl);
+    })();
 
     // A 401 from an authed request means the session lapsed: clear it and drop
     // to anonymous. No hard redirect — the user stays on the map and auth-gated
@@ -158,6 +167,8 @@ function RootNav() {
           }}
         />
       )}
+      {/* Blocking force-update gate (above everything) for outdated builds. */}
+      {updateUrl && <ForceUpdate url={updateUrl} />}
     </>
   );
 }
