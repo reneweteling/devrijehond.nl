@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 
 /**
- * Shared shell for the static legal pages (/privacy, /terms). Matches the
- * homepage container + palette. Server component, no client JS.
+ * Shared shell for the static legal pages (/privacy, /terms). Uses the site
+ * design system (globals.css) for a clean, readable document column.
  */
 export function LegalPage({
   title,
@@ -14,22 +14,20 @@ export function LegalPage({
   children: ReactNode;
 }) {
   return (
-    <main style={{ maxWidth: 720, margin: '0 auto', padding: '32px 20px 64px' }}>
-      <a href="/" style={{ color: '#3F6B4C', textDecoration: 'none', fontSize: 14 }}>
-        ← Terug naar de kaart
-      </a>
-      <h1 style={{ fontSize: 30, margin: '16px 0 4px' }}>{title}</h1>
-      <p style={{ fontSize: 13, color: '#9a957f', marginTop: 0 }}>Laatst bijgewerkt: {updated}</p>
-      <div style={{ fontSize: 15, lineHeight: 1.65, color: '#3c4a3e' }}>{children}</div>
-      <hr
-        style={{ border: 'none', borderTop: '1px solid rgba(60,50,20,.12)', margin: '32px 0 16px' }}
-      />
-      <p style={{ fontSize: 13, color: '#9a957f' }}>
-        Vragen? Mail naar{' '}
-        <a href="mailto:hallo@devrijehond.nl" style={{ color: '#3F6B4C' }}>
-          hallo@devrijehond.nl
-        </a>
-        .
+    <main className="container container-narrow" style={{ padding: '36px 24px 72px' }}>
+      <nav style={{ fontSize: 14, marginBottom: 18 }}>
+        <a href="/">← Terug naar de kaart</a>
+      </nav>
+      <h1 style={{ fontSize: 'clamp(28px, 4vw, 40px)' }}>{title}</h1>
+      <p className="muted" style={{ fontSize: 13.5, marginTop: 8 }}>
+        Laatst bijgewerkt: {updated}
+      </p>
+      <div style={{ fontSize: 16, lineHeight: 1.7, color: 'var(--ink-2)', marginTop: 8 }}>
+        {children}
+      </div>
+      <hr style={{ border: 'none', borderTop: '1px solid var(--line)', margin: '36px 0 16px' }} />
+      <p className="muted" style={{ fontSize: 14 }}>
+        Vragen? Mail naar <a href="mailto:hallo@devrijehond.nl">hallo@devrijehond.nl</a>.
       </p>
     </main>
   );
@@ -37,8 +35,8 @@ export function LegalPage({
 
 export function LegalSection({ heading, children }: { heading: string; children: ReactNode }) {
   return (
-    <section style={{ marginTop: 24 }}>
-      <h2 style={{ fontSize: 18, margin: '0 0 6px' }}>{heading}</h2>
+    <section style={{ marginTop: 28 }}>
+      <h2 style={{ fontSize: 21, margin: '0 0 8px' }}>{heading}</h2>
       {children}
     </section>
   );
