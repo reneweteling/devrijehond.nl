@@ -67,7 +67,6 @@ function Header() {
         <div className="nav-links">
           <a href="/#kaart">Kaart</a>
           <a href="/#zo-werkt-het">Zo werkt het</a>
-          <a href="/api/docs">API</a>
           <a className="btn btn-primary" href="/#app">
             Download de app
           </a>
@@ -153,9 +152,6 @@ function Footer() {
             </li>
             <li>
               <a href="/terms">Voorwaarden</a>
-            </li>
-            <li>
-              <a href="/api/docs">API-documentatie</a>
             </li>
           </ul>
         </div>
