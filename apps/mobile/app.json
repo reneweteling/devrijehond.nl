@@ -20,7 +20,10 @@
         "usesNonExemptEncryption": false
       },
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Je locatie laat de kaart zien welke hondenplekken bij jou in de buurt zijn, en bepaalt of je een plek kunt bevestigen."
+        "NSLocationWhenInUseUsageDescription": "Je locatie laat de kaart zien welke hondenplekken bij jou in de buurt zijn, en bepaalt of je een plek kunt bevestigen.",
+        "NSAppTransportSecurity": {
+          "NSAllowsLocalNetworking": true
+        }
       }
     },
     "android": {
@@ -57,7 +60,6 @@
       [
         "react-native-maps",
         {
-          "iosGoogleMapsApiKey": "TODO_VERIFY_IOS_MAPS_KEY",
           "androidGoogleMapsApiKey": "TODO_VERIFY_ANDROID_MAPS_KEY"
         }
       ]

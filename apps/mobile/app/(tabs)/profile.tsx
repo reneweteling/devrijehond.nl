@@ -17,6 +17,7 @@ import { setAuthToken } from '@devrijehond/api-client';
 
 import { useMe, type Dog } from '@/lib/api';
 import { clearSession } from '@/lib/session';
+import { useAuth } from '@/lib/auth-context';
 import { colors, font, radius, space } from '@/lib/theme';
 import { Button } from '@/components/ui';
 
@@ -24,19 +25,25 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const qc = useQueryClient();
-  const { data: me, isLoading } = useMe();
+  const { isAuthenticated, setAuthenticated } = useAuth();
+  const { data: me, isLoading } = useMe(isAuthenticated);
 
   const signOut = async () => {
     await clearSession();
     setAuthToken(null);
+    setAuthenticated(false);
     qc.clear();
-    router.replace('/(auth)/sign-in');
+    router.replace('/(tabs)');
   };
 
-  if (!isLoading && !me) {
+  if (!isAuthenticated || (!isLoading && !me)) {
     return (
       <View style={[styles.root, styles.center, { paddingTop: insets.top }]}>
-        <SymbolView name="person.crop.circle.badge.questionmark" size={48} tintColor={colors.ink3} />
+        <SymbolView
+          name="person.crop.circle.badge.questionmark"
+          size={48}
+          tintColor={colors.ink3}
+        />
         <Text style={styles.signedOutTitle}>Niet ingelogd</Text>
         <Text style={styles.signedOutSub}>
           Log in om plekken toe te voegen, te bevestigen en reviews te schrijven.
@@ -51,7 +58,10 @@ export default function ProfileScreen() {
   return (
     <ScrollView
       style={styles.root}
-      contentContainerStyle={{ paddingTop: insets.top + space.md, paddingBottom: insets.bottom + 110 }}
+      contentContainerStyle={{
+        paddingTop: insets.top + space.md,
+        paddingBottom: insets.bottom + 110,
+      }}
     >
       <View style={styles.header}>
         <View style={styles.avatar}>
@@ -110,7 +120,12 @@ export default function ProfileScreen() {
       </View>
 
       <View style={{ paddingHorizontal: space.lg, marginTop: space.md }}>
-        <Button label="Uitloggen" variant="secondary" icon="rectangle.portrait.and.arrow.right" onPress={signOut} />
+        <Button
+          label="Uitloggen"
+          variant="secondary"
+          icon="rectangle.portrait.and.arrow.right"
+          onPress={signOut}
+        />
       </View>
     </ScrollView>
   );
@@ -119,7 +134,12 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.sand },
   center: { alignItems: 'center', justifyContent: 'center', gap: space.sm },
-  signedOutTitle: { fontFamily: font.heading, fontSize: 20, color: colors.ink, marginTop: space.sm },
+  signedOutTitle: {
+    fontFamily: font.heading,
+    fontSize: 20,
+    color: colors.ink,
+    marginTop: space.sm,
+  },
   signedOutSub: {
     fontFamily: font.body,
     fontSize: 13,

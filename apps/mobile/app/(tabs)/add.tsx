@@ -12,14 +12,15 @@
  * taxonomy from GET /api/v1/amenities filtered by the chosen category.
  */
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import MapView, { Marker, type Region } from 'react-native-maps';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useAmenities, useCategories, useMe, useSubmitSpot, type SpotType } from '@/lib/api';
+import { useAmenities, useCategories, useSubmitSpot, type SpotType } from '@/lib/api';
+import { useAuth } from '@/lib/auth-context';
 import { categorySymbol } from '@/lib/icons';
 import { colors, font, radius, space } from '@/lib/theme';
 import { Button, Note, ScreenTitle } from '@/components/ui';
@@ -36,7 +37,7 @@ type Step = 'type' | 'place' | 'details' | 'done';
 export default function AddScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { data: me, isLoading: meLoading } = useMe();
+  const { isAuthenticated } = useAuth();
 
   const [step, setStep] = useState<Step>('type');
   const [type, setType] = useState<SpotType | null>(null);
@@ -52,11 +53,6 @@ export default function AddScreen() {
   const amenities = amenitiesData?.items ?? [];
 
   const submit = useSubmitSpot();
-
-  // Route unauthenticated users to sign-in once the /me probe resolves.
-  useEffect(() => {
-    if (!meLoading && !me) router.replace('/(auth)/sign-in');
-  }, [meLoading, me, router]);
 
   const reset = () => {
     setStep('type');
@@ -76,16 +72,34 @@ export default function AddScreen() {
         categoryId,
         name,
         description: description || undefined,
-        point:
-          type === 'POI' && point
-            ? { lat: point.latitude, lng: point.longitude }
-            : undefined,
+        point: type === 'POI' && point ? { lat: point.latitude, lng: point.longitude } : undefined,
         // TODO(verify): for REGION, pass `polygon: [{lat,lng},…]` from the editor.
         amenityIds,
       },
       { onSuccess: () => setStep('done') },
     );
   };
+
+  // Submitting requires an account (wireframe S10). Anonymous users get an
+  // inline sign-in CTA instead of an abrupt bounce.
+  if (!isAuthenticated) {
+    return (
+      <View style={[styles.root, { paddingTop: insets.top }]}>
+        <ScreenTitle sub="Voeg een hondenplek of -gebied toe">Toevoegen</ScreenTitle>
+        <View style={styles.gate}>
+          <SymbolView name="plus.circle.fill" size={48} tintColor={colors.moss} />
+          <Text style={styles.gateTitle}>Log in om een plek toe te voegen</Text>
+          <Text style={styles.gateSub}>
+            Met een account kun je nieuwe hondenplekken inzenden. Ze gaan direct live en worden door
+            de community geverifieerd.
+          </Text>
+          <View style={{ width: '100%' }}>
+            <Button label="Inloggen" onPress={() => router.push('/(auth)/sign-in')} />
+          </View>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
@@ -113,7 +127,9 @@ export default function AddScreen() {
               <SymbolView name="pawprint.fill" size={26} tintColor={colors.moss} />
               <View style={{ flex: 1 }}>
                 <Text style={styles.typeTitle}>Gebied</Text>
-                <Text style={styles.typeSub}>Losloopgebied of zwemstrand — een vlak met een grens.</Text>
+                <Text style={styles.typeSub}>
+                  Losloopgebied of zwemstrand — een vlak met een grens.
+                </Text>
               </View>
             </Pressable>
             <Pressable
@@ -145,7 +161,9 @@ export default function AddScreen() {
               </MapView>
             </View>
             {type === 'REGION' ? (
-              <Note>De polygon-editor volgt; tik voor nu op de kaart om het centrum te kiezen.</Note>
+              <Note>
+                De polygon-editor volgt; tik voor nu op de kaart om het centrum te kiezen.
+              </Note>
             ) : (
               <Note>Tik op de kaart om de pin neer te zetten.</Note>
             )}
@@ -184,7 +202,9 @@ export default function AddScreen() {
                       size={14}
                       tintColor={categoryId === c.id ? '#fff' : colors.mossDark}
                     />
-                    <Text style={[styles.catChipText, categoryId === c.id && styles.catChipTextActive]}>
+                    <Text
+                      style={[styles.catChipText, categoryId === c.id && styles.catChipTextActive]}
+                    >
                       {c.label}
                     </Text>
                   </Pressable>
@@ -241,7 +261,9 @@ export default function AddScreen() {
               loading={submit.isPending}
               disabled={!name || !categoryId}
             />
-            {submit.isError ? <Text style={styles.error}>Plaatsen mislukt. Probeer opnieuw.</Text> : null}
+            {submit.isError ? (
+              <Text style={styles.error}>Plaatsen mislukt. Probeer opnieuw.</Text>
+            ) : null}
           </View>
         )}
 
@@ -264,6 +286,29 @@ export default function AddScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.sand },
+  gate: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: space.sm,
+    paddingHorizontal: space.xl,
+    paddingBottom: 80,
+  },
+  gateTitle: {
+    fontFamily: font.heading,
+    fontSize: 20,
+    color: colors.ink,
+    marginTop: space.sm,
+    textAlign: 'center',
+  },
+  gateSub: {
+    fontFamily: font.body,
+    fontSize: 13,
+    color: colors.ink2,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: space.md,
+  },
   steps: { flexDirection: 'row', gap: 8, marginBottom: space.lg },
   stepDotWrap: { flex: 1, alignItems: 'center' },
   stepDot: {
@@ -291,7 +336,12 @@ const styles = StyleSheet.create({
   typeCardActive: { borderColor: colors.moss },
   typeTitle: { fontFamily: font.heading, fontSize: 15, color: colors.ink },
   typeSub: { fontFamily: font.body, fontSize: 12, color: colors.ink2, marginTop: 2 },
-  mapBox: { height: 260, borderRadius: radius.card, overflow: 'hidden', backgroundColor: colors.mossSoft },
+  mapBox: {
+    height: 260,
+    borderRadius: radius.card,
+    overflow: 'hidden',
+    backgroundColor: colors.mossSoft,
+  },
   field: { gap: 6 },
   label: { fontFamily: font.bodyMedium, fontSize: 12, color: colors.ink2 },
   input: {

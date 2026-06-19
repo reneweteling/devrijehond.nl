@@ -16,11 +16,13 @@ import { SymbolView } from 'expo-symbols';
 import { setAuthToken } from '@devrijehond/api-client';
 
 import { verifyMagicLink } from '@/lib/auth';
+import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui';
 import { colors, font, space } from '@/lib/theme';
 
 export default function VerifyScreen() {
   const router = useRouter();
+  const { setAuthenticated } = useAuth();
   const params = useLocalSearchParams<{ token?: string }>();
   const token = typeof params.token === 'string' ? params.token : undefined;
 
@@ -39,12 +41,13 @@ export default function VerifyScreen() {
       const result = await verifyMagicLink(token);
       if (result.ok) {
         setAuthToken(result.session.token);
+        setAuthenticated(true);
         router.replace('/(tabs)');
       } else {
         setState('error');
       }
     })();
-  }, [token, router]);
+  }, [token, router, setAuthenticated]);
 
   if (state === 'error') {
     return (
@@ -77,5 +80,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   title: { fontFamily: font.heading, fontSize: 20, color: colors.ink },
-  sub: { fontFamily: font.body, fontSize: 14, color: colors.ink2, textAlign: 'center', lineHeight: 21 },
+  sub: {
+    fontFamily: font.body,
+    fontSize: 14,
+    color: colors.ink2,
+    textAlign: 'center',
+    lineHeight: 21,
+  },
 });

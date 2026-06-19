@@ -34,6 +34,7 @@ import {
   type Amenity,
   type Review,
 } from '@/lib/api';
+import { useAuth } from '@/lib/auth-context';
 import { amenitySymbol } from '@/lib/icons';
 import { colors, font, radius, space } from '@/lib/theme';
 import { AmenityTile, Button, Stars, VerifiedBadge } from '@/components/ui';
@@ -52,9 +53,10 @@ export default function SpotDetailScreen() {
   const router = useRouter();
   const qc = useQueryClient();
 
+  const { isAuthenticated } = useAuth();
   const { data: spot, isLoading } = useSpotDetail(slug);
   const { data: reviewsData } = useSpotReviews(slug);
-  const { data: me } = useMe();
+  const { data: me } = useMe(isAuthenticated);
   const castVote = useCastVote();
 
   const reviews = reviewsData?.items ?? [];
@@ -72,6 +74,9 @@ export default function SpotDetailScreen() {
   const progress = Math.max(0, Math.min(1, v.netScore / 5));
   const isOwner = me?.id === spot.submittedBy.id;
   const canVote = !!me && !isOwner && v.status === 'UNVERIFIED';
+  // Buttons stay tappable for anonymous users on an open spot — the tap routes
+  // to sign-in. Only an owner / already-resolved spot disables them.
+  const canInteractVote = !isOwner && v.status === 'UNVERIFIED';
 
   const eligibilityLine = !me
     ? 'Log in om deze plek te bevestigen.'
@@ -82,6 +87,11 @@ export default function SpotDetailScreen() {
         : 'Ben je hier geweest? Dan telt jouw stem mee.';
 
   const vote = (value: 'CONFIRM' | 'DENY') => {
+    // Anonymous tap → route to sign-in rather than silently doing nothing.
+    if (!isAuthenticated) {
+      router.push('/(auth)/sign-in');
+      return;
+    }
     if (!canVote) return;
     // TODO(verify): attach a `proof: { lat, lng }` from expo-location so the
     // server can run the proximity gate and weight the vote.
@@ -192,7 +202,7 @@ export default function SpotDetailScreen() {
                     label="Klopt"
                     icon="hand.thumbsup.fill"
                     onPress={() => vote('CONFIRM')}
-                    disabled={!canVote || castVote.isPending}
+                    disabled={!canInteractVote || castVote.isPending}
                   />
                 </View>
                 <View style={{ flex: 1 }}>
@@ -201,7 +211,7 @@ export default function SpotDetailScreen() {
                     variant="secondary"
                     icon="hand.thumbsdown.fill"
                     onPress={() => vote('DENY')}
-                    disabled={!canVote || castVote.isPending}
+                    disabled={!canInteractVote || castVote.isPending}
                   />
                 </View>
               </View>

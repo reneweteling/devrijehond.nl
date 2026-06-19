@@ -28,13 +28,14 @@ import {
 import { categoryColors, colors, font, radius, space } from '@/lib/theme';
 import { Chip, VerifiedBadge, Wordmark, Stars } from '@/components/ui';
 
-// Amsterdamse Bos-ish default region; the map recentres on the user when
-// location is granted (TODO(verify): wire expo-location for initial centring).
+// Amsterdam-centre default region (covers the seeded spots from the Bos in the
+// south to the NDSM in the north). The map recentres on the user when location
+// is granted (TODO(verify): wire expo-location for initial centring).
 const INITIAL_REGION: Region = {
-  latitude: 52.3006,
-  longitude: 4.8368,
-  latitudeDelta: 0.08,
-  longitudeDelta: 0.08,
+  latitude: 52.365,
+  longitude: 4.89,
+  latitudeDelta: 0.11,
+  longitudeDelta: 0.11,
 };
 
 function regionToBbox(r: Region): Bbox {
@@ -62,10 +63,7 @@ export default function MapScreen() {
 
   const { data: categoriesData } = useCategories();
   const categories = categoriesData?.items ?? [];
-  const catById = useMemo(
-    () => new Map(categories.map((c) => [c.id, c] as const)),
-    [categories],
-  );
+  const catById = useMemo(() => new Map(categories.map((c) => [c.id, c] as const)), [categories]);
 
   const { data: spotsData } = useSpotsInViewport(bbox, { categoryId: activeCat });
   const spots = spotsData?.items ?? [];
@@ -162,7 +160,10 @@ export default function MapScreen() {
         </View>
         <View style={styles.legendRow}>
           <View
-            style={[styles.legendDot, { backgroundColor: '#fff', borderColor: colors.terra, borderStyle: 'dashed' }]}
+            style={[
+              styles.legendDot,
+              { backgroundColor: '#fff', borderColor: colors.terra, borderStyle: 'dashed' },
+            ]}
           />
           <Text style={styles.legendText}>Niet geverifieerd</Text>
         </View>
@@ -266,7 +267,13 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   legendRow: { flexDirection: 'row', alignItems: 'center', gap: 7 },
-  legendDot: { width: 12, height: 12, borderRadius: 6, borderWidth: 1.5, borderColor: 'transparent' },
+  legendDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 1.5,
+    borderColor: 'transparent',
+  },
   legendText: { fontFamily: font.body, fontSize: 11, color: colors.ink2 },
   sheet: {
     position: 'absolute',

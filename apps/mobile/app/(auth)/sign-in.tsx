@@ -10,31 +10,22 @@
 
 import { Platform } from 'react-native';
 import { useState } from 'react';
-import {
-  KeyboardAvoidingView,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { KeyboardAvoidingView, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { setAuthToken } from '@devrijehond/api-client';
 
-import {
-  requestMagicLink,
-  signInWithAppleNative,
-  signInWithGoogleNative,
-} from '@/lib/auth';
+import { requestMagicLink, signInWithAppleNative, signInWithGoogleNative } from '@/lib/auth';
+import { useAuth } from '@/lib/auth-context';
 import { colors, font, radius, space } from '@/lib/theme';
 import { Button } from '@/components/ui';
 
 export default function SignInScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { setAuthenticated } = useAuth();
 
   const [email, setEmail] = useState('');
   const [sending, setSending] = useState(false);
@@ -69,6 +60,7 @@ export default function SignInScreen() {
     setBusy(false);
     if (result.ok) {
       setAuthToken(result.session.token);
+      setAuthenticated(true);
       router.replace('/(tabs)');
     } else if (result.code !== 'cancelled') {
       setError('Inloggen met Apple is niet gelukt.');
@@ -82,6 +74,7 @@ export default function SignInScreen() {
     setBusy(false);
     if (result.ok) {
       setAuthToken(result.session.token);
+      setAuthenticated(true);
       router.replace('/(tabs)');
     } else if (result.code !== 'cancelled') {
       setError('Inloggen met Google is niet gelukt.');
@@ -108,7 +101,9 @@ export default function SignInScreen() {
       style={styles.root}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <View style={[styles.inner, { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 24 }]}>
+      <View
+        style={[styles.inner, { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 24 }]}
+      >
         <View style={styles.brand}>
           <SymbolView name="pawprint.fill" size={28} tintColor={colors.moss} />
           <Text style={styles.wordmark}>De Vrije Hond</Text>
@@ -156,7 +151,7 @@ export default function SignInScreen() {
         </View>
 
         <Text style={styles.legal}>
-          Door door te gaan ga je akkoord met onze voorwaarden en privacyverklaring.
+          Door verder te gaan ga je akkoord met onze voorwaarden en privacyverklaring.
         </Text>
       </View>
     </KeyboardAvoidingView>
@@ -195,7 +190,13 @@ const styles = StyleSheet.create({
   or: { fontFamily: font.body, fontSize: 12, color: colors.ink3 },
   appleBtn: { height: 48, width: '100%' },
   title: { fontFamily: font.heading, fontSize: 22, color: colors.ink, marginTop: space.sm },
-  sub: { fontFamily: font.body, fontSize: 14, color: colors.ink2, textAlign: 'center', lineHeight: 21 },
+  sub: {
+    fontFamily: font.body,
+    fontSize: 14,
+    color: colors.ink2,
+    textAlign: 'center',
+    lineHeight: 21,
+  },
   link: { fontFamily: font.bodyMedium, fontSize: 13, color: colors.mossDark, marginTop: space.md },
   legal: {
     fontFamily: font.body,
