@@ -19,13 +19,13 @@ import {
 } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 import { colors, font, radius, space } from '@/lib/theme';
-import { Chip, ScreenTitle } from '@/components/ui';
+import { Chip, ListState, ScreenTitle } from '@/components/ui';
 
 const STATUS_META: Record<FeatureStatus, { label: string; bg: string; fg: string }> = {
   CONSIDERING: { label: 'In overweging', bg: colors.sand, fg: colors.ink2 },
   PLANNED: { label: 'Gepland', bg: colors.mossSoft, fg: colors.mossDark },
   DONE: { label: 'Klaar', bg: colors.mossDark, fg: '#fff' },
-  DECLINED: { label: 'Afgewezen', bg: '#EADFD8', fg: colors.rust },
+  DECLINED: { label: 'Afgewezen', bg: colors.terraSoft, fg: colors.rust },
 };
 
 const FILTERS: { label: string; status?: FeatureStatus }[] = [
@@ -42,17 +42,43 @@ export default function RequestsScreen() {
   const { isAuthenticated } = useAuth();
 
   const [filter, setFilter] = useState<FeatureStatus | undefined>(undefined);
-  const { data, isLoading, refetch, isRefetching } = useFeatureRequests(filter);
+  const { data, isLoading, isError, refetch, isRefetching } = useFeatureRequests(filter);
   const toggleVote = useToggleFeatureVote();
-  const requests = data?.items ?? [];
 
-  const onVote = (id: string) => {
+  // Optimistic vote state: maps id -> toggled {viewerHasVoted, upvoteCount}
+  const [optimistic, setOptimistic] = useState<
+    Record<string, { viewerHasVoted: boolean; upvoteCount: number }>
+  >({});
+
+  const baseItems = data?.items ?? [];
+  const requests = baseItems.map((r) => (optimistic[r.id] ? { ...r, ...optimistic[r.id] } : r));
+
+  const onVote = (item: FeatureRequest) => {
     if (!isAuthenticated) {
       router.push('/(auth)/sign-in');
       return;
     }
-    toggleVote.mutate(id, {
-      onSuccess: () => qc.invalidateQueries({ queryKey: ['feature-requests'] }),
+    const next = {
+      viewerHasVoted: !item.viewerHasVoted,
+      upvoteCount: item.viewerHasVoted ? item.upvoteCount - 1 : item.upvoteCount + 1,
+    };
+    setOptimistic((prev) => ({ ...prev, [item.id]: next }));
+    toggleVote.mutate(item.id, {
+      onError: () => {
+        setOptimistic((prev) => {
+          const copy = { ...prev };
+          delete copy[item.id];
+          return copy;
+        });
+      },
+      onSettled: () => {
+        setOptimistic((prev) => {
+          const copy = { ...prev };
+          delete copy[item.id];
+          return copy;
+        });
+        qc.invalidateQueries({ queryKey: ['feature-requests'] });
+      },
     });
   };
 
@@ -61,8 +87,12 @@ export default function RequestsScreen() {
     return (
       <View style={styles.card}>
         <Pressable
-          style={[styles.voteBtn, item.viewerHasVoted && styles.voteBtnActive]}
-          onPress={() => onVote(item.id)}
+          style={({ pressed }) => [
+            styles.voteBtn,
+            item.viewerHasVoted && styles.voteBtnActive,
+            { opacity: pressed ? 0.6 : 1 },
+          ]}
+          onPress={() => onVote(item)}
           hitSlop={6}
         >
           <SymbolView
@@ -115,7 +145,13 @@ export default function RequestsScreen() {
           </View>
         }
         ListEmptyComponent={
-          <Text style={styles.empty}>{isLoading ? 'Laden…' : 'Nog geen wensen hier.'}</Text>
+          <ListState
+            loading={isLoading}
+            error={isError}
+            empty={!isLoading && !isError}
+            emptyText="Nog geen wensen hier."
+            onRetry={refetch}
+          />
         }
         contentContainerStyle={{ paddingBottom: insets.bottom + 170 }}
       />
@@ -157,6 +193,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: 48,
+    minHeight: 44,
     paddingVertical: 8,
     borderRadius: radius.card,
     backgroundColor: colors.mossSoft,
@@ -170,13 +207,6 @@ const styles = StyleSheet.create({
   statusTag: { borderRadius: radius.pill, paddingVertical: 3, paddingHorizontal: 9 },
   statusText: { fontFamily: font.bodyMedium, fontSize: 11 },
   component: { fontFamily: font.body, fontSize: 11, color: colors.ink3 },
-  empty: {
-    fontFamily: font.body,
-    fontSize: 13,
-    color: colors.ink3,
-    textAlign: 'center',
-    marginTop: 40,
-  },
   fab: {
     position: 'absolute',
     alignSelf: 'center',

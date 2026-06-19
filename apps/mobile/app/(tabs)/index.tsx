@@ -12,7 +12,15 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import MapView, { Marker, Polygon, type Region } from 'react-native-maps';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
@@ -25,12 +33,13 @@ import {
   type Category,
   type SpotSummary,
 } from '@/lib/api';
+import { useUserLocation } from '@/lib/location';
 import { categoryColors, colors, font, radius, space } from '@/lib/theme';
 import { Chip, VerifiedBadge, Stars } from '@/components/ui';
 
 // Amsterdam-centre default region (covers the seeded spots from the Bos in the
 // south to the NDSM in the north). The map recentres on the user when location
-// is granted (TODO(verify): wire expo-location for initial centring).
+// is granted.
 const INITIAL_REGION: Region = {
   latitude: 52.365,
   longitude: 4.89,
@@ -69,14 +78,34 @@ export default function MapScreen() {
   const router = useRouter();
   const mapRef = useRef<MapView>(null);
   // Search can hand us a location to fly to (e.g. "Hilversum"); see lib/geocode.
-  const params = useLocalSearchParams<{ lat?: string; lng?: string }>();
+  const params = useLocalSearchParams<{ lat?: string; lng?: string; t?: string }>();
   const [bbox, setBbox] = useState<Bbox>(() => regionToBbox(INITIAL_REGION));
   const [activeCat, setActiveCat] = useState<string | undefined>(undefined);
   const [selected, setSelected] = useState<SpotSummary | null>(null);
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Track whether we've done the initial user-location fly-to (only once).
+  const centredOnUser = useRef(false);
 
-  // Fly to a location handed in by search (e.g. "Hilversum"). Runs both on
-  // param change and once the map is ready, so it never races the map mount.
+  // (B) Recenter on the user once on mount when permission is granted.
+  const userLocation = useUserLocation();
+  useEffect(() => {
+    if (centredOnUser.current || !userLocation) return;
+    centredOnUser.current = true;
+    const region: Region = {
+      latitude: userLocation.lat,
+      longitude: userLocation.lng,
+      latitudeDelta: 0.08,
+      longitudeDelta: 0.08,
+    };
+    mapRef.current?.animateToRegion(region, 700);
+    // Defer the viewport sync out of the synchronous effect body.
+    setTimeout(() => setBbox(regionToBbox(region)), 0);
+  }, [userLocation]);
+
+  // (C) Fly to a location handed in by search (e.g. "Hilversum"). Runs both on
+  // param change (including nonce 't') and once the map is ready, so it never
+  // races the map mount. After flying, clear the params so a remount doesn't
+  // yank the user back to a stale location.
   const flyToParams = () => {
     const lat = params.lat ? Number(params.lat) : NaN;
     const lng = params.lng ? Number(params.lng) : NaN;
@@ -90,17 +119,29 @@ export default function MapScreen() {
       mapRef.current?.animateToRegion(region, 700);
       // animateToRegion doesn't always fire onRegionChangeComplete, so refetch
       // the viewport spots explicitly (otherwise you land on an empty map).
-      setBbox(regionToBbox(region));
+      // Deferred so it doesn't run setState synchronously in the effect body.
+      setTimeout(() => {
+        setBbox(regionToBbox(region));
+        router.setParams({ lat: undefined, lng: undefined, t: undefined });
+      }, 0);
     }
   };
-  useEffect(flyToParams, [params.lat, params.lng]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(flyToParams, [params.lat, params.lng, params.t]);
 
   const { data: categoriesData } = useCategories();
   const categories = categoriesData?.items ?? [];
   const catById = useMemo(() => new Map(categories.map((c) => [c.id, c] as const)), [categories]);
 
-  const { data: spotsData } = useSpotsInViewport(bbox, { categoryId: activeCat });
+  const {
+    data: spotsData,
+    isLoading,
+    isError,
+    refetch,
+  } = useSpotsInViewport(bbox, { categoryId: activeCat });
   const spots = spotsData?.items ?? [];
+  // True only on the very first load (no data yet and currently fetching).
+  const isFirstLoad = isLoading && spots.length === 0;
 
   const onRegionChange = (r: Region) => {
     if (debounce.current) clearTimeout(debounce.current);
@@ -116,7 +157,7 @@ export default function MapScreen() {
         onMapReady={flyToParams}
         onRegionChangeComplete={onRegionChange}
         showsUserLocation
-        showsMyLocationButton={false}
+        showsMyLocationButton
         onPress={() => setSelected(null)}
       >
         {/* REGION geofences as filled polygons (tap to peek). */}
@@ -175,6 +216,30 @@ export default function MapScreen() {
         })}
       </MapView>
 
+      {/* (A) Floating status pill: subtle spinner on first load, tappable error on failure */}
+      {(isFirstLoad || isError) && (
+        <View
+          style={[styles.statusPill, { top: insets.top + 72 }, isError && styles.statusPillError]}
+          pointerEvents={isError ? 'box-none' : 'none'}
+        >
+          {isFirstLoad ? (
+            <ActivityIndicator size="small" color={colors.mossDark} />
+          ) : (
+            <Pressable
+              style={({ pressed }) => [styles.statusPillRow, { opacity: pressed ? 0.7 : 1 }]}
+              onPress={() => refetch()}
+            >
+              <SymbolView
+                name="exclamationmark.triangle.fill"
+                size={13}
+                tintColor={colors.terraDark}
+              />
+              <Text style={styles.statusPillText}>Kon plekken niet laden. Opnieuw</Text>
+            </Pressable>
+          )}
+        </View>
+      )}
+
       {/* Floating chrome: wordmark + search pill + category chips */}
       <View style={[styles.chrome, { paddingTop: insets.top + 6 }]} pointerEvents="box-none">
         <View style={styles.searchPill}>
@@ -208,22 +273,24 @@ export default function MapScreen() {
         </ScrollView>
       </View>
 
-      {/* Legend */}
-      <View style={[styles.legend, { bottom: insets.bottom + 120 }]} pointerEvents="none">
-        <View style={styles.legendRow}>
-          <View style={[styles.legendDot, { backgroundColor: colors.moss }]} />
-          <Text style={styles.legendText}>Geverifieerd</Text>
+      {/* (D) Legend — hidden while a spot is selected */}
+      {!selected && (
+        <View style={[styles.legend, { bottom: insets.bottom + 120 }]} pointerEvents="none">
+          <View style={styles.legendRow}>
+            <View style={[styles.legendDot, { backgroundColor: colors.moss }]} />
+            <Text style={styles.legendText}>Geverifieerd</Text>
+          </View>
+          <View style={styles.legendRow}>
+            <View
+              style={[
+                styles.legendDot,
+                { backgroundColor: '#fff', borderColor: colors.terra, borderStyle: 'dashed' },
+              ]}
+            />
+            <Text style={styles.legendText}>Niet geverifieerd</Text>
+          </View>
         </View>
-        <View style={styles.legendRow}>
-          <View
-            style={[
-              styles.legendDot,
-              { backgroundColor: '#fff', borderColor: colors.terra, borderStyle: 'dashed' },
-            ]}
-          />
-          <Text style={styles.legendText}>Niet geverifieerd</Text>
-        </View>
-      </View>
+      )}
 
       {/* Bottom-sheet peek card */}
       {selected && (
@@ -231,6 +298,17 @@ export default function MapScreen() {
           style={[styles.sheet, { paddingBottom: insets.bottom + 100 }]}
           onPress={() => router.push(`/spot/${selected.slug}`)}
         >
+          {/* (D) Close affordance */}
+          <Pressable
+            style={({ pressed }) => [styles.sheetClose, { opacity: pressed ? 0.5 : 1 }]}
+            onPress={(e) => {
+              e.stopPropagation();
+              setSelected(null);
+            }}
+            hitSlop={12}
+          >
+            <SymbolView name="xmark" size={13} tintColor={colors.ink3} />
+          </Pressable>
           <View style={styles.sheetHandle} />
           <View style={styles.sheetRow}>
             <View style={styles.thumb}>
@@ -376,4 +454,32 @@ const styles = StyleSheet.create({
   sheetMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 },
   ratingInline: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   ratingText: { fontFamily: font.bodyMedium, fontSize: 12, color: colors.ink2 },
+  statusPill: {
+    position: 'absolute',
+    alignSelf: 'center',
+    backgroundColor: '#fff',
+    borderRadius: radius.pill,
+    paddingVertical: 7,
+    paddingHorizontal: 14,
+    shadowColor: colors.ink,
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 4,
+  },
+  statusPillError: { backgroundColor: colors.terraSoft },
+  statusPillRow: { flexDirection: 'row', alignItems: 'center', gap: 7 },
+  statusPillText: { fontFamily: font.bodyMedium, fontSize: 12.5, color: colors.terraDark },
+  sheetClose: {
+    position: 'absolute',
+    top: 10,
+    right: space.lg,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1,
+  },
 });

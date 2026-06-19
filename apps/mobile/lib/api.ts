@@ -13,8 +13,9 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { API_URL } from './config';
-import { loadSession } from './session';
+import { clearSession, loadSession } from './session';
 import {
+  setAuthToken,
   getApiV1Categories,
   getApiV1Amenities,
   getApiV1Spots,
@@ -270,6 +271,11 @@ export function useMySpots(enabled = true) {
         headers: session ? { Authorization: `Bearer ${session.token}` } : undefined,
         signal,
       });
+      if (res.status === 401) {
+        await clearSession();
+        setAuthToken(null);
+        throw new Error(`me/spots 401`);
+      }
       if (!res.ok) throw new Error(`me/spots ${res.status}`);
       const data = (await res.json()) as { items: SpotSummary[] };
       return data.items;

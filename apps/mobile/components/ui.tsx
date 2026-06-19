@@ -163,6 +163,87 @@ export function Note({ children }: { children: ReactNode }) {
   );
 }
 
+/**
+ * Shared loading / empty / error state for lists and detail bodies. Renders the
+ * first matching variant; returns null when there's nothing to say (data ready).
+ */
+export function ListState({
+  loading,
+  error,
+  empty,
+  emptyText = 'Niets gevonden.',
+  errorText = 'Er ging iets mis bij het laden.',
+  onRetry,
+}: {
+  loading?: boolean;
+  error?: boolean;
+  empty?: boolean;
+  emptyText?: string;
+  errorText?: string;
+  onRetry?: () => void;
+}) {
+  if (loading) {
+    return (
+      <View style={styles.listState}>
+        <ActivityIndicator color={colors.moss} />
+      </View>
+    );
+  }
+  if (error) {
+    return (
+      <View style={styles.listState}>
+        <Text style={styles.listStateText}>{errorText}</Text>
+        {onRetry ? (
+          <Pressable onPress={onRetry} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
+            <Text style={styles.listStateRetry}>Opnieuw proberen</Text>
+          </Pressable>
+        ) : null}
+      </View>
+    );
+  }
+  if (empty) {
+    return (
+      <View style={styles.listState}>
+        <Text style={styles.listStateText}>{emptyText}</Text>
+      </View>
+    );
+  }
+  return null;
+}
+
+/** Inline status banner (success / error / info), e.g. for vote + report feedback. */
+export function Banner({
+  kind = 'error',
+  children,
+  onRetry,
+}: {
+  kind?: 'error' | 'success' | 'info';
+  children: ReactNode;
+  onRetry?: () => void;
+}) {
+  const palette =
+    kind === 'success'
+      ? { bg: colors.mossSoft, fg: colors.mossDark, icon: 'checkmark.circle.fill' as const }
+      : kind === 'info'
+        ? { bg: colors.sand, fg: colors.ink2, icon: 'info.circle.fill' as const }
+        : {
+            bg: colors.terraSoft,
+            fg: colors.terraDark,
+            icon: 'exclamationmark.triangle.fill' as const,
+          };
+  return (
+    <View style={[styles.banner, { backgroundColor: palette.bg }]}>
+      <SymbolView name={palette.icon} size={15} tintColor={palette.fg} />
+      <Text style={[styles.bannerText, { color: palette.fg }]}>{children}</Text>
+      {onRetry ? (
+        <Pressable onPress={onRetry} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
+          <Text style={[styles.bannerRetry, { color: palette.fg }]}>Opnieuw</Text>
+        </Pressable>
+      ) : null}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   wordmark: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   wordmarkText: { fontFamily: font.heading, color: colors.moss, fontSize: 16, lineHeight: 22 },
@@ -234,4 +315,22 @@ const styles = StyleSheet.create({
     borderRadius: radius.card,
   },
   noteText: { flex: 1, fontFamily: font.body, fontSize: 12, color: colors.ink2, lineHeight: 18 },
+  listState: { alignItems: 'center', justifyContent: 'center', gap: 10, padding: space.xl },
+  listStateText: {
+    fontFamily: font.body,
+    fontSize: 13.5,
+    lineHeight: 19,
+    color: colors.ink2,
+    textAlign: 'center',
+  },
+  listStateRetry: { fontFamily: font.bodyMedium, fontSize: 13.5, color: colors.moss },
+  banner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 11,
+    borderRadius: radius.card,
+  },
+  bannerText: { flex: 1, fontFamily: font.body, fontSize: 12.5, lineHeight: 17 },
+  bannerRetry: { fontFamily: font.bodyMedium, fontSize: 12.5 },
 });

@@ -19,15 +19,15 @@ import { useMe, useMySpots, type Dog, type SpotSummary } from '@/lib/api';
 import { clearSession } from '@/lib/session';
 import { useAuth } from '@/lib/auth-context';
 import { colors, font, radius, space } from '@/lib/theme';
-import { Button, VerifiedBadge } from '@/components/ui';
+import { Button, ListState, VerifiedBadge } from '@/components/ui';
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const qc = useQueryClient();
   const { isAuthenticated, setAuthenticated } = useAuth();
-  const { data: me, isLoading } = useMe(isAuthenticated);
-  const { data: mySpots } = useMySpots(isAuthenticated);
+  const { data: me, isLoading, isError: meError, refetch: meRefetch } = useMe(isAuthenticated);
+  const { data: mySpots, isError: spotsError, refetch: spotsRefetch } = useMySpots(isAuthenticated);
 
   const signOut = async () => {
     await clearSession();
@@ -37,7 +37,7 @@ export default function ProfileScreen() {
     router.replace('/(tabs)');
   };
 
-  if (!isAuthenticated || (!isLoading && !me)) {
+  if (!isAuthenticated) {
     return (
       <View style={[styles.root, styles.center, { paddingTop: insets.top }]}>
         <SymbolView
@@ -52,6 +52,22 @@ export default function ProfileScreen() {
         <View style={{ width: '100%', paddingHorizontal: space.lg, gap: space.sm }}>
           <Button label="Inloggen" onPress={() => router.push('/(auth)/sign-in')} />
         </View>
+      </View>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <View style={[styles.root, styles.center, { paddingTop: insets.top }]}>
+        <ListState loading />
+      </View>
+    );
+  }
+
+  if (meError) {
+    return (
+      <View style={[styles.root, styles.center, { paddingTop: insets.top }]}>
+        <ListState error errorText="Kon profiel niet laden" onRetry={meRefetch} />
       </View>
     );
   }
@@ -117,7 +133,9 @@ export default function ProfileScreen() {
 
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { marginBottom: space.md }]}>Mijn inzendingen</Text>
-        {mySpots && mySpots.length > 0 ? (
+        {spotsError ? (
+          <ListState error errorText="Kon inzendingen niet laden" onRetry={spotsRefetch} />
+        ) : mySpots && mySpots.length > 0 ? (
           mySpots.map((s: SpotSummary) => (
             <Pressable
               key={s.id}

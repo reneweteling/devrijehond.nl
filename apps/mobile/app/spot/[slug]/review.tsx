@@ -16,7 +16,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { useSpotDetail, useSubmitReview } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
-import { Button, Note } from '@/components/ui';
+import { Button, ListState, Note } from '@/components/ui';
 import { colors, font, radius, space } from '@/lib/theme';
 
 export default function WriteReviewScreen() {
@@ -37,6 +37,8 @@ export default function WriteReviewScreen() {
 
   const [stars, setStars] = useState(0);
   const [body, setBody] = useState('');
+
+  if (status === 'loading' || !isAuthenticated) return <ListState loading />;
 
   const onSubmit = () => {
     if (!spot || stars === 0) return;
@@ -91,11 +93,12 @@ export default function WriteReviewScreen() {
           met de community-check op de detailpagina.
         </Note>
 
+        {!spot ? <Text style={styles.hint}>Plek laden…</Text> : null}
         <Button
           label="Review plaatsen"
           onPress={onSubmit}
           loading={submit.isPending}
-          disabled={stars === 0}
+          disabled={!spot || stars === 0}
         />
         {submit.isError ? (
           <Text style={styles.error}>Plaatsen mislukt. Probeer opnieuw.</Text>
@@ -130,5 +133,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     textAlignVertical: 'top',
   },
+  hint: { fontFamily: font.body, fontSize: 12, color: colors.ink3, textAlign: 'center' },
   error: { fontFamily: font.body, fontSize: 12, color: colors.rust, textAlign: 'center' },
 });

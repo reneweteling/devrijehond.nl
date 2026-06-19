@@ -13,7 +13,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useMe, useUpdateMe } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 import { colors, font, radius, space } from '@/lib/theme';
-import { Button } from '@/components/ui';
+import { Button, ListState } from '@/components/ui';
 
 export default function EditProfileScreen() {
   const insets = useSafeAreaInsets();
@@ -31,6 +31,8 @@ export default function EditProfileScreen() {
   // Derive the form from a local draft, falling back to the loaded profile.
   // (Avoids a prefill effect that would setState synchronously on load.)
   const [draft, setDraft] = useState<{ name: string; handle: string; bio: string } | null>(null);
+
+  if (status === 'loading' || !isAuthenticated) return <ListState loading />;
   const v = draft ?? { name: me?.name ?? '', handle: me?.handle ?? '', bio: me?.bio ?? '' };
   const setField = (patch: Partial<typeof v>) => setDraft({ ...v, ...patch });
 

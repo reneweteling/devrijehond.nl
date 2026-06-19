@@ -13,7 +13,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useCreateDog } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 import { colors, font, radius, space } from '@/lib/theme';
-import { Button } from '@/components/ui';
+import { Button, ListState } from '@/components/ui';
 
 export default function AddDogScreen() {
   const insets = useSafeAreaInsets();
@@ -29,6 +29,8 @@ export default function AddDogScreen() {
   const [name, setName] = useState('');
   const [breed, setBreed] = useState('');
   const [birthYear, setBirthYear] = useState('');
+
+  if (status === 'loading' || !isAuthenticated) return <ListState loading />;
 
   const year = parseInt(birthYear, 10);
   const yearValid = !birthYear || (year >= 1990 && year <= new Date().getFullYear());

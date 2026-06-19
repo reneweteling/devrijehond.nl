@@ -13,6 +13,7 @@
 import { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Image,
   Modal,
   Pressable,
@@ -39,7 +40,7 @@ import {
 import { useAuth } from '@/lib/auth-context';
 import { amenitySymbol } from '@/lib/icons';
 import { colors, font, radius, space } from '@/lib/theme';
-import { AmenityTile, Button, Stars, VerifiedBadge } from '@/components/ui';
+import { AmenityTile, Banner, Button, Stars, VerifiedBadge } from '@/components/ui';
 
 function polygonCoords(geometry: unknown): { latitude: number; longitude: number }[] {
   const g = geometry as { type?: string; coordinates?: number[][][] } | null;
@@ -86,20 +87,43 @@ export default function SpotDetailScreen() {
   const qc = useQueryClient();
 
   const { isAuthenticated } = useAuth();
-  const { data: spot, isLoading } = useSpotDetail(slug);
+  const { data: spot, isLoading, isError, error, refetch } = useSpotDetail(slug);
   const { data: reviewsData } = useSpotReviews(slug);
-  const { data: me } = useMe(isAuthenticated);
+  const { data: me, isLoading: meLoading } = useMe(isAuthenticated);
   const castVote = useCastVote();
   const submitReport = useSubmitReport();
   const [reportOpen, setReportOpen] = useState(false);
+  const [reportError, setReportError] = useState(false);
 
   const reviews = reviewsData?.items ?? [];
   const region = useMemo(() => polygonCoords(spot?.geometry), [spot?.geometry]);
 
-  if (isLoading || !spot) {
+  if (isLoading) {
     return (
       <View style={[styles.root, styles.center]}>
         <ActivityIndicator color={colors.moss} />
+      </View>
+    );
+  }
+
+  if (isError || !spot) {
+    const is404 = (error as { status?: number } | null)?.status === 404;
+    return (
+      <View style={[styles.root, styles.center, { padding: space.lg }]}>
+        <Pressable
+          onPress={() => router.back()}
+          style={[
+            styles.backBtn,
+            { position: 'relative', top: 0, left: 0, marginBottom: space.lg },
+          ]}
+          hitSlop={10}
+        >
+          <SymbolView name="chevron.left" size={18} tintColor={colors.ink} />
+        </Pressable>
+        <Text style={styles.errorText}>
+          {is404 ? 'Deze plek bestaat niet meer.' : 'Geen verbinding. Probeer het opnieuw.'}
+        </Text>
+        {!is404 && <Button label="Opnieuw proberen" onPress={() => void refetch()} />}
       </View>
     );
   }
@@ -110,7 +134,9 @@ export default function SpotDetailScreen() {
   const canVote = !!me && !isOwner && v.status === 'UNVERIFIED';
   // Buttons stay tappable for anonymous users on an open spot, the tap routes
   // to sign-in. Only an owner / already-resolved spot disables them.
-  const canInteractVote = !isOwner && v.status === 'UNVERIFIED';
+  // While the authenticated user's profile is still loading we disable to avoid
+  // a silent no-op when `canVote` is false only because `me` hasn't resolved.
+  const canInteractVote = !isOwner && v.status === 'UNVERIFIED' && !meLoading;
 
   const eligibilityLine = !me
     ? 'Log in om deze plek te bevestigen.'
@@ -131,7 +157,17 @@ export default function SpotDetailScreen() {
     // server can run the proximity gate and weight the vote.
     castVote.mutate(
       { spotId: spot.id, value },
-      { onSuccess: () => qc.invalidateQueries({ queryKey: ['spot', slug] }) },
+      {
+        onSuccess: () => {
+          void qc.invalidateQueries({ queryKey: ['spot', slug] });
+          void qc.invalidateQueries({ queryKey: ['spots'] });
+          void qc.invalidateQueries({ queryKey: ['spots-map'] });
+          void qc.invalidateQueries({ queryKey: ['my-spots'] });
+        },
+        onError: () => {
+          // castVote.isError will be true; the Banner below renders the message.
+        },
+      },
     );
   };
 
@@ -249,6 +285,15 @@ export default function SpotDetailScreen() {
                   />
                 </View>
               </View>
+              {castVote.isError && (
+                <Banner kind="error">
+                  {(castVote.error as { status?: number } | null)?.status === 409
+                    ? 'Je hebt al gestemd op deze plek.'
+                    : (castVote.error as { status?: number } | null)?.status === 422
+                      ? 'Je moet hier in de buurt zijn om te stemmen.'
+                      : 'Stemmen mislukt, probeer opnieuw.'}
+                </Banner>
+              )}
               <Text style={styles.eligibility}>{eligibilityLine}</Text>
             </View>
           )}
@@ -342,26 +387,56 @@ export default function SpotDetailScreen() {
         visible={reportOpen}
         transparent
         animationType="slide"
-        onRequestClose={() => setReportOpen(false)}
+        onRequestClose={() => !submitReport.isPending && setReportOpen(false)}
       >
-        <Pressable style={styles.modalScrim} onPress={() => setReportOpen(false)}>
+        <Pressable
+          style={styles.modalScrim}
+          onPress={() => !submitReport.isPending && setReportOpen(false)}
+        >
           <Pressable style={[styles.reportSheet, { paddingBottom: insets.bottom + 16 }]}>
             <View style={styles.sheetHandle} />
             <Text style={styles.reportTitle}>Wat is er mis met deze plek?</Text>
+            {reportError && (
+              <Banner kind="error" onRetry={() => setReportError(false)}>
+                Melden mislukt, probeer opnieuw.
+              </Banner>
+            )}
             {REPORT_REASONS.map((r) => (
               <Pressable
                 key={r.value}
-                style={styles.reportOption}
+                style={[styles.reportOption, submitReport.isPending && { opacity: 0.5 }]}
+                disabled={submitReport.isPending}
                 onPress={() => {
-                  setReportOpen(false);
-                  submitReport.mutate({ targetType: 'SPOT', targetId: spot.id, reason: r.value });
+                  setReportError(false);
+                  submitReport.mutate(
+                    { targetType: 'SPOT', targetId: spot.id, reason: r.value },
+                    {
+                      onSuccess: () => {
+                        setReportOpen(false);
+                        Alert.alert('Bedankt', 'We kijken ernaar.');
+                      },
+                      onError: () => {
+                        setReportError(true);
+                      },
+                    },
+                  );
                 }}
               >
-                <Text style={styles.reportOptionText}>{r.label}</Text>
-                <SymbolView name="chevron.right" size={15} tintColor={colors.ink3} />
+                {submitReport.isPending ? (
+                  <ActivityIndicator size="small" color={colors.moss} />
+                ) : (
+                  <>
+                    <Text style={styles.reportOptionText}>{r.label}</Text>
+                    <SymbolView name="chevron.right" size={15} tintColor={colors.ink3} />
+                  </>
+                )}
               </Pressable>
             ))}
-            <Pressable style={styles.reportCancel} onPress={() => setReportOpen(false)}>
+            <Pressable
+              style={[styles.reportCancel, submitReport.isPending && { opacity: 0.5 }]}
+              disabled={submitReport.isPending}
+              onPress={() => setReportOpen(false)}
+            >
               <Text style={styles.reportCancelText}>Annuleren</Text>
             </Pressable>
           </Pressable>
@@ -399,7 +474,7 @@ const styles = StyleSheet.create({
   body: { padding: space.lg, gap: space.md },
   titleRow: { flexDirection: 'row', alignItems: 'center' },
   title: { flex: 1, fontFamily: font.heading, fontSize: 24, lineHeight: 31, color: colors.ink },
-  category: { fontFamily: font.body, fontSize: 13, color: colors.ink2, marginTop: -6 },
+  category: { fontFamily: font.body, fontSize: 13, color: colors.ink2 },
   badgeRow: { flexDirection: 'row', alignItems: 'center', gap: 12, flexWrap: 'wrap' },
   ratingInline: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   ratingText: { fontFamily: font.body, fontSize: 12, color: colors.ink2 },
@@ -457,6 +532,14 @@ const styles = StyleSheet.create({
     color: colors.ink3,
     marginTop: space.md,
     lineHeight: 18,
+  },
+  errorText: {
+    fontFamily: font.body,
+    fontSize: 14,
+    color: colors.ink2,
+    textAlign: 'center',
+    marginBottom: space.lg,
+    lineHeight: 21,
   },
   reportRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: space.sm },
   reportText: { fontFamily: font.body, fontSize: 12, color: colors.ink3 },

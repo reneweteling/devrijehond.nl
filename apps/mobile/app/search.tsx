@@ -55,7 +55,7 @@ export default function SearchScreen() {
   const goToLocation = (g: GeoResult) => {
     router.replace({
       pathname: '/(tabs)',
-      params: { lat: String(g.lat), lng: String(g.lng) },
+      params: { lat: String(g.lat), lng: String(g.lng), t: String(Date.now()) },
     });
   };
 

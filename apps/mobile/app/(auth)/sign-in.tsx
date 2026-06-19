@@ -8,11 +8,18 @@
  * SecureStore; on a native success we route straight to the map.
  */
 
-import { Platform } from 'react-native';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import * as AppleAuthentication from 'expo-apple-authentication';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { setAuthToken } from '@devrijehond/api-client';
@@ -33,6 +40,7 @@ function CloseButton({ top, onClose }: { top: number; onClose: () => void }) {
 export default function SignInScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { redirect } = useLocalSearchParams<{ redirect?: string }>();
   const { setAuthenticated } = useAuth();
 
   const [email, setEmail] = useState('');
@@ -41,8 +49,20 @@ export default function SignInScreen() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  // Dismiss back to wherever this was pushed from, or fall back to the map so
-  // the user is never trapped on the auth screen.
+  // After a successful native sign-in: go where the user originally intended, or
+  // back if this screen was pushed without an explicit redirect, or the map as a
+  // last resort so the user is never trapped on the auth screen.
+  const afterSignIn = () => {
+    if (redirect) {
+      router.replace(redirect as Parameters<typeof router.replace>[0]);
+    } else if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/(tabs)');
+    }
+  };
+
+  // Dismiss without signing in.
   const onClose = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)'));
 
   const onMagicLink = async () => {
@@ -73,7 +93,7 @@ export default function SignInScreen() {
     if (result.ok) {
       setAuthToken(result.session.token);
       setAuthenticated(true);
-      router.replace('/(tabs)');
+      afterSignIn();
     } else if (result.code !== 'cancelled') {
       setError('Inloggen met Apple is niet gelukt.');
     }
@@ -87,7 +107,7 @@ export default function SignInScreen() {
     if (result.ok) {
       setAuthToken(result.session.token);
       setAuthenticated(true);
-      router.replace('/(tabs)');
+      afterSignIn();
     } else if (result.code !== 'cancelled') {
       setError('Inloggen met Google is niet gelukt.');
     }
@@ -137,7 +157,7 @@ export default function SignInScreen() {
             autoComplete="email"
             inputMode="email"
           />
-          <Button label="Stuur inloglink" onPress={onMagicLink} loading={sending} />
+          <Button label="Stuur inloglink" onPress={onMagicLink} loading={sending} disabled={busy} />
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
           <View style={styles.divider}>
@@ -147,20 +167,26 @@ export default function SignInScreen() {
           </View>
 
           {Platform.OS === 'ios' && (
-            <AppleAuthentication.AppleAuthenticationButton
-              buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
-              buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
-              cornerRadius={radius.button}
-              style={styles.appleBtn}
-              onPress={onApple}
-            />
+            <View
+              pointerEvents={busy || sending ? 'none' : 'auto'}
+              style={{ opacity: busy || sending ? 0.5 : 1 }}
+            >
+              <AppleAuthentication.AppleAuthenticationButton
+                buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+                buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+                cornerRadius={radius.button}
+                style={styles.appleBtn}
+                onPress={onApple}
+              />
+            </View>
           )}
           <Button
             label="Doorgaan met Google"
             variant="secondary"
             icon="g.circle.fill"
             onPress={onGoogle}
-            disabled={busy}
+            loading={busy}
+            disabled={busy || sending}
           />
         </View>
 
@@ -212,10 +238,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   error: { fontFamily: font.body, fontSize: 12, color: colors.rust },
-  divider: { flexDirection: 'row', alignItems: 'center', gap: 10, marginVertical: 2 },
+  divider: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   line: { flex: 1, height: 1, backgroundColor: colors.line },
   or: { fontFamily: font.body, fontSize: 12, color: colors.ink3 },
-  appleBtn: { height: 48, width: '100%' },
+  appleBtn: { height: 46, width: '100%' },
   title: {
     fontFamily: font.heading,
     fontSize: 22,

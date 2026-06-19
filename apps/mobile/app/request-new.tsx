@@ -13,7 +13,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useCreateFeatureRequest } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 import { colors, font, radius, space } from '@/lib/theme';
-import { Button, Note } from '@/components/ui';
+import { Button, ListState, Note } from '@/components/ui';
 
 const COMPONENTS = ['Kaart', 'Inzenden', 'Profiel', 'Anders'];
 
@@ -31,6 +31,8 @@ export default function NewRequestScreen() {
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [component, setComponent] = useState<string | null>(null);
+
+  if (status === 'loading' || !isAuthenticated) return <ListState loading />;
 
   const onSubmit = () => {
     if (title.trim().length < 4) return;

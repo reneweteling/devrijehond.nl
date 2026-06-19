@@ -59,6 +59,13 @@ export const font = {
   bodyMedium: 'Inter_500Medium',
 } as const;
 
+/**
+ * Height of the floating native tab bar. Add insets.bottom + TAB_BAR_CLEARANCE
+ * as bottom padding/contentInset on scrollable screens so content isn't hidden
+ * behind the bar. Example: paddingBottom: insets.bottom + TAB_BAR_CLEARANCE
+ */
+export const TAB_BAR_CLEARANCE = 64;
+
 /** Status → colour, per brand-direction §2. */
 export function statusColor(status: string): string {
   switch (status) {

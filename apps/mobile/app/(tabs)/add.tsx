@@ -18,12 +18,13 @@ import MapView, { Marker, type Region } from 'react-native-maps';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { useAmenities, useCategories, useSubmitSpot, type SpotType } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 import { categorySymbol } from '@/lib/icons';
 import { colors, font, radius, space } from '@/lib/theme';
-import { Button, Note, ScreenTitle } from '@/components/ui';
+import { Button, ListState, Note, ScreenTitle } from '@/components/ui';
 
 const INITIAL_REGION: Region = {
   latitude: 52.3006,
@@ -47,9 +48,21 @@ export default function AddScreen() {
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [amenityIds, setAmenityIds] = useState<string[]>([]);
 
-  const { data: categoriesData } = useCategories(type ?? undefined);
+  const qc = useQueryClient();
+
+  const {
+    data: categoriesData,
+    isLoading: categoriesLoading,
+    isError: categoriesError,
+    refetch: refetchCategories,
+  } = useCategories(type ?? undefined);
   const categories = categoriesData?.items ?? [];
-  const { data: amenitiesData } = useAmenities(categoryId ?? undefined);
+  const {
+    data: amenitiesData,
+    isLoading: amenitiesLoading,
+    isError: amenitiesError,
+    refetch: refetchAmenities,
+  } = useAmenities(categoryId ?? undefined);
   const amenities = amenitiesData?.items ?? [];
 
   const submit = useSubmitSpot();
@@ -72,11 +85,18 @@ export default function AddScreen() {
         categoryId,
         name,
         description: description || undefined,
-        point: type === 'POI' && point ? { lat: point.latitude, lng: point.longitude } : undefined,
+        point: point ? { lat: point.latitude, lng: point.longitude } : undefined,
         // TODO(verify): for REGION, pass `polygon: [{lat,lng},…]` from the editor.
         amenityIds,
       },
-      { onSuccess: () => setStep('done') },
+      {
+        onSuccess: () => {
+          qc.invalidateQueries({ queryKey: ['spots'] });
+          qc.invalidateQueries({ queryKey: ['spots-map'] });
+          qc.invalidateQueries({ queryKey: ['my-spots'] });
+          setStep('done');
+        },
+      },
     );
   };
 
@@ -167,11 +187,7 @@ export default function AddScreen() {
             ) : (
               <Note>Tik op de kaart om de pin neer te zetten.</Note>
             )}
-            <Button
-              label="Volgende"
-              onPress={() => setStep('details')}
-              disabled={type === 'POI' && !point}
-            />
+            <Button label="Volgende" onPress={() => setStep('details')} disabled={!point} />
           </View>
         )}
 
@@ -190,26 +206,37 @@ export default function AddScreen() {
 
             <View style={styles.field}>
               <Text style={styles.label}>Categorie</Text>
-              <View style={styles.catGrid}>
-                {categories.map((c) => (
-                  <Pressable
-                    key={c.id}
-                    style={[styles.catChip, categoryId === c.id && styles.catChipActive]}
-                    onPress={() => setCategoryId(c.id)}
-                  >
-                    <SymbolView
-                      name={categorySymbol(c.icon ?? c.slug)}
-                      size={14}
-                      tintColor={categoryId === c.id ? '#fff' : colors.mossDark}
-                    />
-                    <Text
-                      style={[styles.catChipText, categoryId === c.id && styles.catChipTextActive]}
+              <ListState
+                loading={categoriesLoading}
+                error={categoriesError}
+                errorText="Categorieën konden niet worden geladen."
+                onRetry={() => void refetchCategories()}
+              />
+              {!categoriesLoading && !categoriesError && (
+                <View style={styles.catGrid}>
+                  {categories.map((c) => (
+                    <Pressable
+                      key={c.id}
+                      style={[styles.catChip, categoryId === c.id && styles.catChipActive]}
+                      onPress={() => setCategoryId(c.id)}
                     >
-                      {c.label}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
+                      <SymbolView
+                        name={categorySymbol(c.icon ?? c.slug)}
+                        size={14}
+                        tintColor={categoryId === c.id ? '#fff' : colors.mossDark}
+                      />
+                      <Text
+                        style={[
+                          styles.catChipText,
+                          categoryId === c.id && styles.catChipTextActive,
+                        ]}
+                      >
+                        {c.label}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+              )}
             </View>
 
             <View style={styles.field}>
@@ -224,29 +251,37 @@ export default function AddScreen() {
               />
             </View>
 
-            {amenities.length > 0 && (
+            {categoryId && (
               <View style={styles.field}>
                 <Text style={styles.label}>Voorzieningen</Text>
-                <View style={styles.catGrid}>
-                  {amenities.map((a) => {
-                    const on = amenityIds.includes(a.id);
-                    return (
-                      <Pressable
-                        key={a.id}
-                        style={[styles.catChip, on && styles.catChipActive]}
-                        onPress={() =>
-                          setAmenityIds((cur) =>
-                            on ? cur.filter((x) => x !== a.id) : [...cur, a.id],
-                          )
-                        }
-                      >
-                        <Text style={[styles.catChipText, on && styles.catChipTextActive]}>
-                          {a.label}
-                        </Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
+                <ListState
+                  loading={amenitiesLoading}
+                  error={amenitiesError}
+                  errorText="Voorzieningen konden niet worden geladen."
+                  onRetry={() => void refetchAmenities()}
+                />
+                {!amenitiesLoading && !amenitiesError && amenities.length > 0 && (
+                  <View style={styles.catGrid}>
+                    {amenities.map((a) => {
+                      const on = amenityIds.includes(a.id);
+                      return (
+                        <Pressable
+                          key={a.id}
+                          style={[styles.catChip, on && styles.catChipActive]}
+                          onPress={() =>
+                            setAmenityIds((cur) =>
+                              on ? cur.filter((x) => x !== a.id) : [...cur, a.id],
+                            )
+                          }
+                        >
+                          <Text style={[styles.catChipText, on && styles.catChipTextActive]}>
+                            {a.label}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                )}
               </View>
             )}
 
