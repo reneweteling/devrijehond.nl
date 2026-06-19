@@ -1,0 +1,72 @@
+{
+  "expo": {
+    "name": "De Vrije Hond",
+    "slug": "devrijehond",
+    "scheme": "vrijehond",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F3EFE3"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "bundleIdentifier": "nl.devrijehond.app",
+      "supportsTablet": false,
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Je locatie laat de kaart zien welke hondenplekken bij jou in de buurt zijn, en bepaalt of je een plek kunt bevestigen."
+      }
+    },
+    "android": {
+      "package": "nl.devrijehond.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#F3EFE3"
+      },
+      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash.png",
+          "imageWidth": 200,
+          "backgroundColor": "#F3EFE3"
+        }
+      ],
+      "expo-secure-store",
+      "expo-apple-authentication",
+      "@react-native-google-signin/google-signin",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Je locatie laat de kaart zien welke hondenplekken bij jou in de buurt zijn, en bepaalt of je een plek kunt bevestigen."
+        }
+      ],
+      [
+        "react-native-maps",
+        {
+          "iosGoogleMapsApiKey": "TODO_VERIFY_IOS_MAPS_KEY",
+          "androidGoogleMapsApiKey": "TODO_VERIFY_ANDROID_MAPS_KEY"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {}
+    }
+  }
+}

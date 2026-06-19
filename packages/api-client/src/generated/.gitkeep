@@ -1,0 +1,11 @@
+# Orval output directory.
+#
+# `pnpm --filter @devrijehond/api-client generate` writes the TanStack Query
+# client here (tags-split): `client.schemas.ts` + `<tag>/<tag>.ts` per OpenAPI
+# tag. The directory is committed (this .gitkeep) so the import paths in
+# `../index.ts` resolve before the first generation run; the `@ts-ignore`
+# markers there suppress the "Cannot find module" error until then.
+#
+# Generated files are git-ignored except this marker — regenerate from the
+# committed `openapi.snapshot.json` (default) or the running web dev server
+# (`OPENAPI_SOURCE=dev`).

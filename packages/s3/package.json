@@ -1,0 +1,22 @@
+{
+  "name": "@devrijehond/s3",
+  "version": "0.0.0",
+  "private": true,
+  "description": "S3 upload helpers (presigned PUT URLs + public URL resolver) for De Vrije Hond media.",
+  "type": "module",
+  "exports": {
+    ".": { "types": "./src/index.ts", "default": "./src/index.ts" }
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.726.0",
+    "@aws-sdk/s3-request-presigner": "^3.726.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.2"
+  }
+}

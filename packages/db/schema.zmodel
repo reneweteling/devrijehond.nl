@@ -1,0 +1,498 @@
+//
+// De Vrije Hond — ZenStack v3 schema.
+//
+// Community-driven map of dog-friendly spots. Content is published immediately
+// as UNVERIFIED and verified by the community (net weighted vote score >= +5),
+// auto-hidden after >= 3 denials, with an admin safety-net for overrides.
+//
+// Access policies (@@allow / @@deny) are ENABLED from day one — the whole
+// moderation model is policy-shaped. App code uses the policy-bound client via
+// `authDb(user)` (= `policyDb.$setAuth(...)`); the BetterAuth adapter and
+// migrations/seed use the raw `db` client which bypasses policies.
+//
+// Geometry uses PostGIS: `geom` columns are `geometry(...,4326)` (Unsupported
+// in Prisma); `lat`/`lng` mirror the centroid for cheap reads. Spatial queries
+// (viewport bbox, nearby-radius proximity gate, duplicate detection) run as raw
+// SQL in the API layer. Enable the extension once per database:
+//   CREATE EXTENSION IF NOT EXISTS postgis;
+//
+
+datasource db {
+  provider = 'postgresql'
+  url      = env('DATABASE_URL')
+}
+
+// Access-control plugin (v3 self-contained policy plugin). Provider name is
+// verified at first `zen generate`; see packages/db/README.md.
+plugin policy {
+  provider = '@core/policy'
+}
+
+// Shape of the value passed to `$setAuth(...)` and exposed via `auth()` in
+// policy rules. Bound from the BetterAuth session: { id, role }.
+type Auth {
+  id   String @id
+  role String
+  @@auth
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum SpotType {
+  REGION // polygon area (off-leash zone, swim beach)
+  POI    // point (horeca, wash, shop, drinking point)
+}
+
+enum SpotStatus {
+  UNVERIFIED // live, awaiting community confirmation
+  VERIFIED   // reached net weighted score >= +5
+  HIDDEN     // auto-hidden (>= 3 denials) or admin-hidden; admin-only
+  REMOVED    // admin hard-removed; admin-only
+}
+
+enum TaxonomyStatus {
+  ACTIVE   // curated, broadly shown
+  PROPOSED // community-suggested, awaiting admin curation
+}
+
+enum VoteValue {
+  CONFIRM
+  DENY
+}
+
+enum PhotoStatus {
+  ACTIVE
+  REPORTED
+  REMOVED
+}
+
+enum ReviewStatus {
+  ACTIVE
+  REPORTED
+  REMOVED
+}
+
+enum ReportTarget {
+  SPOT
+  PHOTO
+  REVIEW
+}
+
+enum ReportReason {
+  DUPLICATE
+  SPAM
+  WRONG_INFO
+  INAPPROPRIATE
+  OTHER
+}
+
+enum FeatureStatus {
+  CONSIDERING
+  PLANNED
+  DONE
+  DECLINED
+}
+
+enum AdminActionType {
+  RESTORE
+  FORCE_VERIFY
+  REMOVE
+  EDIT
+  PROMOTE_TAXONOMY
+  MERGE_TAXONOMY
+  RESOLVE_REPORT
+  SET_FEATURE_STATUS
+}
+
+// ---------------------------------------------------------------------------
+// Users & BetterAuth core (User / Session / Account / Verification)
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String   @id @default(uuid()) @db.Uuid
+  email         String   @unique
+  name          String?
+  image         String?  // avatar URL
+  emailVerified Boolean  @default(false)
+  role          UserRole @default(USER)
+
+  // Profile
+  handle     String? @unique // @username
+  bio        String?
+  // Reputation feeds vote weight; recomputed as contributions get verified.
+  reputation Int     @default(0)
+  voteWeight Float   @default(1) // clamped, e.g. new accounts < 1, proven > 1
+
+  dogs            Dog[]
+  spots           Spot[]            @relation("SpotSubmitter")
+  votes           Vote[]
+  reviews         Review[]
+  reports         Report[]
+  photos          SpotPhoto[]
+  featureRequests FeatureRequest[]
+  featureVotes    FeatureVote[]
+  proposedCategories Category[]     @relation("CategoryProposer")
+  proposedAmenities  Amenity[]      @relation("AmenityProposer")
+  adminActions    AdminAction[]
+  sessions        Session[]
+  accounts        Account[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@allow('read', true)
+  @@allow('update', auth().id == id)
+  @@allow('all', auth().role == 'ADMIN')
+}
+
+model Session {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@allow('all', auth().id == userId || auth().role == 'ADMIN')
+}
+
+model Account {
+  id                    String    @id @default(uuid()) @db.Uuid
+  userId                String    @db.Uuid
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@unique([providerId, accountId])
+  @@allow('all', auth().id == userId || auth().role == 'ADMIN')
+}
+
+model Verification {
+  id         String   @id @default(uuid()) @db.Uuid
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@allow('all', auth().role == 'ADMIN')
+}
+
+// ---------------------------------------------------------------------------
+// Dogs (profile)
+// ---------------------------------------------------------------------------
+
+model Dog {
+  id        String  @id @default(uuid()) @db.Uuid
+  ownerId   String  @db.Uuid
+  owner     User    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  name      String
+  breed     String?
+  birthYear Int?
+  photoUrl  String?
+  note      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@allow('read', true)
+  @@allow('all', auth().id == ownerId || auth().role == 'ADMIN')
+}
+
+// ---------------------------------------------------------------------------
+// Taxonomy: categories & amenities (data-driven, community-growable)
+// ---------------------------------------------------------------------------
+
+model Category {
+  id        String         @id @default(uuid()) @db.Uuid
+  slug      String         @unique
+  label     String
+  type      SpotType // REGION categories vs POI categories
+  icon      String? // Tabler / SF Symbol name (see brand-direction.md)
+  color     String? // pin color
+  visible   Boolean        @default(true)
+  sortOrder Int            @default(0)
+  status    TaxonomyStatus @default(ACTIVE)
+
+  proposedById String? @db.Uuid
+  proposedBy   User?   @relation("CategoryProposer", fields: [proposedById], references: [id], onDelete: SetNull)
+
+  spots     Spot[]
+  amenities AmenityOnCategory[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@allow('read', visible || auth().role == 'ADMIN')
+  @@allow('create', auth() != null && status == 'PROPOSED')
+  @@allow('all', auth().role == 'ADMIN')
+}
+
+model Amenity {
+  id        String         @id @default(uuid()) @db.Uuid
+  slug      String         @unique
+  label     String
+  icon      String?
+  visible   Boolean        @default(true)
+  sortOrder Int            @default(0)
+  status    TaxonomyStatus @default(ACTIVE)
+
+  proposedById String? @db.Uuid
+  proposedBy   User?   @relation("AmenityProposer", fields: [proposedById], references: [id], onDelete: SetNull)
+
+  categories AmenityOnCategory[]
+  spots      SpotAmenity[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@allow('read', visible || auth().role == 'ADMIN')
+  @@allow('create', auth() != null && status == 'PROPOSED')
+  @@allow('all', auth().role == 'ADMIN')
+}
+
+// Which amenities apply to which categories (drives the category-scoped form).
+model AmenityOnCategory {
+  amenityId  String   @db.Uuid
+  amenity    Amenity  @relation(fields: [amenityId], references: [id], onDelete: Cascade)
+  categoryId String   @db.Uuid
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([amenityId, categoryId])
+  @@allow('read', true)
+  @@allow('all', auth().role == 'ADMIN')
+}
+
+// ---------------------------------------------------------------------------
+// Spots (the core content type — REGION or POI)
+// ---------------------------------------------------------------------------
+
+model Spot {
+  id          String     @id @default(uuid()) @db.Uuid
+  slug        String     @unique
+  type        SpotType
+  categoryId  String     @db.Uuid
+  category    Category   @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  name        String
+  description String?
+  status      SpotStatus @default(UNVERIFIED)
+
+  // Geometry (PostGIS, SRID 4326). `geom` = point for POI / polygon for REGION.
+  // lat/lng mirror the centroid for cheap reads + the proximity gate.
+  geom Unsupported("geometry(Geometry, 4326)")?
+  lat  Float?
+  lng  Float?
+
+  // POI extras
+  address String?
+  hours   Json? // opening hours structure (validated at API boundary)
+  phone   String?
+  website String?
+
+  // Verification scoring (denormalized; recomputed on each vote — see queue job)
+  confirmScore Float @default(0) // sum of weighted CONFIRM votes
+  denyScore    Float @default(0) // sum of weighted DENY votes
+  netScore     Float @default(0) // confirmScore - denyScore
+  confirmCount Int   @default(0)
+  denyCount    Int   @default(0)
+
+  submittedById String @db.Uuid
+  submittedBy   User   @relation("SpotSubmitter", fields: [submittedById], references: [id], onDelete: Cascade)
+
+  amenities SpotAmenity[]
+  photos    SpotPhoto[]
+  votes     Vote[]
+  reviews   Review[]
+
+  // Review aggregate (denormalized)
+  ratingAvg   Float @default(0)
+  ratingCount Int   @default(0)
+
+  verifiedAt DateTime?
+  hiddenAt   DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([status, updatedAt])
+  @@index([categoryId])
+
+  // Hidden/removed content is admin-only (and visible to its submitter).
+  @@deny('read', (status == 'HIDDEN' || status == 'REMOVED') && auth().role != 'ADMIN' && auth().id != submittedById)
+  @@allow('read', true)
+  @@allow('create', auth() != null && auth().id == submittedById)
+  // Owner may edit while still unverified; admin may always edit.
+  @@allow('update', auth().id == submittedById && status == 'UNVERIFIED')
+  @@allow('all', auth().role == 'ADMIN')
+}
+
+model SpotAmenity {
+  spotId    String  @db.Uuid
+  spot      Spot    @relation(fields: [spotId], references: [id], onDelete: Cascade)
+  amenityId String  @db.Uuid
+  amenity   Amenity @relation(fields: [amenityId], references: [id], onDelete: Cascade)
+
+  @@id([spotId, amenityId])
+  @@allow('read', true)
+  @@allow('create', auth() != null && spot.submittedById == auth().id)
+  @@allow('all', auth().role == 'ADMIN')
+}
+
+model SpotPhoto {
+  id           String      @id @default(uuid()) @db.Uuid
+  spotId       String      @db.Uuid
+  spot         Spot        @relation(fields: [spotId], references: [id], onDelete: Cascade)
+  url          String
+  uploadedById String      @db.Uuid
+  uploadedBy   User        @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+  status       PhotoStatus @default(ACTIVE)
+  sortOrder    Int         @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@allow('read', status != 'REMOVED' || auth().role == 'ADMIN')
+  @@allow('create', auth() != null && auth().id == uploadedById)
+  @@allow('all', auth().id == uploadedById || auth().role == 'ADMIN')
+}
+
+// ---------------------------------------------------------------------------
+// Community verification votes
+// ---------------------------------------------------------------------------
+
+model Vote {
+  id                String    @id @default(uuid()) @db.Uuid
+  spotId            String    @db.Uuid
+  spot              Spot      @relation(fields: [spotId], references: [id], onDelete: Cascade)
+  userId            String    @db.Uuid
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  value             VoteValue
+  weight            Float     @default(1) // snapshot of voter weight at vote time
+  proximityVerified Boolean   @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // One vote per user per spot.
+  @@unique([spotId, userId])
+  @@index([spotId])
+
+  @@allow('read', auth().id == userId || auth().role == 'ADMIN')
+  // Authenticated, not the submitter, one per spot (DB-enforced).
+  @@allow('create', auth() != null && auth().id == userId && spot.submittedById != auth().id)
+  @@allow('update,delete', auth().id == userId || auth().role == 'ADMIN')
+}
+
+// ---------------------------------------------------------------------------
+// Reviews (0-5 stars + comment) — separate from verification votes
+// ---------------------------------------------------------------------------
+
+model Review {
+  id           String       @id @default(uuid()) @db.Uuid
+  spotId       String       @db.Uuid
+  spot         Spot         @relation(fields: [spotId], references: [id], onDelete: Cascade)
+  userId       String       @db.Uuid
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stars        Int // 0..5 (validated at API boundary)
+  body         String?
+  helpfulCount Int          @default(0)
+  status       ReviewStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([spotId])
+  @@allow('read', status != 'REMOVED' || auth().role == 'ADMIN')
+  @@allow('create', auth() != null && auth().id == userId)
+  @@allow('update,delete', auth().id == userId || auth().role == 'ADMIN')
+}
+
+// ---------------------------------------------------------------------------
+// Reports (safety-net) & admin action log
+// ---------------------------------------------------------------------------
+
+model Report {
+  id         String       @id @default(uuid()) @db.Uuid
+  targetType ReportTarget
+  targetId   String       @db.Uuid
+  reporterId String       @db.Uuid
+  reporter   User         @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  reason     ReportReason
+  note       String?
+  resolved   Boolean      @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@index([targetType, targetId])
+  @@allow('create', auth() != null && auth().id == reporterId)
+  @@allow('all', auth().role == 'ADMIN')
+}
+
+model AdminAction {
+  id         String          @id @default(uuid()) @db.Uuid
+  adminId    String          @db.Uuid
+  admin      User            @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  action     AdminActionType
+  targetType String
+  targetId   String
+  note       String?
+
+  createdAt DateTime @default(now())
+
+  @@allow('all', auth().role == 'ADMIN')
+}
+
+// ---------------------------------------------------------------------------
+// Feature requests (community product input)
+// ---------------------------------------------------------------------------
+
+model FeatureRequest {
+  id          String        @id @default(uuid()) @db.Uuid
+  title       String
+  body        String?
+  component   String? // Kaart / Inzenden / Profiel / Anders
+  status      FeatureStatus @default(CONSIDERING)
+  upvoteCount Int           @default(0)
+
+  createdById String @db.Uuid
+  createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  votes FeatureVote[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@allow('read', true)
+  @@allow('create', auth() != null && auth().id == createdById)
+  @@allow('all', auth().role == 'ADMIN')
+}
+
+model FeatureVote {
+  requestId String         @db.Uuid
+  request   FeatureRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  userId    String         @db.Uuid
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@id([requestId, userId])
+  @@allow('read', true)
+  @@allow('create,delete', auth() != null && auth().id == userId)
+}

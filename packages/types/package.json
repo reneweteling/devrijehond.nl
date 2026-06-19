@@ -1,0 +1,35 @@
+{
+  "name": "@devrijehond/types",
+  "version": "0.0.0",
+  "private": true,
+  "description": "OpenAPI-annotated Zod DTOs composed on top of @devrijehond/db, plus the shared OpenAPIRegistry — the typed API contract between apps/web and apps/mobile.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./registry": {
+      "types": "./src/registry.ts",
+      "default": "./src/registry.ts"
+    },
+    "./dto": {
+      "types": "./src/dto/index.ts",
+      "default": "./src/dto/index.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@asteasolutions/zod-to-openapi": "^7.3.0",
+    "@devrijehond/db": "workspace:*",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.2"
+  }
+}

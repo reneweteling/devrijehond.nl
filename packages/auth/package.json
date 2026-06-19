@@ -1,0 +1,33 @@
+{
+  "name": "@devrijehond/auth",
+  "version": "0.0.0",
+  "private": true,
+  "description": "BetterAuth instance (magic link via HTTPS interstitial, native Apple/Google, bearer) and React client for De Vrije Hond.",
+  "type": "module",
+  "exports": {
+    ".": { "types": "./src/index.ts", "default": "./src/index.ts" },
+    "./client": { "types": "./src/client.ts", "default": "./src/client.ts" }
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@devrijehond/db": "workspace:*",
+    "@devrijehond/email": "workspace:*",
+    "@zenstackhq/better-auth": "^3.0.0",
+    "better-auth": "^1.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "@types/react": "^19.0.0",
+    "react": "^19.0.0",
+    "typescript": "^5.7.2"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": { "optional": true }
+  }
+}

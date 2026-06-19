@@ -1,0 +1,29 @@
+{
+  "name": "@devrijehond/server",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared request context (BetterAuth session → authDb), PostGIS pool, and logger for the De Vrije Hond API.",
+  "type": "module",
+  "exports": {
+    ".": { "types": "./src/index.ts", "default": "./src/index.ts" },
+    "./context": { "types": "./src/context.ts", "default": "./src/context.ts" },
+    "./logger": { "types": "./src/logger.ts", "default": "./src/logger.ts" },
+    "./pg": { "types": "./src/pg.ts", "default": "./src/pg.ts" }
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@devrijehond/auth": "workspace:*",
+    "@devrijehond/db": "workspace:*",
+    "pg": "^8.13.1",
+    "pino": "^9.5.0",
+    "pino-pretty": "^11.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "@types/pg": "^8.11.10",
+    "typescript": "^5.7.2"
+  }
+}
