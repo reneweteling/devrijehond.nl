@@ -25,10 +25,7 @@ import { haversineMeters, PROXIMITY_RADIUS_M } from '@/lib/geo';
  */
 export const runtime = 'nodejs';
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   let ctx;
   try {
     ctx = await requireAuth(request);
@@ -96,8 +93,7 @@ export async function POST(
   let voteId: string;
   let voteCreatedAt: Date;
   try {
-    // TODO(verify): composite-unique accessor name. ZenStack/Prisma derives it
-    // from `@@unique([spotId, userId])` as `spotId_userId`; confirm post-generate.
+    // Composite-unique accessor derived from `@@unique([spotId, userId])`.
     const existing = await db.vote.findUnique({
       where: { spotId_userId: { spotId, userId: user.id } },
       select: { id: true },

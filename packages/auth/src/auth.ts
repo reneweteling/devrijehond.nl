@@ -27,9 +27,6 @@
 import { betterAuth } from 'better-auth';
 import { bearer, magicLink } from 'better-auth/plugins';
 import { nextCookies } from 'better-auth/next-js';
-// TODO (verify pass): confirm the export name `zenstackAdapter` against the
-// installed `@zenstackhq/better-auth` (v3). If the package exposes a different
-// factory (e.g. `createAdapter` / default export), swap this import.
 import { zenstackAdapter } from '@zenstackhq/better-auth';
 import { db } from '@devrijehond/db/client';
 import { sendMagicLink } from '@devrijehond/email';
@@ -184,8 +181,7 @@ export const auth = betterAuth({
           const originalCallback = parsed.searchParams.get('callbackURL') ?? '';
           if (
             originalCallback &&
-            (originalCallback.startsWith('exp://') ||
-              originalCallback.startsWith('vrijehond://'))
+            (originalCallback.startsWith('exp://') || originalCallback.startsWith('vrijehond://'))
           ) {
             const t = parsed.searchParams.get('token') ?? token;
             const baseURL = process.env.BETTER_AUTH_BASE_URL;

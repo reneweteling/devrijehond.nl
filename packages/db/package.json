@@ -5,11 +5,26 @@
   "description": "ZenStack v3 schema, access policies, generated client, Zod factory and seed for De Vrije Hond.",
   "type": "module",
   "exports": {
-    ".": { "types": "./src/index.ts", "default": "./src/index.ts" },
-    "./client": { "types": "./src/client.ts", "default": "./src/client.ts" },
-    "./schema": { "types": "./schema.ts", "default": "./schema.ts" },
-    "./models": { "types": "./models.ts", "default": "./models.ts" },
-    "./zod": { "types": "./src/zod.ts", "default": "./src/zod.ts" }
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./client": {
+      "types": "./src/client.ts",
+      "default": "./src/client.ts"
+    },
+    "./schema": {
+      "types": "./schema.ts",
+      "default": "./schema.ts"
+    },
+    "./models": {
+      "types": "./models.ts",
+      "default": "./models.ts"
+    },
+    "./zod": {
+      "types": "./src/zod.ts",
+      "default": "./src/zod.ts"
+    }
   },
   "scripts": {
     "db:generate": "zen generate",
@@ -22,9 +37,11 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@asteasolutions/zod-to-openapi": "^7.3.0",
+    "@asteasolutions/zod-to-openapi": "^8.5.0",
     "@zenstackhq/better-auth": "^3.0.0",
     "@zenstackhq/orm": "^3.0.0",
+    "@zenstackhq/plugin-policy": "^3.0.0",
+    "@zenstackhq/schema": "^3.0.0",
     "@zenstackhq/zod": "^3.0.0",
     "pg": "^8.13.1",
     "zod": "^4.4.3"
@@ -37,5 +54,7 @@
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   },
-  "zenstack": { "schema": "schema.zmodel" }
+  "zenstack": {
+    "schema": "schema.zmodel"
+  }
 }

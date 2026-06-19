@@ -24,7 +24,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@asteasolutions/zod-to-openapi": "^7.3.0",
+    "@asteasolutions/zod-to-openapi": "^8.5.0",
     "@devrijehond/db": "workspace:*",
     "zod": "^4.4.3"
   },

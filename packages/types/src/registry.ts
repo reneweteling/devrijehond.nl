@@ -48,7 +48,9 @@ export type OpenApiVersion = 'v1' | 'v2';
  * with the right Cache-Control headers. `version` is advisory until we fork
  * `/api/v2`; today both values compile the same registry.
  */
-export function buildOpenApiDocument(version: OpenApiVersion) {
+export function buildOpenApiDocument(
+  version: OpenApiVersion,
+): ReturnType<OpenApiGeneratorV31['generateDocument']> {
   const generator = new OpenApiGeneratorV31(registry.definitions);
   return generator.generateDocument({
     openapi: '3.1.0',

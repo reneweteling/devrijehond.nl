@@ -38,8 +38,8 @@ export async function handleNativeSignIn(
 
   let result: unknown;
   try {
-    // TODO(verify): confirm the `signInSocial` body shape (`idToken: { token }`)
-    // against the installed better-auth version.
+    // Native idToken path: better-auth verifies the token against the provider
+    // and skips the OAuth redirect.
     result = await auth.api.signInSocial({
       body: { provider, idToken: { token: parsed.data.idToken } },
       headers: request.headers,

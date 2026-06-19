@@ -35,20 +35,22 @@ export async function sendEmail(options: SendEmailOptions) {
   const { to, subject, react, html, text, from } = options;
 
   const resolvedHtml = react ? await render(react) : html;
-  const resolvedText =
-    text ?? (react ? await render(react, { plainText: true }) : undefined);
+  const resolvedText = text ?? (react ? await render(react, { plainText: true }) : undefined);
 
   if (!resolvedHtml && !resolvedText) {
     throw new Error('[email] sendEmail requires `react`, `html`, or `text`');
   }
 
-  const { data, error } = await getResend().emails.send({
-    from: from ?? defaultFrom(),
-    to,
-    subject,
-    ...(resolvedHtml ? { html: resolvedHtml } : {}),
-    ...(resolvedText ? { text: resolvedText } : {}),
-  });
+  // Resend's `CreateEmailOptions` is a union that requires at least one of
+  // `html` / `text` / `react` to be definitely present. The branch keeps one of
+  // them non-optional so the payload matches a union member; the guard above
+  // guarantees `resolvedText` is set whenever `resolvedHtml` is not.
+  const base = { from: from ?? defaultFrom(), to, subject };
+  const payload = resolvedHtml
+    ? { ...base, html: resolvedHtml, ...(resolvedText ? { text: resolvedText } : {}) }
+    : { ...base, text: resolvedText as string };
+
+  const { data, error } = await getResend().emails.send(payload);
 
   if (error) {
     throw new Error(`[email] failed to send "${subject}": ${error.message}`);

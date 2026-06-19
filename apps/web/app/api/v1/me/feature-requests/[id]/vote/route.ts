@@ -13,10 +13,7 @@ import { ok, error, NO_STORE_CACHE_CONTROL } from '@/lib/api-response';
  */
 export const runtime = 'nodejs';
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   let ctx;
   try {
     ctx = await requireAuth(request);
@@ -28,8 +25,7 @@ export async function POST(
 
   const db = authDb(user);
 
-  // TODO(verify): composite-key accessor name derived from `@@id([requestId,
-  // userId])` → `requestId_userId`; confirm against the generated client.
+  // Composite-key accessor derived from `@@id([requestId, userId])`.
   const existing = await db.featureVote.findUnique({
     where: { requestId_userId: { requestId, userId: user.id } },
     select: { requestId: true },

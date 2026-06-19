@@ -1,13 +1,17 @@
 import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
 import { createSchemaFactory } from '@zenstackhq/zod';
 import { z } from 'zod';
-import { schema } from '../schema';
+import { schema, type SchemaType } from '../schema';
 
 // Patch zod with `.openapi()` before constructing any schema (zod 4 snapshots
 // prototype methods at construction time).
 extendZodWithOpenApi(z);
 
-const factory = createSchemaFactory(schema);
+// Annotate explicitly: the inferred factory type is an unnameable class with a
+// private member and a decimal.js reference, which tsc can't serialize for the
+// declaration output (TS2742/TS4094/TS7056). Naming it via the function's
+// return type sidesteps all three.
+const factory: ReturnType<typeof createSchemaFactory<SchemaType>> = createSchemaFactory(schema);
 
 // Model schemas
 export const UserSchema = factory.makeModelSchema('User');

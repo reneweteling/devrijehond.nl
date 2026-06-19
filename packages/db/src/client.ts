@@ -1,5 +1,6 @@
 import { ZenStackClient, type ClientContract } from '@zenstackhq/orm';
 import { PostgresDialect } from '@zenstackhq/orm/dialects/postgres';
+import { PolicyPlugin } from '@zenstackhq/plugin-policy';
 import pg, { Pool } from 'pg';
 import { schema, type SchemaType } from '../schema';
 
@@ -14,11 +15,12 @@ import { schema, type SchemaType } from '../schema';
  *
  * `auth()` shape is defined by `type Auth { id; role; @@auth }` in the schema.
  *
- * NOTE (verify pass): the v3 access-policy runtime is a self-contained plugin
- * declared in the ZModel (`plugin policy`). Depending on the installed
- * @zenstackhq/orm version the runtime install may be implicit (just call
- * `$setAuth`) or require `.$use(policyPlugin)`. Confirm against the installed
- * package during `pnpm install` + `zen generate` and adjust `policyDb` below.
+ * The access-policy runtime is the `PolicyPlugin` from `@zenstackhq/plugin-policy`
+ * (the same package whose `plugin.zmodel` contributes `@@allow`/`@@deny` at
+ * `zen generate` time). `$setAuth` only binds the identity exposed to `auth()`;
+ * it does NOT enforce on its own. Enforcement is on only for `policyDb`, which
+ * has the plugin installed via `$use`. The raw `db` deliberately omits it so the
+ * BetterAuth adapter and migrations/seed bypass policies.
  */
 
 pg.types.setTypeParser(1114, (str: string) => new Date(str + 'Z'));
@@ -26,7 +28,10 @@ pg.types.setTypeParser(1082, (str: string) => new Date(str + 'T00:00:00Z'));
 
 type DvhClient = ClientContract<SchemaType>;
 
-const globalForDb = globalThis as unknown as { dvhDb?: DvhClient };
+const globalForDb = globalThis as unknown as {
+  dvhDb?: DvhClient;
+  dvhPolicyDb?: DvhClient;
+};
 
 function createPool(): Pool {
   const connectionString = process.env.DATABASE_URL ?? '';
@@ -51,9 +56,17 @@ function createClient(): DvhClient {
 /** Raw client — bypasses policies. BetterAuth adapter + migrations only. */
 export const db: DvhClient =
   globalForDb.dvhDb ??
+  (process.env.NODE_ENV === 'production' ? createClient() : (globalForDb.dvhDb = createClient()));
+
+/**
+ * Policy-enforcing client (no identity bound yet). Application code never uses
+ * this directly — it goes through `authDb` / `anonDb`, which bind `auth()`.
+ */
+const policyDb: DvhClient =
+  globalForDb.dvhPolicyDb ??
   (process.env.NODE_ENV === 'production'
-    ? createClient()
-    : (globalForDb.dvhDb = createClient()));
+    ? db.$use(new PolicyPlugin())
+    : (globalForDb.dvhPolicyDb = db.$use(new PolicyPlugin())));
 
 export type Db = DvhClient;
 
@@ -64,10 +77,14 @@ export interface AuthUser {
 
 /** Policy-bound client for a given user. Use everywhere in application code. */
 export function authDb(user: AuthUser) {
-  return db.$setAuth({ id: user.id, role: user.role });
+  return policyDb.$setAuth({ id: user.id, role: user.role });
 }
 
-/** Anonymous policy-bound client (public reads). `auth()` is null. */
+/**
+ * Anonymous policy-bound client (public reads). Pass `undefined` (not `null`)
+ * — the ORM rejects an explicit null. In policy rules `auth()` then reads as
+ * null, so `auth() == null` / `auth() != null` behave as intended.
+ */
 export function anonDb() {
-  return db.$setAuth(null);
+  return policyDb.$setAuth(undefined);
 }

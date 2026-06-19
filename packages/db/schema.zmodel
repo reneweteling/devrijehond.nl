@@ -22,10 +22,11 @@ datasource db {
   url      = env('DATABASE_URL')
 }
 
-// Access-control plugin (v3 self-contained policy plugin). Provider name is
-// verified at first `zen generate`; see packages/db/README.md.
+// Access-control plugin (v3 self-contained policy plugin). The provider
+// resolves to `<provider>/plugin.zmodel` via Node resolution, so it points at
+// the installed package, not a `@core/*` alias.
 plugin policy {
-  provider = '@core/policy'
+  provider = '@zenstackhq/plugin-policy'
 }
 
 // Shape of the value passed to `$setAuth(...)` and exposed via `auth()` in

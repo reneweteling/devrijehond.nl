@@ -5,17 +5,15 @@
  *
  * Tabs: Map (kaart) · Nabij (nearby list) · Plek toevoegen (submit) · Profiel.
  *
- * TODO(verify): `expo-router/unstable-native-tabs` is the SDK-55 import path for
- * the native-tabs API; confirm the `NativeTabs` / `NativeTabs.Trigger` /
- * `Icon` / `Label` subcomponent names against the installed expo-router build —
- * the unstable API has churned across SDKs. If the import is unavailable, fall
- * back to `import { Tabs } from 'expo-router'` with `tabBarIcon` rendering an
- * `expo-symbols` SymbolView.
+ * In SDK 55 `Label` and `Icon` are nested statics on the trigger
+ * (`NativeTabs.Trigger.Label` / `.Icon`), not standalone named exports.
  */
 
-import { NativeTabs, Icon, Label } from 'expo-router/unstable-native-tabs';
+import { NativeTabs } from 'expo-router/unstable-native-tabs';
 
 import { colors } from '@/lib/theme';
+
+const { Label, Icon } = NativeTabs.Trigger;
 
 export default function TabsLayout() {
   return (

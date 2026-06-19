@@ -1,5 +1,5 @@
 import type { NextRequest } from 'next/server';
-import { authDb } from '@devrijehond/db';
+import { authDb, type JsonValue } from '@devrijehond/db';
 import { pgQuery, requireAuth } from '@devrijehond/server';
 import { UpdateSpotRequestSchema, type SubmitSpotResponseDto } from '@devrijehond/types';
 import { ok, error, NO_STORE_CACHE_CONTROL } from '@/lib/api-response';
@@ -15,10 +15,7 @@ import { loadSpotDetail } from '@/lib/spot-detail';
  */
 export const runtime = 'nodejs';
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   let ctx;
   try {
     ctx = await requireAuth(request);
@@ -75,7 +72,7 @@ export async function PATCH(
       ...(dto.address !== undefined && { address: dto.address ?? null }),
       ...(dto.phone !== undefined && { phone: dto.phone ?? null }),
       ...(dto.website !== undefined && { website: dto.website ?? null }),
-      ...(dto.hours !== undefined && { hours: (dto.hours as object | undefined) ?? null }),
+      ...(dto.hours !== undefined && { hours: dto.hours as JsonValue }),
       ...(geom && { lat: geom.lat, lng: geom.lng }),
     },
   });

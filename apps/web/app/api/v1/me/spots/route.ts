@@ -1,5 +1,5 @@
 import type { NextRequest } from 'next/server';
-import { authDb } from '@devrijehond/db';
+import { authDb, type JsonValue } from '@devrijehond/db';
 import { pgQuery, requireAuth } from '@devrijehond/server';
 import { SubmitSpotRequestSchema, type SubmitSpotResponseDto } from '@devrijehond/types';
 import { ok, error, NO_STORE_CACHE_CONTROL } from '@/lib/api-response';
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
         address: dto.type === 'POI' ? (dto.address ?? null) : null,
         phone: dto.type === 'POI' ? (dto.phone ?? null) : null,
         website: dto.type === 'POI' ? (dto.website ?? null) : null,
-        hours: dto.type === 'POI' ? ((dto.hours as object | undefined) ?? null) : null,
+        hours: dto.type === 'POI' ? (dto.hours as JsonValue | undefined) : undefined,
         submittedById: user.id,
       },
       select: { id: true },

@@ -41,7 +41,9 @@ import { AmenityTile, Button, Stars, VerifiedBadge } from '@/components/ui';
 function polygonCoords(geometry: unknown): { latitude: number; longitude: number }[] {
   const g = geometry as { type?: string; coordinates?: number[][][] } | null;
   if (!g || g.type !== 'Polygon' || !Array.isArray(g.coordinates?.[0])) return [];
-  return g.coordinates[0].map(([lng, lat]) => ({ latitude: lat, longitude: lng }));
+  return g.coordinates[0]
+    .filter((pt): pt is [number, number] => pt.length >= 2)
+    .map(([lng, lat]) => ({ latitude: lat, longitude: lng }));
 }
 
 export default function SpotDetailScreen() {
@@ -228,9 +230,7 @@ export default function SpotDetailScreen() {
           {spot.type === 'POI' && (spot.address || spot.phone || spot.website) && (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Informatie</Text>
-              {spot.address ? (
-                <Info icon="mappin.circle.fill" text={spot.address} />
-              ) : null}
+              {spot.address ? <Info icon="mappin.circle.fill" text={spot.address} /> : null}
               {spot.phone ? <Info icon="phone.fill" text={spot.phone} /> : null}
               {spot.website ? <Info icon="globe" text={spot.website} /> : null}
             </View>
@@ -242,9 +242,7 @@ export default function SpotDetailScreen() {
               <Text style={styles.sectionTitle}>Reviews</Text>
               <Pressable
                 onPress={() =>
-                  me
-                    ? router.push(`/spot/${spot.slug}/review`)
-                    : router.push('/(auth)/sign-in')
+                  me ? router.push(`/spot/${spot.slug}/review`) : router.push('/(auth)/sign-in')
                 }
               >
                 <Text style={styles.link}>Schrijf review</Text>
@@ -257,7 +255,9 @@ export default function SpotDetailScreen() {
                     <View style={styles.reviewAvatar}>
                       <SymbolView name="person.fill" size={13} tintColor={colors.mossDark} />
                     </View>
-                    <Text style={styles.reviewName}>{r.author.name ?? r.author.handle ?? 'Anoniem'}</Text>
+                    <Text style={styles.reviewName}>
+                      {r.author.name ?? r.author.handle ?? 'Anoniem'}
+                    </Text>
                     <View style={{ marginLeft: 'auto' }}>
                       <Stars value={r.stars} size={12} />
                     </View>
@@ -272,7 +272,8 @@ export default function SpotDetailScreen() {
 
           {/* Provenance */}
           <Text style={styles.provenance}>
-            Ingezonden door {spot.submittedBy.handle ? `@${spot.submittedBy.handle}` : 'een gebruiker'}
+            Ingezonden door{' '}
+            {spot.submittedBy.handle ? `@${spot.submittedBy.handle}` : 'een gebruiker'}
             {v.status === 'VERIFIED'
               ? ` · geverifieerd door de community, netto +${v.netScore}`
               : ''}

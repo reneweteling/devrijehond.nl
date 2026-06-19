@@ -1,11 +1,6 @@
 import { anonDb } from '@devrijehond/db';
 import { pgQuery } from '@devrijehond/server';
-import type {
-  SpotDetailDto,
-  SpotSummaryDto,
-  CategoryDto,
-  AmenityDto,
-} from '@devrijehond/types';
+import type { SpotDetailDto, SpotSummaryDto, CategoryDto, AmenityDto } from '@devrijehond/types';
 
 /**
  * Shared spot read helpers used by the public detail API AND the SSR spot
@@ -60,8 +55,6 @@ function toCategoryDto(c: {
 export async function loadSpotDetail(slug: string): Promise<SpotDetailDto | null> {
   const db = anonDb();
 
-  // TODO(verify): confirm ZenStack v3 `include`/`select` nesting matches this
-  // Prisma-style shape against the generated client.
   const spot = await db.spot.findUnique({
     where: { slug },
     include: {
