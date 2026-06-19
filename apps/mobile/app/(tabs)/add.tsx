@@ -297,9 +297,11 @@ const styles = StyleSheet.create({
   gateTitle: {
     fontFamily: font.heading,
     fontSize: 20,
+    lineHeight: 26,
     color: colors.ink,
     marginTop: space.sm,
     textAlign: 'center',
+    alignSelf: 'stretch',
   },
   gateSub: {
     fontFamily: font.body,

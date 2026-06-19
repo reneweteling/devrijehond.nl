@@ -156,6 +156,7 @@ const styles = StyleSheet.create({
   signedOutTitle: {
     fontFamily: font.heading,
     fontSize: 20,
+    lineHeight: 26,
     color: colors.ink,
     marginTop: space.sm,
   },

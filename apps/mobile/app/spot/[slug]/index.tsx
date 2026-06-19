@@ -479,6 +479,7 @@ const styles = StyleSheet.create({
   reportTitle: {
     fontFamily: font.heading,
     fontSize: 16,
+    lineHeight: 21,
     color: colors.ink,
     marginBottom: space.sm,
   },
