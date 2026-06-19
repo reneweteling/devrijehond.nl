@@ -31,6 +31,7 @@
     "db:push": "zen db push",
     "db:migrate": "zen migrate dev",
     "db:migrate:deploy": "zen migrate deploy",
+    "db:deploy": "node ensure-postgis.mjs && zen migrate deploy",
     "db:seed": "tsx --env-file-if-exists=../../.env.local seed.ts",
     "build": "zen generate",
     "check-types": "tsc --noEmit",

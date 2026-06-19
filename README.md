@@ -38,3 +38,10 @@ pnpm dev                   # turbo runs web + mobile
 - Imports: `@/` aliases inside apps; import API shapes from `@devrijehond/types`.
 - Server Components by default in `apps/web`; `"use client"` only when needed.
 - Mobile never imports the db client — all data access via the generated HTTP client.
+
+## Dokku setup
+
+dokku apps:create devrijehond
+dokku domains:set devrijehond www.devrijehond.nl devrijehond.nl
+dokku ports:add devrijehond http:80:3000
+dokku letsencrypt:enable devrijehond

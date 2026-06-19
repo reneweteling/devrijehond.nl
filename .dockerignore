@@ -1,0 +1,18 @@
+node_modules
+**/node_modules
+.git
+.turbo
+**/.turbo
+**/.next
+**/dist
+# The Expo native prebuild is ~1GB and irrelevant to the web image.
+apps/mobile/ios
+apps/mobile/android
+apps/mobile/.expo
+**/.expo
+*.log
+.env
+.env.*
+**/.env.local
+.DS_Store
+.playwright-cli

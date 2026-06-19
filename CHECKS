@@ -1,0 +1,7 @@
+# Dokku zero-downtime health check. The new container must serve a healthy
+# /api/health (which pings the DB) before it takes traffic.
+WAIT=8
+ATTEMPTS=8
+TIMEOUT=20
+
+/api/health ok
