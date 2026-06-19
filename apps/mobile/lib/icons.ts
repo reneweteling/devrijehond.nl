@@ -62,12 +62,22 @@ const AMENITY_SF: Record<string, string> = {
 
 const FALLBACK_SF: SFName = 'tag.fill';
 
-export function categorySymbol(name: string | null | undefined): SFName {
+/**
+ * Resolve a category/amenity icon to an SF Symbol name. The API stores the icon
+ * as an SF Symbol already (e.g. `bowl.fill`), so a value containing a dot passes
+ * through untouched. A bare Tabler name / slug (e.g. `ti-bowl`, `waterbak`) is
+ * looked up in the map; anything unknown falls back to a neutral tag glyph.
+ */
+function resolveSymbol(name: string | null | undefined, map: Record<string, string>): SFName {
   if (!name) return FALLBACK_SF;
-  return (CATEGORY_SF[name] ?? FALLBACK_SF) as SFName;
+  if (name.includes('.')) return name as SFName; // already an SF Symbol
+  return (map[name] ?? FALLBACK_SF) as SFName;
+}
+
+export function categorySymbol(name: string | null | undefined): SFName {
+  return resolveSymbol(name, CATEGORY_SF);
 }
 
 export function amenitySymbol(name: string | null | undefined): SFName {
-  if (!name) return FALLBACK_SF;
-  return (AMENITY_SF[name] ?? FALLBACK_SF) as SFName;
+  return resolveSymbol(name, AMENITY_SF);
 }

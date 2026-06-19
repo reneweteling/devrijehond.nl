@@ -10,10 +10,11 @@
  *   - Region detail leads with the geofence on a small map.
  */
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
+  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -31,6 +32,7 @@ import {
   useMe,
   useSpotDetail,
   useSpotReviews,
+  useSubmitReport,
   type Amenity,
   type Review,
 } from '@/lib/api';
@@ -47,6 +49,36 @@ function polygonCoords(geometry: unknown): { latitude: number; longitude: number
     .map(([lng, lat]) => ({ latitude: lat, longitude: lng }));
 }
 
+const NL_MONTHS = [
+  'jan',
+  'feb',
+  'mrt',
+  'apr',
+  'mei',
+  'jun',
+  'jul',
+  'aug',
+  'sep',
+  'okt',
+  'nov',
+  'dec',
+];
+
+/** Compact Dutch date for a review (e.g. "19 jun 2026"). */
+function formatReviewDate(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  return `${d.getDate()} ${NL_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+const REPORT_REASONS = [
+  { value: 'DUPLICATE', label: 'Dubbele plek' },
+  { value: 'WRONG_INFO', label: 'Verkeerde informatie' },
+  { value: 'SPAM', label: 'Spam' },
+  { value: 'INAPPROPRIATE', label: 'Ongepast' },
+  { value: 'OTHER', label: 'Anders' },
+] as const;
+
 export default function SpotDetailScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const insets = useSafeAreaInsets();
@@ -58,6 +90,8 @@ export default function SpotDetailScreen() {
   const { data: reviewsData } = useSpotReviews(slug);
   const { data: me } = useMe(isAuthenticated);
   const castVote = useCastVote();
+  const submitReport = useSubmitReport();
+  const [reportOpen, setReportOpen] = useState(false);
 
   const reviews = reviewsData?.items ?? [];
   const region = useMemo(() => polygonCoords(spot?.geometry), [spot?.geometry]);
@@ -273,6 +307,10 @@ export default function SpotDetailScreen() {
                     </View>
                   </View>
                   {r.body ? <Text style={styles.reviewBody}>{r.body}</Text> : null}
+                  <Text style={styles.reviewMeta}>
+                    {formatReviewDate(r.createdAt)}
+                    {r.helpfulCount > 0 ? ` · ${r.helpfulCount}× nuttig` : ''}
+                  </Text>
                 </View>
               ))
             ) : (
@@ -291,15 +329,44 @@ export default function SpotDetailScreen() {
 
           <Pressable
             style={styles.reportRow}
-            onPress={() => {
-              /* TODO(verify): open a report sheet → useSubmitReport. */
-            }}
+            onPress={() => (isAuthenticated ? setReportOpen(true) : router.push('/(auth)/sign-in'))}
           >
             <SymbolView name="flag" size={14} tintColor={colors.ink3} />
             <Text style={styles.reportText}>Probleem melden</Text>
           </Pressable>
         </View>
       </ScrollView>
+
+      {/* Report sheet */}
+      <Modal
+        visible={reportOpen}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setReportOpen(false)}
+      >
+        <Pressable style={styles.modalScrim} onPress={() => setReportOpen(false)}>
+          <Pressable style={[styles.reportSheet, { paddingBottom: insets.bottom + 16 }]}>
+            <View style={styles.sheetHandle} />
+            <Text style={styles.reportTitle}>Wat is er mis met deze plek?</Text>
+            {REPORT_REASONS.map((r) => (
+              <Pressable
+                key={r.value}
+                style={styles.reportOption}
+                onPress={() => {
+                  setReportOpen(false);
+                  submitReport.mutate({ targetType: 'SPOT', targetId: spot.id, reason: r.value });
+                }}
+              >
+                <Text style={styles.reportOptionText}>{r.label}</Text>
+                <SymbolView name="chevron.right" size={15} tintColor={colors.ink3} />
+              </Pressable>
+            ))}
+            <Pressable style={styles.reportCancel} onPress={() => setReportOpen(false)}>
+              <Text style={styles.reportCancelText}>Annuleren</Text>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -382,6 +449,7 @@ const styles = StyleSheet.create({
   },
   reviewName: { fontFamily: font.bodyMedium, fontSize: 13, color: colors.ink },
   reviewBody: { fontFamily: font.body, fontSize: 13, color: colors.ink2, lineHeight: 19 },
+  reviewMeta: { fontFamily: font.body, fontSize: 11, color: colors.ink3, marginTop: 6 },
   placeholder: { fontFamily: font.body, fontSize: 13, color: colors.ink3 },
   provenance: {
     fontFamily: font.body,
@@ -392,4 +460,37 @@ const styles = StyleSheet.create({
   },
   reportRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: space.sm },
   reportText: { fontFamily: font.body, fontSize: 12, color: colors.ink3 },
+  modalScrim: { flex: 1, backgroundColor: 'rgba(30,28,18,0.35)', justifyContent: 'flex-end' },
+  reportSheet: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: radius.sheet,
+    borderTopRightRadius: radius.sheet,
+    paddingHorizontal: space.lg,
+    paddingTop: space.sm,
+  },
+  sheetHandle: {
+    alignSelf: 'center',
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.line,
+    marginBottom: space.md,
+  },
+  reportTitle: {
+    fontFamily: font.heading,
+    fontSize: 16,
+    color: colors.ink,
+    marginBottom: space.sm,
+  },
+  reportOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.line,
+  },
+  reportOptionText: { fontFamily: font.bodyMedium, fontSize: 14, color: colors.ink },
+  reportCancel: { alignItems: 'center', paddingVertical: 14, marginTop: space.sm },
+  reportCancelText: { fontFamily: font.bodyMedium, fontSize: 14, color: colors.ink2 },
 });

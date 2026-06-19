@@ -12,7 +12,7 @@
  */
 
 import { useMemo, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import MapView, { Marker, type Region } from 'react-native-maps';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
@@ -178,7 +178,15 @@ export default function MapScreen() {
           <View style={styles.sheetHandle} />
           <View style={styles.sheetRow}>
             <View style={styles.thumb}>
-              <SymbolView name="photo.fill" size={20} tintColor={colors.ink3} />
+              {selected.photoUrl ? (
+                <Image
+                  source={{ uri: selected.photoUrl }}
+                  style={styles.thumbImg}
+                  resizeMode="cover"
+                />
+              ) : (
+                <SymbolView name="photo.fill" size={20} tintColor={colors.ink3} />
+              )}
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.sheetTitle} numberOfLines={1}>
@@ -307,7 +315,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.mossSoft,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
+  thumbImg: { width: 56, height: 56 },
   sheetTitle: { fontFamily: font.heading, fontSize: 15, color: colors.ink },
   sheetMeta: { fontFamily: font.body, fontSize: 12, color: colors.ink2, marginTop: 1 },
   sheetMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 },

@@ -7,7 +7,7 @@
  * which we read from the spot detail (cached by slug).
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { useSpotDetail, useSubmitReview } from '@/lib/api';
+import { useAuth } from '@/lib/auth-context';
 import { Button, Note } from '@/components/ui';
 import { colors, font, radius, space } from '@/lib/theme';
 
@@ -23,6 +24,13 @@ export default function WriteReviewScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const qc = useQueryClient();
+  const { status, isAuthenticated } = useAuth();
+
+  // Writing a review needs an account (wireframe S7). Guard direct/deep-link
+  // access — the detail's "Schrijf review" CTA already gates, this covers the rest.
+  useEffect(() => {
+    if (status !== 'loading' && !isAuthenticated) router.replace('/(auth)/sign-in');
+  }, [status, isAuthenticated, router]);
 
   const { data: spot } = useSpotDetail(slug);
   const submit = useSubmitReview();
@@ -89,7 +97,9 @@ export default function WriteReviewScreen() {
           loading={submit.isPending}
           disabled={stars === 0}
         />
-        {submit.isError ? <Text style={styles.error}>Plaatsen mislukt. Probeer opnieuw.</Text> : null}
+        {submit.isError ? (
+          <Text style={styles.error}>Plaatsen mislukt. Probeer opnieuw.</Text>
+        ) : null}
       </View>
     </View>
   );

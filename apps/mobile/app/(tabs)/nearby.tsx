@@ -5,7 +5,7 @@
  */
 
 import { useMemo, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -21,10 +21,7 @@ export default function NearbyScreen() {
 
   const { data: categoriesData } = useCategories();
   const categories = categoriesData?.items ?? [];
-  const catById = useMemo(
-    () => new Map(categories.map((c) => [c.id, c] as const)),
-    [categories],
-  );
+  const catById = useMemo(() => new Map(categories.map((c) => [c.id, c] as const)), [categories]);
 
   const { data, isLoading, refetch, isRefetching } = useSpots({ categoryId: activeCat });
   const spots = data?.items ?? [];
@@ -32,7 +29,11 @@ export default function NearbyScreen() {
   const renderItem = ({ item }: { item: SpotSummary }) => (
     <Pressable style={styles.row} onPress={() => router.push(`/spot/${item.slug}`)}>
       <View style={styles.thumb}>
-        <SymbolView name="photo.fill" size={22} tintColor={colors.ink3} />
+        {item.photoUrl ? (
+          <Image source={{ uri: item.photoUrl }} style={styles.thumbImg} resizeMode="cover" />
+        ) : (
+          <SymbolView name="photo.fill" size={22} tintColor={colors.ink3} />
+        )}
       </View>
       <View style={{ flex: 1, gap: 3 }}>
         <Text style={styles.title} numberOfLines={1}>
@@ -118,7 +119,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.mossSoft,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
+  thumbImg: { width: 60, height: 60 },
   title: { fontFamily: font.heading, fontSize: 15, color: colors.ink },
   meta: { fontFamily: font.body, fontSize: 12, color: colors.ink2 },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 2 },
