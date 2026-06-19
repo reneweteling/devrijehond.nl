@@ -13,7 +13,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import MapView, { Marker, type Region } from 'react-native-maps';
+import MapView, { Marker, Polygon, type Region } from 'react-native-maps';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -53,6 +53,17 @@ function catColor(category: Category | undefined): string {
   return colors.moss;
 }
 
+// REGION spots carry a GeoJSON Polygon outline (the geofence) on the map DTO.
+// Convert its rings ([lng, lat] pairs) to react-native-maps coordinates.
+type LngLat = [number, number];
+function regionRings(s: SpotSummary): { latitude: number; longitude: number }[][] | null {
+  const geom = (s as unknown as { geometry?: { type: string; coordinates: LngLat[][] } }).geometry;
+  if (!geom || geom.type !== 'Polygon' || !Array.isArray(geom.coordinates)) return null;
+  return geom.coordinates.map((ring) =>
+    ring.map(([lng, lat]) => ({ latitude: lat, longitude: lng })),
+  );
+}
+
 export default function MapScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -70,10 +81,16 @@ export default function MapScreen() {
     const lat = params.lat ? Number(params.lat) : NaN;
     const lng = params.lng ? Number(params.lng) : NaN;
     if (Number.isFinite(lat) && Number.isFinite(lng)) {
-      mapRef.current?.animateToRegion(
-        { latitude: lat, longitude: lng, latitudeDelta: 0.08, longitudeDelta: 0.08 },
-        700,
-      );
+      const region: Region = {
+        latitude: lat,
+        longitude: lng,
+        latitudeDelta: 0.08,
+        longitudeDelta: 0.08,
+      };
+      mapRef.current?.animateToRegion(region, 700);
+      // animateToRegion doesn't always fire onRegionChangeComplete, so refetch
+      // the viewport spots explicitly (otherwise you land on an empty map).
+      setBbox(regionToBbox(region));
     }
   };
   useEffect(flyToParams, [params.lat, params.lng]);
@@ -102,6 +119,24 @@ export default function MapScreen() {
         showsMyLocationButton={false}
         onPress={() => setSelected(null)}
       >
+        {/* REGION geofences as filled polygons (tap to peek). */}
+        {spots.map((s) => {
+          const rings = regionRings(s);
+          if (!rings || !rings[0]) return null;
+          const color = catColor(catById.get(s.categoryId));
+          return (
+            <Polygon
+              key={`poly-${s.id}`}
+              coordinates={rings[0]}
+              holes={rings.slice(1)}
+              strokeColor={colors.mossDark}
+              strokeWidth={2.5}
+              fillColor={`${color}59`}
+              tappable
+              onPress={() => setSelected(s)}
+            />
+          );
+        })}
         {/*
           The map DTO carries only the centroid (lat/lng), not full geometry, so
           REGION spots render as a circular moss marker and POIs as a teardrop

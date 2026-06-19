@@ -152,6 +152,7 @@ const RESEARCH: {
   lat: number;
   lng: number;
   description: string;
+  radiusM?: number; // geofence size for REGION spots (metres)
 }[] = [
   {
     name: 'Amsterdamse Bos',
@@ -818,6 +819,115 @@ const RESEARCH: {
     lng: 5.026,
     description: 'Omheinde hondenspeelplaats met water om te zwemmen en drinken.',
   },
+  {
+    name: 'De Hei (Laarder Wasmeren)',
+    category: 'off-leash',
+    city: 'Laren',
+    lat: 52.2725,
+    lng: 5.2345,
+    description:
+      'Groot losloopgebied op de Gooise heide; eindeloos struinen over de hei en door het bos.',
+    radiusM: 1900,
+  },
+  {
+    name: 'Westerheide',
+    category: 'off-leash',
+    city: 'Hilversum',
+    lat: 52.2585,
+    lng: 5.1865,
+    description: 'Uitgestrekte heide tussen Hilversum en Laren waar honden vrij mogen rennen.',
+    radiusM: 1700,
+  },
+  {
+    name: 'Bussumerheide en Franse Kampheide',
+    category: 'off-leash',
+    city: 'Hilversum',
+    lat: 52.2735,
+    lng: 5.1645,
+    description: 'Grote aaneengesloten heide; populair losloopgebied in het Gooi.',
+    radiusM: 1600,
+  },
+  {
+    name: 'Spanderswoud',
+    category: 'off-leash',
+    city: 'Bussum',
+    lat: 52.2515,
+    lng: 5.1455,
+    description: 'Bosgebied tussen Bussum en Hilversum met losloopzones en vennen.',
+    radiusM: 1100,
+  },
+  {
+    name: 'Amelisweerd',
+    category: 'off-leash',
+    city: 'Bunnik',
+    lat: 52.0735,
+    lng: 5.1655,
+    description: 'Landgoed met oude lanen langs de Kromme Rijn; deels losloopgebied.',
+    radiusM: 1200,
+  },
+  {
+    name: 'Beatrixpark',
+    category: 'off-leash',
+    city: 'Amsterdam',
+    lat: 52.3385,
+    lng: 4.8815,
+    description: 'Stadspark bij de Zuidas met aangewezen losloopveld.',
+    radiusM: 500,
+  },
+  {
+    name: 'Flevopark',
+    category: 'off-leash',
+    city: 'Amsterdam',
+    lat: 52.3625,
+    lng: 4.9515,
+    description: 'Park aan het IJ in Oost met losloopstroken en een zwemplek.',
+    radiusM: 700,
+  },
+  {
+    name: 'Park Frankendael',
+    category: 'off-leash',
+    city: 'Amsterdam',
+    lat: 52.3515,
+    lng: 4.9285,
+    description: 'Groen park in de Watergraafsmeer met een hondenlosloopgebied.',
+    radiusM: 500,
+  },
+  {
+    name: 'Park Sonsbeek',
+    category: 'off-leash',
+    city: 'Arnhem',
+    lat: 51.99,
+    lng: 5.905,
+    description: 'Glooiend stadspark met vijvers en waterval; aangewezen losloopplekken.',
+    radiusM: 900,
+  },
+  {
+    name: 'Park Transwijk',
+    category: 'off-leash',
+    city: 'Utrecht',
+    lat: 52.073,
+    lng: 5.105,
+    description: 'Ruim stadspark in Kanaleneiland met een hondenlosloopveld.',
+    radiusM: 600,
+  },
+  {
+    name: 'Kralingse Plas hondenstrand',
+    category: 'swim-beach',
+    city: 'Rotterdam',
+    lat: 51.9365,
+    lng: 4.5205,
+    description: 'Strandje aan de Kralingse Plas waar honden mogen zwemmen.',
+    radiusM: 500,
+  },
+  {
+    name: 'IJzeren Man',
+    category: 'swim-beach',
+    city: 'Vught',
+    lat: 51.6555,
+    lng: 5.2735,
+    description: 'Vennen bij Vught met een hondenstrand om te zwemmen.',
+    radiusM: 600,
+  },
 ];
 
 function slugify(s: string): string {
@@ -873,7 +983,7 @@ function buildSpots(): SpotSeed[] {
       photos: verified ? 2 : 1,
       votes,
       reviews,
-      regionRadiusM: isRegion ? 300 : undefined,
+      regionRadiusM: isRegion ? (r.radiusM ?? 700) : undefined,
     };
   });
 }

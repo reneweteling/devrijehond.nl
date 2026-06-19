@@ -48,6 +48,12 @@ type SpotRow = {
   rating_count: number;
   photo_url: string | null;
   updated_at: Date;
+  geojson: string | null;
+};
+
+/** A REGION's polygon outline (geofence) as GeoJSON, added to the map items. */
+type MapItem = SpotSummaryDto & {
+  geometry: { type: string; coordinates: unknown } | null;
 };
 
 export async function GET(request: NextRequest) {
@@ -86,6 +92,10 @@ export async function GET(request: NextRequest) {
       s."status", s."lat", s."lng",
       s."ratingAvg" AS rating_avg, s."ratingCount" AS rating_count,
       s."updatedAt" AS updated_at,
+      -- REGION outline as GeoJSON (the geofence); POIs need only the centroid.
+      CASE WHEN s."type" = 'REGION'
+        THEN ST_AsGeoJSON(s."geom")
+        ELSE NULL END AS geojson,
       (
         SELECT p."url" FROM "SpotPhoto" p
         WHERE p."spotId" = s."id" AND p."status" = 'ACTIVE'
@@ -108,7 +118,7 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  const items: SpotSummaryDto[] = rows.map((r) => ({
+  const items: MapItem[] = rows.map((r) => ({
     id: r.id,
     slug: r.slug,
     type: r.type,
@@ -120,8 +130,9 @@ export async function GET(request: NextRequest) {
     rating: { average: r.rating_avg, count: r.rating_count },
     photoUrl: r.photo_url,
     updatedAt: r.updated_at.toISOString(),
+    geometry: r.geojson ? JSON.parse(r.geojson) : null,
   }));
 
-  const body: SpotsMapResponseDto = { items };
+  const body = { items } satisfies SpotsMapResponseDto;
   return ok(body);
 }
