@@ -1,6 +1,15 @@
 import type { SpotDetailDto } from '@devrijehond/types';
 
+import type { NearbySpot } from '@/lib/spot-detail';
 import { StoreButton } from './site-chrome';
+
+function detailHref(type: 'REGION' | 'POI', slug: string) {
+  return `/${type === 'REGION' ? 'gebied' : 'plek'}/${slug}`;
+}
+
+function fmtDistance(m: number): string {
+  return m < 1000 ? `${m} m` : `${(m / 1000).toFixed(1).replace('.', ',')} km`;
+}
 
 /**
  * Server-rendered spot detail, shared by `/plek/[slug]` (POI) and
@@ -40,7 +49,7 @@ const PHONE =
 const LINK =
   'M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1';
 
-export function SpotView({ spot }: { spot: SpotDetailDto }) {
+export function SpotView({ spot, nearby = [] }: { spot: SpotDetailDto; nearby?: NearbySpot[] }) {
   const verified = spot.verification.status === 'VERIFIED';
   const [lead, ...rest] = spot.photos;
   const isPoi = spot.type === 'POI';
@@ -184,6 +193,17 @@ export function SpotView({ spot }: { spot: SpotDetailDto }) {
 
         {/* Sidebar */}
         <aside style={{ display: 'grid', gap: 16, position: 'sticky', top: 84 }}>
+          {spot.lat != null && spot.lng != null ? (
+            <a
+              className="btn btn-primary"
+              href={`https://www.google.com/maps/dir/?api=1&destination=${spot.lat},${spot.lng}`}
+              target="_blank"
+              rel="noreferrer"
+              style={{ width: '100%' }}
+            >
+              <Ico d={PIN} size={15} /> Route via Google Maps
+            </a>
+          ) : null}
           {isPoi && (spot.address || spot.phone || spot.website) ? (
             <div className="card" style={{ padding: 20 }}>
               <h3
@@ -240,6 +260,37 @@ export function SpotView({ spot }: { spot: SpotDetailDto }) {
           </div>
         </aside>
       </div>
+
+      {nearby.length > 0 ? (
+        <section className="container" style={{ marginTop: 44, marginBottom: 8 }}>
+          <h2 className="section-title" style={{ fontSize: 24 }}>
+            In de buurt
+          </h2>
+          <div className="grid grid-3" style={{ marginTop: 20 }}>
+            {nearby.map((n) => (
+              <a
+                key={n.slug}
+                href={detailHref(n.type, n.slug)}
+                className="card card-link"
+                style={{ display: 'block', overflow: 'hidden' }}
+              >
+                {n.photo ? (
+                  <div className="card-media" style={{ height: 132, position: 'relative' }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={n.photo} alt={`${n.catLabel} ${n.name}`} />
+                  </div>
+                ) : null}
+                <div className="card-body">
+                  <div style={{ fontWeight: 600, color: 'var(--ink)' }}>{n.name}</div>
+                  <div className="muted" style={{ fontSize: 13.5, marginTop: 3 }}>
+                    {n.catLabel} · {fmtDistance(n.distanceM)}
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
+        </section>
+      ) : null}
     </main>
   );
 }

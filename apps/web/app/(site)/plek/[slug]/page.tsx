@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { loadSpotDetail } from '@/lib/spot-detail';
+import { loadSpotDetail, loadNearbySpots } from '@/lib/spot-detail';
 import { SpotView } from '../../spot-view';
 
 /**
@@ -41,5 +41,7 @@ export default async function PlekPage({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const spot = await loadSpotDetail(slug);
   if (!spot || spot.type !== 'POI') notFound();
-  return <SpotView spot={spot} />;
+  const nearby =
+    spot.lat != null && spot.lng != null ? await loadNearbySpots(spot.id, spot.lat, spot.lng) : [];
+  return <SpotView spot={spot} nearby={nearby} />;
 }

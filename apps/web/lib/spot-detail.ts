@@ -119,6 +119,64 @@ export async function loadSpotDetail(slug: string): Promise<SpotDetailDto | null
   };
 }
 
+export type NearbySpot = {
+  slug: string;
+  name: string;
+  type: 'REGION' | 'POI';
+  catLabel: string;
+  catColor: string | null;
+  photo: string | null;
+  distanceM: number;
+};
+
+type NearbyRow = {
+  slug: string;
+  name: string;
+  type: 'REGION' | 'POI';
+  cat_label: string;
+  cat_color: string | null;
+  photo: string | null;
+  dist_m: number;
+};
+
+/**
+ * Nearest visible spots to a given point, excluding the spot itself. Uses the
+ * GiST `<->` operator to order by distance and a geography cast for metres.
+ * Public-visibility (HIDDEN/REMOVED) is reproduced in SQL, matching the policy.
+ */
+export async function loadNearbySpots(
+  spotId: string,
+  lat: number,
+  lng: number,
+  limit = 6,
+): Promise<NearbySpot[]> {
+  const point = `ST_SetSRID(ST_MakePoint($2, $3), 4326)`;
+  const rows = await pgQuery<NearbyRow>(
+    `SELECT s."slug", s."name", s."type",
+            c."label" AS cat_label, c."color" AS cat_color,
+            (SELECT p."url" FROM "SpotPhoto" p
+              WHERE p."spotId" = s."id" AND p."status" = 'ACTIVE'
+              ORDER BY p."sortOrder" ASC LIMIT 1) AS photo,
+            ST_Distance(s."geom"::geography, ${point}::geography) AS dist_m
+       FROM "Spot" s
+       JOIN "Category" c ON c."id" = s."categoryId"
+      WHERE s."id" <> $1
+        AND s."status" IN ('VERIFIED', 'UNVERIFIED')
+      ORDER BY s."geom" <-> ${point}
+      LIMIT $4`,
+    [spotId, lng, lat, limit],
+  );
+  return rows.map((r) => ({
+    slug: r.slug,
+    name: r.name,
+    type: r.type,
+    catLabel: r.cat_label,
+    catColor: r.cat_color,
+    photo: r.photo,
+    distanceM: Math.round(r.dist_m),
+  }));
+}
+
 /** Map a loaded detail down to the lightweight summary (list/marker) shape. */
 export function detailToSummary(d: SpotDetailDto): SpotSummaryDto {
   return {
