@@ -33,6 +33,15 @@ export default function SignInScreen() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  // Dismiss back to wherever this was pushed from, or fall back to the map so
+  // the user is never trapped on the auth screen.
+  const onClose = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)'));
+  const CloseButton = () => (
+    <Pressable onPress={onClose} hitSlop={12} style={[styles.close, { top: insets.top + 8 }]}>
+      <SymbolView name="xmark" size={17} tintColor={colors.ink2} />
+    </Pressable>
+  );
+
   const onMagicLink = async () => {
     setError(null);
     if (!/.+@.+\..+/.test(email)) {
@@ -84,6 +93,7 @@ export default function SignInScreen() {
   if (sent) {
     return (
       <View style={[styles.root, styles.center, { paddingTop: insets.top }]}>
+        <CloseButton />
         <SymbolView name="envelope.badge.fill" size={48} tintColor={colors.moss} />
         <Text style={styles.title}>Check je inbox</Text>
         <Text style={styles.sub}>
@@ -101,6 +111,7 @@ export default function SignInScreen() {
       style={styles.root}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
+      <CloseButton />
       <View
         style={[styles.inner, { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 24 }]}
       >
@@ -160,6 +171,19 @@ export default function SignInScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.sand },
+  close: {
+    position: 'absolute',
+    left: space.lg,
+    zIndex: 10,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.line,
+  },
   inner: { flex: 1, paddingHorizontal: space.lg, justifyContent: 'space-between' },
   center: { alignItems: 'center', justifyContent: 'center', gap: space.sm, paddingHorizontal: 40 },
   brand: { alignItems: 'center', gap: space.sm },
