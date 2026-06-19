@@ -15,11 +15,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQueryClient } from '@tanstack/react-query';
 import { setAuthToken } from '@devrijehond/api-client';
 
-import { useMe, type Dog } from '@/lib/api';
+import { useMe, useMySpots, type Dog, type SpotSummary } from '@/lib/api';
 import { clearSession } from '@/lib/session';
 import { useAuth } from '@/lib/auth-context';
 import { colors, font, radius, space } from '@/lib/theme';
-import { Button } from '@/components/ui';
+import { Button, VerifiedBadge } from '@/components/ui';
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
@@ -27,6 +27,7 @@ export default function ProfileScreen() {
   const qc = useQueryClient();
   const { isAuthenticated, setAuthenticated } = useAuth();
   const { data: me, isLoading } = useMe(isAuthenticated);
+  const { data: mySpots } = useMySpots(isAuthenticated);
 
   const signOut = async () => {
     await clearSession();
@@ -115,10 +116,26 @@ export default function ProfileScreen() {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Mijn inzendingen</Text>
-        {/* TODO(verify): list the user's submitted spots once a mine-list
-            endpoint is available. */}
-        <Text style={styles.placeholder}>Je toegevoegde plekken verschijnen hier.</Text>
+        <Text style={[styles.sectionTitle, { marginBottom: space.md }]}>Mijn inzendingen</Text>
+        {mySpots && mySpots.length > 0 ? (
+          mySpots.map((s: SpotSummary) => (
+            <Pressable
+              key={s.id}
+              style={styles.spotRow}
+              onPress={() => router.push(`/spot/${s.slug}`)}
+            >
+              <View style={{ flex: 1, gap: 3 }}>
+                <Text style={styles.dogName} numberOfLines={1}>
+                  {s.name}
+                </Text>
+                <VerifiedBadge status={s.status} />
+              </View>
+              <SymbolView name="chevron.right" size={15} tintColor={colors.ink3} />
+            </Pressable>
+          ))
+        ) : (
+          <Text style={styles.placeholder}>Je toegevoegde plekken verschijnen hier.</Text>
+        )}
       </View>
 
       <View style={{ paddingHorizontal: space.lg, marginTop: space.md }}>
@@ -211,6 +228,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  spotRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10 },
   dogName: { fontFamily: font.bodyMedium, fontSize: 14, color: colors.ink },
   dogMeta: { fontFamily: font.body, fontSize: 12, color: colors.ink2 },
   placeholder: { fontFamily: font.body, fontSize: 13, color: colors.ink3 },

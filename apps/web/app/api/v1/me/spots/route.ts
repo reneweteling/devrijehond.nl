@@ -1,7 +1,11 @@
 import type { NextRequest } from 'next/server';
 import { authDb, type JsonValue } from '@devrijehond/db';
 import { pgQuery, requireAuth } from '@devrijehond/server';
-import { SubmitSpotRequestSchema, type SubmitSpotResponseDto } from '@devrijehond/types';
+import {
+  SubmitSpotRequestSchema,
+  type SubmitSpotResponseDto,
+  type SpotSummaryDto,
+} from '@devrijehond/types';
 import { ok, error, NO_STORE_CACHE_CONTROL } from '@/lib/api-response';
 import { uniqueSlug } from '@/lib/slug';
 import { normaliseGeometry } from '@/lib/geo';
@@ -27,6 +31,57 @@ import { loadSpotDetail } from '@/lib/spot-detail';
  * `/me/*` → CDN-bypass, `Cache-Control: no-store`.
  */
 export const runtime = 'nodejs';
+
+/**
+ * GET /api/v1/me/spots — the signed-in user's own submissions, across all
+ * statuses (UNVERIFIED / VERIFIED / HIDDEN), newest first. Policy-bound to the
+ * owner via authDb. `/me/*` → CDN-bypass, no-store.
+ */
+export async function GET(request: NextRequest) {
+  let ctx;
+  try {
+    ctx = await requireAuth(request);
+  } catch (res) {
+    return res as Response;
+  }
+  const db = authDb({ id: ctx.user.id, role: ctx.user.role });
+
+  const rows = await db.spot.findMany({
+    where: { submittedById: ctx.user.id },
+    orderBy: { createdAt: 'desc' },
+    take: 200,
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      type: true,
+      status: true,
+      lat: true,
+      lng: true,
+      categoryId: true,
+      ratingAvg: true,
+      ratingCount: true,
+      updatedAt: true,
+      photos: { select: { url: true }, orderBy: { sortOrder: 'asc' }, take: 1 },
+    },
+  });
+
+  const items: SpotSummaryDto[] = rows.map((s) => ({
+    id: s.id,
+    slug: s.slug,
+    name: s.name,
+    type: s.type,
+    status: s.status,
+    lat: s.lat,
+    lng: s.lng,
+    categoryId: s.categoryId,
+    rating: { average: s.ratingAvg, count: s.ratingCount },
+    photoUrl: s.photos[0]?.url ?? null,
+    updatedAt: s.updatedAt.toISOString(),
+  }));
+
+  return ok({ items }, { cacheControl: NO_STORE_CACHE_CONTROL });
+}
 
 export async function POST(request: NextRequest) {
   let ctx;

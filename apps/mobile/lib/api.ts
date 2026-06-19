@@ -11,6 +11,9 @@
  */
 
 import { useMutation, useQuery } from '@tanstack/react-query';
+
+import { API_URL } from './config';
+import { loadSession } from './session';
 import {
   getApiV1Categories,
   getApiV1Amenities,
@@ -250,5 +253,26 @@ export function useCreateDog() {
 export function useDeleteDog() {
   return useMutation({
     mutationFn: (id: string) => deleteApiV1MeDogsId(id),
+  });
+}
+
+/**
+ * GET /api/v1/me/spots, the user's own submissions (all statuses). Not in the
+ * generated client yet, so this reads it directly with the stored bearer.
+ */
+export function useMySpots(enabled = true) {
+  return useQuery({
+    queryKey: ['my-spots'],
+    enabled,
+    queryFn: async ({ signal }): Promise<SpotSummary[]> => {
+      const session = await loadSession();
+      const res = await fetch(`${API_URL}/api/v1/me/spots`, {
+        headers: session ? { Authorization: `Bearer ${session.token}` } : undefined,
+        signal,
+      });
+      if (!res.ok) throw new Error(`me/spots ${res.status}`);
+      const data = (await res.json()) as { items: SpotSummary[] };
+      return data.items;
+    },
   });
 }
