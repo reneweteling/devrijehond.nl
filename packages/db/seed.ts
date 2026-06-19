@@ -601,6 +601,8 @@ async function main() {
   await db.spotPhoto.deleteMany({});
   await db.spotAmenity.deleteMany({});
   await db.spot.deleteMany({});
+  await db.featureVote.deleteMany({});
+  await db.featureRequest.deleteMany({});
   await db.user.deleteMany({ where: { email: { not: ADMIN_EMAIL } } });
 
   // --- Admin + taxonomy ---
@@ -758,6 +760,83 @@ async function main() {
     }
   }
 
+  // --- Feature requests (community product input) ---
+  const FEATURE_REQUESTS: {
+    title: string;
+    body: string;
+    component: string;
+    status: 'CONSIDERING' | 'PLANNED' | 'DONE' | 'DECLINED';
+    by: number;
+    voters: number[];
+  }[] = [
+    {
+      title: 'Hondentrimsalons op de kaart',
+      body: 'Zou mooi zijn als trimsalons een eigen categorie krijgen.',
+      component: 'Kaart',
+      status: 'CONSIDERING',
+      by: 0,
+      voters: [1, 2, 3, 5, 6],
+    },
+    {
+      title: 'Route naar een losloopgebied',
+      body: 'Een knop "breng me ernaartoe" die de navigatie opent.',
+      component: 'Kaart',
+      status: 'CONSIDERING',
+      by: 1,
+      voters: [0, 2, 3, 4, 5, 6],
+    },
+    {
+      title: 'Offline kaart voor onderweg',
+      body: 'Handig op plekken zonder bereik.',
+      component: 'Kaart',
+      status: 'PLANNED',
+      by: 3,
+      voters: [0, 4, 5],
+    },
+    {
+      title: 'Filteren op "omheind"',
+      body: 'Snel alleen omheinde gebieden zien.',
+      component: 'Kaart',
+      status: 'DONE',
+      by: 5,
+      voters: [1, 2],
+    },
+    {
+      title: 'Melding bij een nieuwe plek in de buurt',
+      body: 'Push als er iets nieuws vlakbij wordt toegevoegd.',
+      component: 'Anders',
+      status: 'CONSIDERING',
+      by: 2,
+      voters: [0, 4],
+    },
+    {
+      title: 'Hondenweer-waarschuwing',
+      body: 'Waarschuwing bij te warm asfalt.',
+      component: 'Anders',
+      status: 'DECLINED',
+      by: 4,
+      voters: [],
+    },
+  ];
+  for (const fr of FEATURE_REQUESTS) {
+    const created = await db.featureRequest.create({
+      data: {
+        title: fr.title,
+        body: fr.body,
+        component: fr.component,
+        status: fr.status,
+        upvoteCount: fr.voters.length,
+        createdById: userId[fr.by],
+      },
+      select: { id: true },
+    });
+    if (fr.voters.length) {
+      await db.featureVote.createMany({
+        data: fr.voters.map((u) => ({ requestId: created.id, userId: userId[u] })),
+      });
+    }
+  }
+
   // --- Geometry: points for POIs, polygons for REGIONs ---
   await pool.query(
     `UPDATE "Spot" SET geom = ST_SetSRID(ST_MakePoint(lng, lat), 4326)
@@ -778,7 +857,8 @@ async function main() {
     `Seeded: admin=${admin.email}, users=${USERS.length}, categories=${CATEGORIES.length}, ` +
       `amenities=${AMENITIES.length}, spots=${SPOTS.length} (verified=${verified}), ` +
       `reviews=${SPOTS.reduce((n, s) => n + (s.reviews?.length ?? 0), 0)}, ` +
-      `votes=${SPOTS.reduce((n, s) => n + (s.votes?.length ?? 0), 0)}`,
+      `votes=${SPOTS.reduce((n, s) => n + (s.votes?.length ?? 0), 0)}, ` +
+      `featureRequests=${FEATURE_REQUESTS.length}`,
   );
 }
 

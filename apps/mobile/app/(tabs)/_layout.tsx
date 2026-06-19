@@ -3,7 +3,8 @@
  * Android). Each trigger declares both an SF Symbol (`sf`) and a Material icon
  * (`md`) — Apple's HIG forces an icon, so every tab needs one.
  *
- * Tabs: Map (kaart) · Nabij (nearby list) · Plek toevoegen (submit) · Profiel.
+ * Tabs: Map (kaart) · Nabij (nearby list) · Toevoegen (submit) · Wensen
+ * (feature requests) · Profiel.
  *
  * In SDK 55 `Label` and `Icon` are nested statics on the trigger
  * (`NativeTabs.Trigger.Label` / `.Icon`), not standalone named exports.
@@ -31,6 +32,11 @@ export default function TabsLayout() {
       <NativeTabs.Trigger name="add">
         <Label>Toevoegen</Label>
         <Icon sf="plus.circle.fill" drawable="ic_input_add" />
+      </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="requests">
+        <Label>Wensen</Label>
+        <Icon sf="lightbulb.fill" drawable="ic_menu_info_details" />
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="profile">

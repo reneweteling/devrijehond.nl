@@ -124,6 +124,15 @@ function RootNav() {
             contentStyle: { backgroundColor: colors.surface },
           }}
         />
+        <Stack.Screen
+          name="request-new"
+          options={{
+            presentation: 'card',
+            gestureEnabled: true,
+            animation: 'slide_from_right',
+            contentStyle: { backgroundColor: colors.surface },
+          }}
+        />
       </Stack>
       {/* Overlay while boot is pending. Absolute over the live Stack so any
           router action always has a navigator to land on. */}
