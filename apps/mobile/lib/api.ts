@@ -19,10 +19,13 @@ import {
   getApiV1SpotsSlug,
   getApiV1SpotsSlugReviews,
   getApiV1Me,
+  getApiV1FeatureRequests,
   postApiV1MeSpots,
   postApiV1MeSpotsIdVote,
   postApiV1MeSpotsIdReviews,
   postApiV1MeReports,
+  postApiV1MeFeatureRequests,
+  postApiV1MeFeatureRequestsIdVote,
   type Category,
   type Amenity,
   type SpotSummary,
@@ -43,6 +46,8 @@ import {
   type VoteValue,
   type SubmitSpotRequest,
   type SubmitReportRequest,
+  type FeatureRequest,
+  type FeatureStatus,
 } from '@devrijehond/api-client';
 
 // Re-export the contract types under the names the screens import. These are
@@ -66,6 +71,8 @@ export type {
   SpotType,
   SpotStatus,
   VoteValue,
+  FeatureRequest,
+  FeatureStatus,
 };
 
 /** Body for `useSubmitSpot` — the generated submit-spot request shape. */
@@ -185,5 +192,33 @@ export function useSubmitReport() {
         reason: args.reason as SubmitReportRequest['reason'],
         note: args.note,
       }),
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Feature requests (community product input). List is public; create + vote
+// require auth.
+// ---------------------------------------------------------------------------
+
+/** GET /api/v1/feature-requests — public list, optionally filtered by status. */
+export function useFeatureRequests(status?: FeatureStatus) {
+  return useQuery({
+    queryKey: ['feature-requests', status ?? 'all'],
+    queryFn: ({ signal }) => getApiV1FeatureRequests(status ? { status } : undefined, signal),
+  });
+}
+
+/** POST /api/v1/me/feature-requests — create a feature request. */
+export function useCreateFeatureRequest() {
+  return useMutation({
+    mutationFn: (args: { title: string; body?: string; component?: string }) =>
+      postApiV1MeFeatureRequests(args),
+  });
+}
+
+/** POST /api/v1/me/feature-requests/:id/vote — toggle an upvote. */
+export function useToggleFeatureVote() {
+  return useMutation({
+    mutationFn: (id: string) => postApiV1MeFeatureRequestsIdVote(id),
   });
 }
