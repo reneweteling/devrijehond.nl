@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: devrijehond-db
+    environment:
+      POSTGRES_USER: devrijehond
+      POSTGRES_PASSWORD: devrijehond
+      POSTGRES_DB: devrijehond
+    ports:
+      - '5432:5432'
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U devrijehond']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+volumes:
+  dbdata:

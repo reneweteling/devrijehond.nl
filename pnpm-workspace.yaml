@@ -1,0 +1,9 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+onlyBuiltDependencies:
+  - '@zenstackhq/cli'
+  - '@zenstackhq/orm'
+  - esbuild
+  - sharp

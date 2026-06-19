@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>De Vrije Hond — mobiele wireframes</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/iconfont/tabler-icons.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Inter:wght@400;500&display=swap');
+:root{
+  --color-background-primary:#fff;--color-background-secondary:#F3EFE3;--color-background-tertiary:#ECE7D8;
+  --color-text-primary:#2C2A1E;--color-text-secondary:#5E5A48;--color-text-tertiary:#908B79;
+  --color-border-tertiary:rgba(60,50,20,.14);--color-border-secondary:rgba(60,50,20,.30);
+  --border-radius-md:10px;--border-radius-lg:12px;--border-radius-xl:16px;
+  --teal:#6E7B33;--teal-bg:#E7E9D5;--teal-tx:#4C5622;--accent:#C2762E;--accent-tx:#8A4F1B;
+}
+*{box-sizing:border-box;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
+body{margin:0;background:#E4DEC9;color:var(--color-text-primary);padding:24px 12px;display:flex;justify-content:center}
+.wrap{width:100%;max-width:680px}
+.title,.scr-h,.center h3,.wm{font-family:'Poppins',sans-serif}
+</style>
+</head>
+<body>
+<div class="wrap" id="dvh-root"></div>
+<script>
+const ROOT_STYLE = `
+.dvh-nav{display:flex;flex-wrap:wrap;gap:6px;margin:0 12px 16px;justify-content:center}
+.dvh-nav button{font-size:12px;padding:5px 10px;border:.5px solid var(--color-border-secondary);background:var(--color-background-primary);
+  border-radius:var(--border-radius-md);color:var(--color-text-secondary);cursor:pointer}
+.dvh-nav button.on{background:var(--teal-bg);color:var(--teal-tx);border-color:var(--teal)}
+.dvh-stage{display:flex;justify-content:center}
+.phone{width:300px;background:var(--color-background-primary);border:1px solid var(--color-border-secondary);border-radius:26px;overflow:hidden}
+.sbar{height:26px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-size:11px;color:var(--color-text-tertiary)}
+.screen{display:none}.screen.show{display:block}
+.scr-h{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--color-text-tertiary);text-align:center;margin:14px 0 6px}
+.ph{background:repeating-linear-gradient(45deg,#efeee8,#efeee8 8px,#e7e6df 8px,#e7e6df 16px);
+  border:.5px dashed var(--color-border-secondary);border-radius:var(--border-radius-md);display:flex;align-items:center;justify-content:center;color:var(--color-text-tertiary);font-size:12px}
+.map{height:300px;position:relative;background:#E7E4D2;border-bottom:.5px solid var(--color-border-tertiary);overflow:hidden;cursor:pointer}
+.photo{display:block;object-fit:cover}
+.region{position:absolute;left:18px;top:40px;width:150px;height:120px;background:rgba(29,158,117,.16);border:1px dashed var(--teal);border-radius:18px 40px 24px 30px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--teal-tx);text-align:center;cursor:pointer}
+.pin{position:absolute;width:24px;height:24px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:1px solid #fff;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.pin i{transform:rotate(45deg);display:block;color:#fff;font-size:12px;text-align:center;line-height:22px}
+.pin.eat{background:#C2762E}.pin.wash{background:#4F7A86}.pin.shop{background:#8A6BA0}.pin.me{background:#2C2A1E;border-radius:50%}
+.pin.unv{background:#fff;border:1.5px dashed #C2762E;box-shadow:none}.pin.unv i{color:#C2762E}
+.searchbar{display:flex;align-items:center;gap:8px;margin:10px 12px;padding:8px 10px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);font-size:13px;color:var(--color-text-tertiary)}
+.searchbar .filt{margin-left:auto;color:var(--color-text-secondary);cursor:pointer}
+.chips{display:flex;gap:6px;overflow:hidden;padding:0 12px 10px}
+.chip{font-size:11px;padding:5px 9px;border:.5px solid var(--color-border-secondary);border-radius:20px;white-space:nowrap;color:var(--color-text-secondary)}
+.chip.on{background:var(--teal-bg);color:var(--teal-tx);border-color:var(--teal)}
+.tabbar{display:flex;border-top:.5px solid var(--color-border-tertiary)}
+.tabbar div{flex:1;text-align:center;padding:8px 0 10px;font-size:10px;color:var(--color-text-tertiary);cursor:pointer}
+.tabbar div i{display:block;font-size:18px;margin-bottom:2px}.tabbar div.on{color:var(--teal-tx)}
+.fab{position:absolute;right:12px;bottom:12px;width:34px;height:34px;border-radius:50%;background:#fff;border:.5px solid var(--color-border-secondary);display:flex;align-items:center;justify-content:center;color:var(--color-text-secondary)}
+.legend{position:absolute;left:8px;top:8px;background:rgba(255,255,255,.92);border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:5px 8px;font-size:10px;color:var(--color-text-secondary);line-height:1.5}
+.peek{position:absolute;left:8px;right:8px;bottom:8px;background:#fff;border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:10px;display:flex;gap:10px;align-items:center;cursor:pointer}
+.peek .thumb{width:40px;height:40px;border-radius:8px;flex:none}
+.topbar{display:flex;align-items:center;gap:10px;padding:10px 12px;font-size:14px}
+.topbar .ic{cursor:pointer;color:var(--color-text-secondary)}.topbar .sp{margin-left:auto;display:flex;gap:12px}
+.hero{height:150px;border-radius:0}
+.title{font-size:17px;font-weight:500;margin:10px 12px 2px}
+.meta{font-size:12px;color:var(--color-text-tertiary);margin:0 12px 10px}
+.tag{display:inline-block;font-size:11px;background:var(--color-background-secondary);color:var(--color-text-secondary);padding:2px 8px;border-radius:20px;margin:0 2px 0 0}
+.tag.cat{background:var(--teal-bg);color:var(--teal-tx)}
+.vbadge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 9px;border-radius:20px}
+.vbadge.unv{background:#faeeda;color:#854f0b}.vbadge.ver{background:#e1f5ee;color:#0f6e56}
+.vbox{margin:0 12px 12px;padding:11px;border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);background:var(--color-background-secondary)}
+.vbox .vh{font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px}
+.vbox .vs{font-size:12px;color:var(--color-text-secondary);margin-top:4px}
+.vbar{height:6px;background:rgba(0,0,0,.08);border-radius:4px;overflow:hidden;margin:8px 0 6px}
+.vbar i{display:block;height:100%;background:var(--teal)}
+.vcount{font-size:11px;color:var(--color-text-tertiary)}
+.vask{font-size:13px;margin:10px 0 0;font-weight:500}
+.vbtns{display:flex;gap:8px;margin-top:8px}.vbtns .btn{flex:1}
+.elig{font-size:11px;color:var(--color-text-tertiary);margin-top:8px;display:flex;align-items:center;gap:6px}
+.actions{display:flex;gap:8px;padding:0 12px 12px}.actions .btn{flex:1}
+.btn{display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;padding:9px 10px;border-radius:var(--border-radius-md);border:.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);cursor:pointer;text-align:center}
+.btn.pri{background:var(--teal);color:#fff;border-color:var(--teal)}.btn.dng{color:#a32d2d;border-color:#e0a0a0}
+.btn.wide{width:calc(100% - 24px);margin:4px 12px}
+.sec{padding:12px;border-top:.5px solid var(--color-border-tertiary)}
+.sec h4{font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--color-text-tertiary);margin:0 0 8px;font-weight:500}
+.sec p{font-size:13px;color:var(--color-text-secondary);margin:0;line-height:1.5}
+.amen{display:flex;flex-wrap:wrap;gap:8px}
+.amen span{font-size:12px;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:5px 9px;border-radius:var(--border-radius-md)}
+.amen span.hl{background:var(--teal-bg);color:var(--teal-tx)}
+.gallery{display:flex;gap:6px;padding:0 12px 12px}.gallery .ph{height:64px;flex:1}
+.field{margin:0 12px 12px}
+.field label{font-size:12px;color:var(--color-text-secondary);display:block;margin-bottom:4px}
+.input{height:34px;border:.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);display:flex;align-items:center;padding:0 10px;font-size:13px;color:var(--color-text-tertiary);background:#fff}
+.input.area{height:auto;padding:8px 10px;min-height:54px;align-items:flex-start}.input .chev{margin-left:auto}
+.check{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--color-text-secondary);padding:4px 0}.check i{color:var(--teal)}
+.choice{margin:0 12px 10px;border:.5px solid var(--color-border-secondary);border-radius:var(--border-radius-lg);padding:12px;cursor:pointer}
+.choice:hover{border-color:var(--teal);background:var(--teal-bg)}
+.choice .ct{font-size:14px;font-weight:500;display:flex;align-items:center;gap:8px}.choice .cd{font-size:12px;color:var(--color-text-secondary);margin-top:4px}
+.center{text-align:center;padding:28px 16px}
+.center .big{width:54px;height:54px;border-radius:50%;background:var(--teal-bg);color:var(--teal-tx);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 14px}
+.center h3{font-size:16px;margin:0 0 6px;font-weight:500}.center p{font-size:13px;color:var(--color-text-secondary);margin:0 0 18px;line-height:1.5}
+.qrow{padding:11px 12px;border-bottom:.5px solid var(--color-border-tertiary);cursor:pointer}
+.qrow .l1{font-size:13px;display:flex;align-items:center;gap:6px}.qrow .l2{font-size:11px;color:var(--color-text-tertiary);margin-top:2px}
+.qrow .qa{display:flex;gap:6px;margin-top:8px}.qrow .qa .btn{flex:1;padding:6px}
+.status{font-size:11px;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.st-pub{background:#e1f5ee;color:#0f6e56}.st-pen{background:#faeeda;color:#854f0b}.st-rej{background:#fcebeb;color:#a32d2d}
+.st-con{background:#faeeda;color:#854f0b}.st-plan{background:#e6f1fb;color:#0c447c}.st-done{background:#eaf3de;color:#3b6d11}
+.note{margin:10px 12px;padding:9px 10px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);font-size:12px;color:var(--color-text-secondary);display:flex;gap:8px}
+.note i{color:var(--color-text-tertiary);margin-top:1px}
+.warn{margin:0;border-radius:0;background:#faeeda;color:#854f0b}
+.profile-h{padding:16px 12px;display:flex;align-items:center;gap:12px;border-bottom:.5px solid var(--color-border-tertiary)}
+.avatar{width:44px;height:44px;border-radius:50%;background:var(--teal-bg);color:var(--teal-tx);display:flex;align-items:center;justify-content:center;font-weight:500}
+.seg{display:flex;margin:10px 12px;border:.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);overflow:hidden}
+.seg div{flex:1;text-align:center;font-size:12px;padding:7px 0;color:var(--color-text-secondary)}.seg div.on{background:var(--teal-bg);color:var(--teal-tx)}
+.modentry{margin:12px;padding:11px 12px;border:.5px solid #e0a0a0;background:#fcebeb;border-radius:var(--border-radius-md);font-size:13px;color:#a32d2d;display:flex;align-items:center;gap:8px;cursor:pointer}
+.modentry .ct{margin-left:auto;background:#fff;border-radius:20px;padding:1px 8px;font-size:11px}
+.upv{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:40px;padding:5px 4px;border:.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-size:12px;color:var(--color-text-secondary);cursor:pointer}
+.upv i{font-size:14px}.upv.on{background:var(--teal-bg);color:var(--teal-tx);border-color:var(--teal)}
+.frrow{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-bottom:.5px solid var(--color-border-tertiary)}
+.frrow .frt{font-size:13px;font-weight:500}.frrow .frd{font-size:11px;color:var(--color-text-tertiary);margin-top:3px;display:flex;align-items:center;gap:6px}
+.acfield{margin-top:8px;height:34px;border:.5px dashed var(--color-border-secondary);border-radius:var(--border-radius-md);display:flex;align-items:center;gap:6px;padding:0 10px;font-size:13px;color:var(--color-text-tertiary)}
+.acsug{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.acsug span{font-size:11px;border:.5px solid var(--color-border-tertiary);border-radius:20px;padding:3px 8px;color:var(--color-text-secondary);cursor:pointer}
+.acsug span.new{border-style:dashed;color:var(--teal-tx)}
+.stars{color:#e6a817;letter-spacing:1px}.stars .off{color:rgba(0,0,0,.16)}
+.rev{display:flex;gap:10px;padding:9px 0;border-top:.5px solid var(--color-border-tertiary)}
+.ravatar{width:30px;height:30px;border-radius:50%;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--color-text-secondary);flex:none}
+.rev .rn{font-size:12px;font-weight:500}.rev .rt{font-size:12px;color:var(--color-text-secondary);margin:2px 0;line-height:1.45}.rev .rd{font-size:11px;color:var(--color-text-tertiary)}
+.ratebig{text-align:center;padding:16px 12px 8px}.ratebig .num{font-size:30px;letter-spacing:6px;cursor:pointer}
+.bio{font-size:12px;color:var(--color-text-secondary);padding:0 12px 10px;line-height:1.5}
+.subh{padding:0 12px 6px;font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--color-text-tertiary)}
+.dogs{display:flex;gap:8px;padding:0 12px 12px;flex-wrap:wrap}
+.dog{display:flex;align-items:center;gap:7px;border:.5px solid var(--color-border-tertiary);border-radius:20px;padding:4px 11px 4px 5px;font-size:12px;color:var(--color-text-secondary);cursor:pointer}
+.dog .dav{width:24px;height:24px;border-radius:50%;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:12px;flex:none;color:var(--color-text-secondary)}
+.dogcard{display:flex;gap:10px;align-items:center;margin-bottom:8px;padding:10px;border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg)}
+.dogcard .dav{width:42px;height:42px;border-radius:50%;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;flex:none;color:var(--color-text-secondary);font-size:18px}
+.avedit{position:relative;width:72px;height:72px;margin:10px auto 4px}
+.avedit .big{width:72px;height:72px;border-radius:50%;background:var(--teal-bg);color:var(--teal-tx);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:500}
+.avedit .cam{position:absolute;right:-2px;bottom:-2px;width:26px;height:26px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;border:2px solid var(--color-background-primary);font-size:13px}
+.caption{text-align:center;font-size:12px;color:#6b6a64;margin-top:14px}`;
+
+const SCREENS = {
+discovery:{label:"Map (home)", html:`
+  <div class="searchbar"><i class="ti ti-search"></i> Zoek hondenplekken… <span class="filt" onclick="go('filter')"><i class="ti ti-adjustments-horizontal"></i> filter</span></div>
+  <div class="chips"><span class="chip on">Alles</span><span class="chip">Losloop</span><span class="chip">Horeca</span><span class="chip">Wassen</span><span class="chip">Strand</span><span class="chip">Winkel</span></div>
+  <div class="map" onclick="go('detail_poi')">
+    <div class="legend"><i class="ti ti-rosette-discount-check" style="color:#6E7B33"></i> geverifieerd &nbsp; <i class="ti ti-help-circle" style="color:#C2762E"></i> niet geverifieerd</div>
+    <div class="region" onclick="event.stopPropagation();go('detail_region')">Westerpark<br>losloopgebied</div>
+    <div class="pin unv" style="left:150px;top:150px" onclick="event.stopPropagation();go('detail_poi')"><i class="ti ti-coffee"></i></div>
+    <div class="pin wash" style="left:210px;top:90px" onclick="event.stopPropagation();go('detail_poi')"><i class="ti ti-droplet"></i></div>
+    <div class="pin shop" style="left:95px;top:200px" onclick="event.stopPropagation();go('detail_poi')"><i class="ti ti-building-store"></i></div>
+    <div class="pin me" style="left:175px;top:215px"></div>
+    <div class="fab"><i class="ti ti-current-location"></i></div>
+    <div class="peek" onclick="go('detail_poi')"><img class="thumb photo" style="width:40px;height:40px;border-radius:8px" src="https://place.dog/80/80" onerror="this.onerror=null;this.src='https://picsum.photos/seed/peek/80/80'">
+      <div style="flex:1"><div style="font-size:13px;font-weight:500">Café De Waterbak <span class="vbadge unv" style="font-size:10px;padding:1px 6px">niet geverifieerd</span></div>
+      <div style="font-size:11px;color:var(--color-text-tertiary)">waterbak · binnen ok · 0,4 km</div></div><i class="ti ti-chevron-right"></i></div>
+  </div>`, tab:"map"},
+
+filter:{label:"Filter sheet", html:`
+  <div class="topbar"><span style="font-weight:500">Filters</span><span class="sp"><span style="font-size:12px;color:var(--color-text-tertiary)">Reset</span></span></div>
+  <div class="sec"><h4>Categorie</h4>
+    <div class="check"><i class="ti ti-square-check"></i> Losloopgebieden</div>
+    <div class="check"><i class="ti ti-square-check"></i> Hondvriendelijke horeca</div>
+    <div class="check"><i class="ti ti-square-check"></i> Was- / spoelplekken</div>
+    <div class="check"><i class="ti ti-square-check"></i> Zwemstranden</div>
+    <div class="check"><i class="ti ti-square"></i> Winkels</div>
+    <div class="check"><i class="ti ti-square"></i> Drinkpunten</div></div>
+  <div class="sec"><h4>Voorzieningen</h4><div class="amen"><span class="hl">Waterbak</span><span>Omheind</span><span>Binnen ok</span><span>Gratis</span></div></div>
+  <div class="sec"><h4>Verificatie</h4><div class="amen"><span>Alleen geverifieerd</span><span>Ook niet geverifieerd</span></div></div>
+  <div class="btn pri wide" onclick="go('discovery')">Toon 42 resultaten</div>`, tab:"map"},
+
+detail_region:{label:"Spot detail — geverifieerd", html:`
+  <div class="topbar"><i class="ti ti-arrow-left ic" onclick="go('discovery')"></i><span class="sp"><i class="ti ti-heart ic"></i><i class="ti ti-share ic"></i><i class="ti ti-flag ic"></i></span></div>
+  <div class="ph map" style="height:140px;cursor:default"><div class="region" style="position:static;width:120px;height:90px">geofence-grens</div></div>
+  <div class="title">Westerpark losloopgebied</div>
+  <div class="meta">★ 4,8 (51) · 0,3 km · Amsterdam</div>
+  <div style="margin:0 12px 10px"><span class="tag cat">Losloop</span><span class="tag">Omheind</span> <span class="vbadge ver"><i class="ti ti-rosette-discount-check"></i> Geverifieerd</span></div>
+  <div class="actions"><div class="btn pri"><i class="ti ti-directions"></i> Route</div><div class="btn"><i class="ti ti-map-pin-check"></i> Ik ben hier</div></div>
+  <div class="gallery">
+    <img class="photo" style="height:64px;flex:1;border-radius:var(--border-radius-md)" src="https://place.dog/g/200/200" onerror="this.onerror=null;this.src='https://picsum.photos/seed/g1/200/200'">
+    <img class="photo" style="height:64px;flex:1;border-radius:var(--border-radius-md)" src="https://place.dog/201/200" onerror="this.onerror=null;this.src='https://picsum.photos/seed/g2/200/200'">
+    <img class="photo" style="height:64px;flex:1;border-radius:var(--border-radius-md)" src="https://place.dog/202/200" onerror="this.onerror=null;this.src='https://picsum.photos/seed/g3/200/200'"></div>
+  <div class="sec"><h4>Over</h4><p>Groot omheind veld, volledig losloop overdag. Rustig op doordeweekse ochtenden.</p></div>
+  <div class="sec"><h4>Voorzieningen</h4><div class="amen"><span class="hl">Waterbak</span><span>Omheind</span><span>Parkeren</span><span>Schaduw</span></div></div>
+  <div class="sec"><h4>Regels / tijden</h4><p>Losloop toegestaan 06:00–22:00.</p></div>
+  <div class="sec"><h4>Tips &amp; reviews (51)</h4><p>"Lekker rustig doordeweeks." — @lotte</p></div>
+  <div class="sec"><p style="font-size:11px;color:var(--color-text-tertiary)">Ingediend door @lotte · geverifieerd door de community (netto +9)</p></div>`, tab:"map"},
+
+detail_poi:{label:"Spot detail — niet geverifieerd", html:`
+  <div class="topbar"><i class="ti ti-arrow-left ic" onclick="go('discovery')"></i><span class="sp"><i class="ti ti-heart ic"></i><i class="ti ti-share ic"></i><i class="ti ti-flag ic"></i></span></div>
+  <div style="position:relative"><img class="hero photo" style="width:100%;height:150px" src="https://place.dog/600/300" onerror="this.onerror=null;this.src='https://picsum.photos/seed/waterbak/600/300'">
+    <span style="position:absolute;left:10px;bottom:10px;background:rgba(44,42,30,.7);color:#fff;font-size:10px;padding:2px 7px;border-radius:20px"><i class="ti ti-brand-google"></i> Google-foto</span></div>
+  <div class="title">Café De Waterbak</div>
+  <div class="meta">★ 4,6 (23) · 0,4 km · Amsterdam</div>
+  <div style="margin:0 12px 10px"><span class="tag cat">Horeca</span> <span class="vbadge unv"><i class="ti ti-help-circle"></i> Niet geverifieerd</span></div>
+  <div class="vbox">
+    <div class="vh"><i class="ti ti-users"></i> Community-check</div>
+    <div class="vs">Netto +3 — bij +5 wordt deze plek automatisch geverifieerd</div>
+    <div class="vbar"><i style="width:60%"></i></div>
+    <div class="vcount">8 vinden 'm oké · 1 keurt af · netto +3</div>
+    <div class="vask">Klopt deze plek?</div>
+    <div class="vbtns"><div class="btn pri"><i class="ti ti-thumb-up"></i> Ja, klopt</div><div class="btn dng"><i class="ti ti-thumb-down"></i> Klopt niet</div></div>
+    <div class="elig"><i class="ti ti-map-pin-check"></i> Je bent hier geweest — jouw stem telt mee</div>
+  </div>
+  <div class="sec"><h4>Voorzieningen voor honden</h4><div class="amen"><span class="hl">Waterbak</span><span>Snoepjes</span><span>Binnen ok</span><span>Terras</span></div></div>
+  <div class="sec"><h4>Openingstijden</h4><p>Open · sluit 23:00</p></div>
+  <div class="sec"><h4>Adres</h4><p>Haarlemmerdijk 12, Amsterdam</p></div>
+  <div class="sec"><h4>Reviews &amp; ratings</h4>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="font-size:26px;font-weight:500">4,6</div>
+      <div style="font-size:12px;color:var(--color-text-secondary)"><span class="stars">★★★★★</span><br>23 reviews</div></div>
+    <div class="rev"><div class="ravatar">LO</div><div style="flex:1"><div class="rn">Lotte · <span class="stars">★★★★★</span></div><div class="rt">Honden krijgen meteen water bij de deur. Top terras.</div><div class="rd">3 dagen geleden · 👍 4</div></div></div>
+    <div class="rev"><div class="ravatar">JD</div><div style="flex:1"><div class="rn">Jeroen · <span class="stars">★★★★<span class="off">★</span></span></div><div class="rt">Prima plek, soms druk in het weekend.</div><div class="rd">1 week geleden</div></div></div>
+    <div class="btn wide" style="width:100%;margin:10px 0 0" onclick="go('review_new')"><i class="ti ti-pencil"></i> Schrijf een review</div></div>
+  <div class="sec"><p style="font-size:11px;color:var(--color-text-tertiary)">Ingediend door @rik · 2 dagen geleden</p></div>`, tab:"map"},
+
+review_new:{label:"Schrijf een review", html:`
+  <div class="topbar"><i class="ti ti-arrow-left ic" onclick="go('detail_poi')"></i><span style="font-weight:500;margin-left:4px">Schrijf een review</span></div>
+  <div style="padding:10px 12px 0;font-size:13px;font-weight:500">Café De Waterbak</div>
+  <div class="ratebig"><div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:6px">Jouw rating</div>
+    <div class="num"><span class="stars">★★★★<span class="off">★</span></span></div></div>
+  <div class="field"><label>Je review</label><div class="input area">Deel je ervaring met andere hondenbezitters…</div></div>
+  <div class="field"><label>Foto's <span style="color:var(--color-text-tertiary)">(optioneel)</span></label>
+    <div class="gallery" style="padding:0"><div class="ph" style="height:54px;flex:none;width:54px"><i class="ti ti-plus"></i></div></div></div>
+  <div class="note"><i class="ti ti-info-circle"></i> Een review is iets anders dan de community-check: reviews delen je ervaring, de check bevestigt of de plek écht bestaat.</div>
+  <div class="btn pri wide" onclick="go('detail_poi')">Plaatsen</div>`, tab:"map"},
+
+submit_type:{label:"Add — kies type", html:`
+  <div class="topbar"><i class="ti ti-x ic" onclick="go('discovery')"></i><span style="font-weight:500;margin-left:4px">Spot toevoegen</span></div>
+  <div style="font-size:13px;color:var(--color-text-secondary);margin:4px 12px 12px">Wat voeg je toe?</div>
+  <div class="choice" onclick="go('submit_place_region')"><div class="ct"><i class="ti ti-vector"></i> Gebied / losloopzone</div>
+    <div class="cd">Teken een regio waar honden vrij mogen lopen, een strand, enz.</div></div>
+  <div class="choice" onclick="go('submit_place_poi')"><div class="ct"><i class="ti ti-map-pin"></i> Plek / point of interest</div>
+    <div class="cd">Horeca, wasplek, winkel, drinkpunt…</div></div>`, tab:"add"},
+
+submit_place_poi:{label:"Add — pin plaatsen", html:`
+  <div class="topbar"><i class="ti ti-arrow-left ic" onclick="go('submit_type')"></i><span style="font-weight:500;margin-left:4px">Plaats de pin</span></div>
+  <div class="map" style="cursor:default"><div class="pin eat" style="left:138px;top:135px"><i class="ti ti-coffee"></i></div>
+    <div style="position:absolute;left:0;right:0;bottom:10px;text-align:center;font-size:11px;color:var(--color-text-tertiary)">sleep de pin · Lat 52.38 Lng 4.88</div></div>
+  <div class="btn pri wide" onclick="go('submit_form')">Gebruik deze plek</div>`, tab:"add"},
+
+submit_place_region:{label:"Add — gebied tekenen", html:`
+  <div class="topbar"><i class="ti ti-arrow-left ic" onclick="go('submit_type')"></i><span style="font-weight:500;margin-left:4px">Teken het gebied</span></div>
+  <div class="map" style="cursor:default"><div class="region" style="position:absolute;left:60px;top:70px">tik om punten<br>te plaatsen</div>
+    <div style="position:absolute;right:12px;bottom:40px;display:flex;gap:6px"><span class="btn" style="padding:5px 8px;font-size:11px">undo</span><span class="btn" style="padding:5px 8px;font-size:11px">reset</span></div>
+    <div style="position:absolute;left:0;right:0;bottom:10px;text-align:center;font-size:11px;color:var(--color-text-tertiary)">oppervlak ≈ 1,2 ha</div></div>
+  <div class="btn pri wide" onclick="go('submit_form')">Gebruik dit gebied</div>`, tab:"add"},
+
+submit_form:{label:"Add — details", html:`
+  <div class="topbar"><i class="ti ti-arrow-left ic" onclick="go('submit_type')"></i><span style="font-weight:500;margin-left:4px">Details</span><span class="sp" style="font-size:12px;color:var(--color-text-tertiary)">2 / 3</span></div>
+  <div class="field"><label>Naam *</label><div class="input">Café De Waterbak</div></div>
+  <div class="field"><label>Categorie *</label><div class="input">Hondvriendelijke horeca<span class="chev"><i class="ti ti-chevron-down"></i></span></div></div>
+  <div class="field"><label>Omschrijving</label><div class="input area">Klein café, honden welkom…</div></div>
+  <div class="field"><label>Voorzieningen <span style="color:var(--color-text-tertiary)">(per categorie)</span></label>
+    <div class="check"><i class="ti ti-square-check"></i> Waterbak voor honden</div>
+    <div class="check"><i class="ti ti-square"></i> Snoepjes</div>
+    <div class="check"><i class="ti ti-square-check"></i> Binnen ok</div>
+    <div class="check"><i class="ti ti-square-check"></i> Terras</div>
+    <div class="acfield"><i class="ti ti-search"></i> Anders… typ om toe te voegen</div>
+    <div class="acsug"><span>Hondendouche</span><span>Poepzakjes</span><span>Schaduw</span><span class="new"><i class="ti ti-plus" style="font-size:11px"></i> "drinkfontein" toevoegen</span></div>
+    <div style="font-size:11px;color:var(--color-text-tertiary);margin-top:6px">Kiest uit bestaande voorzieningen; iets nieuws gaat als 'voorgesteld' naar de admin.</div></div>
+  <div class="field"><label>Foto's</label><div class="gallery" style="padding:0"><div class="ph" style="height:54px;flex:none;width:54px"><i class="ti ti-plus"></i></div><div class="ph" style="height:54px">foto</div></div></div>
+  <div class="btn pri wide" onclick="go('submit_pending')">Verder</div>`, tab:"add"},
+
+submit_pending:{label:"Add — live (niet geverifieerd)", html:`
+  <div class="note"><i class="ti ti-info-circle"></i> Je plek staat meteen live als 'niet geverifieerd'. Bij netto +5 community-stemmen wordt hij automatisch geverifieerd — geen moderator nodig.</div>
+  <div class="center"><div class="big"><i class="ti ti-check"></i></div>
+    <h3>Bedankt! Je plek staat live.</h3><p>Anderen kunnen 'm nu vinden en bevestigen. Je krijgt een melding zodra hij geverifieerd is.</p>
+    <div class="btn pri wide" onclick="go('detail_poi')">Bekijk je plek</div>
+    <div class="btn wide" onclick="go('submit_type')">Nog een toevoegen</div></div>`, tab:"add"},
+
+profile:{label:"Profiel", html:`
+  <div class="profile-h"><div style="position:relative" onclick="go('profile_edit')"><div class="avatar">RW</div>
+    <div style="position:absolute;right:-2px;bottom:-2px;width:20px;height:20px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;border:2px solid var(--color-background-primary);font-size:10px"><i class="ti ti-camera"></i></div></div>
+    <div style="flex:1"><div style="font-weight:500">Rik Weteling <span style="font-size:12px;color:var(--color-text-tertiary)">@rik</span></div>
+    <div style="font-size:12px;color:var(--color-text-secondary)">12 spots · reputatie ★★★ · stemgewicht ×1,4</div></div>
+    <i class="ti ti-settings ic"></i></div>
+  <div class="bio">Hondenliefhebber uit Amsterdam. Altijd op zoek naar nieuwe losloopplekken en terrasjes waar Max welkom is.</div>
+  <div class="subh">Mijn honden</div>
+  <div class="dogs">
+    <div class="dog" onclick="go('dog_edit')"><div class="dav"><i class="ti ti-paw"></i></div> Max · Labrador</div>
+    <div class="dog" onclick="go('dog_edit')"><div class="dav"><i class="ti ti-paw"></i></div> Bella · Border collie</div>
+    <div class="dog" style="color:var(--teal-tx);border-style:dashed" onclick="go('dog_edit')"><i class="ti ti-plus"></i> Hond</div>
+  </div>
+  <div class="btn wide" onclick="go('profile_edit')"><i class="ti ti-edit"></i> Profiel bewerken</div>
+  <div class="seg"><div class="on">Mijn inzendingen</div><div>Opgeslagen</div></div>
+  <div class="qrow" onclick="go('detail_region')"><div class="l1"><i class="ti ti-coffee"></i> Café De Waterbak <span class="status st-pub" style="margin-left:auto">Geverifieerd</span></div></div>
+  <div class="qrow" onclick="go('detail_poi')"><div class="l1"><i class="ti ti-beach"></i> Hondenstrand IJ <span class="status st-pen" style="margin-left:auto">Live · unverified</span></div><div class="l2">netto +2 · nog 3 stemmen te gaan</div></div>
+  <div class="qrow"><div class="l1"><i class="ti ti-vector"></i> Park Zuid zone <span class="status st-rej" style="margin-left:auto">Verborgen</span></div><div class="l2">3 afkeuringen — admin bekijkt</div></div>
+  <div class="qrow" onclick="go('feature_requests')"><div class="l1"><i class="ti ti-bulb"></i> Functieverzoeken <i class="ti ti-chevron-right" style="margin-left:auto;color:var(--color-text-tertiary)"></i></div></div>
+  <div class="modentry" onclick="go('mod_queue')"><i class="ti ti-alert-triangle"></i> Admin · aandacht nodig <span class="ct">4</span><i class="ti ti-chevron-right"></i></div>`, tab:"profile"},
+
+profile_edit:{label:"Profiel bewerken", html:`
+  <div class="topbar"><i class="ti ti-arrow-left ic" onclick="go('profile')"></i><span style="font-weight:500;margin-left:4px">Profiel bewerken</span><span class="sp" style="font-size:13px;color:var(--teal-tx);font-weight:500" onclick="go('profile')">Opslaan</span></div>
+  <div class="avedit"><div class="big">RW</div><div class="cam"><i class="ti ti-camera"></i></div></div>
+  <div style="text-align:center;font-size:12px;color:var(--teal-tx);margin-bottom:12px;cursor:pointer">Foto wijzigen</div>
+  <div class="field"><label>Weergavenaam</label><div class="input">Rik Weteling</div></div>
+  <div class="field"><label>Gebruikersnaam</label><div class="input">@rik</div></div>
+  <div class="field"><label>Bio <span style="color:var(--color-text-tertiary)">(kort, iets over jou)</span></label><div class="input area">Hondenliefhebber uit Amsterdam. Altijd op zoek naar nieuwe losloopplekken…</div></div>
+  <div class="field"><label>Mijn honden</label>
+    <div class="dogcard"><div class="dav"><i class="ti ti-paw"></i></div><div style="flex:1"><div style="font-size:13px;font-weight:500">Max</div><div style="font-size:11px;color:var(--color-text-tertiary)">Labrador · 4 jaar</div></div><i class="ti ti-edit ic" onclick="go('dog_edit')"></i></div>
+    <div class="dogcard"><div class="dav"><i class="ti ti-paw"></i></div><div style="flex:1"><div style="font-size:13px;font-weight:500">Bella</div><div style="font-size:11px;color:var(--color-text-tertiary)">Border collie · 2 jaar</div></div><i class="ti ti-edit ic" onclick="go('dog_edit')"></i></div>
+    <div class="btn wide" style="width:100%;margin:4px 0 0" onclick="go('dog_edit')"><i class="ti ti-plus"></i> Hond toevoegen</div></div>`, tab:"profile"},
+dog_edit:{label:"Hond toevoegen / bewerken", html:`
+  <div class="topbar"><i class="ti ti-arrow-left ic" onclick="go('profile_edit')"></i><span style="font-weight:500;margin-left:4px">Hond</span><span class="sp" style="font-size:13px;color:var(--teal-tx);font-weight:500" onclick="go('profile_edit')">Opslaan</span></div>
+  <div class="avedit"><div class="big"><i class="ti ti-paw"></i></div><div class="cam"><i class="ti ti-camera"></i></div></div>
+  <div style="text-align:center;font-size:12px;color:var(--teal-tx);margin-bottom:12px;cursor:pointer">Foto toevoegen</div>
+  <div class="field"><label>Naam</label><div class="input">Max</div></div>
+  <div class="field"><label>Ras</label><div class="input">Labrador<span class="chev"><i class="ti ti-chevron-down"></i></span></div></div>
+  <div class="field"><label>Geboortejaar <span style="color:var(--color-text-tertiary)">(optioneel)</span></label><div class="input">2022</div></div>
+  <div class="field"><label>Over deze hond <span style="color:var(--color-text-tertiary)">(optioneel)</span></label><div class="input area">Vrolijke reu, houdt van water…</div></div>
+  <div class="btn wide dng" style="width:100%" onclick="go('profile_edit')"><i class="ti ti-trash"></i> Hond verwijderen</div>`, tab:"profile"},
+feature_requests:{label:"Functieverzoeken", html:`
+  <div class="topbar"><i class="ti ti-arrow-left ic" onclick="go('profile')"></i><span style="font-weight:500;margin-left:4px">Functieverzoeken</span><span class="sp" style="font-size:12px;color:var(--color-text-tertiary)">sorteer</span></div>
+  <div style="font-size:12px;color:var(--color-text-secondary);margin:0 12px 8px">Stem op ideeën of dien een nieuw verzoek in.</div>
+  <div class="chips" style="padding:0 12px 8px"><span class="chip on">Populair</span><span class="chip">Nieuw</span><span class="chip">Gepland</span><span class="chip">Klaar</span></div>
+  <div class="frrow"><div class="upv on"><i class="ti ti-chevron-up"></i>56</div><div style="flex:1"><div class="frt">Hondentrimsalons als categorie op de kaart</div><div class="frd"><span class="status st-con">In overweging</span> · door @rik · nieuwe categorie</div></div></div>
+  <div class="frrow"><div class="upv on"><i class="ti ti-chevron-up"></i>42</div><div style="flex:1"><div class="frt">Wandelroutes delen &amp; volgen</div><div class="frd"><span class="status st-plan">Gepland</span> · door @sanne</div></div></div>
+  <div class="frrow"><div class="upv"><i class="ti ti-chevron-up"></i>31</div><div style="flex:1"><div class="frt">Offline kaart</div><div class="frd"><span class="status st-con">In overweging</span> · door @rik</div></div></div>
+  <div class="frrow"><div class="upv"><i class="ti ti-chevron-up"></i>27</div><div style="flex:1"><div class="frt">Melding bij nieuwe plek in de buurt</div><div class="frd"><span class="status st-con">In overweging</span></div></div></div>
+  <div class="frrow"><div class="upv"><i class="ti ti-chevron-up"></i>18</div><div style="flex:1"><div class="frt">Donker thema</div><div class="frd"><span class="status st-done">Klaar</span></div></div></div>
+  <div class="btn pri wide" onclick="go('feature_new')"><i class="ti ti-plus"></i> Nieuw verzoek</div>`, tab:"profile"},
+
+feature_new:{label:"Nieuw functieverzoek", html:`
+  <div class="topbar"><i class="ti ti-arrow-left ic" onclick="go('feature_requests')"></i><span style="font-weight:500;margin-left:4px">Nieuw functieverzoek</span></div>
+  <div class="field"><label>Titel *</label><div class="input">Korte, duidelijke titel…</div></div>
+  <div class="field"><label>Omschrijving</label><div class="input area">Wat zou je willen, en waarom?</div></div>
+  <div class="field"><label>Onderdeel</label><div class="input">Kaart<span class="chev"><i class="ti ti-chevron-down"></i></span></div></div>
+  <div class="note"><i class="ti ti-search"></i> We tonen tijdens het typen vergelijkbare verzoeken, zodat dubbele ideeën samenkomen.</div>
+  <div class="btn pri wide" onclick="go('feature_requests')">Indienen</div>`, tab:"profile"},
+
+mod_queue:{label:"Admin · aandacht nodig", html:`
+  <div class="topbar"><i class="ti ti-arrow-left ic" onclick="go('profile')"></i><span style="font-weight:500;margin-left:4px">Admin · aandacht nodig</span></div>
+  <div class="note"><i class="ti ti-info-circle"></i> De community keurt vanzelf goed/af. Hier komt alleen wat is verborgen, gemeld of betwist.</div>
+  <div class="chips" style="padding:0 12px 8px"><span class="chip on">Verborgen 4</span><span class="chip">Gemeld 3</span><span class="chip">Betwist 2</span></div>
+  <div class="qrow"><div class="l1"><i class="ti ti-vector"></i> Park Zuid zone <span class="tag" style="margin-left:auto">Regio</span></div>
+    <div class="l2">auto-verborgen · 3 afkeuringen · door @rik</div>
+    <div class="qa"><span class="btn pri" onclick="go('mod_queue')"><i class="ti ti-restore"></i> herstel</span><span class="btn dng" onclick="go('mod_queue')"><i class="ti ti-trash"></i></span><span class="btn" onclick="go('mod_review')">openen</span></div></div>
+  <div class="qrow"><div class="l1"><i class="ti ti-flag"></i> Café X <span class="tag" style="margin-left:auto">Horeca</span></div>
+    <div class="l2">3 meldingen · spam?</div>
+    <div class="qa"><span class="btn" onclick="go('mod_review')">openen</span></div></div>
+  <div class="qrow"><div class="l1"><i class="ti ti-droplet"></i> Wasplek Noord <span class="tag" style="margin-left:auto">Betwist</span></div>
+    <div class="l2">netto +2 maar 2 afkeuringen — vlak bij bestaande plek</div>
+    <div class="qa"><span class="btn" onclick="go('mod_review')">openen</span></div></div>`, tab:"profile"},
+
+mod_review:{label:"Admin · beoordelen", html:`
+  <div class="topbar"><i class="ti ti-arrow-left ic" onclick="go('mod_queue')"></i><span style="font-weight:500;margin-left:4px">Plek beoordelen</span></div>
+  <div class="ph map" style="height:120px;cursor:default"><div class="pin eat" style="left:140px;top:55px"><i class="ti ti-map-pin"></i></div></div>
+  <div class="note warn"><i class="ti ti-alert-triangle"></i> Auto-verborgen na 3 afkeuringen · 1 bestaande plek binnen 80 m.</div>
+  <div class="title" style="font-size:15px">Park Zuid zone</div>
+  <div class="meta">Losloopgebied · door @rik · 2 u geleden</div>
+  <div class="sec"><h4>Community-stemmen</h4><p>4 oké (gewogen +4,2) · 3 afgekeurd (gewogen −3,1) · netto +1,1<br>Afkeuringen van @anon1, @anon2 (nieuw account, laag gewicht), @buur.</p></div>
+  <div class="gallery"><div class="ph">foto ⚑</div><div class="ph">foto</div></div>
+  <div class="field"><label>Admin-notitie (intern)</label><div class="input area">…</div></div>
+  <div class="actions"><div class="btn pri" onclick="go('mod_queue')"><i class="ti ti-restore"></i> Herstellen</div><div class="btn" onclick="go('mod_queue')"><i class="ti ti-rosette-discount-check"></i> Forceer verified</div></div>
+  <div class="btn wide dng" onclick="go('mod_queue')"><i class="ti ti-trash"></i> Definitief verwijderen</div>`, tab:"profile"},
+};
+
+const ORDER=["discovery","filter","detail_region","detail_poi","review_new","submit_type","submit_place_poi","submit_place_region","submit_form","submit_pending","profile","profile_edit","dog_edit","feature_requests","feature_new","mod_queue","mod_review"];
+const TABS=[["map","Map","ti-map"],["nearby","Nabij","ti-list"],["add","Add","ti-plus"],["profile","Profiel","ti-user"]];
+let current="discovery";
+function tabbar(active){return '<div class="tabbar">'+TABS.map(t=>`<div class="${t[0]===active?'on':''}" onclick="go('${t[0]==='add'?'submit_type':t[0]==='profile'?'profile':'discovery'}')"><i class="ti ${t[2]}"></i>${t[1]}</div>`).join('')+'</div>';}
+function render(){
+  const nav='<div class="dvh-nav">'+ORDER.map(id=>`<button class="${id===current?'on':''}" onclick="go('${id}')">${SCREENS[id].label}</button>`).join('')+'</div>';
+  const s=SCREENS[current];
+  const phone=`<div class="dvh-stage"><div class="phone">
+    <div class="sbar"><span>9:41</span><span><i class="ti ti-wifi"></i> <i class="ti ti-battery-3"></i></span></div>
+    <div class="scr-h">${s.label}</div><div class="screen show">${s.html}</div>${tabbar(s.tab)}
+  </div></div>`;
+  document.getElementById('dvh-root').innerHTML='<style>'+ROOT_STYLE+'</style>'+nav+phone+'<div class="caption">Klikbaar low-fi prototype · tik op pins, knoppen en de tabbalk om door de flows te lopen</div>';
+}
+function go(id){if(SCREENS[id]){current=id;render();window.scrollTo({top:0,behavior:'smooth'});}}
+render();
+</script>
+</body>
+</html>
