@@ -22,7 +22,6 @@ RUN pnpm install --frozen-lockfile
 
 # Browser-facing config (must be present at build; defaults are safe for prod).
 ARG NEXT_PUBLIC_APP_URL=https://www.devrijehond.nl
-ARG NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
 ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 ENV NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=$NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 

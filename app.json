@@ -1,0 +1,16 @@
+{
+  "healthchecks": {
+    "web": [
+      {
+        "type": "startup",
+        "name": "web /api/health",
+        "path": "/api/health",
+        "content": "ok",
+        "attempts": 8,
+        "wait": 8,
+        "timeout": 20,
+        "initialDelay": 5
+      }
+    ]
+  }
+}

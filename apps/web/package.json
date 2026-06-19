@@ -19,9 +19,9 @@
     "@vis.gl/react-google-maps": "^1.8.3",
     "better-auth": "^1.2.0",
     "maplibre-gl": "^5.24.0",
-    "next": "^15.5.4",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
+    "next": "^16.2.9",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
     "zod": "^4.4.3"
   },
   "devDependencies": {
