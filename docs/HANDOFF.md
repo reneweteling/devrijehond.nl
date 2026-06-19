@@ -90,6 +90,26 @@ generated `BETTER_AUTH_SECRET` (other secrets still blank — see BUILD-STATUS).
    `TODO(verify)` in `apps/web/app/api/v1/me/spots/[id]/vote/route.ts` (queue
    job / `SECURITY DEFINER` trigger for R1).
 3. Finish the stubbed/lighter handlers + mobile sheets listed below.
+4. **Geofence editing (the one remaining piece of the add/edit ask).** Adding a
+   region geofence is done: the Add flow taps out a polygon ring and submits it
+   (`apps/mobile/app/(tabs)/add.tsx`). Editing an existing spot's geometry is not
+   wired on mobile yet, but the backend is ready: `PATCH /api/v1/me/spots/[id]`
+   already accepts `name` / `description` / `polygon` / `geometry`
+   (`apps/web/app/api/v1/me/spots/[id]/route.ts`). To finish: add a
+   `useUpdateSpot` hook (raw fetch with the bearer, like `useMySpots`, since the
+   generated client has no patch-spot fn yet), an edit screen that loads the spot
+   detail, pre-fills the fields and pre-loads the polygon into the same editor,
+   and an entry point from the profile "Mijn inzendingen" list (and/or the spot
+   detail when you're the submitter).
+
+Done in the autonomous review rounds (2026-06-19): a 14-item app-review pass
+(cache invalidation on submit, spot-detail error states, vote/report feedback,
+map loading/error + recenter, profile auth states, 401 session-clear, search
+fly-to nonce, sign-in redirect intent, shared `ListState`/`Banner` primitives);
+the geofence add editor; web spot-page enrichment ("In de buurt" + Route link +
+JSON-LD); an FAQ + structured data; a11y (skip link, focus ring). See
+`docs/TEST-PLAN.md`. iOS build archives on `macos-26`; export needs the Apple
+App ID + app record (see `docs/CI.md`).
 
 Local toolchain note: Node/pnpm run via asdf. Prefix commands with
 `ASDF_NODEJS_VERSION=24.13.1` (or `asdf shell nodejs 24.13.1`) and use
