@@ -48,7 +48,14 @@ export function MapIsland() {
     <section aria-label="Kaart met hondvriendelijke plekken">
       <div style={{ position: 'relative' }}>
         <div
-          style={{ height: 420, borderRadius: 12, overflow: 'hidden', backgroundColor: '#dfe7df' }}
+          style={{
+            height: 420,
+            borderRadius: 'var(--radius-lg)',
+            overflow: 'hidden',
+            backgroundColor: 'var(--moss-soft)',
+            border: '1px solid var(--line)',
+            boxShadow: 'var(--shadow)',
+          }}
         >
           {GOOGLE_MAPS_KEY ? (
             <GoogleMapView apiKey={GOOGLE_MAPS_KEY} spots={spots} onBoundsChange={handleBounds} />
@@ -69,37 +76,63 @@ export function MapIsland() {
         <div
           style={{
             position: 'absolute',
-            top: 12,
-            left: 12,
-            padding: '4px 10px',
+            top: 14,
+            left: 14,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 7,
+            padding: '6px 12px',
             borderRadius: 999,
-            backgroundColor: 'rgba(255,255,255,0.9)',
-            color: '#3F6B4C',
+            backgroundColor: '#fff',
+            color: 'var(--ink)',
             fontSize: 13,
             fontWeight: 600,
+            boxShadow: '0 2px 10px rgba(40,40,20,0.18)',
             pointerEvents: 'none',
           }}
         >
+          <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--moss)' }} />
           {loading ? 'Kaart laden…' : `${spots.length} plekken in beeld`}
         </div>
       </div>
 
-      {/* Crawlable / no-JS fallback list of the spots in view. */}
-      <ul style={{ listStyle: 'none', padding: 0, marginTop: 16, display: 'grid', gap: 8 }}>
-        {spots.map((s) => (
-          <li key={s.id}>
+      {/* Spots in the current viewport, as a tidy grid of cards (a moss dot =
+          verified, terracotta = not yet). Doubles as the no-JS/crawlable list. */}
+      {spots.length > 0 ? (
+        <div
+          className="grid"
+          style={{
+            gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))',
+            gap: 10,
+            marginTop: 18,
+          }}
+        >
+          {spots.map((s) => (
             <a
+              key={s.id}
               href={spotHref(s)}
-              style={{ color: '#1f2b22', textDecoration: 'none', fontWeight: 500 }}
+              className="card card-link"
+              style={{ padding: '11px 14px', display: 'flex', alignItems: 'center', gap: 10 }}
             >
-              {s.name}
-              {s.status !== 'VERIFIED' ? (
-                <span style={{ color: '#9a7b3f', fontSize: 13 }}> · niet geverifieerd</span>
-              ) : null}
+              <span
+                title={s.status === 'VERIFIED' ? 'Geverifieerd' : 'Nog niet geverifieerd'}
+                style={{
+                  width: 9,
+                  height: 9,
+                  borderRadius: '50%',
+                  flex: 'none',
+                  background: s.status === 'VERIFIED' ? 'var(--moss)' : 'var(--terra)',
+                }}
+              />
+              <span
+                style={{ fontWeight: 500, color: 'var(--ink)', fontSize: 14.5, lineHeight: 1.3 }}
+              >
+                {s.name}
+              </span>
             </a>
-          </li>
-        ))}
-      </ul>
+          ))}
+        </div>
+      ) : null}
     </section>
   );
 }

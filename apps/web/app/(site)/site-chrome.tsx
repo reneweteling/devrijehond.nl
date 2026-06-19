@@ -30,12 +30,11 @@ function AppleGlyph() {
 }
 
 function PlayGlyph() {
+  // simple-icons Google Play glyph, rendered monochrome white to match the
+  // Apple mark next to it.
   return (
-    <svg width="20" height="22" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M3.6 1.8 14.5 12 3.6 22.2c-.4-.2-.6-.6-.6-1.1V2.9c0-.5.2-.9.6-1.1z" fill="#34d399" />
-      <path d="M14.5 12 3.6 1.8c.2-.1.5-.1.8 0l8.9 5.1L14.5 12z" fill="#60a5fa" />
-      <path d="M14.5 12 13.3 17.1l-8.9 5.1c-.3.1-.6.1-.8 0L14.5 12z" fill="#f87171" />
-      <path d="m18.2 9.9 2.2 1.3c.7.4.7 1.2 0 1.6l-2.2 1.3L16 12l2.2-2.1z" fill="#fbbf24" />
+    <svg width="20" height="22" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
+      <path d="M22.018 13.298l-3.919 2.218-3.515-3.493 3.543-3.521 3.891 2.202a1.49 1.49 0 0 1 0 2.594zM1.337.924a1.486 1.486 0 0 0-.112.568v21.017c0 .217.045.419.124.6l11.155-11.087L1.337.924zm12.207 10.065l3.258-3.238L2.27.195a1.49 1.49 0 0 0-.84-.069l12.114 10.863zm0 2.022L1.43 23.874a1.49 1.49 0 0 0 .84-.07l14.532-7.558-3.258-3.235z" />
     </svg>
   );
 }

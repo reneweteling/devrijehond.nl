@@ -3,6 +3,7 @@ import { pgQuery } from '@devrijehond/server';
 
 import { MapIsland } from './map-island';
 import { AppCta, StoreButton } from './site-chrome';
+import { Reveal, FadeIn } from './motion';
 
 /**
  * Map home (`/`). A rich, crawlable landing page (hero, categories, the
@@ -84,7 +85,7 @@ export default async function HomePage() {
       {/* Hero */}
       <section className="hero">
         <div className="container hero-grid">
-          <div>
+          <FadeIn>
             <span className="eyebrow">🐾 Voor hondenbazen, door hondenbazen</span>
             <h1>
               Vind de fijnste <em>hondenplekken</em> van Nederland
@@ -114,88 +115,102 @@ export default async function HomePage() {
                 <div className="lbl">van strand tot stad</div>
               </div>
             </div>
-          </div>
-          <div className="phone">
-            <Image
-              src="/app-map.png"
-              alt="De Vrije Hond app met de kaart van hondenplekken"
-              width={580}
-              height={1200}
-              priority
-            />
-          </div>
+          </FadeIn>
+          <FadeIn delay={0.12} y={24}>
+            <div className="phone">
+              <Image
+                src="/app-map.png"
+                alt="De Vrije Hond app met de kaart van hondenplekken"
+                width={580}
+                height={1200}
+                priority
+              />
+            </div>
+          </FadeIn>
         </div>
       </section>
 
       {/* Categories */}
       <section className="section">
         <div className="container">
-          <span className="eyebrow">Ontdek per soort</span>
-          <h2 className="section-title">Alles voor een fijne wandeling</h2>
-          <div className="grid grid-3" style={{ marginTop: 28 }}>
-            {cats.map((c) => (
-              <a key={c.slug} href="#kaart" className="card card-link" style={{ display: 'block' }}>
-                <div
-                  className="card-body"
-                  style={{ display: 'flex', alignItems: 'center', gap: 14 }}
+          <Reveal>
+            <span className="eyebrow">Ontdek per soort</span>
+            <h2 className="section-title">Alles voor een fijne wandeling</h2>
+            <div className="grid grid-3" style={{ marginTop: 28 }}>
+              {cats.map((c) => (
+                <a
+                  key={c.slug}
+                  href="#kaart"
+                  className="card card-link"
+                  style={{ display: 'block' }}
                 >
-                  <span
-                    style={{
-                      width: 52,
-                      height: 52,
-                      borderRadius: 14,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 26,
-                      background: `${c.color}1f`,
-                    }}
+                  <div
+                    className="card-body"
+                    style={{ display: 'flex', alignItems: 'center', gap: 14 }}
                   >
-                    {CATEGORY_EMOJI[c.slug] ?? '📍'}
-                  </span>
-                  <div>
-                    <div style={{ fontWeight: 600, fontSize: 16.5, color: 'var(--ink)' }}>
-                      {c.label}
-                    </div>
-                    <div className="muted" style={{ fontSize: 14 }}>
-                      {c.n} {c.n === 1 ? 'plek' : 'plekken'}
+                    <span
+                      style={{
+                        width: 52,
+                        height: 52,
+                        borderRadius: 14,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 26,
+                        background: `${c.color}1f`,
+                      }}
+                    >
+                      {CATEGORY_EMOJI[c.slug] ?? '📍'}
+                    </span>
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: 16.5, color: 'var(--ink)' }}>
+                        {c.label}
+                      </div>
+                      <div className="muted" style={{ fontSize: 14 }}>
+                        {c.n} {c.n === 1 ? 'plek' : 'plekken'}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </a>
-            ))}
-          </div>
+                </a>
+              ))}
+            </div>
+          </Reveal>
         </div>
       </section>
 
       {/* How it works */}
       <section id="zo-werkt-het" className="section topo" style={{ scrollMarginTop: 72 }}>
         <div className="container">
-          <span className="eyebrow">Zo werkt het</span>
-          <h2 className="section-title">De community houdt de kaart eerlijk</h2>
-          <p className="section-lead">
-            Geen ondoorzichtige redactie. Een plek verschijnt meteen en wordt betrouwbaar zodra
-            genoeg hondenbazen in de buurt hem bevestigen.
-          </p>
-          <div className="grid grid-3 steps" style={{ marginTop: 32 }}>
-            {[
-              [
-                'Ontdek',
-                'Open de kaart en zie losloopgebieden, stranden en plekken bij jou in de buurt.',
-              ],
-              ['Voeg toe', 'Ken je een plek die nog ontbreekt? Zet hem er in een paar tikken op.'],
-              [
-                'Verifieer',
-                'Ben je er geweest? Bevestig de plek. Genoeg bevestigingen en hij wordt geverifieerd.',
-              ],
-            ].map(([title, body], i) => (
-              <div key={title} className="step card" style={{ padding: 24 }}>
-                <span className="step-num">{i + 1}</span>
-                <h3>{title}</h3>
-                <p>{body}</p>
-              </div>
-            ))}
-          </div>
+          <Reveal>
+            <span className="eyebrow">Zo werkt het</span>
+            <h2 className="section-title">De community houdt de kaart eerlijk</h2>
+            <p className="section-lead">
+              Geen ondoorzichtige redactie. Een plek verschijnt meteen en wordt betrouwbaar zodra
+              genoeg hondenbazen in de buurt hem bevestigen.
+            </p>
+            <div className="grid grid-3 steps" style={{ marginTop: 32 }}>
+              {[
+                [
+                  'Ontdek',
+                  'Open de kaart en zie losloopgebieden, stranden en plekken bij jou in de buurt.',
+                ],
+                [
+                  'Voeg toe',
+                  'Ken je een plek die nog ontbreekt? Zet hem er in een paar tikken op.',
+                ],
+                [
+                  'Verifieer',
+                  'Ben je er geweest? Bevestig de plek. Genoeg bevestigingen en hij wordt geverifieerd.',
+                ],
+              ].map(([title, body], i) => (
+                <div key={title} className="step card" style={{ padding: 24 }}>
+                  <span className="step-num">{i + 1}</span>
+                  <h3>{title}</h3>
+                  <p>{body}</p>
+                </div>
+              ))}
+            </div>
+          </Reveal>
         </div>
       </section>
 
@@ -203,47 +218,51 @@ export default async function HomePage() {
       {featured.length > 0 && (
         <section className="section">
           <div className="container">
-            <span className="eyebrow">Geverifieerd door de community</span>
-            <h2 className="section-title">Uitgelichte plekken</h2>
-            <div className="grid grid-3" style={{ marginTop: 28 }}>
-              {featured.map((s) => (
-                <a key={s.slug} href={detailHref(s.type, s.slug)} className="card card-link">
-                  <div className="card-media">
-                    {s.photo ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={s.photo} alt={`${s.name}, ${s.cat_label}`} loading="lazy" />
-                    ) : null}
-                  </div>
-                  <div className="card-body">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                      <span
-                        className="dot"
-                        style={{
-                          width: 9,
-                          height: 9,
-                          borderRadius: '50%',
-                          background: s.cat_color,
-                        }}
-                      />
-                      <span className="muted" style={{ fontSize: 13 }}>
-                        {s.cat_label}
-                      </span>
-                    </div>
-                    <div style={{ fontWeight: 600, fontSize: 17, color: 'var(--ink)' }}>
-                      {s.name}
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
-                      <span className="badge badge-verified">✓ Geverifieerd</span>
-                      {s.rating_count > 0 ? (
-                        <span className="muted" style={{ fontSize: 13.5 }}>
-                          ★ {Number(s.rating_avg).toFixed(1).replace('.', ',')} · {s.rating_count}
-                        </span>
+            <Reveal>
+              <span className="eyebrow">Geverifieerd door de community</span>
+              <h2 className="section-title">Uitgelichte plekken</h2>
+              <div className="grid grid-3" style={{ marginTop: 28 }}>
+                {featured.map((s) => (
+                  <a key={s.slug} href={detailHref(s.type, s.slug)} className="card card-link">
+                    <div className="card-media">
+                      {s.photo ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={s.photo} alt={`${s.name}, ${s.cat_label}`} loading="lazy" />
                       ) : null}
                     </div>
-                  </div>
-                </a>
-              ))}
-            </div>
+                    <div className="card-body">
+                      <div
+                        style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}
+                      >
+                        <span
+                          className="dot"
+                          style={{
+                            width: 9,
+                            height: 9,
+                            borderRadius: '50%',
+                            background: s.cat_color,
+                          }}
+                        />
+                        <span className="muted" style={{ fontSize: 13 }}>
+                          {s.cat_label}
+                        </span>
+                      </div>
+                      <div style={{ fontWeight: 600, fontSize: 17, color: 'var(--ink)' }}>
+                        {s.name}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
+                        <span className="badge badge-verified">✓ Geverifieerd</span>
+                        {s.rating_count > 0 ? (
+                          <span className="muted" style={{ fontSize: 13.5 }}>
+                            ★ {Number(s.rating_avg).toFixed(1).replace('.', ',')} · {s.rating_count}
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </Reveal>
           </div>
         </section>
       )}
@@ -251,26 +270,21 @@ export default async function HomePage() {
       {/* Live map */}
       <section id="kaart" className="section-tight" style={{ scrollMarginTop: 72 }}>
         <div className="container">
-          <span className="eyebrow">De kaart</span>
-          <h2 className="section-title">Verken alle plekken</h2>
-          <p className="section-lead" style={{ marginBottom: 24 }}>
-            Verplaats de kaart om plekken in een gebied te laden. Tik op een speld voor details.
-          </p>
-          <div
-            style={{
-              borderRadius: 'var(--radius-lg)',
-              overflow: 'hidden',
-              border: '1px solid var(--line)',
-              boxShadow: 'var(--shadow)',
-            }}
-          >
+          <Reveal>
+            <span className="eyebrow">De kaart</span>
+            <h2 className="section-title">Verken alle plekken</h2>
+            <p className="section-lead" style={{ marginBottom: 24 }}>
+              Verplaats de kaart om plekken in een gebied te laden. Tik op een speld voor details.
+            </p>
             <MapIsland />
-          </div>
+          </Reveal>
         </div>
       </section>
 
       <div style={{ height: 24 }} />
-      <AppCta />
+      <Reveal>
+        <AppCta />
+      </Reveal>
       <div style={{ height: 56 }} />
     </main>
   );
