@@ -133,6 +133,15 @@ function RootNav() {
             contentStyle: { backgroundColor: colors.surface },
           }}
         />
+        <Stack.Screen
+          name="search"
+          options={{
+            presentation: 'card',
+            gestureEnabled: true,
+            animation: 'fade',
+            contentStyle: { backgroundColor: colors.sand },
+          }}
+        />
       </Stack>
       {/* Overlay while boot is pending. Absolute over the live Stack so any
           router action always has a navigator to land on. */}

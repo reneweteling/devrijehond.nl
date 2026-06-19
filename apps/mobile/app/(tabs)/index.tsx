@@ -124,8 +124,10 @@ export default function MapScreen() {
       {/* Floating chrome: wordmark + search pill + category chips */}
       <View style={[styles.chrome, { paddingTop: insets.top + 6 }]} pointerEvents="box-none">
         <View style={styles.searchPill}>
-          <SymbolView name="magnifyingglass" size={16} tintColor={colors.ink3} />
-          <Text style={styles.searchPlaceholder}>Zoek een plek of gebied</Text>
+          <Pressable style={styles.searchTap} onPress={() => router.push('/search')}>
+            <SymbolView name="magnifyingglass" size={16} tintColor={colors.ink3} />
+            <Text style={styles.searchPlaceholder}>Zoek een plek of gebied</Text>
+          </Pressable>
           <Pressable
             onPress={() => router.push('/(tabs)/profile')}
             style={styles.avatar}
@@ -237,6 +239,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     elevation: 4,
   },
+  searchTap: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 9 },
   searchPlaceholder: { flex: 1, fontFamily: font.body, fontSize: 13, color: colors.ink3 },
   avatar: {
     width: 28,
