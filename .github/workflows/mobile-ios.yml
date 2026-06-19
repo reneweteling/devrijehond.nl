@@ -1,0 +1,65 @@
+name: iOS build
+
+# Builds the iOS app on a GitHub macOS runner (no EAS). Without Apple signing
+# secrets it does a no-code-signing compile build (validates that the native
+# project + pods + JS bundle build). To produce a signed .ipa for TestFlight,
+# add the Apple secrets (see docs/CI.md) and use the archive/export step.
+on:
+  workflow_dispatch:
+
+jobs:
+  ios:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Prebuild native project
+        working-directory: apps/mobile
+        run: pnpm exec expo prebuild -p ios --no-install
+        env:
+          EXPO_PUBLIC_API_URL: ${{ vars.EXPO_PUBLIC_API_URL || 'https://www.devrijehond.nl' }}
+          EXPO_PUBLIC_AUTH_URL: ${{ vars.EXPO_PUBLIC_AUTH_URL || 'https://www.devrijehond.nl' }}
+
+      - name: Install pods
+        working-directory: apps/mobile/ios
+        run: pod install
+
+      - name: Build (no code signing — compile check)
+        working-directory: apps/mobile/ios
+        run: |
+          xcodebuild \
+            -workspace DeVrijeHond.xcworkspace \
+            -scheme DeVrijeHond \
+            -configuration Release \
+            -sdk iphonesimulator \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            build | tail -40
+
+      # --- Signed archive + IPA for TestFlight (needs Apple secrets) ----------
+      # Uncomment once the Apple Developer account is active and the secrets in
+      # docs/CI.md are set (cert, provisioning profile, App Store Connect key).
+      #
+      # - uses: apple-actions/import-codesign-certs@v3
+      #   with:
+      #     p12-file-base64: ${{ secrets.APPLE_DIST_CERT_P12 }}
+      #     p12-password: ${{ secrets.APPLE_DIST_CERT_PASSWORD }}
+      # - name: Archive + export IPA
+      #   working-directory: apps/mobile/ios
+      #   run: |
+      #     xcodebuild -workspace DeVrijeHond.xcworkspace -scheme DeVrijeHond \
+      #       -configuration Release -sdk iphoneos -archivePath build/DeVrijeHond.xcarchive archive
+      #     xcodebuild -exportArchive -archivePath build/DeVrijeHond.xcarchive \
+      #       -exportOptionsPlist ExportOptions.plist -exportPath build/ipa
+      # - uses: actions/upload-artifact@v4
+      #   with:
+      #     name: devrijehond-ios
+      #     path: apps/mobile/ios/build/ipa/*.ipa
