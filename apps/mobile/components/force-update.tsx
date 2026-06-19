@@ -41,7 +41,13 @@ const styles = StyleSheet.create({
     gap: space.sm,
     paddingHorizontal: 40,
   },
-  title: { fontFamily: font.heading, fontSize: 22, color: colors.ink, marginTop: space.sm },
+  title: {
+    fontFamily: font.heading,
+    fontSize: 22,
+    lineHeight: 29,
+    color: colors.ink,
+    marginTop: space.sm,
+  },
   sub: {
     fontFamily: font.body,
     fontSize: 14,

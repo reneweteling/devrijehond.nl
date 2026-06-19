@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
   stepDotActive: { backgroundColor: colors.moss },
   stepNum: { fontFamily: font.bodyMedium, fontSize: 13, color: colors.mossDark },
   stepNumActive: { color: '#fff' },
-  q: { fontFamily: font.heading, fontSize: 16, color: colors.ink, marginBottom: 2 },
+  q: { fontFamily: font.heading, fontSize: 16, lineHeight: 21, color: colors.ink, marginBottom: 2 },
   typeCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
     borderColor: colors.line,
   },
   typeCardActive: { borderColor: colors.moss },
-  typeTitle: { fontFamily: font.heading, fontSize: 15, color: colors.ink },
+  typeTitle: { fontFamily: font.heading, fontSize: 15, lineHeight: 20, color: colors.ink },
   typeSub: { fontFamily: font.body, fontSize: 12, color: colors.ink2, marginTop: 2 },
   mapBox: {
     height: 260,
@@ -373,7 +373,7 @@ const styles = StyleSheet.create({
   catChipTextActive: { color: '#fff' },
   error: { fontFamily: font.body, fontSize: 12, color: colors.rust, textAlign: 'center' },
   done: { alignItems: 'center', gap: space.md, paddingTop: 40 },
-  doneTitle: { fontFamily: font.heading, fontSize: 20, color: colors.ink },
+  doneTitle: { fontFamily: font.heading, fontSize: 20, lineHeight: 26, color: colors.ink },
   doneSub: {
     fontFamily: font.body,
     fontSize: 13,

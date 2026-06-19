@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
   inner: { flex: 1, paddingHorizontal: space.lg, justifyContent: 'space-between' },
   center: { alignItems: 'center', justifyContent: 'center', gap: space.sm, paddingHorizontal: 40 },
   brand: { alignItems: 'center', gap: space.sm },
-  wordmark: { fontFamily: font.heading, fontSize: 26, color: colors.moss },
+  wordmark: { fontFamily: font.heading, fontSize: 26, lineHeight: 34, color: colors.moss },
   tagline: {
     fontFamily: font.body,
     fontSize: 14,
@@ -189,7 +189,13 @@ const styles = StyleSheet.create({
   line: { flex: 1, height: 1, backgroundColor: colors.line },
   or: { fontFamily: font.body, fontSize: 12, color: colors.ink3 },
   appleBtn: { height: 48, width: '100%' },
-  title: { fontFamily: font.heading, fontSize: 22, color: colors.ink, marginTop: space.sm },
+  title: {
+    fontFamily: font.heading,
+    fontSize: 22,
+    lineHeight: 29,
+    color: colors.ink,
+    marginTop: space.sm,
+  },
   sub: {
     fontFamily: font.body,
     fontSize: 14,

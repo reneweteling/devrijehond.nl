@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.lg,
     marginBottom: space.sm,
   },
-  headerTitle: { fontFamily: font.heading, fontSize: 16, color: colors.ink },
+  headerTitle: { fontFamily: font.heading, fontSize: 16, lineHeight: 21, color: colors.ink },
   label: { fontFamily: font.bodyMedium, fontSize: 12, color: colors.ink2 },
   input: {
     minHeight: 48,

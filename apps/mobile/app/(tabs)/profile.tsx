@@ -157,7 +157,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  name: { fontFamily: font.heading, fontSize: 22, color: colors.ink, marginTop: space.md },
+  name: {
+    fontFamily: font.heading,
+    fontSize: 22,
+    lineHeight: 29,
+    color: colors.ink,
+    marginTop: space.md,
+  },
   handle: { fontFamily: font.body, fontSize: 13, color: colors.ink2, marginTop: 1 },
   bio: {
     fontFamily: font.body,
@@ -193,7 +199,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: space.md,
   },
-  sectionTitle: { fontFamily: font.heading, fontSize: 15, color: colors.ink },
+  sectionTitle: { fontFamily: font.heading, fontSize: 15, lineHeight: 20, color: colors.ink },
   dogRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 8 },
   dogAvatar: {
     width: 44,

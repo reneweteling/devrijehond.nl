@@ -23,19 +23,14 @@ export function VerifiedBadge({ status }: { status: string }) {
   const verified = status === 'VERIFIED';
   return (
     <View
-      style={[
-        styles.badge,
-        { backgroundColor: verified ? colors.mossSoft : colors.terraSoft },
-      ]}
+      style={[styles.badge, { backgroundColor: verified ? colors.mossSoft : colors.terraSoft }]}
     >
       <SymbolView
         name={verified ? 'rosette' : 'questionmark.circle.fill'}
         size={12}
         tintColor={verified ? colors.mossDark : colors.terraDark}
       />
-      <Text
-        style={[styles.badgeText, { color: verified ? colors.mossDark : colors.terraDark }]}
-      >
+      <Text style={[styles.badgeText, { color: verified ? colors.mossDark : colors.terraDark }]}>
         {verified ? 'Geverifieerd' : 'Niet geverifieerd'}
       </Text>
     </View>
@@ -170,7 +165,7 @@ export function Note({ children }: { children: ReactNode }) {
 
 const styles = StyleSheet.create({
   wordmark: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  wordmarkText: { fontFamily: font.heading, color: colors.moss, fontSize: 16 },
+  wordmarkText: { fontFamily: font.heading, color: colors.moss, fontSize: 16, lineHeight: 22 },
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -180,7 +175,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     alignSelf: 'flex-start',
   },
-  badgeText: { fontFamily: font.bodyMedium, fontSize: 11 },
+  badgeText: { fontFamily: font.bodyMedium, fontSize: 11, lineHeight: 15 },
   button: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -191,7 +186,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.button,
   },
   buttonSecondary: { borderWidth: 1, borderColor: colors.line },
-  buttonText: { fontFamily: font.bodyMedium, fontSize: 15 },
+  buttonText: { fontFamily: font.bodyMedium, fontSize: 15, lineHeight: 20 },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -204,7 +199,7 @@ const styles = StyleSheet.create({
     borderColor: colors.line,
   },
   chipActive: { backgroundColor: colors.moss, borderColor: colors.moss },
-  chipText: { fontFamily: font.body, fontSize: 12, color: colors.ink2 },
+  chipText: { fontFamily: font.body, fontSize: 12, color: colors.ink2, lineHeight: 16 },
   chipTextActive: { color: '#fff' },
   amenityCol: { width: 64, alignItems: 'center', gap: 6 },
   amenityTile: {
@@ -222,8 +217,14 @@ const styles = StyleSheet.create({
     color: colors.ink2,
     textAlign: 'center',
   },
-  screenTitle: { fontFamily: font.heading, fontSize: 24, color: colors.ink },
-  screenSub: { fontFamily: font.body, fontSize: 13, color: colors.ink2, marginTop: 2 },
+  screenTitle: { fontFamily: font.heading, fontSize: 24, lineHeight: 31, color: colors.ink },
+  screenSub: {
+    fontFamily: font.body,
+    fontSize: 13,
+    lineHeight: 18,
+    color: colors.ink2,
+    marginTop: 2,
+  },
   note: {
     flexDirection: 'row',
     gap: 9,

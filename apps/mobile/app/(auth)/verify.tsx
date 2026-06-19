@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     gap: space.md,
     paddingHorizontal: 40,
   },
-  title: { fontFamily: font.heading, fontSize: 20, color: colors.ink },
+  title: { fontFamily: font.heading, fontSize: 20, lineHeight: 26, color: colors.ink },
   sub: {
     fontFamily: font.body,
     fontSize: 14,

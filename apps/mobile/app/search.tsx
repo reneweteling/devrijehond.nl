@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   thumbImg: { width: 52, height: 52 },
-  title: { fontFamily: font.heading, fontSize: 15, color: colors.ink },
+  title: { fontFamily: font.heading, fontSize: 15, lineHeight: 20, color: colors.ink },
   meta: { fontFamily: font.body, fontSize: 12, color: colors.ink2 },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 2 },
   ratingInline: { flexDirection: 'row', alignItems: 'center', gap: 4 },

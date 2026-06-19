@@ -114,9 +114,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.lg,
     marginBottom: space.lg,
   },
-  headerTitle: { fontFamily: font.heading, fontSize: 16, color: colors.ink },
+  headerTitle: { fontFamily: font.heading, fontSize: 16, lineHeight: 21, color: colors.ink },
   body: { paddingHorizontal: space.lg, gap: space.lg },
-  spotName: { fontFamily: font.heading, fontSize: 18, color: colors.ink },
+  spotName: { fontFamily: font.heading, fontSize: 18, lineHeight: 23, color: colors.ink },
   starRow: { flexDirection: 'row', gap: 8, justifyContent: 'center', paddingVertical: space.sm },
   input: {
     minHeight: 120,

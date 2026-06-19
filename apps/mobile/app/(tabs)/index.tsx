@@ -317,7 +317,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   thumbImg: { width: 56, height: 56 },
-  sheetTitle: { fontFamily: font.heading, fontSize: 15, color: colors.ink },
+  sheetTitle: { fontFamily: font.heading, fontSize: 15, lineHeight: 20, color: colors.ink },
   sheetMeta: { fontFamily: font.body, fontSize: 12, color: colors.ink2, marginTop: 1 },
   sheetMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 },
   ratingInline: { flexDirection: 'row', alignItems: 'center', gap: 4 },

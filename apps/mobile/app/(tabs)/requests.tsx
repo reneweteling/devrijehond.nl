@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
   voteBtnActive: { backgroundColor: colors.moss },
   voteCount: { fontFamily: font.bodyMedium, fontSize: 14, color: colors.mossDark, marginTop: 2 },
   voteCountActive: { color: '#fff' },
-  title: { fontFamily: font.heading, fontSize: 15, color: colors.ink },
+  title: { fontFamily: font.heading, fontSize: 15, lineHeight: 20, color: colors.ink },
   body: { fontFamily: font.body, fontSize: 13, color: colors.ink2, marginTop: 3, lineHeight: 18 },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 8 },
   statusTag: { borderRadius: radius.pill, paddingVertical: 3, paddingHorizontal: 9 },
