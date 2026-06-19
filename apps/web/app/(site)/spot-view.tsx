@@ -45,10 +45,35 @@ export function SpotView({ spot }: { spot: SpotDetailDto }) {
   const [lead, ...rest] = spot.photos;
   const isPoi = spot.type === 'POI';
 
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.devrijehond.nl';
+  const url = `${baseUrl}/${isPoi ? 'plek' : 'gebied'}/${spot.slug}`;
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': isPoi ? 'LocalBusiness' : 'Place',
+    name: spot.name,
+    url,
+    ...(spot.description ? { description: spot.description } : {}),
+    ...(lead ? { image: lead.url } : {}),
+    ...(isPoi && spot.address ? { address: spot.address } : {}),
+    ...(spot.rating.count > 0
+      ? {
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: spot.rating.average,
+            reviewCount: spot.rating.count,
+          },
+        }
+      : {}),
+  };
+
   return (
     <main>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="container" style={{ paddingTop: 24, paddingBottom: 8 }}>
-        <nav style={{ fontSize: 14, marginBottom: 18 }}>
+        <nav aria-label="Kruimelpad" style={{ fontSize: 14, marginBottom: 18 }}>
           <a href="/">De Vrije Hond</a>
           <span className="muted"> / {spot.category.label}</span>
         </nav>
@@ -215,8 +240,6 @@ export function SpotView({ spot }: { spot: SpotDetailDto }) {
           </div>
         </aside>
       </div>
-
-      <div style={{ height: 64 }} />
     </main>
   );
 }

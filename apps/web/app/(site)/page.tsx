@@ -280,7 +280,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <div style={{ height: 24 }} />
       <Reveal>
         <AppCta />
       </Reveal>

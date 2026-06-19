@@ -188,8 +188,13 @@ function Footer() {
 export function SiteChrome({ children }: { children: React.ReactNode }) {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <a className="skip-link" href="#main">
+        Naar inhoud
+      </a>
       <Header />
-      <div style={{ flex: 1 }}>{children}</div>
+      <div id="main" style={{ flex: 1 }}>
+        {children}
+      </div>
       <Footer />
     </div>
   );

@@ -1,0 +1,94 @@
+- generic [active] [ref=e1]:
+    - generic [ref=e2]:
+        - banner [ref=e3]:
+            - navigation [ref=e4]:
+                - link "De Vrije Hond" [ref=e5] [cursor=pointer]:
+                    - /url: /
+                    - img [ref=e6]
+                    - text: De Vrije Hond
+                - generic [ref=e13]:
+                    - link "Kaart" [ref=e14] [cursor=pointer]:
+                        - /url: /#kaart
+                    - link "Zo werkt het" [ref=e15] [cursor=pointer]:
+                        - /url: /#zo-werkt-het
+                    - link "Download de app" [ref=e16] [cursor=pointer]:
+                        - /url: /#app
+        - main [ref=e18]:
+            - navigation [ref=e19]:
+                - link "← Terug naar de kaart" [ref=e20] [cursor=pointer]:
+                    - /url: /
+            - heading "Privacyverklaring" [level=1] [ref=e21]
+            - paragraph [ref=e22]: 'Laatst bijgewerkt: 19 juni 2026'
+            - generic [ref=e23]:
+                - paragraph [ref=e24]: De Vrije Hond is een community-kaart van hondvriendelijke plekken in Nederland. Deze verklaring legt uit welke gegevens we verzamelen, waarom, en welke rechten je hebt. We verwerken zo min mogelijk en verkopen je gegevens nooit.
+                - generic [ref=e25]:
+                    - heading "Welke gegevens we verwerken" [level=2] [ref=e26]
+                    - list [ref=e27]:
+                        - listitem [ref=e28]:
+                            - strong [ref=e29]: 'Account:'
+                            - text: je e-mailadres en, als je dat instelt, je naam, gebruikersnaam (handle), korte bio en avatar. Inloggen kan via een e-maillink of via Apple/Google.
+                        - listitem [ref=e30]:
+                            - strong [ref=e31]: 'Honden:'
+                            - text: de profielen die je zelf toevoegt (naam, ras, geboortejaar, foto).
+                        - listitem [ref=e32]:
+                            - strong [ref=e33]: 'Bijdragen:'
+                            - text: plekken die je inzendt, je verificatiestemmen, reviews, foto's en feature-verzoeken.
+                        - listitem [ref=e34]:
+                            - strong [ref=e35]: 'Locatie:'
+                            - text: alleen als je toestemming geeft. We gebruiken je locatie om de kaart bij jou te centreren en om te bepalen of je dicht genoeg bij een plek bent om die te bevestigen. We bewaren geen locatiegeschiedenis.
+                        - listitem [ref=e36]:
+                            - strong [ref=e37]: 'Technisch:'
+                            - text: minimale loggegevens (zoals IP en sessie) om de dienst te laten werken en misbruik tegen te gaan.
+                - generic [ref=e38]:
+                    - heading "Waarom we ze verwerken" [level=2] [ref=e39]
+                    - paragraph [ref=e40]: Om je in te laten loggen, je bijdragen te tonen en toe te schrijven, het community-verificatiemodel te laten werken (stemmen wegen mee op basis van reputatie), en de kaart en lijst te kunnen tonen. De wettelijke grondslag is de uitvoering van de overeenkomst (je gebruik van de app) en ons gerechtvaardigd belang om de dienst veilig en werkend te houden.
+                - generic [ref=e41]:
+                    - heading "Diensten van derden" [level=2] [ref=e42]
+                    - paragraph [ref=e43]: "We delen gegevens alleen met verwerkers die nodig zijn om de app te laten werken: e-mail (Resend) voor inloglinks, opslag (S3) voor foto's, en Apple/Google voor inloggen als je daarvoor kiest. Kaartmateriaal wordt geleverd door de kaartaanbieder van je toestel. Deze partijen mogen je gegevens niet voor eigen doeleinden gebruiken."
+                - generic [ref=e44]:
+                    - heading "Bewaartermijn" [level=2] [ref=e45]
+                    - paragraph [ref=e46]: We bewaren je gegevens zolang je een account hebt. Publieke bijdragen (plekken, reviews) kunnen zichtbaar blijven nadat je je account verwijdert, maar worden dan losgekoppeld van je persoonsgegevens.
+                - generic [ref=e47]:
+                    - heading "Je rechten" [level=2] [ref=e48]
+                    - paragraph [ref=e49]: Je hebt recht op inzage, correctie, verwijdering en overdracht van je gegevens, en je kunt bezwaar maken tegen verwerking. Mail ons en we regelen het. Je kunt ook een klacht indienen bij de Autoriteit Persoonsgegevens.
+            - separator [ref=e50]
+            - paragraph [ref=e51]:
+                - text: Vragen? Mail naar
+                - link "hallo@devrijehond.nl" [ref=e52] [cursor=pointer]:
+                    - /url: mailto:hallo@devrijehond.nl
+                - text: .
+        - contentinfo [ref=e53]:
+            - generic [ref=e54]:
+                - generic [ref=e55]:
+                    - generic [ref=e56]:
+                        - img [ref=e57]
+                        - text: De Vrije Hond
+                    - paragraph [ref=e64]: De community-kaart van hondvriendelijke plekken in Nederland. Toegevoegd en geverifieerd door hondenbezitters zelf.
+                - generic [ref=e65]:
+                    - heading "Info" [level=3] [ref=e66]
+                    - list [ref=e67]:
+                        - listitem [ref=e68]:
+                            - link "Kaart" [ref=e69] [cursor=pointer]:
+                                - /url: /#kaart
+                        - listitem [ref=e70]:
+                            - link "Zo werkt het" [ref=e71] [cursor=pointer]:
+                                - /url: /#zo-werkt-het
+                        - listitem [ref=e72]:
+                            - link "Privacyverklaring" [ref=e73] [cursor=pointer]:
+                                - /url: /privacy
+                        - listitem [ref=e74]:
+                            - link "Voorwaarden" [ref=e75] [cursor=pointer]:
+                                - /url: /terms
+                - generic [ref=e76]:
+                    - heading "Gemaakt door" [level=3] [ref=e77]
+                    - paragraph [ref=e78]:
+                        - link "René Weteling" [ref=e79] [cursor=pointer]:
+                            - /url: https://www.weteling.com
+                        - text: ', Felobo B.V.'
+                        - text: 'Van idee tot productie: web, mobiel & AI.'
+                        - link "rene@weteling.com" [ref=e80] [cursor=pointer]:
+                            - /url: mailto:rene@weteling.com
+                        - text: Hilversum, Nederland
+            - generic [ref=e82]: De Vrije Hond™ · © 2026 Felobo B.V. (KvK 80910483). Alle rechten voorbehouden.
+    - button "Open Next.js Dev Tools" [ref=e88] [cursor=pointer]:
+        - img [ref=e89]

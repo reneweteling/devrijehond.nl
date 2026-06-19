@@ -1,0 +1,94 @@
+- generic [active] [ref=e1]:
+    - generic [ref=e2]:
+        - banner [ref=e3]:
+            - navigation [ref=e4]:
+                - link "De Vrije Hond" [ref=e5] [cursor=pointer]:
+                    - /url: /
+                    - img [ref=e6]
+                    - text: De Vrije Hond
+                - generic [ref=e13]:
+                    - link "Kaart" [ref=e14] [cursor=pointer]:
+                        - /url: /#kaart
+                    - link "Zo werkt het" [ref=e15] [cursor=pointer]:
+                        - /url: /#zo-werkt-het
+                    - link "Download de app" [ref=e16] [cursor=pointer]:
+                        - /url: /#app
+        - main [ref=e18]:
+            - generic [ref=e19]:
+                - navigation [ref=e20]:
+                    - link "De Vrije Hond" [ref=e21] [cursor=pointer]:
+                        - /url: /
+                    - generic [ref=e22]: / Losloopgebied
+                - generic [ref=e23]: Losloopgebied
+                - heading "Mastbos" [level=1] [ref=e24]
+                - generic [ref=e25]:
+                    - generic [ref=e26]:
+                        - img [ref=e27]
+                        - text: Geverifieerd
+                    - generic [ref=e29]: ★ 4,0 · 1 beoordeling
+            - img "Foto van Mastbos, Losloopgebied" [ref=e31]
+            - generic [ref=e32]:
+                - generic [ref=e33]:
+                    - paragraph [ref=e34]: Losloopgebied van ca. 82 ha met uitgezette Snuffelroute en poedelpoel. (Breda)
+                    - generic [ref=e35]:
+                        - heading "Voorzieningen" [level=2] [ref=e36]
+                        - generic [ref=e37]:
+                            - generic [ref=e38]: Schaduw
+                            - generic [ref=e39]: Gratis
+                            - generic [ref=e40]: Waterbak
+                            - generic [ref=e41]: Parkeren
+                            - generic [ref=e42]: Omheind
+                    - img "Mastbos, foto 2" [ref=e43]
+                - complementary [ref=e44]:
+                    - generic [ref=e45]:
+                        - heading "Open in de app" [level=3] [ref=e46]
+                        - paragraph [ref=e47]: Routebeschrijving, bevestigen en beoordelen doe je in de app.
+                        - generic [ref=e48]:
+                            - link "Download in de App Store" [ref=e49] [cursor=pointer]:
+                                - /url: https://apps.apple.com/app/de-vrije-hond/id000000000
+                                - img [ref=e50]
+                                - generic [ref=e52]:
+                                    - generic [ref=e53]: Download in de
+                                    - generic [ref=e54]: App Store
+                            - link "Ontdek op Google Play" [ref=e55] [cursor=pointer]:
+                                - /url: https://play.google.com/store/apps/details?id=nl.devrijehond.app
+                                - img [ref=e56]
+                                - generic [ref=e58]:
+                                    - generic [ref=e59]: Ontdek op
+                                    - generic [ref=e60]: Google Play
+        - contentinfo [ref=e62]:
+            - generic [ref=e63]:
+                - generic [ref=e64]:
+                    - generic [ref=e65]:
+                        - img [ref=e66]
+                        - text: De Vrije Hond
+                    - paragraph [ref=e73]: De community-kaart van hondvriendelijke plekken in Nederland. Toegevoegd en geverifieerd door hondenbezitters zelf.
+                - generic [ref=e74]:
+                    - heading "Info" [level=3] [ref=e75]
+                    - list [ref=e76]:
+                        - listitem [ref=e77]:
+                            - link "Kaart" [ref=e78] [cursor=pointer]:
+                                - /url: /#kaart
+                        - listitem [ref=e79]:
+                            - link "Zo werkt het" [ref=e80] [cursor=pointer]:
+                                - /url: /#zo-werkt-het
+                        - listitem [ref=e81]:
+                            - link "Privacyverklaring" [ref=e82] [cursor=pointer]:
+                                - /url: /privacy
+                        - listitem [ref=e83]:
+                            - link "Voorwaarden" [ref=e84] [cursor=pointer]:
+                                - /url: /terms
+                - generic [ref=e85]:
+                    - heading "Gemaakt door" [level=3] [ref=e86]
+                    - paragraph [ref=e87]:
+                        - link "René Weteling" [ref=e88] [cursor=pointer]:
+                            - /url: https://www.weteling.com
+                        - text: ', Felobo B.V.'
+                        - text: 'Van idee tot productie: web, mobiel & AI.'
+                        - link "rene@weteling.com" [ref=e89] [cursor=pointer]:
+                            - /url: mailto:rene@weteling.com
+                        - text: Hilversum, Nederland
+            - generic [ref=e91]: De Vrije Hond™ · © 2026 Felobo B.V. (KvK 80910483). Alle rechten voorbehouden.
+    - button "Open Next.js Dev Tools" [ref=e97] [cursor=pointer]:
+        - img [ref=e98]
+    - alert [ref=e101]
