@@ -92,7 +92,8 @@ export function SpotView({ spot }: { spot: SpotDetailDto }) {
           }}
         >
           {spot.photos.map((p) => (
-            // eslint-disable-next-line @next/next/no-img-element
+            // Plain <img>: these are remote S3 URLs rendered in a simple SSR
+            // grid; next/image's loader/optimisation isn't wired for them.
             <img
               key={p.id}
               src={p.url}
