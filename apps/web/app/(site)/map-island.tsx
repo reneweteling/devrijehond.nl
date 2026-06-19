@@ -1,155 +1,63 @@
 'use client';
 
 /**
- * Client map island. Renders an interactive MapLibre map over free
- * OpenStreetMap raster tiles (no API key), and hydrates markers from the same
- * public viewport endpoint the mobile app uses (`GET /api/v1/spots/map`). The
- * server shell stays crawlable (the `<ul>` of spot links is real SSR-friendly
- * markup); the heavy map loads client-side only.
+ * Client map island. Holds the in-view spot set and renders one of two map
+ * backends: Google Maps when `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is set, else the
+ * free MapLibre + OpenStreetMap fallback. Both hydrate markers from the same
+ * public viewport endpoint the mobile app uses (`GET /api/v1/spots/map`).
  *
- * MapLibre is imported dynamically inside an effect so its `window`-touching
- * module code never runs during SSR.
+ * The crawlable `<ul>` of spot links below the map stays as real SSR-friendly
+ * markup for SEO and as a no-JS fallback.
  */
 
-import { useEffect, useRef, useState } from 'react';
-import type { Map as MapLibreMap, Marker as MapLibreMarker } from 'maplibre-gl';
+import { useCallback, useRef, useState } from 'react';
 import type { SpotSummaryDto } from '@devrijehond/types';
-import 'maplibre-gl/dist/maplibre-gl.css';
+import { type Bbox, spotHref } from './map-shared';
+import { GoogleMapView } from './google-map';
+import { MapLibreMapView } from './maplibre-map';
 
-// Amsterdam-ish default viewport.
-const DEFAULT_CENTER: [number, number] = [4.89, 52.37];
-const DEFAULT_ZOOM = 11;
-
-// Brand palette (docs/design/brand-direction.md).
-const MOSS = '#6E7B33';
-const SAND = '#C9A24B';
-
-function spotHref(s: SpotSummaryDto): string {
-  return `${s.type === 'REGION' ? '/gebied' : '/plek'}/${s.slug}`;
-}
-
-/** Free OpenStreetMap raster style — no API key required. */
-const OSM_STYLE = {
-  version: 8 as const,
-  sources: {
-    osm: {
-      type: 'raster' as const,
-      tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-      tileSize: 256,
-      attribution: '© OpenStreetMap contributors',
-    },
-  },
-  layers: [{ id: 'osm', type: 'raster' as const, source: 'osm' }],
-};
-
-function markerEl(verified: boolean): HTMLDivElement {
-  const el = document.createElement('div');
-  el.style.cssText = [
-    'width:18px',
-    'height:18px',
-    'border-radius:50%',
-    `background:${verified ? MOSS : SAND}`,
-    'border:2px solid #fff',
-    'box-shadow:0 1px 4px rgba(0,0,0,0.35)',
-    'cursor:pointer',
-  ].join(';');
-  return el;
-}
+const GOOGLE_MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '';
 
 export function MapIsland() {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<MapLibreMap | null>(null);
-  const markersRef = useRef<MapLibreMarker[]>([]);
   const [spots, setSpots] = useState<SpotSummaryDto[]>([]);
   const [loading, setLoading] = useState(true);
+  // Skip refetching when the viewport settles on the same box (rounded).
+  const lastKey = useRef('');
 
-  // Init the map once.
-  useEffect(() => {
-    let cancelled = false;
-    let onMoveEnd: (() => void) | null = null;
+  const handleBounds = useCallback(async (b: Bbox) => {
+    const key = [b.minLng, b.minLat, b.maxLng, b.maxLat].map((n) => n.toFixed(4)).join(',');
+    if (key === lastKey.current) return;
+    lastKey.current = key;
 
-    (async () => {
-      const maplibre = (await import('maplibre-gl')).default;
-      if (cancelled || !containerRef.current) return;
-
-      const map = new maplibre.Map({
-        container: containerRef.current,
-        style: OSM_STYLE,
-        center: DEFAULT_CENTER,
-        zoom: DEFAULT_ZOOM,
-        attributionControl: { compact: true },
-      });
-      map.addControl(new maplibre.NavigationControl({ showCompass: false }), 'top-right');
-      mapRef.current = map;
-
-      const refresh = async () => {
-        const b = map.getBounds();
-        const params = new URLSearchParams({
-          minLng: String(b.getWest()),
-          minLat: String(b.getSouth()),
-          maxLng: String(b.getEast()),
-          maxLat: String(b.getNorth()),
-        });
-        try {
-          const res = await fetch(`/api/v1/spots/map?${params.toString()}`);
-          const data: { items?: SpotSummaryDto[] } = res.ok ? await res.json() : {};
-          if (!cancelled) setSpots(data.items ?? []);
-        } catch {
-          if (!cancelled) setSpots([]);
-        } finally {
-          if (!cancelled) setLoading(false);
-        }
-      };
-
-      onMoveEnd = refresh;
-      map.on('load', refresh);
-      map.on('moveend', refresh);
-    })();
-
-    return () => {
-      cancelled = true;
-      markersRef.current.forEach((m) => m.remove());
-      markersRef.current = [];
-      if (mapRef.current && onMoveEnd) mapRef.current.off('moveend', onMoveEnd);
-      mapRef.current?.remove();
-      mapRef.current = null;
-    };
+    const params = new URLSearchParams({
+      minLng: String(b.minLng),
+      minLat: String(b.minLat),
+      maxLng: String(b.maxLng),
+      maxLat: String(b.maxLat),
+    });
+    try {
+      const res = await fetch(`/api/v1/spots/map?${params.toString()}`);
+      const data: { items?: SpotSummaryDto[] } = res.ok ? await res.json() : {};
+      setSpots(data.items ?? []);
+    } catch {
+      setSpots([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
-
-  // Sync markers whenever the spot set changes.
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const maplibre = (await import('maplibre-gl')).default;
-      const map = mapRef.current;
-      if (cancelled || !map) return;
-
-      markersRef.current.forEach((m) => m.remove());
-      markersRef.current = spots
-        .filter((s) => s.lat != null && s.lng != null)
-        .map((s) => {
-          const el = markerEl(s.status === 'VERIFIED');
-          el.title = s.name;
-          el.addEventListener('click', () => {
-            window.location.href = spotHref(s);
-          });
-          return new maplibre.Marker({ element: el })
-            .setLngLat([s.lng as number, s.lat as number])
-            .addTo(map);
-        });
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [spots]);
 
   return (
     <section aria-label="Kaart met hondvriendelijke plekken">
       <div style={{ position: 'relative' }}>
         <div
-          ref={containerRef}
           style={{ height: 420, borderRadius: 12, overflow: 'hidden', backgroundColor: '#dfe7df' }}
-        />
+        >
+          {GOOGLE_MAPS_KEY ? (
+            <GoogleMapView apiKey={GOOGLE_MAPS_KEY} spots={spots} onBoundsChange={handleBounds} />
+          ) : (
+            <MapLibreMapView spots={spots} onBoundsChange={handleBounds} />
+          )}
+        </div>
         <div
           style={{
             position: 'absolute',
