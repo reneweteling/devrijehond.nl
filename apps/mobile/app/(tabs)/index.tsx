@@ -26,7 +26,7 @@ import {
   type SpotSummary,
 } from '@/lib/api';
 import { categoryColors, colors, font, radius, space } from '@/lib/theme';
-import { Chip, VerifiedBadge, Wordmark, Stars } from '@/components/ui';
+import { Chip, VerifiedBadge, Stars } from '@/components/ui';
 
 // Amsterdam-centre default region (covers the seeded spots from the Bos in the
 // south to the NDSM in the north). The map recentres on the user when location
@@ -213,10 +213,6 @@ export default function MapScreen() {
           </View>
         </Pressable>
       )}
-
-      <View style={[styles.topGutter, { top: insets.top + 64 }]} pointerEvents="none">
-        <Wordmark />
-      </View>
     </View>
   );
 }
@@ -326,5 +322,4 @@ const styles = StyleSheet.create({
   sheetMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 },
   ratingInline: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   ratingText: { fontFamily: font.bodyMedium, fontSize: 12, color: colors.ink2 },
-  topGutter: { position: 'absolute', alignSelf: 'center' },
 });
