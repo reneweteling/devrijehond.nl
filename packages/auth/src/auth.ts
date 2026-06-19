@@ -41,7 +41,7 @@ function resolveTrustedOrigins(): string[] {
   const origins: string[] = [];
   if (process.env.NODE_ENV !== 'production') {
     origins.push(
-      'http://localhost:3000',
+      'http://localhost:3030',
       'https://devrijehond.local',
       'https://app.devrijehond.local',
     );
