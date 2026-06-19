@@ -43,18 +43,29 @@ Then decode the keystore in the workflow, point `android/app/build.gradle`'s
 release signingConfig at it, and switch the Gradle task to `bundleRelease`
 (outputs `app/build/outputs/bundle/release/app-release.aab`).
 
-**Secrets** for a signed iOS `.ipa` / TestFlight, once the Apple Developer
-account is active:
+**Signed iOS build → TestFlight** (`mobile-ios.yml`, `testflight` job). The
+account is active, so wire it up:
 
-- `APPLE_DIST_CERT_P12` (base64 of the distribution cert .p12) +
-  `APPLE_DIST_CERT_PASSWORD`
-- the provisioning profile (base64) for `nl.devrijehond.app`
-- App Store Connect API key (`ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8`) for
-  uploading to TestFlight
+1. In App Store Connect, create the app once: New App → iOS → bundle id
+   `nl.devrijehond.app` (the app record must exist before the first upload).
+2. Create an **App Store Connect API key** (Users and Access → Integrations →
+   App Store Connect API, role App Manager). Note the Key ID + Issuer ID and
+   download the `.p8` once.
+3. Create/download an **Apple Distribution certificate** as a `.p12` (with a
+   password). Signing assets/profiles are then managed automatically by
+   `-allowProvisioningUpdates` using the API key.
+4. Set these GitHub **secrets**:
+   - `APPLE_TEAM_ID` — your 10-char Team ID.
+   - `APPLE_DIST_CERT_P12` = `base64 -i dist.p12`, `APPLE_DIST_CERT_PASSWORD`.
+   - `ASC_KEY_ID`, `ASC_ISSUER_ID`.
+   - `ASC_API_KEY_P8` = `base64 -i AuthKey_XXXX.p8`.
+5. Set the **variable** `IOS_RELEASE=true` to enable the `testflight` job (it's
+   gated so it stays off until then).
+6. Run the **iOS build** workflow (Actions → iOS build → Run workflow). It
+   archives with automatic signing, exports an `.ipa`, and uploads it to
+   TestFlight with `xcrun altool`.
 
-Uncomment the archive/export block in `mobile-ios.yml` and add an
-`ExportOptions.plist`. Easiest path for the certs is fastlane match or
-`apple-actions/import-codesign-certs`.
+The `compile` job (no-signing build) always runs and needs no secrets.
 
 ## Bundle identifiers
 
