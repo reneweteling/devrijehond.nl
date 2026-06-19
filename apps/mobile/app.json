@@ -67,7 +67,8 @@
         {
           "androidGoogleMapsApiKey": "TODO_VERIFY_ANDROID_MAPS_KEY"
         }
-      ]
+      ],
+      "./plugins/with-modular-headers.js"
     ],
     "experiments": {
       "typedRoutes": true
