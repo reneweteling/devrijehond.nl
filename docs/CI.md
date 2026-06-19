@@ -67,6 +67,39 @@ account is active, so wire it up:
 
 The `compile` job (no-signing build) always runs and needs no secrets.
 
+### iOS build status (handoff)
+
+The CI build now gets all the way through: `pnpm install`, prebuild, `pod
+install` (with `use_modular_headers!`), and the signed **Archive** all succeed
+on the `macos-26` runner (Xcode 26 / Swift 6.2). Solved along the way: the
+Swift-6.2 toolchain (macos-26), Google-Sign-In `AppCheckCore` modular headers,
+the distribution `.p12` (cert + key), and `Cannot find module
+@expo/config-plugins` (declared as a direct dep of `apps/mobile`).
+
+The only remaining failure is **Export IPA**:
+
+```
+error: exportArchive Cloud signing permission error
+error: exportArchive No profiles for 'nl.devrijehond.app' were found
+```
+
+That is Apple-account setup, do this once in your account:
+
+1. **Register the App ID**: developer.apple.com → Certificates, Identifiers &
+   Profiles → Identifiers → `+` → App IDs → bundle id `nl.devrijehond.app`
+   (enable the capabilities the app uses: Sign In with Apple, Associated
+   Domains if used).
+2. **Create the app record**: appstoreconnect.apple.com/apps → `+` → New App →
+   iOS → bundle id `nl.devrijehond.app`.
+3. **API-key role**: the App Store Connect API key (`ASC_KEY_ID`) must have the
+   **App Manager** (or Admin) role so `-allowProvisioningUpdates` can create the
+   App Store distribution profile during export. Recreate the key with that role
+   if needed and update the `ASC_API_KEY_P8` / `ASC_KEY_ID` / `ASC_ISSUER_ID`
+   secrets.
+
+Then re-run the **iOS build** workflow; archive + export + TestFlight upload
+should complete.
+
 ## Bundle identifiers
 
 - iOS bundle id + Android package: `nl.devrijehond.app`
