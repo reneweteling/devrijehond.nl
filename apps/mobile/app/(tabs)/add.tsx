@@ -1,20 +1,18 @@
 /**
  * S10–S13, Submit flow as a single screen with three steps:
  *   1. choose type (REGION vs POI),
- *   2. place on the map (drop a pin for a POI; a polygon editor is stubbed),
+ *   2. place on the map (drop a pin for a POI; tap out a polygon ring for a
+ *      REGION geofence, with undo / clear),
  *   3. details form (name, category, description, amenities) → submit.
  *
  * A submitted spot goes live immediately as UNVERIFIED. Auth is required; an
- * unauthenticated user is routed to sign-in.
- *
- * TODO(verify): the polygon editor for REGION submissions is a stub, wire a
- * draggable-vertex editor over MapView. The amenity multi-select reads the
+ * unauthenticated user is routed to sign-in. The amenity multi-select reads the
  * taxonomy from GET /api/v1/amenities filtered by the chosen category.
  */
 
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import MapView, { Marker, type Region } from 'react-native-maps';
+import MapView, { Marker, Polygon, type Region } from 'react-native-maps';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -43,6 +41,8 @@ export default function AddScreen() {
   const [step, setStep] = useState<Step>('type');
   const [type, setType] = useState<SpotType | null>(null);
   const [point, setPoint] = useState<{ latitude: number; longitude: number } | null>(null);
+  // REGION geofence: the ring the user taps out vertex by vertex.
+  const [polygon, setPolygon] = useState<{ latitude: number; longitude: number }[]>([]);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [categoryId, setCategoryId] = useState<string | null>(null);
@@ -67,10 +67,21 @@ export default function AddScreen() {
 
   const submit = useSubmitSpot();
 
+  // For a REGION the centroid mirrors the polygon (the map marker + nearby use it).
+  const centroid =
+    polygon.length > 0
+      ? {
+          latitude: polygon.reduce((s, p) => s + p.latitude, 0) / polygon.length,
+          longitude: polygon.reduce((s, p) => s + p.longitude, 0) / polygon.length,
+        }
+      : null;
+  const placeReady = type === 'REGION' ? polygon.length >= 3 : !!point;
+
   const reset = () => {
     setStep('type');
     setType(null);
     setPoint(null);
+    setPolygon([]);
     setName('');
     setDescription('');
     setCategoryId(null);
@@ -85,8 +96,18 @@ export default function AddScreen() {
         categoryId,
         name,
         description: description || undefined,
-        point: point ? { lat: point.latitude, lng: point.longitude } : undefined,
-        // TODO(verify): for REGION, pass `polygon: [{lat,lng},…]` from the editor.
+        point:
+          type === 'REGION'
+            ? centroid
+              ? { lat: centroid.latitude, lng: centroid.longitude }
+              : undefined
+            : point
+              ? { lat: point.latitude, lng: point.longitude }
+              : undefined,
+        polygon:
+          type === 'REGION' && polygon.length >= 3
+            ? polygon.map((p) => ({ lat: p.latitude, lng: p.longitude }))
+            : undefined,
         amenityIds,
       },
       {
@@ -175,19 +196,55 @@ export default function AddScreen() {
               <MapView
                 style={StyleSheet.absoluteFill}
                 initialRegion={INITIAL_REGION}
-                onPress={(e) => setPoint(e.nativeEvent.coordinate)}
+                onPress={(e) => {
+                  const c = e.nativeEvent.coordinate;
+                  if (type === 'REGION') setPolygon((prev) => [...prev, c]);
+                  else setPoint(c);
+                }}
               >
-                {point && type === 'POI' ? <Marker coordinate={point} /> : null}
+                {type === 'POI' && point ? <Marker coordinate={point} /> : null}
+                {type === 'REGION' && polygon.length >= 2 ? (
+                  <Polygon
+                    coordinates={polygon}
+                    strokeColor={colors.mossDark}
+                    strokeWidth={2.5}
+                    fillColor={`${colors.moss}55`}
+                  />
+                ) : null}
+                {type === 'REGION'
+                  ? polygon.map((v, i) => (
+                      <Marker key={i} coordinate={v} anchor={{ x: 0.5, y: 0.5 }}>
+                        <View style={styles.vertex} />
+                      </Marker>
+                    ))
+                  : null}
               </MapView>
             </View>
             {type === 'REGION' ? (
-              <Note>
-                De polygon-editor volgt; tik voor nu op de kaart om het centrum te kiezen.
-              </Note>
+              <>
+                <Note>
+                  Tik op de kaart om hoekpunten te zetten (minimaal 3). De grens sluit zich vanzelf.
+                </Note>
+                {polygon.length > 0 ? (
+                  <View style={{ flexDirection: 'row', gap: space.sm }}>
+                    <Pressable
+                      style={styles.editBtn}
+                      onPress={() => setPolygon((prev) => prev.slice(0, -1))}
+                    >
+                      <SymbolView name="arrow.uturn.backward" size={14} tintColor={colors.ink2} />
+                      <Text style={styles.editBtnText}>Wis laatste</Text>
+                    </Pressable>
+                    <Pressable style={styles.editBtn} onPress={() => setPolygon([])}>
+                      <SymbolView name="trash" size={14} tintColor={colors.ink2} />
+                      <Text style={styles.editBtnText}>Wis alles</Text>
+                    </Pressable>
+                  </View>
+                ) : null}
+              </>
             ) : (
               <Note>Tik op de kaart om de pin neer te zetten.</Note>
             )}
-            <Button label="Volgende" onPress={() => setStep('details')} disabled={!point} />
+            <Button label="Volgende" onPress={() => setStep('details')} disabled={!placeReady} />
           </View>
         )}
 
@@ -379,6 +436,26 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: colors.mossSoft,
   },
+  vertex: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: colors.moss,
+    borderWidth: 2,
+    borderColor: '#fff',
+  },
+  editBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.line,
+    backgroundColor: colors.surface,
+  },
+  editBtnText: { fontFamily: font.bodyMedium, fontSize: 12.5, color: colors.ink2 },
   field: { gap: 6 },
   label: { fontFamily: font.bodyMedium, fontSize: 12, color: colors.ink2 },
   input: {

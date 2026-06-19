@@ -58,12 +58,12 @@ How it's executed:
 
 ### Add (`(tabs)/add.tsx`) — auth-gated
 
-| #   | Step                 | Expected                                                    | Status |
-| --- | -------------------- | ----------------------------------------------------------- | ------ |
-| 1   | Open while anon      | "Log in om een plek toe te voegen" + Inloggen (no clipping) | 🔧     |
-| 2   | Inloggen             | Opens sign-in                                               | ⬜     |
-| 3   | (auth) Pick type     | Region vs POI                                               | ⬜     |
-| 4   | (auth) Draw geofence | Polygon editor for a region — TODO, not built yet           | ⬜     |
+| #   | Step                 | Expected                                                         | Status |
+| --- | -------------------- | ---------------------------------------------------------------- | ------ |
+| 1   | Open while anon      | "Log in om een plek toe te voegen" + Inloggen (no clipping)      | 🔧     |
+| 2   | Inloggen             | Opens sign-in                                                    | ⬜     |
+| 3   | (auth) Pick type     | Region vs POI                                                    | ⬜     |
+| 4   | (auth) Draw geofence | Tap out a polygon ring for a region (undo/clear), sent on submit | 🔧     |
 
 ### Wensen (`(tabs)/requests.tsx`)
 
