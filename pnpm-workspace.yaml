@@ -12,6 +12,7 @@ allowBuilds:
   '@zenstackhq/cli': true
   '@zenstackhq/orm': true
   better-sqlite3: true
+  dtrace-provider: true
   esbuild: true
   prisma: true
   sharp: true
