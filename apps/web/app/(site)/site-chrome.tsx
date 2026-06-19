@@ -1,23 +1,16 @@
 /**
- * Shared site chrome: a sticky header and a rich footer (legal links, an
- * app-download push, and a small "made by" business card for Felobo B.V.).
- * Server components, no client JS. Wraps every page in the (site) group.
+ * Shared site chrome: a sticky glass header and a deep-moss footer with legal
+ * links, an app-download push and a small "made by Felobo B.V." business card.
+ * Server components, styled via globals.css. Wraps every page in (site).
  */
-
-const MOSS = '#6E7B33';
-const MOSS_DARK = '#4C5622';
-const SAND = '#f4efe6';
-const INK = '#1f2b22';
-const INK2 = '#4a5a4d';
-const LINE = 'rgba(60,50,20,.14)';
 
 const IOS_URL = 'https://apps.apple.com/app/de-vrije-hond/id000000000';
 const ANDROID_URL = 'https://play.google.com/store/apps/details?id=nl.devrijehond.app';
 
-function PawMark({ size = 22, color = MOSS }: { size?: number; color?: string }) {
+export function PawMark({ size = 26, color = 'var(--moss)' }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 1024 1024" aria-hidden="true">
-      <g fill="none" stroke={color} strokeWidth={64} strokeLinecap="round" strokeLinejoin="round">
+      <g fill="none" stroke={color} strokeWidth={66} strokeLinecap="round" strokeLinejoin="round">
         <ellipse cx="360" cy="468" rx="54" ry="72" transform="rotate(-18 360 468)" />
         <ellipse cx="452" cy="392" rx="52" ry="74" transform="rotate(-7 452 392)" />
         <ellipse cx="572" cy="392" rx="52" ry="74" transform="rotate(7 572 392)" />
@@ -28,62 +21,54 @@ function PawMark({ size = 22, color = MOSS }: { size?: number; color?: string })
   );
 }
 
+function AppleGlyph() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
+      <path d="M16.36 1.43c0 1.14-.42 2.2-1.25 3.05-.9.94-2 .54-2.06.5-.04-1.1.45-2.16 1.2-2.94.85-.9 2.1-1.42 2.11-1.4-.01.27 0 .53 0 .8zM20.5 17.1c-.5 1.16-.74 1.68-1.39 2.7-.9 1.42-2.18 3.2-3.76 3.2-1.4.01-1.76-.92-3.67-.9-1.9.01-2.3.92-3.7.9-1.58-.01-2.78-1.6-3.69-3.03C1.96 16.4 1.7 11.7 3.27 9.2c1.11-1.78 2.86-2.82 4.5-2.82 1.68 0 2.73.92 4.12.92 1.34 0 2.16-.92 4.1-.92 1.47 0 3.02.8 4.13 2.18-3.63 1.99-3.04 7.18.28 8.54z" />
+    </svg>
+  );
+}
+
+function PlayGlyph() {
+  return (
+    <svg width="20" height="22" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M3.6 1.8 14.5 12 3.6 22.2c-.4-.2-.6-.6-.6-1.1V2.9c0-.5.2-.9.6-1.1z" fill="#34d399" />
+      <path d="M14.5 12 3.6 1.8c.2-.1.5-.1.8 0l8.9 5.1L14.5 12z" fill="#60a5fa" />
+      <path d="M14.5 12 13.3 17.1l-8.9 5.1c-.3.1-.6.1-.8 0L14.5 12z" fill="#f87171" />
+      <path d="m18.2 9.9 2.2 1.3c.7.4.7 1.2 0 1.6l-2.2 1.3L16 12l2.2-2.1z" fill="#fbbf24" />
+    </svg>
+  );
+}
+
+export function StoreButton({ href, kind }: { href: string; kind: 'ios' | 'android' }) {
+  return (
+    <a className="store-btn" href={href} target="_blank" rel="noreferrer">
+      {kind === 'ios' ? <AppleGlyph /> : <PlayGlyph />}
+      <span>
+        <span className="store-small" style={{ display: 'block' }}>
+          {kind === 'ios' ? 'Download in de' : 'Ontdek op'}
+        </span>
+        <span className="store-big" style={{ display: 'block' }}>
+          {kind === 'ios' ? 'App Store' : 'Google Play'}
+        </span>
+      </span>
+    </a>
+  );
+}
+
 function Header() {
   return (
-    <header
-      style={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 10,
-        backgroundColor: 'rgba(244,239,230,0.92)',
-        backdropFilter: 'saturate(140%) blur(8px)',
-        borderBottom: `1px solid ${LINE}`,
-      }}
-    >
-      <nav
-        style={{
-          maxWidth: 980,
-          margin: '0 auto',
-          padding: '12px 20px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 16,
-        }}
-      >
-        <a
-          href="/"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 9,
-            textDecoration: 'none',
-            color: MOSS,
-            fontWeight: 600,
-            fontSize: 17,
-          }}
-        >
-          <PawMark />
+    <header className="site-header">
+      <nav className="container">
+        <a className="brand" href="/">
+          <PawMark size={26} />
           De Vrije Hond
         </a>
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 18 }}>
-          <a href="/#kaart" style={{ color: INK2, textDecoration: 'none', fontSize: 14 }}>
-            Kaart
-          </a>
-          <a href="/api/docs" style={{ color: INK2, textDecoration: 'none', fontSize: 14 }}>
-            API
-          </a>
-          <a
-            href="#app"
-            style={{
-              backgroundColor: MOSS,
-              color: '#fff',
-              textDecoration: 'none',
-              fontSize: 14,
-              fontWeight: 500,
-              padding: '8px 14px',
-              borderRadius: 999,
-            }}
-          >
+        <div className="nav-links">
+          <a href="/#kaart">Kaart</a>
+          <a href="/#zo-werkt-het">Zo werkt het</a>
+          <a href="/api/docs">API</a>
+          <a className="btn btn-primary" href="/#app">
             Download de app
           </a>
         </div>
@@ -92,135 +77,97 @@ function Header() {
   );
 }
 
-function StoreButton({ href, kind }: { href: string; kind: 'ios' | 'android' }) {
-  return (
-    <a
-      href={href}
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 10,
-        backgroundColor: INK,
-        color: '#fff',
-        textDecoration: 'none',
-        padding: '10px 16px',
-        borderRadius: 12,
-        minWidth: 180,
-      }}
-    >
-      <span style={{ fontSize: 22 }}>{kind === 'ios' ? '' : '▶'}</span>
-      <span style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.15 }}>
-        <span style={{ fontSize: 10, opacity: 0.8 }}>
-          {kind === 'ios' ? 'Download in de' : 'Ontdek op'}
-        </span>
-        <span style={{ fontSize: 16, fontWeight: 600 }}>
-          {kind === 'ios' ? 'App Store' : 'Google Play'}
-        </span>
-      </span>
-    </a>
-  );
-}
-
 export function AppCta() {
   return (
     <section
       id="app"
-      style={{
-        backgroundColor: MOSS,
-        color: '#fff',
-        borderRadius: 18,
-        padding: '28px 24px',
-        margin: '32px 0',
-        display: 'flex',
-        flexWrap: 'wrap',
-        alignItems: 'center',
-        gap: 20,
-      }}
+      className="container"
+      style={{ paddingTop: 8, paddingBottom: 8, scrollMarginTop: 80 }}
     >
-      <div style={{ flex: '1 1 280px' }}>
-        <h2 style={{ margin: '0 0 6px', fontSize: 22 }}>Neem de kaart mee op je wandeling</h2>
-        <p style={{ margin: 0, fontSize: 15, lineHeight: 1.5, color: 'rgba(255,255,255,.88)' }}>
-          De Vrije Hond-app vindt losloopgebieden, hondenstranden en honden­vriendelijke plekken bij
-          jou in de buurt — en jij helpt mee verifiëren.
-        </p>
-      </div>
-      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-        <StoreButton href={IOS_URL} kind="ios" />
-        <StoreButton href={ANDROID_URL} kind="android" />
+      <div
+        className="topo"
+        style={{
+          background: 'linear-gradient(135deg, var(--moss) 0%, var(--moss-700) 100%)',
+          color: '#fff',
+          borderRadius: 'var(--radius-lg)',
+          padding: '40px 36px',
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          gap: 24,
+          boxShadow: 'var(--shadow)',
+        }}
+      >
+        <div style={{ flex: '1 1 300px' }}>
+          <h2 style={{ color: '#fff', fontSize: 28, marginBottom: 10 }}>
+            Neem de kaart mee op je wandeling
+          </h2>
+          <p style={{ margin: 0, fontSize: 16.5, color: 'rgba(255,255,255,.9)', maxWidth: '48ch' }}>
+            De Vrije Hond vindt losloopgebieden, hondenstranden en hondvriendelijke plekken bij jou
+            in de buurt. En jij helpt mee verifiëren.
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <StoreButton href={IOS_URL} kind="ios" />
+          <StoreButton href={ANDROID_URL} kind="android" />
+        </div>
       </div>
     </section>
   );
 }
 
 function Footer() {
-  const year = 2026;
   return (
-    <footer style={{ borderTop: `1px solid ${LINE}`, marginTop: 40 }}>
-      <div
-        style={{
-          maxWidth: 980,
-          margin: '0 auto',
-          padding: '32px 20px 48px',
-          display: 'grid',
-          gap: 28,
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-        }}
-      >
+    <footer className="site-footer">
+      <div className="container foot-grid">
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 10 }}>
-            <PawMark />
-            <strong style={{ color: MOSS, fontSize: 16 }}>De Vrije Hond</strong>
+          <div className="brand" style={{ color: '#fff', marginBottom: 12 }}>
+            <PawMark size={26} color="#cdd3b0" />
+            De Vrije Hond
           </div>
-          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55, color: INK2 }}>
+          <p
+            style={{
+              margin: 0,
+              fontSize: 14.5,
+              lineHeight: 1.6,
+              color: '#c4c9ad',
+              maxWidth: '40ch',
+            }}
+          >
             De community-kaart van hondvriendelijke plekken in Nederland. Toegevoegd en geverifieerd
             door hondenbezitters zelf.
           </p>
         </div>
 
         <div>
-          <h3
-            style={{
-              fontSize: 13,
-              textTransform: 'uppercase',
-              letterSpacing: 0.5,
-              color: INK2,
-              margin: '0 0 10px',
-            }}
-          >
-            Info
-          </h3>
-          <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 7 }}>
-            {[
-              ['Privacyverklaring', '/privacy'],
-              ['Voorwaarden', '/terms'],
-              ['API-documentatie', '/api/docs'],
-              ['De app', '#app'],
-            ].map(([label, href]) => (
-              <li key={href}>
-                <a href={href} style={{ color: INK, textDecoration: 'none', fontSize: 14 }}>
-                  {label}
-                </a>
-              </li>
-            ))}
+          <h3>Info</h3>
+          <ul className="foot-links">
+            <li>
+              <a href="/#kaart">Kaart</a>
+            </li>
+            <li>
+              <a href="/#zo-werkt-het">Zo werkt het</a>
+            </li>
+            <li>
+              <a href="/privacy">Privacyverklaring</a>
+            </li>
+            <li>
+              <a href="/terms">Voorwaarden</a>
+            </li>
+            <li>
+              <a href="/api/docs">API-documentatie</a>
+            </li>
           </ul>
         </div>
 
         <div>
-          <h3
-            style={{
-              fontSize: 13,
-              textTransform: 'uppercase',
-              letterSpacing: 0.5,
-              color: INK2,
-              margin: '0 0 10px',
-            }}
-          >
-            Gemaakt door
-          </h3>
-          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55, color: INK2 }}>
+          <h3>Gemaakt door</h3>
+          <p style={{ margin: 0, fontSize: 14.5, lineHeight: 1.65, color: '#c4c9ad' }}>
             <a
               href="https://www.weteling.com"
-              style={{ color: MOSS_DARK, fontWeight: 600, textDecoration: 'none' }}
+              target="_blank"
+              rel="noreferrer"
+              style={{ fontWeight: 600 }}
             >
               René Weteling
             </a>{' '}
@@ -228,27 +175,16 @@ function Footer() {
             <br />
             Van idee tot productie: web, mobiel &amp; AI.
             <br />
-            <a href="mailto:rene@weteling.com" style={{ color: INK, textDecoration: 'none' }}>
-              rene@weteling.com
-            </a>
+            <a href="mailto:rene@weteling.com">rene@weteling.com</a>
             <br />
-            Hilversum, NL
+            Hilversum, Nederland
           </p>
         </div>
       </div>
-
-      <div style={{ borderTop: `1px solid ${LINE}` }}>
-        <p
-          style={{
-            maxWidth: 980,
-            margin: '0 auto',
-            padding: '14px 20px',
-            fontSize: 12.5,
-            color: '#9a957f',
-          }}
-        >
-          De Vrije Hond™ — © {year} Felobo B.V. (KvK 80910483). Alle rechten voorbehouden.
-        </p>
+      <div className="foot-bottom">
+        <div className="container">
+          De Vrije Hond™ — © 2026 Felobo B.V. (KvK 80910483). Alle rechten voorbehouden.
+        </div>
       </div>
     </footer>
   );

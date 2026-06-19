@@ -1,5 +1,16 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import { Fraunces, Inter } from 'next/font/google';
+
+import './globals.css';
+
+const display = Fraunces({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-display',
+  display: 'swap',
+});
+const body = Inter({ subsets: ['latin'], variable: '--font-body', display: 'swap' });
 
 const SITE_NAME = 'De Vrije Hond';
 const DESCRIPTION =
@@ -38,18 +49,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="nl">
-      <body
-        style={{
-          margin: 0,
-          backgroundColor: '#f4efe6',
-          color: '#1f2b22',
-          fontFamily:
-            "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif",
-        }}
-      >
-        {children}
-      </body>
+    <html lang="nl" className={`${display.variable} ${body.variable}`}>
+      <body>{children}</body>
     </html>
   );
 }
