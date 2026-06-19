@@ -3,6 +3,48 @@
 Pick-up point for continuing De Vrije Hond in Claude Code. Read `CLAUDE.md`
 first (it auto-loads), then this.
 
+## Latest (2026-06-19): web redesign, admin, nationwide seed
+
+Large push this session, all committed and green:
+
+- Public website fully redesigned. Design system in `apps/web/app/globals.css`
+  (Fraunces + Inter via `next/font`, earthy tokens, cards/buttons/badges/hero
+  classes). Homepage has a hero with an app mockup, a category showcase, the
+  community-verification story, a featured-verified-spots grid, the live map and
+  an app-download band. Spot detail and legal pages restyled. Glass header plus
+  a deep-moss footer carrying the Felobo B.V. business card and the De Vrije
+  Hond™ trademark. Mobile-responsive, AA contrast. Em-dashes swept repo-wide
+  (house rule). Verified by a multi-lens design-QA workflow; all 12 fixes done.
+- Admin (`/admin`, ADMIN-gated). Dark shell + section nav. Overview with stat
+  tiles + moderation queues (auto-hidden / contested / open reports). Taxonomy
+  curation (promote PROPOSED, show/hide). A Wensen board with a status control
+  (`setFeatureStatus` action) the mobile app reflects.
+- SEO: rich metadata + OG image, `robots.txt`, a `sitemap.xml` listing every
+  spot page, favicons from the paw. Scalar API reference at `/api/docs`.
+- Force-update flow: `/api/v1/app-config` + a blocking mobile gate.
+- Next 15 to 16. Local DB on `postgis/postgis:17-3.5` (amd64 emulation) for
+  prod parity. Dokku deploy artifacts: `Dockerfile`, `Procfile`, `app.json`
+  healthcheck, `packages/db/ensure-postgis.mjs`, `db:deploy`.
+- Seed: 83 real Dutch dog spots nationwide (researched), ~1/3 VERIFIED with
+  votes + reviews.
+- Mobile: Nabij search + distance (`expo-location`), font line-height clipping
+  fixed, a sign-in close button, removed the map wordmark overlap.
+
+Verified: `pnpm typecheck` green workspace-wide; `pnpm --filter web build` green
+(all routes); mobile verification-gate flow.
+
+Next (deliberate, not yet done):
+
+- Deploy: run `git push dokku main` on your server (no access from here). The
+  full Dokku command list (incl. PostGIS) was provided in chat.
+- Expo SDK 55 to 56: a native migration (prebuild + pod install + rebuild +
+  device re-test). Left as a focused follow-up so the working SDK 55 app stays
+  stable.
+- Mobile auth-gated screens still stubbed: my-submissions list, edit profile
+  (S14b), add dog (S14c).
+- Admin is typechecked + builds but not screenshot-verified (gated; needs an
+  admin login).
+
 ## Where we are
 
 Project arc: **wireframes → design → build**. Wireframes and design are done;
