@@ -41,7 +41,9 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
     return NextResponse.redirect(signinUrl);
   }
 
-  if (session.user.role !== 'ADMIN') {
+  // Staff (ADMIN or MODERATOR) reach the admin section; user-management pages
+  // gate to ADMIN at the page level.
+  if (session.user.role !== 'ADMIN' && session.user.role !== 'MODERATOR') {
     const unauthorizedUrl = request.nextUrl.clone();
     unauthorizedUrl.pathname = '/unauthorized';
     unauthorizedUrl.search = '';
@@ -54,7 +56,5 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 export default proxy;
 
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon\\.ico|robots\\.txt|sitemap\\.xml).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon\\.ico|robots\\.txt|sitemap\\.xml).*)'],
 };

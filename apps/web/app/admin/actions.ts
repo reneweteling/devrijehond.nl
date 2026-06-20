@@ -3,7 +3,7 @@
 import { headers } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { authDb } from '@devrijehond/db';
-import { withContext } from '@devrijehond/server';
+import { withContext, withStaffContext } from '@devrijehond/server';
 
 /**
  * Admin server actions, the moderation safety-net + taxonomy curation.
@@ -21,10 +21,15 @@ import { withContext } from '@devrijehond/server';
 
 type AdminCtx = Awaited<ReturnType<typeof withContext>>;
 
-async function adminContext(): Promise<AdminCtx> {
+/** Moderation context: ADMIN or MODERATOR (most admin actions). */
+async function staffContext(): Promise<AdminCtx> {
   const h = await headers();
-  // `withContext` reads the BetterAuth session off the request headers and
-  // asserts the ADMIN role.
+  return withStaffContext(new Request('http://internal/admin', { headers: h }));
+}
+
+/** Admin-only context (user-role management). */
+async function adminOnlyContext(): Promise<AdminCtx> {
+  const h = await headers();
   return withContext(new Request('http://internal/admin', { headers: h }));
 }
 
@@ -55,7 +60,7 @@ async function logAction(
 
 /** Restore a hidden/removed spot back to UNVERIFIED (clears hiddenAt). */
 export async function restoreSpot(spotId: string): Promise<void> {
-  const ctx = await adminContext();
+  const ctx = await staffContext();
   const db = authDb(ctx.user);
   await db.spot.update({
     where: { id: spotId },
@@ -67,7 +72,7 @@ export async function restoreSpot(spotId: string): Promise<void> {
 
 /** Force-verify a spot regardless of its vote tally (+verifiedAt). */
 export async function forceVerifySpot(spotId: string): Promise<void> {
-  const ctx = await adminContext();
+  const ctx = await staffContext();
   const db = authDb(ctx.user);
   await db.spot.update({
     where: { id: spotId },
@@ -79,7 +84,7 @@ export async function forceVerifySpot(spotId: string): Promise<void> {
 
 /** Permanently remove a spot (admin hard-removal, terminal). */
 export async function removeSpot(spotId: string, note?: string): Promise<void> {
-  const ctx = await adminContext();
+  const ctx = await staffContext();
   const db = authDb(ctx.user);
   await db.spot.update({
     where: { id: spotId },
@@ -91,7 +96,7 @@ export async function removeSpot(spotId: string, note?: string): Promise<void> {
 
 /** Mark a report resolved. */
 export async function resolveReport(reportId: string): Promise<void> {
-  const ctx = await adminContext();
+  const ctx = await staffContext();
   const db = authDb(ctx.user);
   await db.report.update({ where: { id: reportId }, data: { resolved: true } });
   await logAction(ctx, 'RESOLVE_REPORT', 'REPORT', reportId);
@@ -104,7 +109,7 @@ export async function resolveReport(reportId: string): Promise<void> {
 
 /** Promote a PROPOSED category/amenity to ACTIVE (and make it visible). */
 export async function promoteCategory(categoryId: string): Promise<void> {
-  const ctx = await adminContext();
+  const ctx = await staffContext();
   const db = authDb(ctx.user);
   await db.category.update({
     where: { id: categoryId },
@@ -115,7 +120,7 @@ export async function promoteCategory(categoryId: string): Promise<void> {
 }
 
 export async function promoteAmenity(amenityId: string): Promise<void> {
-  const ctx = await adminContext();
+  const ctx = await staffContext();
   const db = authDb(ctx.user);
   await db.amenity.update({
     where: { id: amenityId },
@@ -130,7 +135,7 @@ export async function updateCategory(
   categoryId: string,
   patch: { visible?: boolean; sortOrder?: number },
 ): Promise<void> {
-  const ctx = await adminContext();
+  const ctx = await staffContext();
   const db = authDb(ctx.user);
   await db.category.update({ where: { id: categoryId }, data: patch });
   await logAction(ctx, 'EDIT', 'CATEGORY', categoryId);
@@ -141,7 +146,7 @@ export async function updateAmenity(
   amenityId: string,
   patch: { visible?: boolean; sortOrder?: number },
 ): Promise<void> {
-  const ctx = await adminContext();
+  const ctx = await staffContext();
   const db = authDb(ctx.user);
   await db.amenity.update({ where: { id: amenityId }, data: patch });
   await logAction(ctx, 'EDIT', 'AMENITY', amenityId);
@@ -157,9 +162,48 @@ export async function setFeatureStatus(
   requestId: string,
   status: 'CONSIDERING' | 'PLANNED' | 'DONE' | 'DECLINED',
 ): Promise<void> {
-  const ctx = await adminContext();
+  const ctx = await staffContext();
   const db = authDb(ctx.user);
   await db.featureRequest.update({ where: { id: requestId }, data: { status } });
   await logAction(ctx, 'SET_FEATURE_STATUS', 'FEATURE_REQUEST', requestId, status);
   revalidatePath('/admin/feature-requests');
+}
+
+// ---------------------------------------------------------------------------
+// Spots management (direct status control)
+// ---------------------------------------------------------------------------
+
+/** Set a spot's status directly from the spots-management table. */
+export async function setSpotStatus(
+  spotId: string,
+  status: 'UNVERIFIED' | 'VERIFIED' | 'HIDDEN' | 'REMOVED',
+): Promise<void> {
+  const ctx = await staffContext();
+  const db = authDb(ctx.user);
+  const data: { status: typeof status; verifiedAt?: Date | null; hiddenAt?: Date | null } = {
+    status,
+  };
+  if (status === 'VERIFIED') data.verifiedAt = new Date();
+  if (status === 'HIDDEN' || status === 'REMOVED') data.hiddenAt = new Date();
+  if (status === 'UNVERIFIED') data.hiddenAt = null;
+  await db.spot.update({ where: { id: spotId }, data });
+  await logAction(ctx, 'EDIT', 'SPOT', spotId, status);
+  revalidatePath('/admin/spots');
+  revalidatePath('/admin');
+}
+
+// ---------------------------------------------------------------------------
+// User management (ADMIN only)
+// ---------------------------------------------------------------------------
+
+/** Change a user's role. Admin-only (moderators cannot manage roles). */
+export async function setUserRole(
+  userId: string,
+  role: 'USER' | 'MODERATOR' | 'ADMIN',
+): Promise<void> {
+  const ctx = await adminOnlyContext();
+  const db = authDb(ctx.user);
+  await db.user.update({ where: { id: userId }, data: { role } });
+  await logAction(ctx, 'EDIT', 'USER', userId, role);
+  revalidatePath('/admin/users');
 }

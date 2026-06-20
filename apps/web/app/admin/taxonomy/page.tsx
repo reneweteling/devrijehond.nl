@@ -1,4 +1,4 @@
-import { adminDb } from '@/lib/admin-db';
+import { staffDb } from '@/lib/admin-db';
 import { promoteCategory, promoteAmenity, updateCategory, updateAmenity } from '../actions';
 
 /**
@@ -9,7 +9,7 @@ import { promoteCategory, promoteAmenity, updateCategory, updateAmenity } from '
 export const dynamic = 'force-dynamic';
 
 export default async function TaxonomyPage() {
-  const db = await adminDb();
+  const db = await staffDb();
 
   const [categories, amenities] = await Promise.all([
     db.category.findMany({ orderBy: [{ sortOrder: 'asc' }, { label: 'asc' }] }),

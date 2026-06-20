@@ -2,17 +2,22 @@
 
 import { usePathname } from 'next/navigation';
 
-const LINKS: [string, string][] = [
+const STAFF_LINKS: [string, string][] = [
   ['/admin', 'Overzicht'],
+  ['/admin/spots', 'Plekken'],
+  ['/admin/reports', 'Meldingen'],
   ['/admin/taxonomy', 'Taxonomie'],
   ['/admin/feature-requests', 'Wensen'],
 ];
 
-export function AdminNav() {
+const ADMIN_LINKS: [string, string][] = [['/admin/users', 'Gebruikers']];
+
+export function AdminNav({ isAdmin = false }: { isAdmin?: boolean }) {
   const path = usePathname();
+  const links = isAdmin ? [...STAFF_LINKS, ...ADMIN_LINKS] : STAFF_LINKS;
   return (
     <div className="admin-nav">
-      {LINKS.map(([href, label]) => (
+      {links.map(([href, label]) => (
         <a key={href} href={href} className={path === href ? 'active' : ''}>
           {label}
         </a>

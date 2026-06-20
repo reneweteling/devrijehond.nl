@@ -24,7 +24,7 @@ import { authDb, anonDb, type AuthUser as DbAuthUser } from '@devrijehond/db';
 const API_VERSION = 'v1';
 
 /** A capability check helper bound to the resolved user (extend as policies grow). */
-export type CanI = (action: 'admin') => boolean;
+export type CanI = (action: 'admin' | 'moderate') => boolean;
 
 export interface RequestContext {
   /** The authenticated user, or null for anonymous requests. */
@@ -49,6 +49,8 @@ function makeCanI(user: AuthUser | null): CanI {
     switch (action) {
       case 'admin':
         return user?.role === 'ADMIN';
+      case 'moderate':
+        return user?.role === 'ADMIN' || user?.role === 'MODERATOR';
       default:
         return false;
     }
@@ -126,6 +128,20 @@ export async function requireAuth(request: Request): Promise<AuthedContext> {
 export async function withContext(request: Request): Promise<AuthedContext> {
   const ctx = await requireAuth(request);
   if (ctx.user.role !== 'ADMIN') {
+    throw errorResponse('FORBIDDEN', 403);
+  }
+  return ctx;
+}
+
+/**
+ * Staff context: ADMIN or MODERATOR. Throws 401 for anonymous callers, 403 for
+ * plain users. Use for moderation actions (spot status, reports, taxonomy,
+ * feature-request status) that a moderator may perform. Keep `withContext`
+ * (ADMIN-only) for user-role management and other admin-only operations.
+ */
+export async function withStaffContext(request: Request): Promise<AuthedContext> {
+  const ctx = await requireAuth(request);
+  if (ctx.user.role !== 'ADMIN' && ctx.user.role !== 'MODERATOR') {
     throw errorResponse('FORBIDDEN', 403);
   }
   return ctx;

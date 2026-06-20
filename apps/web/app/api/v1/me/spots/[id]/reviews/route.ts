@@ -20,14 +20,11 @@ import { ok, error, NO_STORE_CACHE_CONTROL } from '@/lib/api-response';
  */
 export const runtime = 'nodejs';
 
-function authedDb(user: { id: string; role: 'USER' | 'ADMIN' }) {
+function authedDb(user: { id: string; role: 'USER' | 'MODERATOR' | 'ADMIN' }) {
   return authDb(user);
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   let ctx;
   try {
     ctx = await requireAuth(request);
@@ -63,10 +60,7 @@ export async function GET(
   return ok(body, { cacheControl: NO_STORE_CACHE_CONTROL });
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   let ctx;
   try {
     ctx = await requireAuth(request);

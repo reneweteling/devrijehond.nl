@@ -10,7 +10,10 @@ import { ok, error, NO_STORE_CACHE_CONTROL } from '@/lib/api-response';
  */
 export const runtime = 'nodejs';
 
-async function load(user: { id: string; role: 'USER' | 'ADMIN' }): Promise<MeProfileDto | null> {
+async function load(user: {
+  id: string;
+  role: 'USER' | 'MODERATOR' | 'ADMIN';
+}): Promise<MeProfileDto | null> {
   const db = authDb(user);
   const row = await db.user.findUnique({
     where: { id: user.id },

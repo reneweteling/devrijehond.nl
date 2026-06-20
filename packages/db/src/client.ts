@@ -72,7 +72,7 @@ export type Db = DvhClient;
 
 export interface AuthUser {
   id: string;
-  role: 'USER' | 'ADMIN';
+  role: 'USER' | 'MODERATOR' | 'ADMIN';
 }
 
 /** Policy-bound client for a given user. Use everywhere in application code. */

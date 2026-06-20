@@ -237,7 +237,7 @@ export type AuthUser = InferSession['user'] & {
    * plain string at the session level; we narrow it here so middleware can
    * switch on a typed union without a cast.
    */
-  role: 'ADMIN' | 'USER';
+  role: 'USER' | 'MODERATOR' | 'ADMIN';
 };
 
 export type AuthSession = Omit<InferSession, 'user'> & { user: AuthUser };

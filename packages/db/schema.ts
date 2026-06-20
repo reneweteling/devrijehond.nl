@@ -824,9 +824,17 @@ export class SchemaType implements SchemaDef {
                 ExpressionUtils.field('visible'),
                 '||',
                 ExpressionUtils.binary(
-                  ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
-                  '==',
-                  ExpressionUtils.literal('ADMIN'),
+                  ExpressionUtils.binary(
+                    ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                    '==',
+                    ExpressionUtils.literal('ADMIN'),
+                  ),
+                  '||',
+                  ExpressionUtils.binary(
+                    ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                    '==',
+                    ExpressionUtils.literal('MODERATOR'),
+                  ),
                 ),
               ),
             },
@@ -857,9 +865,17 @@ export class SchemaType implements SchemaDef {
             {
               name: 'condition',
               value: ExpressionUtils.binary(
-                ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
-                '==',
-                ExpressionUtils.literal('ADMIN'),
+                ExpressionUtils.binary(
+                  ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                  '==',
+                  ExpressionUtils.literal('ADMIN'),
+                ),
+                '||',
+                ExpressionUtils.binary(
+                  ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                  '==',
+                  ExpressionUtils.literal('MODERATOR'),
+                ),
               ),
             },
           ],
@@ -1001,9 +1017,17 @@ export class SchemaType implements SchemaDef {
                 ExpressionUtils.field('visible'),
                 '||',
                 ExpressionUtils.binary(
-                  ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
-                  '==',
-                  ExpressionUtils.literal('ADMIN'),
+                  ExpressionUtils.binary(
+                    ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                    '==',
+                    ExpressionUtils.literal('ADMIN'),
+                  ),
+                  '||',
+                  ExpressionUtils.binary(
+                    ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                    '==',
+                    ExpressionUtils.literal('MODERATOR'),
+                  ),
                 ),
               ),
             },
@@ -1034,9 +1058,17 @@ export class SchemaType implements SchemaDef {
             {
               name: 'condition',
               value: ExpressionUtils.binary(
-                ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
-                '==',
-                ExpressionUtils.literal('ADMIN'),
+                ExpressionUtils.binary(
+                  ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                  '==',
+                  ExpressionUtils.literal('ADMIN'),
+                ),
+                '||',
+                ExpressionUtils.binary(
+                  ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                  '==',
+                  ExpressionUtils.literal('MODERATOR'),
+                ),
               ),
             },
           ],
@@ -1145,9 +1177,17 @@ export class SchemaType implements SchemaDef {
             {
               name: 'condition',
               value: ExpressionUtils.binary(
-                ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
-                '==',
-                ExpressionUtils.literal('ADMIN'),
+                ExpressionUtils.binary(
+                  ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                  '==',
+                  ExpressionUtils.literal('ADMIN'),
+                ),
+                '||',
+                ExpressionUtils.binary(
+                  ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                  '==',
+                  ExpressionUtils.literal('MODERATOR'),
+                ),
               ),
             },
           ],
@@ -1440,22 +1480,30 @@ export class SchemaType implements SchemaDef {
                 ExpressionUtils.binary(
                   ExpressionUtils.binary(
                     ExpressionUtils.binary(
-                      ExpressionUtils.field('status'),
-                      '==',
-                      ExpressionUtils.literal('HIDDEN'),
+                      ExpressionUtils.binary(
+                        ExpressionUtils.field('status'),
+                        '==',
+                        ExpressionUtils.literal('HIDDEN'),
+                      ),
+                      '||',
+                      ExpressionUtils.binary(
+                        ExpressionUtils.field('status'),
+                        '==',
+                        ExpressionUtils.literal('REMOVED'),
+                      ),
                     ),
-                    '||',
+                    '&&',
                     ExpressionUtils.binary(
-                      ExpressionUtils.field('status'),
-                      '==',
-                      ExpressionUtils.literal('REMOVED'),
+                      ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                      '!=',
+                      ExpressionUtils.literal('ADMIN'),
                     ),
                   ),
                   '&&',
                   ExpressionUtils.binary(
                     ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
                     '!=',
-                    ExpressionUtils.literal('ADMIN'),
+                    ExpressionUtils.literal('MODERATOR'),
                   ),
                 ),
                 '&&',
@@ -1522,9 +1570,17 @@ export class SchemaType implements SchemaDef {
             {
               name: 'condition',
               value: ExpressionUtils.binary(
-                ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
-                '==',
-                ExpressionUtils.literal('ADMIN'),
+                ExpressionUtils.binary(
+                  ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                  '==',
+                  ExpressionUtils.literal('ADMIN'),
+                ),
+                '||',
+                ExpressionUtils.binary(
+                  ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                  '==',
+                  ExpressionUtils.literal('MODERATOR'),
+                ),
               ),
             },
           ],
@@ -1651,9 +1707,17 @@ export class SchemaType implements SchemaDef {
             {
               name: 'condition',
               value: ExpressionUtils.binary(
-                ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
-                '==',
-                ExpressionUtils.literal('ADMIN'),
+                ExpressionUtils.binary(
+                  ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                  '==',
+                  ExpressionUtils.literal('ADMIN'),
+                ),
+                '||',
+                ExpressionUtils.binary(
+                  ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                  '==',
+                  ExpressionUtils.literal('MODERATOR'),
+                ),
               ),
             },
           ],
@@ -1789,9 +1853,17 @@ export class SchemaType implements SchemaDef {
                 ),
                 '||',
                 ExpressionUtils.binary(
-                  ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
-                  '==',
-                  ExpressionUtils.literal('ADMIN'),
+                  ExpressionUtils.binary(
+                    ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                    '==',
+                    ExpressionUtils.literal('ADMIN'),
+                  ),
+                  '||',
+                  ExpressionUtils.binary(
+                    ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                    '==',
+                    ExpressionUtils.literal('MODERATOR'),
+                  ),
                 ),
               ),
             },
@@ -1829,9 +1901,17 @@ export class SchemaType implements SchemaDef {
                 ),
                 '||',
                 ExpressionUtils.binary(
-                  ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
-                  '==',
-                  ExpressionUtils.literal('ADMIN'),
+                  ExpressionUtils.binary(
+                    ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                    '==',
+                    ExpressionUtils.literal('ADMIN'),
+                  ),
+                  '||',
+                  ExpressionUtils.binary(
+                    ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                    '==',
+                    ExpressionUtils.literal('MODERATOR'),
+                  ),
                 ),
               ),
             },
@@ -1992,9 +2072,17 @@ export class SchemaType implements SchemaDef {
                 ),
                 '||',
                 ExpressionUtils.binary(
-                  ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
-                  '==',
-                  ExpressionUtils.literal('ADMIN'),
+                  ExpressionUtils.binary(
+                    ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                    '==',
+                    ExpressionUtils.literal('ADMIN'),
+                  ),
+                  '||',
+                  ExpressionUtils.binary(
+                    ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                    '==',
+                    ExpressionUtils.literal('MODERATOR'),
+                  ),
                 ),
               ),
             },
@@ -2044,9 +2132,17 @@ export class SchemaType implements SchemaDef {
                 ),
                 '||',
                 ExpressionUtils.binary(
-                  ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
-                  '==',
-                  ExpressionUtils.literal('ADMIN'),
+                  ExpressionUtils.binary(
+                    ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                    '==',
+                    ExpressionUtils.literal('ADMIN'),
+                  ),
+                  '||',
+                  ExpressionUtils.binary(
+                    ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                    '==',
+                    ExpressionUtils.literal('MODERATOR'),
+                  ),
                 ),
               ),
             },
@@ -2204,9 +2300,17 @@ export class SchemaType implements SchemaDef {
                 ),
                 '||',
                 ExpressionUtils.binary(
-                  ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
-                  '==',
-                  ExpressionUtils.literal('ADMIN'),
+                  ExpressionUtils.binary(
+                    ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                    '==',
+                    ExpressionUtils.literal('ADMIN'),
+                  ),
+                  '||',
+                  ExpressionUtils.binary(
+                    ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                    '==',
+                    ExpressionUtils.literal('MODERATOR'),
+                  ),
                 ),
               ),
             },
@@ -2244,9 +2348,17 @@ export class SchemaType implements SchemaDef {
                 ),
                 '||',
                 ExpressionUtils.binary(
-                  ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
-                  '==',
-                  ExpressionUtils.literal('ADMIN'),
+                  ExpressionUtils.binary(
+                    ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                    '==',
+                    ExpressionUtils.literal('ADMIN'),
+                  ),
+                  '||',
+                  ExpressionUtils.binary(
+                    ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                    '==',
+                    ExpressionUtils.literal('MODERATOR'),
+                  ),
                 ),
               ),
             },
@@ -2377,9 +2489,17 @@ export class SchemaType implements SchemaDef {
             {
               name: 'condition',
               value: ExpressionUtils.binary(
-                ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
-                '==',
-                ExpressionUtils.literal('ADMIN'),
+                ExpressionUtils.binary(
+                  ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                  '==',
+                  ExpressionUtils.literal('ADMIN'),
+                ),
+                '||',
+                ExpressionUtils.binary(
+                  ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                  '==',
+                  ExpressionUtils.literal('MODERATOR'),
+                ),
               ),
             },
           ],
@@ -2470,9 +2590,17 @@ export class SchemaType implements SchemaDef {
             {
               name: 'condition',
               value: ExpressionUtils.binary(
-                ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
-                '==',
-                ExpressionUtils.literal('ADMIN'),
+                ExpressionUtils.binary(
+                  ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                  '==',
+                  ExpressionUtils.literal('ADMIN'),
+                ),
+                '||',
+                ExpressionUtils.binary(
+                  ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                  '==',
+                  ExpressionUtils.literal('MODERATOR'),
+                ),
               ),
             },
           ],
@@ -2616,9 +2744,17 @@ export class SchemaType implements SchemaDef {
             {
               name: 'condition',
               value: ExpressionUtils.binary(
-                ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
-                '==',
-                ExpressionUtils.literal('ADMIN'),
+                ExpressionUtils.binary(
+                  ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                  '==',
+                  ExpressionUtils.literal('ADMIN'),
+                ),
+                '||',
+                ExpressionUtils.binary(
+                  ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                  '==',
+                  ExpressionUtils.literal('MODERATOR'),
+                ),
               ),
             },
           ],
@@ -2774,6 +2910,7 @@ export class SchemaType implements SchemaDef {
       name: 'UserRole',
       values: {
         USER: 'USER',
+        MODERATOR: 'MODERATOR',
         ADMIN: 'ADMIN',
       },
     },

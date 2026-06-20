@@ -43,7 +43,8 @@ type Auth {
 
 enum UserRole {
   USER
-  ADMIN
+  MODERATOR // content moderation: spots, reports, taxonomy, feature requests
+  ADMIN     // everything, including user-role management
 }
 
 enum SpotType {
@@ -243,9 +244,9 @@ model Category {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@allow('read', visible || auth().role == 'ADMIN')
+  @@allow('read', visible || (auth().role == 'ADMIN' || auth().role == 'MODERATOR'))
   @@allow('create', auth() != null && status == 'PROPOSED')
-  @@allow('all', auth().role == 'ADMIN')
+  @@allow('all', (auth().role == 'ADMIN' || auth().role == 'MODERATOR'))
 }
 
 model Amenity {
@@ -266,9 +267,9 @@ model Amenity {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@allow('read', visible || auth().role == 'ADMIN')
+  @@allow('read', visible || (auth().role == 'ADMIN' || auth().role == 'MODERATOR'))
   @@allow('create', auth() != null && status == 'PROPOSED')
-  @@allow('all', auth().role == 'ADMIN')
+  @@allow('all', (auth().role == 'ADMIN' || auth().role == 'MODERATOR'))
 }
 
 // Which amenities apply to which categories (drives the category-scoped form).
@@ -280,7 +281,7 @@ model AmenityOnCategory {
 
   @@id([amenityId, categoryId])
   @@allow('read', true)
-  @@allow('all', auth().role == 'ADMIN')
+  @@allow('all', (auth().role == 'ADMIN' || auth().role == 'MODERATOR'))
 }
 
 // ---------------------------------------------------------------------------
@@ -337,12 +338,12 @@ model Spot {
   @@index([categoryId])
 
   // Hidden/removed content is admin-only (and visible to its submitter).
-  @@deny('read', (status == 'HIDDEN' || status == 'REMOVED') && auth().role != 'ADMIN' && auth().id != submittedById)
+  @@deny('read', (status == 'HIDDEN' || status == 'REMOVED') && auth().role != 'ADMIN' && auth().role != 'MODERATOR' && auth().id != submittedById)
   @@allow('read', true)
   @@allow('create', auth() != null && auth().id == submittedById)
   // Owner may edit while still unverified; admin may always edit.
   @@allow('update', auth().id == submittedById && status == 'UNVERIFIED')
-  @@allow('all', auth().role == 'ADMIN')
+  @@allow('all', (auth().role == 'ADMIN' || auth().role == 'MODERATOR'))
 }
 
 model SpotAmenity {
@@ -354,7 +355,7 @@ model SpotAmenity {
   @@id([spotId, amenityId])
   @@allow('read', true)
   @@allow('create', auth() != null && spot.submittedById == auth().id)
-  @@allow('all', auth().role == 'ADMIN')
+  @@allow('all', (auth().role == 'ADMIN' || auth().role == 'MODERATOR'))
 }
 
 model SpotPhoto {
@@ -369,9 +370,9 @@ model SpotPhoto {
 
   createdAt DateTime @default(now())
 
-  @@allow('read', status != 'REMOVED' || auth().role == 'ADMIN')
+  @@allow('read', status != 'REMOVED' || (auth().role == 'ADMIN' || auth().role == 'MODERATOR'))
   @@allow('create', auth() != null && auth().id == uploadedById)
-  @@allow('all', auth().id == uploadedById || auth().role == 'ADMIN')
+  @@allow('all', auth().id == uploadedById || (auth().role == 'ADMIN' || auth().role == 'MODERATOR'))
 }
 
 // ---------------------------------------------------------------------------
@@ -395,10 +396,10 @@ model Vote {
   @@unique([spotId, userId])
   @@index([spotId])
 
-  @@allow('read', auth().id == userId || auth().role == 'ADMIN')
+  @@allow('read', auth().id == userId || (auth().role == 'ADMIN' || auth().role == 'MODERATOR'))
   // Authenticated, not the submitter, one per spot (DB-enforced).
   @@allow('create', auth() != null && auth().id == userId && spot.submittedById != auth().id)
-  @@allow('update,delete', auth().id == userId || auth().role == 'ADMIN')
+  @@allow('update,delete', auth().id == userId || (auth().role == 'ADMIN' || auth().role == 'MODERATOR'))
 }
 
 // ---------------------------------------------------------------------------
@@ -420,9 +421,9 @@ model Review {
   updatedAt DateTime @updatedAt
 
   @@index([spotId])
-  @@allow('read', status != 'REMOVED' || auth().role == 'ADMIN')
+  @@allow('read', status != 'REMOVED' || (auth().role == 'ADMIN' || auth().role == 'MODERATOR'))
   @@allow('create', auth() != null && auth().id == userId)
-  @@allow('update,delete', auth().id == userId || auth().role == 'ADMIN')
+  @@allow('update,delete', auth().id == userId || (auth().role == 'ADMIN' || auth().role == 'MODERATOR'))
 }
 
 // ---------------------------------------------------------------------------
@@ -443,7 +444,7 @@ model Report {
 
   @@index([targetType, targetId])
   @@allow('create', auth() != null && auth().id == reporterId)
-  @@allow('all', auth().role == 'ADMIN')
+  @@allow('all', (auth().role == 'ADMIN' || auth().role == 'MODERATOR'))
 }
 
 model AdminAction {
@@ -457,7 +458,7 @@ model AdminAction {
 
   createdAt DateTime @default(now())
 
-  @@allow('all', auth().role == 'ADMIN')
+  @@allow('all', (auth().role == 'ADMIN' || auth().role == 'MODERATOR'))
 }
 
 // ---------------------------------------------------------------------------
@@ -482,7 +483,7 @@ model FeatureRequest {
 
   @@allow('read', true)
   @@allow('create', auth() != null && auth().id == createdById)
-  @@allow('all', auth().role == 'ADMIN')
+  @@allow('all', (auth().role == 'ADMIN' || auth().role == 'MODERATOR'))
 }
 
 model FeatureVote {

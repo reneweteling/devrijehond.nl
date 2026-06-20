@@ -1,4 +1,4 @@
-import { adminDb } from '@/lib/admin-db';
+import { staffDb } from '@/lib/admin-db';
 import { setFeatureStatus } from '../actions';
 
 /**
@@ -19,7 +19,7 @@ const STATUS_META: Record<Status, { label: string; bg: string; fg: string }> = {
 };
 
 export default async function AdminFeatureRequestsPage() {
-  const db = await adminDb();
+  const db = await staffDb();
   const requests = await db.featureRequest.findMany({
     orderBy: [{ upvoteCount: 'desc' }, { createdAt: 'desc' }],
     take: 100,

@@ -1073,7 +1073,8 @@ async function main() {
         email: u.email,
         name: u.name,
         handle: u.handle,
-        role: 'USER',
+        // Anna is seeded as a MODERATOR so the role is demonstrable in admin.
+        role: u.email === 'seed-anna@devrijehond.nl' ? 'MODERATOR' : 'USER',
         emailVerified: true,
         reputation: u.reputation,
         voteWeight: u.voteWeight,

@@ -4,6 +4,7 @@ export {
   getSessionUser,
   requireAuth,
   withContext,
+  withStaffContext,
   type RequestContext,
   type AuthedContext,
   type CanI,

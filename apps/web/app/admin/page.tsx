@@ -1,4 +1,4 @@
-import { adminDb } from '@/lib/admin-db';
+import { staffDb } from '@/lib/admin-db';
 import { restoreSpot, forceVerifySpot, removeSpot, resolveReport } from './actions';
 
 /**
@@ -8,13 +8,13 @@ import { restoreSpot, forceVerifySpot, removeSpot, resolveReport } from './actio
  * and open reports. Each row offers restore / force-verify / remove / resolve
  * via server actions that also write an AdminAction log row.
  *
- * Role gate: proxy.ts redirects non-admins; adminDb() re-asserts ADMIN and
+ * Role gate: proxy.ts redirects non-admins; staffDb() re-asserts ADMIN and
  * yields a policy-bound client that can read HIDDEN/REMOVED content.
  */
 export const dynamic = 'force-dynamic';
 
 export default async function AdminDashboardPage() {
-  const db = await adminDb();
+  const db = await staffDb();
 
   const [hidden, contested, openReports, totalSpots, verifiedSpots] = await Promise.all([
     db.spot.findMany({

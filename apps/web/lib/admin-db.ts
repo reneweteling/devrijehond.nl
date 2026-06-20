@@ -1,18 +1,36 @@
 import { headers } from 'next/headers';
-import { withContext } from '@devrijehond/server';
+import { withContext, withStaffContext } from '@devrijehond/server';
 import { authDb } from '@devrijehond/db';
 
 /**
- * Resolve an ADMIN-scoped `authDb` inside an admin server component.
+ * Policy-bound `authDb` clients for admin server components.
  *
- * `proxy.ts` already redirects non-admins away from `/admin/**`, but the
- * server component still needs an authenticated, policy-bound client to READ
- * hidden/removed content (the `@@allow('all', ADMIN)` grant). This re-resolves
- * the session from the request headers and asserts ADMIN, then returns the
- * policy-bound client.
+ * `proxy.ts` redirects non-staff away from `/admin/**`, but a server component
+ * still needs an authenticated, policy-bound client to READ hidden/removed
+ * content. These re-resolve the session from the request headers and assert the
+ * required role, then return the policy-bound client.
+ *
+ * - `staffDb()`  — ADMIN or MODERATOR. Moderation pages (dashboard, spots,
+ *   reports, taxonomy, feature requests).
+ * - `adminDb()`  — ADMIN only. User-role management.
  */
-export async function adminDb() {
+async function reqHeaders(): Promise<Request> {
   const h = await headers();
-  const ctx = await withContext(new Request('http://internal/admin', { headers: h }));
+  return new Request('http://internal/admin', { headers: h });
+}
+
+export async function staffDb() {
+  const ctx = await withStaffContext(await reqHeaders());
   return authDb(ctx.user);
+}
+
+export async function adminDb() {
+  const ctx = await withContext(await reqHeaders());
+  return authDb(ctx.user);
+}
+
+/** The current staff user (e.g. to gate ADMIN-only nav/actions by role). */
+export async function currentStaff() {
+  const ctx = await withStaffContext(await reqHeaders());
+  return ctx.user;
 }
