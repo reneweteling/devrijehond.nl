@@ -305,12 +305,16 @@ export default async function HomePage() {
           <Reveal>
             <span className="eyebrow">Veelgestelde vragen</span>
             <h2 className="section-title">Goed om te weten</h2>
-            <div className="grid grid-2" style={{ marginTop: 28, alignItems: 'start' }}>
+            <div style={{ marginTop: 28, display: 'grid', gap: 12, maxWidth: 820 }}>
               {FAQS.map((f) => (
-                <details key={f.q} className="card" style={{ padding: '18px 22px' }}>
+                <details key={f.q} className="card faq-item" style={{ padding: '18px 22px' }}>
                   <summary
                     style={{
                       cursor: 'pointer',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      gap: 16,
                       fontFamily: 'var(--font-display-stack)',
                       fontSize: 18,
                       color: 'var(--ink)',
@@ -318,7 +322,7 @@ export default async function HomePage() {
                   >
                     {f.q}
                   </summary>
-                  <p style={{ marginTop: 10, color: 'var(--ink-2)', lineHeight: 1.6 }}>{f.a}</p>
+                  <p style={{ marginTop: 12, color: 'var(--ink-2)', lineHeight: 1.65 }}>{f.a}</p>
                 </details>
               ))}
             </div>

@@ -364,6 +364,30 @@ img {
 }
 
 /* ---- Cards -------------------------------------------------------------- */
+/* FAQ accordion: custom chevron, no default disclosure triangle. */
+.faq-item {
+  overflow: hidden;
+}
+.faq-item > summary {
+  list-style: none;
+}
+.faq-item > summary::-webkit-details-marker {
+  display: none;
+}
+.faq-item > summary::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  flex: none;
+  border-right: 2px solid var(--moss-700);
+  border-bottom: 2px solid var(--moss-700);
+  transform: rotate(45deg);
+  transition: transform 0.18s ease;
+}
+.faq-item[open] > summary::after {
+  transform: rotate(-135deg);
+}
+
 .card {
   background: var(--cream);
   border: 1px solid var(--line);

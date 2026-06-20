@@ -7,25 +7,28 @@
 const IOS_URL = 'https://apps.apple.com/app/de-vrije-hond/id000000000';
 const ANDROID_URL = 'https://play.google.com/store/apps/details?id=nl.devrijehond.app';
 
-/** Labrador head, front view, single-weight line drawing (the wordmark glyph). */
+/** Labrador face, front view: a filled silhouette with floppy ears and
+ *  cut-out eyes + nose (the wordmark glyph). Single colour, reads on any bg. */
 export function PawMark({ size = 26, color = 'var(--moss)' }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden="true">
-      <g fill="none" stroke={color} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
-        {/* Floppy ears */}
-        <path d="M23 17 C14 13 9 19 11 30 C12 35 15 39 19 41" />
-        <path d="M41 17 C50 13 55 19 53 30 C52 35 49 39 45 41" />
-        {/* Head + muzzle outline (dome over the brow, narrowing to a rounded chin) */}
-        <path d="M23 17 C27 12 37 12 41 17 C45 22 46 29 44 35 C42 44 38 50 32 51 C26 50 22 44 20 35 C18 29 19 22 23 17 Z" />
-        {/* Muzzle break */}
-        <path d="M26 39 C29 42 35 42 38 39" />
-      </g>
-      {/* Eyes + nose */}
-      <g fill={color}>
-        <circle cx="26" cy="30" r="2" />
-        <circle cx="38" cy="30" r="2" />
-        <ellipse cx="32" cy="38" rx="3" ry="2.3" />
-      </g>
+      <path
+        fill={color}
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M32 7
+           C26 7 21.5 9.6 19 14.2
+           C13.6 11.4 7.7 13.4 6 19.8
+           C4.3 26.2 7.2 33.7 14 37
+           C16 45 23 53 32 53
+           C41 53 48 45 50 37
+           C56.8 33.7 59.7 26.2 58 19.8
+           C56.3 13.4 50.4 11.4 45 14.2
+           C42.5 9.6 38 7 32 7 Z
+           M25 29 a2.6 2.6 0 1 0 0.001 0 Z
+           M39 29 a2.6 2.6 0 1 0 0.001 0 Z
+           M32 38 a3.2 2.7 0 1 0 0.001 0 Z"
+      />
     </svg>
   );
 }
