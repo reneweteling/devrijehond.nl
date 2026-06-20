@@ -1,17 +1,27 @@
+import Link from 'next/link';
 import { adminDb } from '@/lib/admin-db';
 import { approveModeratorApplication, rejectModeratorApplication } from '../actions';
+import { AdminSearch, Pagination, ADMIN_PAGE_SIZE, parsePage } from '../_components/table-ui';
 
 /**
- * Moderator-application review — ADMIN only. Lists all applications ordered by
- * PENDING first, then newest first. For pending rows the admin can approve or
- * reject via server action forms.
+ * Moderator-application review — ADMIN only. Lists all applications with
+ * search, status filter, and pagination.
  *
  * `adminDb()` throws 403 for MODERATOR callers, so no additional role check
  * needed here.
  */
 export const dynamic = 'force-dynamic';
 
-const STATUS_META: Record<string, { label: string; bg: string; fg: string }> = {
+const BASE = '/admin/applications';
+
+const VALID_STATUSES = ['PENDING', 'APPROVED', 'REJECTED'] as const;
+type AppStatus = (typeof VALID_STATUSES)[number];
+
+function isValidStatus(v: string | undefined): v is AppStatus {
+  return VALID_STATUSES.includes(v as AppStatus);
+}
+
+const STATUS_META: Record<AppStatus, { label: string; bg: string; fg: string }> = {
   PENDING: { label: 'In behandeling', bg: '#fef3c7', fg: '#92400e' },
   APPROVED: { label: 'Goedgekeurd', bg: '#d1fae5', fg: '#065f46' },
   REJECTED: { label: 'Afgewezen', bg: '#fee2e2', fg: '#991b1b' },
@@ -23,17 +33,56 @@ const ROLE_META: Record<string, { label: string; bg: string; fg: string }> = {
   ADMIN: { label: 'Admin', bg: 'var(--terra-soft)', fg: 'var(--terra-700)' },
 };
 
-export default async function ApplicationsPage() {
+const FILTER_OPTIONS: { label: string; value: AppStatus | '' }[] = [
+  { label: 'Alle', value: '' },
+  { label: 'In behandeling', value: 'PENDING' },
+  { label: 'Goedgekeurd', value: 'APPROVED' },
+  { label: 'Afgewezen', value: 'REJECTED' },
+];
+
+export default async function ApplicationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; page?: string; status?: string }>;
+}) {
+  const sp = await searchParams;
+  const q = sp.q?.trim() ?? '';
+  const activeStatus = isValidStatus(sp.status) ? sp.status : undefined;
+  const page = parsePage(sp.page);
+  const skip = (page - 1) * ADMIN_PAGE_SIZE;
+
   const db = await adminDb();
 
-  const applications = await db.moderatorApplication.findMany({
-    orderBy: [{ status: 'asc' }, { createdAt: 'desc' }],
-    include: {
-      user: { select: { name: true, email: true, handle: true, role: true } },
-    },
-  });
+  const where = {
+    ...(activeStatus ? { status: activeStatus } : {}),
+    ...(q
+      ? {
+          OR: [
+            { user: { name: { contains: q, mode: 'insensitive' as const } } },
+            { user: { email: { contains: q, mode: 'insensitive' as const } } },
+            { user: { handle: { contains: q, mode: 'insensitive' as const } } },
+            { motivation: { contains: q, mode: 'insensitive' as const } },
+          ],
+        }
+      : {}),
+  };
 
-  const pending = applications.filter((a) => a.status === 'PENDING').length;
+  const [applications, total] = await Promise.all([
+    db.moderatorApplication.findMany({
+      where,
+      orderBy: [{ status: 'asc' }, { createdAt: 'desc' }],
+      skip,
+      take: ADMIN_PAGE_SIZE,
+      select: {
+        id: true,
+        status: true,
+        motivation: true,
+        createdAt: true,
+        user: { select: { name: true, email: true, handle: true, role: true } },
+      },
+    }),
+    db.moderatorApplication.count({ where }),
+  ]);
 
   return (
     <div>
@@ -44,48 +93,58 @@ export default async function ApplicationsPage() {
         Moderator, of wijs af.
       </p>
 
-      <div className="admin-stats">
-        <div className="admin-stat">
-          <div className="n">{applications.length}</div>
-          <div className="l">aanmeldingen totaal</div>
+      <div className="admin-toolbar">
+        <AdminSearch
+          basePath={BASE}
+          q={q}
+          placeholder="Zoek op naam, e-mail of motivatie…"
+          keep={{ status: activeStatus }}
+        />
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {FILTER_OPTIONS.map((opt) => {
+            const isActive = (opt.value || undefined) === activeStatus;
+            return (
+              <Link
+                key={opt.value || 'all'}
+                href={opt.value ? `${BASE}?status=${opt.value}` : BASE}
+                className="btn btn-sm"
+                style={
+                  isActive
+                    ? { background: 'var(--ink)', color: '#fff', borderColor: 'var(--ink)' }
+                    : undefined
+                }
+              >
+                {opt.label}
+              </Link>
+            );
+          })}
         </div>
-        <div className="admin-stat">
-          <div className="n">{pending}</div>
-          <div className="l">in behandeling</div>
-        </div>
-        <div className="admin-stat">
-          <div className="n">{applications.filter((a) => a.status === 'APPROVED').length}</div>
-          <div className="l">goedgekeurd</div>
-        </div>
+        <span className="admin-count">{total} resultaten</span>
       </div>
 
       {applications.length === 0 ? (
         <p className="muted" style={{ marginTop: 24 }}>
-          Nog geen aanmeldingen.
+          {q || activeStatus
+            ? 'Geen aanmeldingen gevonden voor deze filter.'
+            : 'Nog geen aanmeldingen.'}
         </p>
       ) : (
-        <div style={{ overflowX: 'auto', marginTop: 24 }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14.5 }}>
+        <div className="admin-table-wrap">
+          <table className="admin-table">
             <thead>
-              <tr
-                style={{
-                  borderBottom: '2px solid var(--line)',
-                  textAlign: 'left',
-                  color: 'var(--ink-2)',
-                  fontSize: 13,
-                }}
-              >
-                <th style={{ padding: '8px 12px 8px 0', fontWeight: 500 }}>Aanmelder</th>
-                <th style={{ padding: '8px 12px', fontWeight: 500 }}>Motivatie</th>
-                <th style={{ padding: '8px 12px', fontWeight: 500 }}>Rol</th>
-                <th style={{ padding: '8px 12px', fontWeight: 500 }}>Status</th>
-                <th style={{ padding: '8px 12px', fontWeight: 500 }}>Aangemeld op</th>
-                <th style={{ padding: '8px 12px', fontWeight: 500 }}>Acties</th>
+              <tr>
+                <th>Aanvrager</th>
+                <th>E-mail</th>
+                <th>Huidige rol</th>
+                <th>Motivatie</th>
+                <th>Status</th>
+                <th>Datum</th>
+                <th className="actions">Acties</th>
               </tr>
             </thead>
             <tbody>
               {applications.map((app) => {
-                const statusMeta = STATUS_META[app.status] ?? {
+                const statusMeta = STATUS_META[app.status as AppStatus] ?? {
                   label: app.status,
                   bg: '#eee',
                   fg: '#5a5a4a',
@@ -95,32 +154,28 @@ export default async function ApplicationsPage() {
                   bg: '#eee',
                   fg: '#5a5a4a',
                 };
+                const date = new Date(app.createdAt).toLocaleDateString('nl-NL', {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric',
+                });
                 return (
-                  <tr key={app.id} style={{ borderBottom: '1px solid var(--line)' }}>
-                    <td style={{ padding: '12px 12px 12px 0', verticalAlign: 'top' }}>
-                      <strong>{app.user.name ?? '—'}</strong>
+                  <tr key={app.id}>
+                    <td className="row-title">
+                      {app.user.name ?? '—'}
                       {app.user.handle ? (
-                        <span className="muted" style={{ marginLeft: 6, fontSize: 13 }}>
+                        <span
+                          className="muted"
+                          style={{ marginLeft: 6, fontSize: 13, fontWeight: 400 }}
+                        >
                           @{app.user.handle}
                         </span>
                       ) : null}
-                      <br />
-                      <span className="muted" style={{ fontSize: 13 }}>
-                        {app.user.email}
-                      </span>
                     </td>
-                    <td
-                      style={{
-                        padding: '12px',
-                        verticalAlign: 'top',
-                        maxWidth: 360,
-                        whiteSpace: 'pre-wrap',
-                        wordBreak: 'break-word',
-                      }}
-                    >
-                      {app.motivation}
+                    <td className="muted" style={{ whiteSpace: 'nowrap' }}>
+                      {app.user.email}
                     </td>
-                    <td style={{ padding: '12px', verticalAlign: 'top' }}>
+                    <td>
                       <span
                         className="badge"
                         style={{ background: roleMeta.bg, color: roleMeta.fg }}
@@ -128,7 +183,18 @@ export default async function ApplicationsPage() {
                         {roleMeta.label}
                       </span>
                     </td>
-                    <td style={{ padding: '12px', verticalAlign: 'top' }}>
+                    <td
+                      title={app.motivation ?? undefined}
+                      style={{
+                        maxWidth: 320,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {app.motivation ?? <span className="muted">—</span>}
+                    </td>
+                    <td>
                       <span
                         className="badge"
                         style={{ background: statusMeta.bg, color: statusMeta.fg }}
@@ -136,19 +202,19 @@ export default async function ApplicationsPage() {
                         {statusMeta.label}
                       </span>
                     </td>
-                    <td
-                      className="muted"
-                      style={{ padding: '12px', verticalAlign: 'top', whiteSpace: 'nowrap' }}
-                    >
-                      {new Date(app.createdAt).toLocaleDateString('nl-NL', {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric',
-                      })}
+                    <td className="muted" style={{ whiteSpace: 'nowrap' }}>
+                      {date}
                     </td>
-                    <td style={{ padding: '12px', verticalAlign: 'top' }}>
+                    <td className="actions">
                       {app.status === 'PENDING' ? (
-                        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                        <span
+                          style={{
+                            display: 'flex',
+                            gap: 6,
+                            justifyContent: 'flex-end',
+                            flexWrap: 'wrap',
+                          }}
+                        >
                           <form action={approveModeratorApplication.bind(null, app.id)}>
                             <button type="submit" className="btn btn-sm btn-primary">
                               Goedkeuren
@@ -159,7 +225,7 @@ export default async function ApplicationsPage() {
                               Afwijzen
                             </button>
                           </form>
-                        </div>
+                        </span>
                       ) : (
                         <span className="muted" style={{ fontSize: 13 }}>
                           Afgehandeld
@@ -173,6 +239,13 @@ export default async function ApplicationsPage() {
           </table>
         </div>
       )}
+
+      <Pagination
+        basePath={BASE}
+        page={page}
+        total={total}
+        params={{ q: q || undefined, status: activeStatus }}
+      />
     </div>
   );
 }

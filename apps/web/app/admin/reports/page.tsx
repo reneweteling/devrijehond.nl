@@ -1,10 +1,11 @@
 import { staffDb } from '@/lib/admin-db';
 import { resolveReport } from '../actions';
+import { ADMIN_PAGE_SIZE, Pagination, parsePage } from '../_components/table-ui';
 
 /**
  * Reports queue for staff (ADMIN + MODERATOR).
  *
- * Shows all reports ordered by unresolved-first, then newest-first.
+ * Filterable by ?status=open (default) or ?status=done.
  * For SPOT reports, resolves the spot name and links to the spot page.
  * Each open report has an "Afhandelen" action; resolved rows show a muted tag.
  */
@@ -24,115 +25,159 @@ const TARGET_LABELS: Record<string, string> = {
   REVIEW: 'Recensie',
 };
 
-export default async function AdminReportsPage() {
+export default async function AdminReportsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string; page?: string }>;
+}) {
+  const sp = await searchParams;
+  const statusFilter = sp.status === 'done' ? 'done' : 'open';
+  const page = parsePage(sp.page);
+  const skip = (page - 1) * ADMIN_PAGE_SIZE;
+
   const db = await staffDb();
 
-  const reports = await db.report.findMany({
-    orderBy: [{ resolved: 'asc' }, { createdAt: 'desc' }],
-    take: 100,
-    select: {
-      id: true,
-      targetType: true,
-      targetId: true,
-      reason: true,
-      note: true,
-      resolved: true,
-      createdAt: true,
-      reporter: { select: { handle: true, name: true } },
-    },
-  });
+  const where = { resolved: statusFilter === 'done' };
+
+  const [reports, total] = await Promise.all([
+    db.report.findMany({
+      where,
+      orderBy: [{ resolved: 'asc' }, { createdAt: 'desc' }],
+      skip,
+      take: ADMIN_PAGE_SIZE,
+      select: {
+        id: true,
+        targetType: true,
+        targetId: true,
+        reason: true,
+        note: true,
+        resolved: true,
+        createdAt: true,
+        reporter: { select: { handle: true, name: true } },
+      },
+    }),
+    db.report.count({ where }),
+  ]);
 
   // Resolve spot names for SPOT-type reports.
   const spotIds = reports.filter((r) => r.targetType === 'SPOT').map((r) => r.targetId);
 
-  const spotMap = new Map<string, { name: string; slug: string; type: string }>();
+  const spotMap = new Map<string, { name: string; slug: string }>();
   if (spotIds.length > 0) {
     const spots = await db.spot.findMany({
       where: { id: { in: spotIds } },
-      select: { id: true, name: true, slug: true, type: true },
+      select: { id: true, name: true, slug: true },
     });
     for (const s of spots) {
-      spotMap.set(s.id, { name: s.name, slug: s.slug, type: s.type });
+      spotMap.set(s.id, { name: s.name, slug: s.slug });
     }
   }
 
-  const openCount = reports.filter((r) => !r.resolved).length;
+  const basePath = '/admin/reports';
 
   return (
     <div>
       <span className="eyebrow">Beheer</span>
-      <h1 style={{ fontSize: 'clamp(26px, 4vw, 36px)', margin: '8px 0 8px' }}>Meldingen</h1>
-      <p className="muted" style={{ maxWidth: '60ch', marginBottom: 20 }}>
-        {openCount === 0
-          ? 'Geen open meldingen.'
-          : `${openCount} open ${openCount === 1 ? 'melding' : 'meldingen'}.`}
-      </p>
+      <h1 style={{ fontSize: 'clamp(26px, 4vw, 36px)', margin: '8px 0 16px' }}>Meldingen</h1>
+
+      <div className="admin-toolbar">
+        <nav style={{ display: 'flex', gap: 8 }}>
+          <a
+            href={basePath}
+            className={statusFilter === 'open' ? 'filter-link active' : 'filter-link'}
+          >
+            Open
+          </a>
+          <a
+            href={`${basePath}?status=done`}
+            className={statusFilter === 'done' ? 'filter-link active' : 'filter-link'}
+          >
+            Afgehandeld
+          </a>
+        </nav>
+        <span className="admin-count">
+          {total} {total === 1 ? 'melding' : 'meldingen'}
+        </span>
+      </div>
 
       {reports.length === 0 ? (
-        <p className="muted">Nog geen meldingen binnengekomen.</p>
+        <p className="muted" style={{ marginTop: 16 }}>
+          {statusFilter === 'open' ? 'Geen open meldingen.' : 'Geen afgehandelde meldingen.'}
+        </p>
       ) : (
-        <div style={{ display: 'grid', gap: 10 }}>
-          {reports.map((r) => {
-            const spot = r.targetType === 'SPOT' ? spotMap.get(r.targetId) : undefined;
-            const dateStr = new Date(r.createdAt).toLocaleDateString('nl-NL', {
-              day: 'numeric',
-              month: 'short',
-              year: 'numeric',
-            });
-            const reporterLabel = r.reporter.handle ?? r.reporter.name ?? 'Onbekend';
+        <>
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th className="row-title">Doel</th>
+                  <th>Reden</th>
+                  <th>Notitie</th>
+                  <th>Melder</th>
+                  <th>Datum</th>
+                  <th className="actions">Status / Actie</th>
+                </tr>
+              </thead>
+              <tbody>
+                {reports.map((r) => {
+                  const spot = r.targetType === 'SPOT' ? spotMap.get(r.targetId) : undefined;
+                  const dateStr = new Date(r.createdAt).toLocaleDateString('nl-NL', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                  });
+                  const reporterLabel = r.reporter.handle ?? r.reporter.name ?? 'Onbekend';
 
-            return (
-              <div key={r.id} className="admin-row">
-                <span style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                    <strong>
-                      {spot ? (
-                        <a href={`/plek/${spot.slug}`} style={{ color: 'inherit' }}>
-                          {spot.name}
-                        </a>
-                      ) : (
-                        `${TARGET_LABELS[r.targetType] ?? r.targetType} · ${r.targetId.slice(0, 8)}`
-                      )}
-                    </strong>
-                    <span
-                      className="badge"
-                      style={{ background: 'var(--sand)', color: 'var(--ink-2)' }}
-                    >
-                      {TARGET_LABELS[r.targetType] ?? r.targetType}
-                    </span>
-                    <span
-                      className="badge"
-                      style={{ background: 'var(--terra-soft)', color: 'var(--terra-700)' }}
-                    >
-                      {REASON_LABELS[r.reason] ?? r.reason}
-                    </span>
-                  </span>
-                  <span className="muted" style={{ fontSize: 13.5 }}>
-                    {r.note ? <span style={{ marginRight: 8 }}>{r.note}</span> : null}
-                    door {reporterLabel} · {dateStr}
-                  </span>
-                </span>
+                  return (
+                    <tr key={r.id}>
+                      <td className="row-title">
+                        {spot ? (
+                          <a href={`/plek/${spot.slug}`}>{spot.name}</a>
+                        ) : (
+                          `${TARGET_LABELS[r.targetType] ?? r.targetType} · ${r.targetId.slice(0, 8)}`
+                        )}
+                      </td>
+                      <td>
+                        <span
+                          className="badge"
+                          style={{ background: 'var(--terra-soft)', color: 'var(--terra-700)' }}
+                        >
+                          {REASON_LABELS[r.reason] ?? r.reason}
+                        </span>
+                      </td>
+                      <td>{r.note ?? <span className="muted">—</span>}</td>
+                      <td>{reporterLabel}</td>
+                      <td>{dateStr}</td>
+                      <td className="actions">
+                        {r.resolved ? (
+                          <span
+                            className="badge"
+                            style={{ background: '#eee', color: '#8a8a76', whiteSpace: 'nowrap' }}
+                          >
+                            Afgehandeld
+                          </span>
+                        ) : (
+                          <form action={resolveReport.bind(null, r.id)}>
+                            <button type="submit" className="btn btn-sm btn-soft">
+                              Afhandelen
+                            </button>
+                          </form>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
 
-                <span className="actions">
-                  {r.resolved ? (
-                    <span
-                      className="badge"
-                      style={{ background: '#eee', color: '#8a8a76', whiteSpace: 'nowrap' }}
-                    >
-                      Afgehandeld
-                    </span>
-                  ) : (
-                    <form action={resolveReport.bind(null, r.id)}>
-                      <button type="submit" className="btn btn-sm btn-soft">
-                        Afhandelen
-                      </button>
-                    </form>
-                  )}
-                </span>
-              </div>
-            );
-          })}
-        </div>
+          <Pagination
+            basePath={basePath}
+            page={page}
+            total={total}
+            params={{ status: statusFilter === 'done' ? 'done' : undefined }}
+          />
+        </>
       )}
     </div>
   );

@@ -1,10 +1,10 @@
-import { adminDb } from '@/lib/admin-db';
+import { adminDb, currentStaff } from '@/lib/admin-db';
+import { AdminSearch, Pagination, parsePage, ADMIN_PAGE_SIZE } from '../_components/table-ui';
 import { setUserRole } from '../actions';
 
 /**
- * User management — ADMIN only. Lists every user with their role, reputation
- * and activity counts. Each row has three role buttons; clicking one sets that
- * role via a server action.
+ * User management — ADMIN only. Lists every user with role, reputation and
+ * activity counts. Supports search (name/email/handle) and URL-driven pagination.
  *
  * `adminDb()` throws a 403 Response if the caller is a MODERATOR, so no
  * additional role check is needed here.
@@ -20,22 +20,52 @@ const ROLE_META: Record<Role, { label: string; bg: string; fg: string }> = {
   ADMIN: { label: 'Admin', bg: 'var(--terra-soft)', fg: 'var(--terra-700)' },
 };
 
-export default async function AdminUsersPage() {
-  const db = await adminDb();
+export default async function AdminUsersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; page?: string }>;
+}) {
+  const sp = await searchParams;
+  const q = sp.q?.trim() || undefined;
+  const page = parsePage(sp.page);
+  const skip = (page - 1) * ADMIN_PAGE_SIZE;
 
-  const users = await db.user.findMany({
-    orderBy: [{ role: 'desc' }, { createdAt: 'asc' }],
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      handle: true,
-      role: true,
-      reputation: true,
-      createdAt: true,
-      _count: { select: { spots: true, reports: true } },
-    },
-  });
+  const [db, me] = await Promise.all([adminDb(), currentStaff()]);
+
+  const where = q
+    ? {
+        OR: [
+          { name: { contains: q, mode: 'insensitive' as const } },
+          { email: { contains: q, mode: 'insensitive' as const } },
+          { handle: { contains: q, mode: 'insensitive' as const } },
+        ],
+      }
+    : {};
+
+  const orderBy = [{ role: 'desc' as const }, { createdAt: 'asc' as const }];
+
+  const [users, total, totalUsers, totalMods, totalAdmins] = await Promise.all([
+    db.user.findMany({
+      where,
+      orderBy,
+      skip,
+      take: ADMIN_PAGE_SIZE,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        handle: true,
+        role: true,
+        reputation: true,
+        createdAt: true,
+        _count: { select: { spots: true } },
+      },
+    }),
+    db.user.count({ where }),
+    db.user.count(),
+    db.user.count({ where: { role: 'MODERATOR' } }),
+    db.user.count({ where: { role: 'ADMIN' } }),
+  ]);
 
   return (
     <div>
@@ -48,115 +78,87 @@ export default async function AdminUsersPage() {
 
       <div className="admin-stats">
         <div className="admin-stat">
-          <div className="n">{users.length}</div>
+          <div className="n">{totalUsers}</div>
           <div className="l">gebruikers totaal</div>
         </div>
         <div className="admin-stat">
-          <div className="n">{users.filter((u) => u.role === 'MODERATOR').length}</div>
+          <div className="n">{totalMods}</div>
           <div className="l">moderatoren</div>
         </div>
         <div className="admin-stat">
-          <div className="n">{users.filter((u) => u.role === 'ADMIN').length}</div>
+          <div className="n">{totalAdmins}</div>
           <div className="l">beheerders</div>
         </div>
       </div>
 
+      <div className="admin-toolbar">
+        <AdminSearch basePath="/admin/users" q={q} placeholder="Zoek op naam, e-mail of handle…" />
+        <span className="admin-count">{total} resultaten</span>
+      </div>
+
       {users.length === 0 ? (
-        <p className="muted">Nog geen gebruikers.</p>
+        <p className="muted">Geen gebruikers gevonden.</p>
       ) : (
-        <div style={{ overflowX: 'auto', marginTop: 24 }}>
-          <table
-            style={{
-              width: '100%',
-              borderCollapse: 'collapse',
-              fontSize: 14.5,
-            }}
-          >
+        <div className="admin-table-wrap">
+          <table className="admin-table">
             <thead>
-              <tr
-                style={{
-                  borderBottom: '2px solid var(--line)',
-                  textAlign: 'left',
-                  color: 'var(--ink-2)',
-                  fontSize: 13,
-                }}
-              >
-                <th style={{ padding: '8px 12px 8px 0', fontWeight: 500 }}>Naam</th>
-                <th style={{ padding: '8px 12px', fontWeight: 500 }}>E-mail</th>
-                <th style={{ padding: '8px 12px', fontWeight: 500 }}>Reputatie</th>
-                <th style={{ padding: '8px 12px', fontWeight: 500 }}>Plekken</th>
-                <th style={{ padding: '8px 12px', fontWeight: 500 }}>Lid sinds</th>
-                <th style={{ padding: '8px 12px', fontWeight: 500 }}>Rol</th>
+              <tr>
+                <th>Naam</th>
+                <th>E-mail</th>
+                <th>Rol</th>
+                <th className="num">Reputatie</th>
+                <th className="num">Plekken</th>
+                <th>Lid sinds</th>
+                <th className="actions">Rol-acties</th>
               </tr>
             </thead>
             <tbody>
               {users.map((u) => {
                 const currentRole = u.role as Role;
                 const meta = ROLE_META[currentRole] ?? ROLE_META.USER;
+                const isSelf = u.id === me.id;
                 return (
-                  <tr key={u.id} style={{ borderBottom: '1px solid var(--line)' }}>
-                    <td style={{ padding: '12px 12px 12px 0', verticalAlign: 'middle' }}>
-                      <strong>{u.name ?? '—'}</strong>
+                  <tr key={u.id}>
+                    <td className="row-title">
+                      {u.name ?? '—'}
                       {u.handle ? (
-                        <span className="muted" style={{ marginLeft: 6, fontSize: 13 }}>
+                        <span
+                          className="muted"
+                          style={{ marginLeft: 6, fontSize: 13, fontWeight: 400 }}
+                        >
                           @{u.handle}
                         </span>
                       ) : null}
                     </td>
-                    <td
-                      className="muted"
-                      style={{ padding: '12px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}
-                    >
-                      {u.email}
+                    <td className="muted">{u.email}</td>
+                    <td>
+                      <span className="badge" style={{ background: meta.bg, color: meta.fg }}>
+                        {meta.label}
+                      </span>
                     </td>
-                    <td
-                      style={{
-                        padding: '12px',
-                        verticalAlign: 'middle',
-                        textAlign: 'right',
-                        fontVariantNumeric: 'tabular-nums',
-                      }}
-                    >
-                      {u.reputation}
-                    </td>
-                    <td
-                      style={{
-                        padding: '12px',
-                        verticalAlign: 'middle',
-                        textAlign: 'right',
-                        fontVariantNumeric: 'tabular-nums',
-                      }}
-                    >
-                      {u._count.spots}
-                    </td>
-                    <td
-                      className="muted"
-                      style={{ padding: '12px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}
-                    >
+                    <td className="num">{u.reputation}</td>
+                    <td className="num">{u._count.spots}</td>
+                    <td className="muted">
                       {new Date(u.createdAt).toLocaleDateString('nl-NL', {
                         day: 'numeric',
                         month: 'short',
                         year: 'numeric',
                       })}
                     </td>
-                    <td style={{ padding: '12px', verticalAlign: 'middle' }}>
-                      <div
-                        style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}
-                      >
-                        <span
-                          className="badge"
-                          style={{ background: meta.bg, color: meta.fg, marginRight: 4 }}
-                        >
-                          {meta.label}
+                    <td className="actions">
+                      {isSelf ? (
+                        <span className="muted" style={{ fontSize: 13 }}>
+                          eigen account
                         </span>
-                        {ROLES.filter((r) => r !== currentRole).map((role) => (
+                      ) : (
+                        ROLES.filter((r) => r !== currentRole).map((role) => (
                           <form key={role} action={setUserRole.bind(null, u.id, role)}>
                             <button type="submit" className="btn btn-sm btn-soft">
-                              → {ROLE_META[role].label}
+                              {ROLE_META[role].label}
                             </button>
                           </form>
-                        ))}
-                      </div>
+                        ))
+                      )}
                     </td>
                   </tr>
                 );
@@ -165,6 +167,8 @@ export default async function AdminUsersPage() {
           </table>
         </div>
       )}
+
+      <Pagination basePath="/admin/users" page={page} total={total} params={{ q }} />
     </div>
   );
 }

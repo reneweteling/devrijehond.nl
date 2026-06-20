@@ -1,13 +1,8 @@
 import Link from 'next/link';
 import { staffDb } from '@/lib/admin-db';
 import { setSpotStatus } from '../actions';
+import { ADMIN_PAGE_SIZE, AdminSearch, Pagination, parsePage } from '../_components/table-ui';
 
-/**
- * Spots management table for staff (ADMIN + MODERATOR).
- *
- * Supports filtering by status via ?status= query param. Renders 100 spots
- * ordered newest-first with direct status controls per row.
- */
 export const dynamic = 'force-dynamic';
 
 const VALID_STATUSES = ['UNVERIFIED', 'VERIFIED', 'HIDDEN', 'REMOVED'] as const;
@@ -28,7 +23,6 @@ const FILTER_OPTIONS: { label: string; value: string }[] = [
   { label: 'Verwijderd', value: 'REMOVED' },
 ];
 
-// Status transitions: which buttons to show and in which order.
 const STATUS_ACTIONS: {
   status: SpotStatus;
   label: string;
@@ -51,55 +45,84 @@ function spotUrl(slug: string, type: string): string {
 export default async function AdminSpotsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ q?: string; page?: string; status?: string }>;
 }) {
-  const { status: rawStatus } = await searchParams;
-  const activeFilter = isValidStatus(rawStatus) ? rawStatus : 'ALL';
+  const sp = await searchParams;
+  const q = sp.q?.trim() || undefined;
+  const activeFilter = isValidStatus(sp.status) ? sp.status : undefined;
+  const page = parsePage(sp.page);
+  const skip = (page - 1) * ADMIN_PAGE_SIZE;
 
   const db = await staffDb();
 
-  const spots = await db.spot.findMany({
-    where: activeFilter !== 'ALL' ? { status: activeFilter } : undefined,
-    orderBy: { createdAt: 'desc' },
-    take: 100,
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      type: true,
-      status: true,
-      denyCount: true,
-      netScore: true,
-      createdAt: true,
-      category: { select: { label: true } },
-      submittedBy: { select: { handle: true, name: true } },
-    },
-  });
+  const where = {
+    ...(activeFilter ? { status: activeFilter } : {}),
+    ...(q ? { name: { contains: q, mode: 'insensitive' as const } } : {}),
+  };
+
+  const [spots, total] = await Promise.all([
+    db.spot.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: ADMIN_PAGE_SIZE,
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        type: true,
+        status: true,
+        denyCount: true,
+        netScore: true,
+        createdAt: true,
+        category: { select: { label: true } },
+        submittedBy: { select: { handle: true, name: true } },
+      },
+    }),
+    db.spot.count({ where }),
+  ]);
+
+  const filterHref = (value: string) => {
+    if (value === 'ALL') return q ? `/admin/spots?q=${encodeURIComponent(q)}` : '/admin/spots';
+    const params = new URLSearchParams({ status: value });
+    if (q) params.set('q', q);
+    return `/admin/spots?${params.toString()}`;
+  };
 
   return (
     <div>
       <span className="eyebrow">Beheer</span>
       <h1 style={{ fontSize: 'clamp(26px, 4vw, 36px)', margin: '8px 0 20px' }}>Plekken</h1>
 
-      {/* Filter links */}
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 24 }}>
-        {FILTER_OPTIONS.map((opt) => {
-          const isActive = opt.value === activeFilter;
-          return (
-            <Link
-              key={opt.value}
-              href={opt.value === 'ALL' ? '/admin/spots' : `/admin/spots?status=${opt.value}`}
-              className="btn btn-sm"
-              style={
-                isActive
-                  ? { background: 'var(--ink)', color: '#fff', borderColor: 'var(--ink)' }
-                  : undefined
-              }
-            >
-              {opt.label}
-            </Link>
-          );
-        })}
+      <div className="admin-toolbar">
+        <AdminSearch
+          basePath="/admin/spots"
+          q={q}
+          placeholder="Zoek op naam..."
+          keep={{ status: activeFilter }}
+        />
+
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {FILTER_OPTIONS.map((opt) => {
+            const isActive = opt.value === 'ALL' ? !activeFilter : opt.value === activeFilter;
+            return (
+              <Link
+                key={opt.value}
+                href={filterHref(opt.value)}
+                className="btn btn-sm"
+                style={
+                  isActive
+                    ? { background: 'var(--ink)', color: '#fff', borderColor: 'var(--ink)' }
+                    : undefined
+                }
+              >
+                {opt.label}
+              </Link>
+            );
+          })}
+        </div>
+
+        <span className="admin-count">{total} resultaten</span>
       </div>
 
       {spots.length === 0 ? (
@@ -107,20 +130,18 @@ export default async function AdminSpotsPage({
           Geen plekken gevonden.
         </p>
       ) : (
-        <div style={{ overflowX: 'auto' }}>
-          <table className="admin-table" style={{ width: '100%', fontSize: 14 }}>
+        <div className="admin-table-wrap">
+          <table className="admin-table">
             <thead>
               <tr>
-                <th style={{ textAlign: 'left', paddingBottom: 8, fontWeight: 600 }}>Naam</th>
-                <th style={{ textAlign: 'left', paddingBottom: 8, fontWeight: 600 }}>Categorie</th>
-                <th style={{ textAlign: 'left', paddingBottom: 8, fontWeight: 600 }}>Type</th>
-                <th style={{ textAlign: 'left', paddingBottom: 8, fontWeight: 600 }}>Status</th>
-                <th style={{ textAlign: 'right', paddingBottom: 8, fontWeight: 600 }}>Score</th>
-                <th style={{ textAlign: 'left', paddingBottom: 8, fontWeight: 600 }}>
-                  Ingediend door
-                </th>
-                <th style={{ textAlign: 'left', paddingBottom: 8, fontWeight: 600 }}>Datum</th>
-                <th style={{ paddingBottom: 8 }} />
+                <th>Naam</th>
+                <th>Categorie</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th className="num">Score</th>
+                <th>Inzender</th>
+                <th>Aangemaakt</th>
+                <th className="actions" />
               </tr>
             </thead>
             <tbody>
@@ -139,23 +160,15 @@ export default async function AdminSpotsPage({
                   : '';
 
                 return (
-                  <tr key={spot.id} style={{ borderTop: '1px solid var(--line)' }}>
-                    <td style={{ padding: '10px 12px 10px 0' }}>
-                      <Link
-                        href={spotUrl(spot.slug, spot.type)}
-                        target="_blank"
-                        style={{ fontWeight: 600, color: 'var(--ink)' }}
-                      >
+                  <tr key={spot.id}>
+                    <td className="row-title">
+                      <Link href={spotUrl(spot.slug, spot.type)} target="_blank">
                         {spot.name}
                       </Link>
                     </td>
-                    <td style={{ padding: '10px 12px', color: 'var(--ink-2)' }}>
-                      {spot.category?.label ?? <span className="muted">–</span>}
-                    </td>
-                    <td style={{ padding: '10px 12px', color: 'var(--ink-2)', fontSize: 13 }}>
-                      {spot.type}
-                    </td>
-                    <td style={{ padding: '10px 12px' }}>
+                    <td>{spot.category?.label ?? <span className="muted">–</span>}</td>
+                    <td>{spot.type}</td>
+                    <td>
                       {meta ? (
                         <span className="badge" style={{ background: meta.bg, color: meta.fg }}>
                           {meta.label}
@@ -164,14 +177,7 @@ export default async function AdminSpotsPage({
                         <span className="muted">{spot.status}</span>
                       )}
                     </td>
-                    <td
-                      style={{
-                        padding: '10px 12px',
-                        textAlign: 'right',
-                        color: 'var(--ink-2)',
-                        fontVariantNumeric: 'tabular-nums',
-                      }}
-                    >
+                    <td className="num">
                       {spot.netScore >= 0 ? '+' : ''}
                       {spot.netScore}
                       {spot.denyCount > 0 ? (
@@ -180,20 +186,9 @@ export default async function AdminSpotsPage({
                         </small>
                       ) : null}
                     </td>
-                    <td style={{ padding: '10px 12px', color: 'var(--ink-2)', fontSize: 13 }}>
-                      {submitterLabel}
-                    </td>
-                    <td
-                      style={{
-                        padding: '10px 12px',
-                        color: 'var(--ink-2)',
-                        fontSize: 13,
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {date}
-                    </td>
-                    <td style={{ padding: '10px 0 10px 12px' }}>
+                    <td>{submitterLabel}</td>
+                    <td style={{ whiteSpace: 'nowrap' }}>{date}</td>
+                    <td className="actions">
                       <span
                         style={{
                           display: 'flex',
@@ -229,6 +224,13 @@ export default async function AdminSpotsPage({
           </table>
         </div>
       )}
+
+      <Pagination
+        basePath="/admin/spots"
+        page={page}
+        total={total}
+        params={{ q, status: activeFilter }}
+      />
     </div>
   );
 }
