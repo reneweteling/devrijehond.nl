@@ -46,6 +46,14 @@ security set-keychain-settings -lut 21600 "$KEYCHAIN" # don't auto-lock for 6h
 security unlock-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN"
 security import "$ROOT/secrets/Certificates.p12" -k "$KEYCHAIN" \
   -P "$APPLE_DIST_CERT_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
+# Apple WWDR intermediates: without them the cert chain can't be built when the
+# search list is the signing keychain alone, so the cert reads as an INVALID
+# identity and fastlane/codesign find "0 valid identities".
+for g in G3 G6; do
+  curl -fsSL "https://www.apple.com/certificateauthority/AppleWWDRCA${g}.cer" \
+    -o "/tmp/AppleWWDRCA${g}.cer" 2>/dev/null &&
+    security import "/tmp/AppleWWDRCA${g}.cer" -k "$KEYCHAIN" 2>/dev/null || true
+done
 security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PWD" "$KEYCHAIN" >/dev/null
 # Search ONLY the signing keychain during the build, so codesign can't fall back
 # to the login keychain's copy of the cert (which would pop a GUI prompt and
