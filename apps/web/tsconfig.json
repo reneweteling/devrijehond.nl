@@ -8,7 +8,7 @@
     "incremental": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "types": ["node"],
+    "types": ["node", "google.maps"],
     "paths": {
       "@/*": ["./*"]
     },

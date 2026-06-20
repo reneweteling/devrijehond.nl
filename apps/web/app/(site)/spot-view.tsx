@@ -3,6 +3,7 @@ import type { SpotDetailDto, ReviewDto } from '@devrijehond/types';
 import type { NearbySpot } from '@/lib/spot-detail';
 import { StoreButton } from './site-chrome';
 import { SpotParticipation } from './spot-participation';
+import { SpotRegionMap } from './spot-region-map';
 
 function detailHref(type: 'REGION' | 'POI', slug: string) {
   return `/${type === 'REGION' ? 'gebied' : 'plek'}/${slug}`;
@@ -303,6 +304,7 @@ export function SpotView({
 
         {/* Sidebar */}
         <aside style={{ display: 'grid', gap: 16, position: 'sticky', top: 84 }}>
+          <SpotRegionMap geometry={spot.geometry} lat={spot.lat} lng={spot.lng} />
           {spot.lat != null && spot.lng != null ? (
             <a
               className="btn btn-primary"
