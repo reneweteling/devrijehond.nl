@@ -72,25 +72,21 @@ jobs:
         working-directory: apps/mobile/ios
         run: pod install
 
-      # App Store Connect API key (.p8) for automatic signing + upload.
+      # App Store Connect API key (.p8): a raw key for xcodebuild/altool, plus a
+      # fastlane key file used to create the distribution provisioning profile.
       - name: Write App Store Connect API key
         run: |
           mkdir -p ~/.appstoreconnect/private_keys
-          echo "${{ secrets.ASC_API_KEY_P8 }}" | base64 --decode > ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.ASC_KEY_ID }}.p8
-
-      - name: Write ExportOptions.plist
-        working-directory: apps/mobile/ios
-        run: |
-          cat > ExportOptions.plist <<PLIST
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0"><dict>
-            <key>method</key><string>app-store</string>
-            <key>teamID</key><string>${TEAM_ID}</string>
-            <key>signingStyle</key><string>automatic</string>
-            <key>uploadSymbols</key><true/>
-          </dict></plist>
-          PLIST
+          KEYFILE="$HOME/.appstoreconnect/private_keys/AuthKey_${{ secrets.ASC_KEY_ID }}.p8"
+          echo "${{ secrets.ASC_API_KEY_P8 }}" | base64 --decode > "$KEYFILE"
+          cat > /tmp/asc_api_key.json <<JSON
+          {
+            "key_id": "${{ secrets.ASC_KEY_ID }}",
+            "issuer_id": "${{ secrets.ASC_ISSUER_ID }}",
+            "key_filepath": "$KEYFILE",
+            "in_house": false
+          }
+          JSON
 
       - name: Archive
         working-directory: apps/mobile/ios
@@ -108,17 +104,40 @@ jobs:
             DEVELOPMENT_TEAM=${TEAM_ID} \
             archive
 
-      - name: Export IPA
+      # An App Manager API key can't drive xcodebuild's cloud distribution
+      # signing (that needs Admin), which is why -allowProvisioningUpdates failed
+      # with "Cloud signing permission error / No profiles". Instead create the
+      # App Store profile via the API (fastlane sigh) and export with MANUAL
+      # signing using the imported distribution certificate.
+      - name: Export IPA (manual signing via API-created profile)
         working-directory: apps/mobile/ios
         run: |
+          command -v fastlane >/dev/null || sudo gem install fastlane -N -q
+          fastlane sigh \
+            --api_key_path /tmp/asc_api_key.json \
+            --app_identifier nl.devrijehond.app \
+            --platform ios \
+            --output_path /tmp/profiles
+          PROFILE_PATH="$(ls /tmp/profiles/*.mobileprovision | head -1)"
+          PROFILE_NAME="$(security cms -D -i "$PROFILE_PATH" | plutil -extract Name raw -)"
+          echo "Exporting with profile: $PROFILE_NAME"
+          cat > ExportOptions.plist <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store</string>
+            <key>teamID</key><string>${TEAM_ID}</string>
+            <key>signingStyle</key><string>manual</string>
+            <key>signingCertificate</key><string>Apple Distribution</string>
+            <key>provisioningProfiles</key>
+            <dict><key>nl.devrijehond.app</key><string>${PROFILE_NAME}</string></dict>
+            <key>uploadSymbols</key><true/>
+          </dict></plist>
+          PLIST
           xcodebuild -exportArchive \
             -archivePath build/DeVrijeHond.xcarchive \
             -exportOptionsPlist ExportOptions.plist \
-            -exportPath build/ipa \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.ASC_KEY_ID }}.p8 \
-            -authenticationKeyID ${{ secrets.ASC_KEY_ID }} \
-            -authenticationKeyIssuerID ${{ secrets.ASC_ISSUER_ID }}
+            -exportPath build/ipa
 
       - uses: actions/upload-artifact@v4
         with:
