@@ -1,46 +1,14 @@
 name: iOS build
 
-# Builds the iOS app on a GitHub macOS runner (no EAS).
-# - `compile`  : no-signing build that validates the native project + pods + JS
-#                bundle. Always runs on dispatch.
-# - `testflight`: signed archive + upload to TestFlight. Enable by setting the
-#                 repo variable IOS_RELEASE=true and the Apple secrets (see
-#                 docs/CI.md). Uses App Store Connect API-key signing.
+# Builds + signs the iOS app on a GitHub macOS runner and uploads it to
+# TestFlight (no EAS). This is the CI fallback; the faster/free path is to run
+# `pnpm ios:release` locally (see scripts/release-ios.sh). Enable by setting the
+# repo variable IOS_RELEASE=true and the Apple secrets (see docs/CI.md). Uses an
+# App Store Connect API key (App Manager) to create the App Store profile.
 on:
   workflow_dispatch:
 
 jobs:
-  compile:
-    runs-on: macos-26
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - name: Prebuild native project
-        working-directory: apps/mobile
-        run: pnpm exec expo prebuild -p ios --no-install
-        env:
-          EXPO_PUBLIC_API_URL: ${{ vars.EXPO_PUBLIC_API_URL || 'https://www.devrijehond.nl' }}
-          EXPO_PUBLIC_AUTH_URL: ${{ vars.EXPO_PUBLIC_AUTH_URL || 'https://www.devrijehond.nl' }}
-      - name: Install pods
-        working-directory: apps/mobile/ios
-        run: pod install
-      - name: Build (no code signing)
-        working-directory: apps/mobile/ios
-        run: |
-          xcodebuild \
-            -workspace DeVrijeHond.xcworkspace \
-            -scheme DeVrijeHond \
-            -configuration Release \
-            -destination 'generic/platform=iOS Simulator' \
-            -derivedDataPath build \
-            CODE_SIGNING_ALLOWED=NO \
-            build | tail -40
-
   testflight:
     if: ${{ vars.IOS_RELEASE == 'true' }}
     runs-on: macos-26
