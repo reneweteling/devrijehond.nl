@@ -15,7 +15,7 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "bundleIdentifier": "nl.devrijehond.app",
-      "buildNumber": "9",
+      "buildNumber": "10",
       "supportsTablet": false,
       "config": {
         "usesNonExemptEncryption": false

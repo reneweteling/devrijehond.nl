@@ -47,12 +47,15 @@ const INITIAL_REGION: Region = {
   longitudeDelta: 0.11,
 };
 
+// Round to ~3 decimals (~100m) so tiny region jitter (the map settling, the
+// user dot updating) doesn't churn the query key and restart the fetch forever.
+const r3 = (n: number) => Math.round(n * 1000) / 1000;
 function regionToBbox(r: Region): Bbox {
   return {
-    minLng: r.longitude - r.longitudeDelta / 2,
-    minLat: r.latitude - r.latitudeDelta / 2,
-    maxLng: r.longitude + r.longitudeDelta / 2,
-    maxLat: r.latitude + r.latitudeDelta / 2,
+    minLng: r3(r.longitude - r.longitudeDelta / 2),
+    minLat: r3(r.latitude - r.latitudeDelta / 2),
+    maxLng: r3(r.longitude + r.longitudeDelta / 2),
+    maxLat: r3(r.latitude + r.latitudeDelta / 2),
   };
 }
 
@@ -142,8 +145,10 @@ export default function MapScreen() {
     refetch,
   } = useSpotsInViewport(bbox, { categoryId: activeCat });
   const spots = spotsData?.items ?? [];
-  // True only on the very first load (no data yet and currently fetching).
-  const isFirstLoad = isLoading && spots.length === 0;
+  // First-load spinner: only before the very first response ever lands.
+  // `spotsData` is undefined only until the first success (keepPreviousData
+  // keeps it set afterwards), so this can't stay stuck once anything loaded.
+  const isFirstLoad = isLoading && spotsData === undefined;
 
   const onRegionChange = (r: Region) => {
     if (debounce.current) clearTimeout(debounce.current);

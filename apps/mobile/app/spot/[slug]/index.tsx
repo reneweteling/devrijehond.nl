@@ -23,6 +23,7 @@ import {
   View,
 } from 'react-native';
 import MapView, { Marker, Polygon } from 'react-native-maps';
+import * as Location from 'expo-location';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SymbolView, type SymbolViewProps } from 'expo-symbols';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -150,17 +151,30 @@ export default function SpotDetailScreen() {
         ? 'Deze plek is al door de community geverifieerd.'
         : 'Ben je hier geweest? Dan telt jouw stem mee.';
 
-  const vote = (value: 'CONFIRM' | 'DENY') => {
+  const vote = async (value: 'CONFIRM' | 'DENY') => {
     // Anonymous tap → route to sign-in rather than silently doing nothing.
     if (!isAuthenticated) {
       router.push('/(auth)/sign-in');
       return;
     }
     if (!canVote) return;
-    // TODO(verify): attach a `proof: { lat, lng }` from expo-location so the
-    // server can run the proximity gate and weight the vote.
+    // Attach a proximity proof so the server can run the nearby-radius gate and
+    // weight the vote. Best-effort: if permission is denied we still submit and
+    // let the server decide (it may 422, which the Banner surfaces).
+    let proof: { lat: number; lng: number } | undefined;
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status === 'granted') {
+        const pos = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
+        proof = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      }
+    } catch {
+      /* location unavailable: submit without proof */
+    }
     castVote.mutate(
-      { spotId: spot.id, value },
+      { spotId: spot.id, value, proof },
       {
         onSuccess: () => {
           void qc.invalidateQueries({ queryKey: ['spot', slug] });
