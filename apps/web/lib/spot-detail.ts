@@ -1,6 +1,12 @@
 import { anonDb } from '@devrijehond/db';
 import { pgQuery } from '@devrijehond/server';
-import type { SpotDetailDto, SpotSummaryDto, CategoryDto, AmenityDto } from '@devrijehond/types';
+import type {
+  SpotDetailDto,
+  SpotSummaryDto,
+  CategoryDto,
+  AmenityDto,
+  ReviewDto,
+} from '@devrijehond/types';
 
 /**
  * Shared spot read helpers used by the public detail API AND the SSR spot
@@ -174,6 +180,39 @@ export async function loadNearbySpots(
     catColor: r.cat_color,
     photo: r.photo,
     distanceM: Math.round(r.dist_m),
+  }));
+}
+
+/**
+ * Load the 50 most recent ACTIVE reviews for a spot by slug.
+ * Uses `anonDb()` so the HIDDEN/REMOVED read policy is enforced — invisible
+ * spots return an empty list. Safe to call in SSR server components.
+ */
+export async function loadSpotReviews(slug: string): Promise<ReviewDto[]> {
+  const db = anonDb();
+  const spot = await db.spot.findUnique({ where: { slug }, select: { id: true } });
+  if (!spot) return [];
+
+  const rows = await db.review.findMany({
+    where: { spotId: spot.id, status: 'ACTIVE' },
+    include: { user: { select: { id: true, handle: true, name: true, image: true } } },
+    orderBy: { createdAt: 'desc' },
+    take: 50,
+  });
+
+  return rows.map((r) => ({
+    id: r.id,
+    spotId: r.spotId,
+    stars: r.stars,
+    body: r.body ?? null,
+    helpfulCount: r.helpfulCount,
+    author: {
+      id: r.user.id,
+      handle: r.user.handle ?? null,
+      name: r.user.name ?? null,
+      image: r.user.image ?? null,
+    },
+    createdAt: r.createdAt.toISOString(),
   }));
 }
 

@@ -4,6 +4,8 @@
  * Server components, styled via globals.css. Wraps every page in (site).
  */
 
+import { HeaderAccount } from './header-account';
+
 const IOS_URL = 'https://apps.apple.com/app/de-vrije-hond/id000000000';
 const ANDROID_URL = 'https://play.google.com/store/apps/details?id=nl.devrijehond.app';
 
@@ -87,6 +89,7 @@ function Header() {
           <a className="btn btn-primary" href="/#app">
             Download de app
           </a>
+          <HeaderAccount />
         </div>
       </nav>
     </header>
@@ -172,6 +175,12 @@ function Footer() {
             </li>
             <li>
               <a href="/terms">Voorwaarden</a>
+            </li>
+            <li>
+              <a href="/account">Account</a>
+            </li>
+            <li>
+              <a href="/signin">Inloggen</a>
             </li>
           </ul>
         </div>

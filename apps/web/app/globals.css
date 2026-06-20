@@ -191,6 +191,22 @@ img {
 .btn-ghost:hover {
   background: rgba(255, 255, 255, 0.6);
 }
+
+/* "of met e-mail" divider on the sign-in form. */
+.signin-or {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--ink-3);
+  font-size: 13px;
+}
+.signin-or::before,
+.signin-or::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
 .btn-sm {
   padding: 7px 13px;
   font-size: 13px;

@@ -23,8 +23,9 @@ async function loadRequests(): Promise<FeatureRequestsResponseDto> {
       cache: 'no-store',
     });
     if (!res.ok) throw new Error(`${res.status}`);
-    const json = (await res.json()) as { data: FeatureRequestsResponseDto };
-    return json.data;
+    // The API returns the response DTO directly (`{ items, nextCursor }`), not
+    // wrapped in `{ data }`.
+    return (await res.json()) as FeatureRequestsResponseDto;
   } catch {
     return { items: [], nextCursor: null };
   }

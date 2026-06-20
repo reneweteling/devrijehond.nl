@@ -1,7 +1,8 @@
-import type { SpotDetailDto } from '@devrijehond/types';
+import type { SpotDetailDto, ReviewDto } from '@devrijehond/types';
 
 import type { NearbySpot } from '@/lib/spot-detail';
 import { StoreButton } from './site-chrome';
+import { SpotParticipation } from './spot-participation';
 
 function detailHref(type: 'REGION' | 'POI', slug: string) {
   return `/${type === 'REGION' ? 'gebied' : 'plek'}/${slug}`;
@@ -11,11 +12,30 @@ function fmtDistance(m: number): string {
   return m < 1000 ? `${m} m` : `${(m / 1000).toFixed(1).replace('.', ',')} km`;
 }
 
+function fmtDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('nl-NL', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+
+function StarDisplay({ value }: { value: number }) {
+  return (
+    <span aria-label={`${value} van de 5 sterren`} style={{ color: 'var(--terra)', fontSize: 15 }}>
+      {'★'.repeat(value)}
+      {'☆'.repeat(5 - value)}
+    </span>
+  );
+}
+
 /**
  * Server-rendered spot detail, shared by `/plek/[slug]` (POI) and
  * `/gebied/[slug]` (REGION). The crawlable, verified content: name, category,
  * description, amenities, rating, verification status, a photo gallery and POI
  * contact details, styled to the site design system (globals.css).
+ * Also renders the SSR review list (SEO + trust) and mounts the client-side
+ * participation island for signed-in users.
  */
 
 const IOS_URL = 'https://apps.apple.com/app/de-vrije-hond/id000000000';
@@ -49,7 +69,15 @@ const PHONE =
 const LINK =
   'M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1';
 
-export function SpotView({ spot, nearby = [] }: { spot: SpotDetailDto; nearby?: NearbySpot[] }) {
+export function SpotView({
+  spot,
+  nearby = [],
+  reviews = [],
+}: {
+  spot: SpotDetailDto;
+  nearby?: NearbySpot[];
+  reviews?: ReviewDto[];
+}) {
   const verified = spot.verification.status === 'VERIFIED';
   const [lead, ...rest] = spot.photos;
   const isPoi = spot.type === 'POI';
@@ -189,6 +217,88 @@ export function SpotView({ spot, nearby = [] }: { spot: SpotDetailDto; nearby?: 
               ))}
             </section>
           ) : null}
+
+          {/* Reviews list — server-rendered for SEO + trust */}
+          {reviews.length > 0 ? (
+            <section style={{ marginTop: 36 }}>
+              <h2 style={{ fontSize: 22, marginBottom: 20 }}>
+                Beoordelingen{' '}
+                <span className="muted" style={{ fontSize: 15, fontWeight: 400 }}>
+                  ({reviews.length})
+                </span>
+              </h2>
+              <div style={{ display: 'grid', gap: 16 }}>
+                {reviews.map((r) => (
+                  <div
+                    key={r.id}
+                    className="card"
+                    style={{ padding: '16px 18px', overflow: 'visible' }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: 12,
+                        flexWrap: 'wrap',
+                        marginBottom: 8,
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        {r.author.image ? (
+                          <img
+                            src={r.author.image}
+                            alt={r.author.handle ?? r.author.name ?? 'Gebruiker'}
+                            width={32}
+                            height={32}
+                            style={{ borderRadius: '50%', objectFit: 'cover', flex: 'none' }}
+                          />
+                        ) : (
+                          <div
+                            aria-hidden="true"
+                            style={{
+                              width: 32,
+                              height: 32,
+                              borderRadius: '50%',
+                              background: 'var(--moss-soft)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: 14,
+                              color: 'var(--moss-700)',
+                              fontWeight: 600,
+                              flex: 'none',
+                            }}
+                          >
+                            {(r.author.handle ?? r.author.name ?? '?')[0]?.toUpperCase()}
+                          </div>
+                        )}
+                        <span style={{ fontWeight: 600, fontSize: 14.5, color: 'var(--ink)' }}>
+                          {r.author.handle ?? r.author.name ?? 'Anoniem'}
+                        </span>
+                      </div>
+                      <span className="muted" style={{ fontSize: 13 }}>
+                        {fmtDate(r.createdAt)}
+                      </span>
+                    </div>
+                    <StarDisplay value={r.stars} />
+                    {r.body ? (
+                      <p
+                        style={{
+                          marginTop: 8,
+                          fontSize: 15,
+                          color: 'var(--ink-2)',
+                          lineHeight: 1.6,
+                        }}
+                      >
+                        {r.body}
+                      </p>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : null}
         </div>
 
         {/* Sidebar */}
@@ -240,6 +350,9 @@ export function SpotView({ spot, nearby = [] }: { spot: SpotDetailDto; nearby?: 
             </div>
           ) : null}
 
+          {/* Signed-in participation: vote, review, report */}
+          <SpotParticipation spotId={spot.id} status={spot.verification.status} />
+
           <div
             className="card"
             style={{
@@ -251,7 +364,7 @@ export function SpotView({ spot, nearby = [] }: { spot: SpotDetailDto; nearby?: 
           >
             <h3 style={{ color: '#fff', fontSize: 18, margin: '0 0 6px' }}>Open in de app</h3>
             <p style={{ margin: '0 0 14px', fontSize: 14.5, color: '#fff' }}>
-              Routebeschrijving, bevestigen en beoordelen doe je in de app.
+              Gebruik de app voor navigatie en meer functies.
             </p>
             <div style={{ display: 'grid', gap: 10 }}>
               <StoreButton href={IOS_URL} kind="ios" />
@@ -276,7 +389,6 @@ export function SpotView({ spot, nearby = [] }: { spot: SpotDetailDto; nearby?: 
               >
                 {n.photo ? (
                   <div className="card-media" style={{ height: 132, position: 'relative' }}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={n.photo} alt={`${n.catLabel} ${n.name}`} />
                   </div>
                 ) : null}

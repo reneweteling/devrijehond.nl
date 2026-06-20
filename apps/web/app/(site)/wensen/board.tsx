@@ -227,8 +227,8 @@ function NewRequestForm({ onCreated }: { onCreated: (item: FeatureRequestDto) =>
         }),
       });
       if (!res.ok) throw new Error(await res.text());
-      const data = (await res.json()) as { data: FeatureRequestDto };
-      onCreated(data.data);
+      const created = (await res.json()) as FeatureRequestDto;
+      onCreated(created);
       setTitle('');
       setBody('');
       setComponent('');
@@ -404,8 +404,8 @@ export function FeatureBoard({ initial }: { initial: FeatureRequestsResponseDto 
         tab === 'all' ? '/api/v1/feature-requests' : `/api/v1/feature-requests?status=${tab}`;
       const res = await fetch(url, { credentials: 'include' });
       if (res.ok) {
-        const data = (await res.json()) as { data: FeatureRequestsResponseDto };
-        setItems(data.data.items);
+        const data = (await res.json()) as FeatureRequestsResponseDto;
+        setItems(data.items);
       }
     } finally {
       setLoading(false);
@@ -420,15 +420,17 @@ export function FeatureBoard({ initial }: { initial: FeatureRequestsResponseDto 
     });
     if (!res.ok) return;
     const data = (await res.json()) as {
-      data: { requestId: string; upvoteCount: number; viewerHasVoted: boolean };
+      requestId: string;
+      upvoteCount: number;
+      viewerHasVoted: boolean;
     };
     setItems((prev) =>
       prev.map((item) =>
         item.id === id
           ? {
               ...item,
-              upvoteCount: data.data.upvoteCount,
-              viewerHasVoted: data.data.viewerHasVoted,
+              upvoteCount: data.upvoteCount,
+              viewerHasVoted: data.viewerHasVoted,
             }
           : item,
       ),
