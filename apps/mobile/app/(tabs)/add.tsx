@@ -1,8 +1,9 @@
 /**
  * S10–S13, Submit flow as a single screen with three steps:
  *   1. choose type (REGION vs POI),
- *   2. place on the map (drop a pin for a POI; tap out a polygon ring for a
- *      REGION geofence, with undo / clear),
+ *   2. place on the map — a full-screen editor (Modal) with location search and
+ *      a recenter button: drop a draggable pin for a POI, or tap out a polygon
+ *      ring for a REGION geofence with draggable vertices + undo / clear,
  *   3. details form (name, category, description, amenities) → submit.
  *
  * A submitted spot goes live immediately as UNVERIFIED. Auth is required; an
@@ -10,9 +11,9 @@
  * taxonomy from GET /api/v1/amenities filtered by the chosen category.
  */
 
-import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import MapView, { Marker, Polygon, type Region } from 'react-native-maps';
+import { useEffect, useRef, useState } from 'react';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import MapView, { Marker, Polygon, type MapPressEvent, type Region } from 'react-native-maps';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -20,9 +21,13 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { useAmenities, useCategories, useSubmitSpot, type SpotType } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
+import { geocodePlace, type GeoResult } from '@/lib/geocode';
+import { useUserLocation } from '@/lib/location';
 import { categorySymbol } from '@/lib/icons';
 import { colors, font, radius, space } from '@/lib/theme';
 import { Button, ListState, Note, ScreenTitle } from '@/components/ui';
+
+type LatLng = { latitude: number; longitude: number };
 
 const INITIAL_REGION: Region = {
   latitude: 52.3006,
@@ -47,6 +52,49 @@ export default function AddScreen() {
   const [description, setDescription] = useState('');
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [amenityIds, setAmenityIds] = useState<string[]>([]);
+
+  // Full-screen map editor (the 'place' step).
+  const mapRef = useRef<MapView>(null);
+  const userLocation = useUserLocation();
+  const [search, setSearch] = useState('');
+  const [geo, setGeo] = useState<GeoResult[]>([]);
+
+  // Debounced location search inside the editor.
+  useEffect(() => {
+    const term = search.trim();
+    let cancelled = false;
+    const t = setTimeout(async () => {
+      if (term.length < 2) {
+        if (!cancelled) setGeo([]);
+        return;
+      }
+      const res = await geocodePlace(term);
+      if (!cancelled) setGeo(res);
+    }, 400);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [search]);
+
+  const flyTo = (lat: number, lng: number, delta = 0.02) => {
+    mapRef.current?.animateToRegion(
+      { latitude: lat, longitude: lng, latitudeDelta: delta, longitudeDelta: delta },
+      500,
+    );
+  };
+  const onPickGeo = (g: GeoResult) => {
+    setSearch('');
+    setGeo([]);
+    flyTo(g.lat, g.lng);
+  };
+  const onMapPress = (e: MapPressEvent) => {
+    const c = e.nativeEvent.coordinate;
+    if (type === 'REGION') setPolygon((prev) => [...prev, c]);
+    else setPoint(c);
+  };
+  const moveVertex = (i: number, c: LatLng) =>
+    setPolygon((prev) => prev.map((v, idx) => (idx === i ? c : v)));
 
   const qc = useQueryClient();
 
@@ -188,63 +236,9 @@ export default function AddScreen() {
         )}
 
         {step === 'place' && (
-          <View style={{ gap: space.md }}>
-            <Text style={styles.q}>
-              {type === 'REGION' ? 'Teken de grens van het gebied' : 'Zet de pin op de plek'}
-            </Text>
-            <View style={styles.mapBox}>
-              <MapView
-                style={StyleSheet.absoluteFill}
-                initialRegion={INITIAL_REGION}
-                onPress={(e) => {
-                  const c = e.nativeEvent.coordinate;
-                  if (type === 'REGION') setPolygon((prev) => [...prev, c]);
-                  else setPoint(c);
-                }}
-              >
-                {type === 'POI' && point ? <Marker coordinate={point} /> : null}
-                {type === 'REGION' && polygon.length >= 2 ? (
-                  <Polygon
-                    coordinates={polygon}
-                    strokeColor={colors.mossDark}
-                    strokeWidth={2.5}
-                    fillColor={`${colors.moss}55`}
-                  />
-                ) : null}
-                {type === 'REGION'
-                  ? polygon.map((v, i) => (
-                      <Marker key={i} coordinate={v} anchor={{ x: 0.5, y: 0.5 }}>
-                        <View style={styles.vertex} />
-                      </Marker>
-                    ))
-                  : null}
-              </MapView>
-            </View>
-            {type === 'REGION' ? (
-              <>
-                <Note>
-                  Tik op de kaart om hoekpunten te zetten (minimaal 3). De grens sluit zich vanzelf.
-                </Note>
-                {polygon.length > 0 ? (
-                  <View style={{ flexDirection: 'row', gap: space.sm }}>
-                    <Pressable
-                      style={styles.editBtn}
-                      onPress={() => setPolygon((prev) => prev.slice(0, -1))}
-                    >
-                      <SymbolView name="arrow.uturn.backward" size={14} tintColor={colors.ink2} />
-                      <Text style={styles.editBtnText}>Wis laatste</Text>
-                    </Pressable>
-                    <Pressable style={styles.editBtn} onPress={() => setPolygon([])}>
-                      <SymbolView name="trash" size={14} tintColor={colors.ink2} />
-                      <Text style={styles.editBtnText}>Wis alles</Text>
-                    </Pressable>
-                  </View>
-                ) : null}
-              </>
-            ) : (
-              <Note>Tik op de kaart om de pin neer te zetten.</Note>
-            )}
-            <Button label="Volgende" onPress={() => setStep('details')} disabled={!placeReady} />
+          <View style={styles.placeHint}>
+            <SymbolView name="map.fill" size={20} tintColor={colors.mossDark} />
+            <Text style={styles.editBtnText}>De kaart-editor is geopend…</Text>
           </View>
         )}
 
@@ -372,6 +366,146 @@ export default function AddScreen() {
           </View>
         )}
       </ScrollView>
+
+      {/* Full-screen map editor for the 'place' step */}
+      <Modal
+        visible={step === 'place'}
+        animationType="slide"
+        onRequestClose={() => setStep('type')}
+      >
+        <View style={styles.editor}>
+          <MapView
+            ref={mapRef}
+            style={StyleSheet.absoluteFill}
+            initialRegion={
+              userLocation
+                ? {
+                    latitude: userLocation.lat,
+                    longitude: userLocation.lng,
+                    latitudeDelta: 0.05,
+                    longitudeDelta: 0.05,
+                  }
+                : INITIAL_REGION
+            }
+            showsUserLocation
+            onPress={onMapPress}
+          >
+            {type === 'POI' && point ? (
+              <Marker
+                coordinate={point}
+                draggable
+                onDragEnd={(e) => setPoint(e.nativeEvent.coordinate)}
+              />
+            ) : null}
+            {type === 'REGION' && polygon.length >= 2 ? (
+              <Polygon
+                coordinates={polygon}
+                strokeColor={colors.mossDark}
+                strokeWidth={2.5}
+                fillColor={`${colors.moss}55`}
+              />
+            ) : null}
+            {type === 'REGION'
+              ? polygon.map((v, i) => (
+                  <Marker
+                    key={i}
+                    coordinate={v}
+                    anchor={{ x: 0.5, y: 0.5 }}
+                    draggable
+                    onDragEnd={(e) => moveVertex(i, e.nativeEvent.coordinate)}
+                  >
+                    <View style={styles.vertex} />
+                  </Marker>
+                ))
+              : null}
+          </MapView>
+
+          {/* Top: back + location search */}
+          <View style={[styles.editorTop, { paddingTop: insets.top + 8 }]} pointerEvents="box-none">
+            <View style={styles.editorSearchRow}>
+              <Pressable style={styles.editorIconBtn} onPress={() => setStep('type')} hitSlop={8}>
+                <SymbolView name="chevron.left" size={18} tintColor={colors.ink} />
+              </Pressable>
+              <View style={styles.editorSearchPill}>
+                <SymbolView name="magnifyingglass" size={15} tintColor={colors.ink3} />
+                <TextInput
+                  style={styles.editorSearchInput}
+                  value={search}
+                  onChangeText={setSearch}
+                  placeholder="Zoek een plaats of adres"
+                  placeholderTextColor={colors.ink3}
+                  autoCorrect={false}
+                  returnKeyType="search"
+                />
+                {search.length > 0 ? (
+                  <Pressable onPress={() => setSearch('')} hitSlop={8}>
+                    <SymbolView name="xmark.circle.fill" size={15} tintColor={colors.ink3} />
+                  </Pressable>
+                ) : null}
+              </View>
+            </View>
+            {geo.length > 0 ? (
+              <View style={styles.editorResults}>
+                {geo.map((g, i) => (
+                  <Pressable
+                    key={`${g.lat}-${g.lng}-${i}`}
+                    style={styles.editorResultRow}
+                    onPress={() => onPickGeo(g)}
+                  >
+                    <SymbolView name="mappin.and.ellipse" size={15} tintColor={colors.mossDark} />
+                    <Text style={styles.editorResultText} numberOfLines={1}>
+                      {g.label}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            ) : null}
+          </View>
+
+          {/* Recenter on the user's location */}
+          {userLocation ? (
+            <Pressable
+              style={({ pressed }) => [
+                styles.editorRecenter,
+                { bottom: insets.bottom + 168, opacity: pressed ? 0.7 : 1 },
+              ]}
+              onPress={() => flyTo(userLocation.lat, userLocation.lng, 0.02)}
+              hitSlop={8}
+            >
+              <SymbolView name="location.fill" size={20} tintColor={colors.mossDark} />
+            </Pressable>
+          ) : null}
+
+          {/* Bottom controls */}
+          <View style={[styles.editorBottom, { paddingBottom: insets.bottom + 12 }]}>
+            <Text style={styles.editorHint}>
+              {type === 'REGION'
+                ? polygon.length < 3
+                  ? 'Tik op de kaart om hoekpunten te zetten (min. 3). Sleep een punt om het te verplaatsen.'
+                  : `${polygon.length} hoekpunten — sleep een punt om bij te stellen.`
+                : point
+                  ? 'Sleep de pin om de plek precies te zetten.'
+                  : 'Tik op de kaart om de pin neer te zetten.'}
+            </Text>
+            {type === 'REGION' && polygon.length > 0 ? (
+              <View style={{ flexDirection: 'row', gap: space.sm, marginBottom: space.sm }}>
+                <Pressable
+                  style={styles.editBtn}
+                  onPress={() => setPolygon((prev) => prev.slice(0, -1))}
+                >
+                  <SymbolView name="arrow.uturn.backward" size={14} tintColor={colors.ink2} />
+                  <Text style={styles.editBtnText}>Wis laatste</Text>
+                </Pressable>
+                <Pressable style={styles.editBtn} onPress={() => setPolygon([])}>
+                  <SymbolView name="trash" size={14} tintColor={colors.ink2} />
+                  <Text style={styles.editBtnText}>Wis alles</Text>
+                </Pressable>
+              </View>
+            ) : null}
+            <Button label="Klaar" onPress={() => setStep('details')} disabled={!placeReady} />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -456,6 +590,113 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   editBtnText: { fontFamily: font.bodyMedium, fontSize: 12.5, color: colors.ink2 },
+  placeHint: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: space.xl,
+  },
+  // --- full-screen map editor ---
+  editor: { flex: 1, backgroundColor: colors.sand },
+  editorTop: { position: 'absolute', left: 0, right: 0, top: 0, paddingHorizontal: space.lg },
+  editorSearchRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  editorIconBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: colors.ink,
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+  },
+  editorSearchPill: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 9,
+    height: 42,
+    backgroundColor: '#fff',
+    borderRadius: radius.pill,
+    paddingHorizontal: 14,
+    shadowColor: colors.ink,
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+  },
+  editorSearchInput: {
+    flex: 1,
+    fontFamily: font.body,
+    fontSize: 14,
+    color: colors.ink,
+    padding: 0,
+  },
+  editorResults: {
+    marginTop: 8,
+    marginLeft: 52,
+    backgroundColor: '#fff',
+    borderRadius: radius.card,
+    overflow: 'hidden',
+    shadowColor: colors.ink,
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+  },
+  editorResultRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 11,
+    paddingHorizontal: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.line,
+  },
+  editorResultText: { flex: 1, fontFamily: font.body, fontSize: 14, color: colors.ink },
+  editorRecenter: {
+    position: 'absolute',
+    right: space.lg,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: colors.ink,
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+  },
+  editorBottom: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: colors.sand,
+    paddingHorizontal: space.lg,
+    paddingTop: space.md,
+    gap: space.sm,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    shadowColor: colors.ink,
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: -2 },
+    elevation: 8,
+  },
+  editorHint: {
+    fontFamily: font.body,
+    fontSize: 12.5,
+    lineHeight: 17,
+    color: colors.ink2,
+    textAlign: 'center',
+  },
   field: { gap: 6 },
   label: { fontFamily: font.bodyMedium, fontSize: 12, color: colors.ink2 },
   input: {
