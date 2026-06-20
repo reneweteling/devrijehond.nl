@@ -7,15 +7,24 @@
 const IOS_URL = 'https://apps.apple.com/app/de-vrije-hond/id000000000';
 const ANDROID_URL = 'https://play.google.com/store/apps/details?id=nl.devrijehond.app';
 
+/** Labrador head, front view, single-weight line drawing (the wordmark glyph). */
 export function PawMark({ size = 26, color = 'var(--moss)' }: { size?: number; color?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 1024 1024" aria-hidden="true">
-      <g fill="none" stroke={color} strokeWidth={66} strokeLinecap="round" strokeLinejoin="round">
-        <ellipse cx="360" cy="468" rx="54" ry="72" transform="rotate(-18 360 468)" />
-        <ellipse cx="452" cy="392" rx="52" ry="74" transform="rotate(-7 452 392)" />
-        <ellipse cx="572" cy="392" rx="52" ry="74" transform="rotate(7 572 392)" />
-        <ellipse cx="664" cy="468" rx="54" ry="72" transform="rotate(18 664 468)" />
-        <path d="M 512 556 C 600 556 668 612 668 690 C 668 760 604 792 558 808 C 528 818 496 818 466 808 C 420 792 356 760 356 690 C 356 612 424 556 512 556 Z" />
+    <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden="true">
+      <g fill="none" stroke={color} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+        {/* Floppy ears */}
+        <path d="M23 17 C14 13 9 19 11 30 C12 35 15 39 19 41" />
+        <path d="M41 17 C50 13 55 19 53 30 C52 35 49 39 45 41" />
+        {/* Head + muzzle outline (dome over the brow, narrowing to a rounded chin) */}
+        <path d="M23 17 C27 12 37 12 41 17 C45 22 46 29 44 35 C42 44 38 50 32 51 C26 50 22 44 20 35 C18 29 19 22 23 17 Z" />
+        {/* Muzzle break */}
+        <path d="M26 39 C29 42 35 42 38 39" />
+      </g>
+      {/* Eyes + nose */}
+      <g fill={color}>
+        <circle cx="26" cy="30" r="2" />
+        <circle cx="38" cy="30" r="2" />
+        <ellipse cx="32" cy="38" rx="3" ry="2.3" />
       </g>
     </svg>
   );

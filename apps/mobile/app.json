@@ -15,7 +15,7 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "bundleIdentifier": "nl.devrijehond.app",
-      "buildNumber": "8",
+      "buildNumber": "9",
       "supportsTablet": false,
       "config": {
         "usesNonExemptEncryption": false
@@ -56,7 +56,12 @@
       ],
       "expo-secure-store",
       "expo-apple-authentication",
-      "@react-native-google-signin/google-signin",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.762592672284-8atreoupa0ic702gnrg61bds9h88qrmp"
+        }
+      ],
       [
         "expo-location",
         {

@@ -1,16 +1,27 @@
+import { SignInForm } from './signin-form';
+
 /**
- * Minimal sign-in landing for admins (magic-link). The full sign-in UI is a
- * later story; this is the redirect target `proxy.ts` sends unauthenticated
- * `/admin/**` requests to, so the route must exist.
+ * Sign-in landing for admins/moderators (magic-link). `proxy.ts` sends
+ * unauthenticated `/admin/**` requests here with a `?next=` target. Requesting
+ * a link emails a login URL (printed to the server console in local dev) that
+ * returns to `next` once verified.
  */
-export default function SignInPage() {
+export const dynamic = 'force-dynamic';
+
+export default async function SignInPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const { next } = await searchParams;
+  const target = next && next.startsWith('/') ? next : '/admin';
   return (
     <main style={{ maxWidth: 420, margin: '80px auto', padding: '0 20px', textAlign: 'center' }}>
-      <h1>Inloggen</h1>
-      <p style={{ color: '#4a5a4d' }}>
-        Vraag een inloglink aan om toegang te krijgen tot het admin-dashboard.
+      <h1 style={{ marginBottom: 8 }}>Inloggen</h1>
+      <p style={{ color: 'var(--ink-2)', margin: 0 }}>
+        Vraag een inloglink aan om toegang te krijgen tot het beheer.
       </p>
-      {/* TODO: wire `authClient.signIn.magicLink({ email })` form (STORY-WEB-AUTH). */}
+      <SignInForm next={target} />
     </main>
   );
 }

@@ -301,18 +301,18 @@ export default async function HomePage() {
 
       {/* FAQ */}
       <section className="section">
-        <div className="container container-narrow">
+        <div className="container">
           <Reveal>
             <span className="eyebrow">Veelgestelde vragen</span>
             <h2 className="section-title">Goed om te weten</h2>
-            <div style={{ marginTop: 20, display: 'grid', gap: 14 }}>
+            <div className="grid grid-2" style={{ marginTop: 28, alignItems: 'start' }}>
               {FAQS.map((f) => (
-                <details key={f.q} className="card" style={{ padding: '16px 20px' }}>
+                <details key={f.q} className="card" style={{ padding: '18px 22px' }}>
                   <summary
                     style={{
                       cursor: 'pointer',
-                      fontWeight: 600,
-                      fontSize: 16.5,
+                      fontFamily: 'var(--font-display-stack)',
+                      fontSize: 18,
                       color: 'var(--ink)',
                     }}
                   >

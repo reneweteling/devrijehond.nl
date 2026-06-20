@@ -22,7 +22,7 @@ import * as AppleAuthentication from 'expo-apple-authentication';
 import Constants from 'expo-constants';
 import * as Linking from 'expo-linking';
 
-import { AUTH_URL, GOOGLE_WEB_CLIENT_ID } from './config';
+import { AUTH_URL, GOOGLE_WEB_CLIENT_ID, GOOGLE_IOS_CLIENT_ID } from './config';
 import { extractTokenFromResponse, saveSession, type PersistedSession } from './session';
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
@@ -238,7 +238,10 @@ export async function signInWithGoogleNative(): Promise<NativeSignInResult> {
 
   let idToken: string | null = null;
   try {
-    GoogleSignin.configure({ webClientId: GOOGLE_WEB_CLIENT_ID });
+    GoogleSignin.configure({
+      webClientId: GOOGLE_WEB_CLIENT_ID,
+      iosClientId: GOOGLE_IOS_CLIENT_ID,
+    });
     await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
     // Force the chooser every time: drop the SDK's cached account.
     await GoogleSignin.signOut().catch(() => {});

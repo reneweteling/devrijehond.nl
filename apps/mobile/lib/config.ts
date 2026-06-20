@@ -47,3 +47,10 @@ export const AUTH_URL: string = process.env.EXPO_PUBLIC_AUTH_URL ?? API_URL;
  */
 export const GOOGLE_WEB_CLIENT_ID: string | undefined =
   process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
+
+/**
+ * iOS OAuth client id for the native Google Sign-In SDK on iOS. Its reversed
+ * form is the URL scheme configured for the google-signin plugin in app.json.
+ */
+export const GOOGLE_IOS_CLIENT_ID: string | undefined =
+  process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;

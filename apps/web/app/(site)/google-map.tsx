@@ -8,8 +8,8 @@
  * navigating away immediately.
  */
 
-import { useState } from 'react';
-import { APIProvider, InfoWindow, Map, Marker } from '@vis.gl/react-google-maps';
+import { useEffect, useRef, useState } from 'react';
+import { APIProvider, InfoWindow, Map, Marker, useMap } from '@vis.gl/react-google-maps';
 import type { SpotSummaryDto } from '@devrijehond/types';
 import {
   type Bbox,
@@ -19,6 +19,31 @@ import {
   markerColor,
   spotHref,
 } from './map-shared';
+
+/**
+ * Asks the browser for the visitor's location once and recenters the map there
+ * (that's where they walk). Renders nothing; runs inside the Map context so it
+ * can drive the live map instance via useMap().
+ */
+function RecenterOnUser() {
+  const map = useMap();
+  const done = useRef(false);
+  useEffect(() => {
+    if (!map || done.current || typeof navigator === 'undefined' || !navigator.geolocation) return;
+    done.current = true;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        map.panTo({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        map.setZoom(13);
+      },
+      () => {
+        /* denied / unavailable: keep the default NL view */
+      },
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 },
+    );
+  }, [map]);
+  return null;
+}
 
 function pinIcon(s: SpotSummaryDto): string {
   const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22'><circle cx='11' cy='11' r='8' fill='${markerColor(s)}' stroke='white' stroke-width='2'/></svg>`;
@@ -56,6 +81,7 @@ export function GoogleMapView({
           onBoundsChange(bbox);
         }}
       >
+        <RecenterOnUser />
         {spots
           .filter((s) => s.lat != null && s.lng != null)
           .map((s) => (
