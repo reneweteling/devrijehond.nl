@@ -52,6 +52,12 @@ export default function ProfileScreen() {
         </Text>
         <View style={{ width: '100%', paddingHorizontal: space.lg, gap: space.sm }}>
           <Button label="Inloggen" onPress={() => router.push('/(auth)/sign-in')} />
+          <Button
+            label="Over De Vrije Hond"
+            variant="secondary"
+            icon="info.circle"
+            onPress={() => router.push('/about')}
+          />
         </View>
       </View>
     );
@@ -181,7 +187,13 @@ export default function ProfileScreen() {
         )}
       </View>
 
-      <View style={{ paddingHorizontal: space.lg, marginTop: space.md }}>
+      <View style={{ paddingHorizontal: space.lg, marginTop: space.md, gap: space.sm }}>
+        <Button
+          label="Over De Vrije Hond"
+          variant="secondary"
+          icon="info.circle"
+          onPress={() => router.push('/about')}
+        />
         <Button
           label="Uitloggen"
           variant="secondary"

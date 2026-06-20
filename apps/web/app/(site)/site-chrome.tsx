@@ -7,28 +7,16 @@
 const IOS_URL = 'https://apps.apple.com/app/de-vrije-hond/id000000000';
 const ANDROID_URL = 'https://play.google.com/store/apps/details?id=nl.devrijehond.app';
 
-/** Labrador face, front view: a filled silhouette with floppy ears and
- *  cut-out eyes + nose (the wordmark glyph). Single colour, reads on any bg. */
 export function PawMark({ size = 26, color = 'var(--moss)' }: { size?: number; color?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden="true">
-      <path
-        fill={color}
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M32 7
-           C26 7 21.5 9.6 19 14.2
-           C13.6 11.4 7.7 13.4 6 19.8
-           C4.3 26.2 7.2 33.7 14 37
-           C16 45 23 53 32 53
-           C41 53 48 45 50 37
-           C56.8 33.7 59.7 26.2 58 19.8
-           C56.3 13.4 50.4 11.4 45 14.2
-           C42.5 9.6 38 7 32 7 Z
-           M25 29 a2.6 2.6 0 1 0 0.001 0 Z
-           M39 29 a2.6 2.6 0 1 0 0.001 0 Z
-           M32 38 a3.2 2.7 0 1 0 0.001 0 Z"
-      />
+    <svg width={size} height={size} viewBox="0 0 1024 1024" aria-hidden="true">
+      <g fill="none" stroke={color} strokeWidth={66} strokeLinecap="round" strokeLinejoin="round">
+        <ellipse cx="360" cy="468" rx="54" ry="72" transform="rotate(-18 360 468)" />
+        <ellipse cx="452" cy="392" rx="52" ry="74" transform="rotate(-7 452 392)" />
+        <ellipse cx="572" cy="392" rx="52" ry="74" transform="rotate(7 572 392)" />
+        <ellipse cx="664" cy="468" rx="54" ry="72" transform="rotate(18 664 468)" />
+        <path d="M 512 556 C 600 556 668 612 668 690 C 668 760 604 792 558 808 C 528 818 496 818 466 808 C 420 792 356 760 356 690 C 356 612 424 556 512 556 Z" />
+      </g>
     </svg>
   );
 }
@@ -157,6 +145,9 @@ function Footer() {
             </li>
             <li>
               <a href="/#zo-werkt-het">Zo werkt het</a>
+            </li>
+            <li>
+              <a href="/over">Over &amp; meebouwen</a>
             </li>
             <li>
               <a href="/privacy">Privacyverklaring</a>
