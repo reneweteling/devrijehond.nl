@@ -134,35 +134,41 @@ export default function SearchScreen() {
         renderItem={renderItem}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
-          geo.length > 0 ? (
-            <View>
-              {geo.map((g, i) => (
-                <Pressable
-                  key={`${g.lat}-${g.lng}-${i}`}
-                  style={styles.locRow}
-                  onPress={() => goToLocation(g)}
-                >
-                  <View style={styles.locIcon}>
-                    <SymbolView name="mappin.and.ellipse" size={18} tintColor={colors.mossDark} />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.locTitle} numberOfLines={1}>
-                      {g.label}
-                    </Text>
-                    <Text style={styles.locMeta}>Ga naar deze plek op de kaart</Text>
-                  </View>
-                  <SymbolView name="arrow.up.right" size={15} tintColor={colors.ink3} />
-                </Pressable>
-              ))}
-            </View>
-          ) : null
+          <View>
+            {geo.length > 0 ? (
+              <>
+                <Text style={styles.sectionLabel}>Locaties</Text>
+                {geo.map((g, i) => (
+                  <Pressable
+                    key={`${g.lat}-${g.lng}-${i}`}
+                    style={styles.locRow}
+                    onPress={() => goToLocation(g)}
+                  >
+                    <View style={styles.locIcon}>
+                      <SymbolView name="mappin.and.ellipse" size={18} tintColor={colors.mossDark} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.locTitle} numberOfLines={1}>
+                        {g.label}
+                      </Text>
+                      <Text style={styles.locMeta}>Ga hierheen en zie wat er in de buurt is</Text>
+                    </View>
+                    <SymbolView name="arrow.up.right" size={15} tintColor={colors.ink3} />
+                  </Pressable>
+                ))}
+              </>
+            ) : null}
+            {results.length > 0 ? <Text style={styles.sectionLabel}>In onze gids</Text> : null}
+          </View>
         }
         ListEmptyComponent={
-          <Text style={styles.empty}>
-            {query
-              ? 'Geen plekken gevonden. Typ een adres of plaats om naar de kaart te springen.'
-              : 'Typ om te zoeken op naam, categorie, plaats of adres.'}
-          </Text>
+          geo.length > 0 ? null : (
+            <Text style={styles.empty}>
+              {query
+                ? 'Aan het zoeken…'
+                : 'Typ om te zoeken op een plaats, adres of een plek uit onze gids.'}
+            </Text>
+          )
         }
         contentContainerStyle={{ paddingTop: space.md, paddingBottom: insets.bottom + 40 }}
       />
@@ -204,6 +210,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  sectionLabel: {
+    fontFamily: font.bodyMedium,
+    fontSize: 12,
+    color: colors.ink2,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+    marginHorizontal: space.lg,
+    marginBottom: space.sm,
   },
   locTitle: { fontFamily: font.heading, fontSize: 15, lineHeight: 20, color: colors.ink },
   locMeta: { fontFamily: font.body, fontSize: 12, color: colors.ink2, marginTop: 1 },

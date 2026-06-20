@@ -58,6 +58,9 @@ export default function AddScreen() {
   const userLocation = useUserLocation();
   const [search, setSearch] = useState('');
   const [geo, setGeo] = useState<GeoResult[]>([]);
+  // Index of the vertex currently being dragged (for live polygon + lifted dot).
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [dragCoord, setDragCoord] = useState<LatLng | null>(null);
 
   // Debounced location search inside the editor.
   useEffect(() => {
@@ -95,6 +98,12 @@ export default function AddScreen() {
   };
   const moveVertex = (i: number, c: LatLng) =>
     setPolygon((prev) => prev.map((v, idx) => (idx === i ? c : v)));
+
+  // Polygon outline that follows the finger live while a vertex is dragged.
+  const livePolygon =
+    dragIdx != null && dragCoord
+      ? polygon.map((v, idx) => (idx === dragIdx ? dragCoord : v))
+      : polygon;
 
   const qc = useQueryClient();
 
@@ -394,12 +403,13 @@ export default function AddScreen() {
               <Marker
                 coordinate={point}
                 draggable
+                onDrag={(e) => setPoint(e.nativeEvent.coordinate)}
                 onDragEnd={(e) => setPoint(e.nativeEvent.coordinate)}
               />
             ) : null}
-            {type === 'REGION' && polygon.length >= 2 ? (
+            {type === 'REGION' && livePolygon.length >= 2 ? (
               <Polygon
-                coordinates={polygon}
+                coordinates={livePolygon}
                 strokeColor={colors.mossDark}
                 strokeWidth={2.5}
                 fillColor={`${colors.moss}55`}
@@ -409,12 +419,26 @@ export default function AddScreen() {
               ? polygon.map((v, i) => (
                   <Marker
                     key={i}
+                    identifier={`v${i}`}
                     coordinate={v}
                     anchor={{ x: 0.5, y: 0.5 }}
                     draggable
-                    onDragEnd={(e) => moveVertex(i, e.nativeEvent.coordinate)}
+                    tracksViewChanges={dragIdx === i}
+                    onDragStart={() => {
+                      setDragIdx(i);
+                      setDragCoord(v);
+                    }}
+                    onDrag={(e) => setDragCoord(e.nativeEvent.coordinate)}
+                    onDragEnd={(e) => {
+                      moveVertex(i, e.nativeEvent.coordinate);
+                      setDragIdx(null);
+                      setDragCoord(null);
+                    }}
                   >
-                    <View style={styles.vertex} />
+                    {/* Big transparent hit area; the visible dot lifts while dragged. */}
+                    <View style={styles.vertexHit}>
+                      <View style={[styles.vertex, dragIdx === i && styles.vertexActive]} />
+                    </View>
                   </Marker>
                 ))
               : null}
@@ -481,10 +505,10 @@ export default function AddScreen() {
             <Text style={styles.editorHint}>
               {type === 'REGION'
                 ? polygon.length < 3
-                  ? 'Tik op de kaart om hoekpunten te zetten (min. 3). Sleep een punt om het te verplaatsen.'
-                  : `${polygon.length} hoekpunten — sleep een punt om bij te stellen.`
+                  ? 'Tik op de kaart om hoekpunten te zetten (min. 3). Houd een punt ingedrukt en sleep om het te verplaatsen.'
+                  : `${polygon.length} hoekpunten. Houd een punt ingedrukt en sleep om bij te stellen.`
                 : point
-                  ? 'Sleep de pin om de plek precies te zetten.'
+                  ? 'Houd de pin ingedrukt en sleep om de plek precies te zetten.'
                   : 'Tik op de kaart om de pin neer te zetten.'}
             </Text>
             {type === 'REGION' && polygon.length > 0 ? (
@@ -570,13 +594,29 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: colors.mossSoft,
   },
+  // Large transparent touch target so a vertex is easy to grab + drag.
+  vertexHit: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   vertex: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     backgroundColor: colors.moss,
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: '#fff',
+    shadowColor: colors.ink,
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 1 },
+  },
+  // "Lifted" look while being dragged (bigger + terracotta), like Google Maps.
+  vertexActive: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: colors.terra,
+    shadowOpacity: 0.4,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 3 },
   },
   editBtn: {
     flexDirection: 'row',

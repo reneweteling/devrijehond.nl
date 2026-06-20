@@ -86,7 +86,9 @@ export default function MapScreen() {
   // Track whether we've done the initial user-location fly-to (only once).
   const centredOnUser = useRef(false);
 
-  // (B) Recenter on the user once on mount when permission is granted.
+  // (B) Always centre on the user as soon as location resolves (that's where
+  // they're walking). Walking-scale zoom, not the whole city. Runs once; a
+  // search fly-to or manual pan can move it afterwards.
   const userLocation = useUserLocation();
   useEffect(() => {
     if (centredOnUser.current || !userLocation) return;
@@ -94,10 +96,10 @@ export default function MapScreen() {
     const region: Region = {
       latitude: userLocation.lat,
       longitude: userLocation.lng,
-      latitudeDelta: 0.08,
-      longitudeDelta: 0.08,
+      latitudeDelta: 0.04,
+      longitudeDelta: 0.04,
     };
-    mapRef.current?.animateToRegion(region, 700);
+    mapRef.current?.animateToRegion(region, 600);
     // Defer the viewport sync out of the synchronous effect body.
     setTimeout(() => setBbox(regionToBbox(region)), 0);
   }, [userLocation]);
@@ -273,13 +275,6 @@ export default function MapScreen() {
           <Pressable style={styles.searchTap} onPress={() => router.push('/search')}>
             <SymbolView name="magnifyingglass" size={16} tintColor={colors.ink3} />
             <Text style={styles.searchPlaceholder}>Zoek een plek, gebied of adres</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => router.push('/(tabs)/profile')}
-            style={styles.avatar}
-            hitSlop={8}
-          >
-            <SymbolView name="person.fill" size={14} tintColor={colors.mossDark} />
           </Pressable>
         </View>
 

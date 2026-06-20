@@ -71,6 +71,8 @@ jq -n --arg kid "$ASC_KEY_ID" --arg iss "$ASC_ISSUER_ID" --arg key "$(cat "$KEYF
 
 export EXPO_PUBLIC_API_URL="${EXPO_PUBLIC_API_URL:-https://www.devrijehond.nl}"
 export EXPO_PUBLIC_AUTH_URL="${EXPO_PUBLIC_AUTH_URL:-https://www.devrijehond.nl}"
+# Google web OAuth client id (public, not a secret) for native Google Sign-In.
+export EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID="${EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID:-762592672284-cr47iv5jq6d0p2ghvmrcrf1lar90vpiq.apps.googleusercontent.com}"
 
 echo "▸ Prebuild (regenerate ios/)"
 pnpm exec expo prebuild -p ios --no-install
