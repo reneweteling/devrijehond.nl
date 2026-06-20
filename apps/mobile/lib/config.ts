@@ -15,19 +15,27 @@
  * runtime lookup that comes back undefined on device and silently breaks boot.
  */
 
-function requireApiUrl(): string {
+/** Production origin, the fallback when the env var wasn't inlined at build time. */
+const DEFAULT_API_URL = 'https://www.devrijehond.nl';
+
+function resolveApiUrl(): string {
   const value = process.env.EXPO_PUBLIC_API_URL;
-  if (typeof value !== 'string' || value.length === 0) {
+  if (typeof value === 'string' && value.length > 0) return value;
+  // Fail fast in dev (a misconfigured local build), but NEVER hard-crash a
+  // production app at launch over a missing inline: fall back to production.
+  // A top-level throw here crashed the first TestFlight build, because
+  // EXPO_PUBLIC_* is inlined at JS-bundle time and the archive's bundling phase
+  // didn't have the var set.
+  if (__DEV__) {
     throw new Error(
       '[config] EXPO_PUBLIC_API_URL is not set. Configure it in ' +
-        'apps/mobile/.env.development.local for local dev, eas.json#build.<profile>.env ' +
-        'for native builds, and via `eas env:create` for OTA updates.',
+        'apps/mobile/.env.development.local for local dev.',
     );
   }
-  return value;
+  return DEFAULT_API_URL;
 }
 
-export const API_URL: string = requireApiUrl();
+export const API_URL: string = resolveApiUrl();
 
 export const AUTH_URL: string = process.env.EXPO_PUBLIC_AUTH_URL ?? API_URL;
 
