@@ -207,3 +207,33 @@ export async function setUserRole(
   await logAction(ctx, 'EDIT', 'USER', userId, role);
   revalidatePath('/admin/users');
 }
+
+// ---------------------------------------------------------------------------
+// Moderator applications (ADMIN only)
+// ---------------------------------------------------------------------------
+
+/** Approve a moderator application and promote the applicant to MODERATOR. */
+export async function approveModeratorApplication(applicationId: string): Promise<void> {
+  const ctx = await adminOnlyContext();
+  const db = authDb(ctx.user);
+  const application = await db.moderatorApplication.update({
+    where: { id: applicationId },
+    data: { status: 'APPROVED', decidedById: ctx.user.id, decidedAt: new Date() },
+    select: { userId: true },
+  });
+  await db.user.update({ where: { id: application.userId }, data: { role: 'MODERATOR' } });
+  await logAction(ctx, 'EDIT', 'MODERATOR_APPLICATION', applicationId, 'APPROVED');
+  revalidatePath('/admin/applications');
+}
+
+/** Reject a moderator application. */
+export async function rejectModeratorApplication(applicationId: string): Promise<void> {
+  const ctx = await adminOnlyContext();
+  const db = authDb(ctx.user);
+  await db.moderatorApplication.update({
+    where: { id: applicationId },
+    data: { status: 'REJECTED', decidedById: ctx.user.id, decidedAt: new Date() },
+  });
+  await logAction(ctx, 'EDIT', 'MODERATOR_APPLICATION', applicationId, 'REJECTED');
+  revalidatePath('/admin/applications');
+}
