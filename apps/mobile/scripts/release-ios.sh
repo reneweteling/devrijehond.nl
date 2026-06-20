@@ -31,6 +31,29 @@ set +a
 : "${ASC_KEY_ID:?ASC_KEY_ID missing in .env.local}"
 : "${ASC_ISSUER_ID:?ASC_ISSUER_ID missing in .env.local}"
 : "${APPLE_TEAM_ID:?APPLE_TEAM_ID missing in .env.local}"
+: "${APPLE_DIST_CERT_PASSWORD:?APPLE_DIST_CERT_PASSWORD missing in .env.local}"
+
+# --- dedicated signing keychain so codesign never shows a GUI prompt ---
+# Imports the distribution cert+key from secrets/Certificates.p12 into a
+# throwaway keychain whose password we control, and grants codesign access via
+# the partition list. Mirrors apple-actions/import-codesign-certs in CI.
+echo "▸ Signing keychain"
+KEYCHAIN="$HOME/Library/Keychains/devrijehond-signing.keychain-db"
+KEYCHAIN_PWD="devrijehond-signing"
+security delete-keychain "$KEYCHAIN" 2>/dev/null || true
+security create-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN"
+security set-keychain-settings -lut 21600 "$KEYCHAIN" # don't auto-lock for 6h
+security unlock-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN"
+security import "$ROOT/secrets/Certificates.p12" -k "$KEYCHAIN" \
+  -P "$APPLE_DIST_CERT_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
+security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PWD" "$KEYCHAIN" >/dev/null
+# Search ONLY the signing keychain during the build, so codesign can't fall back
+# to the login keychain's copy of the cert (which would pop a GUI prompt and
+# hang a non-interactive build). The original search list is restored on exit.
+ORIG_KEYCHAINS="$(security list-keychains -d user | sed 's/[" ]//g' | tr '\n' ' ')"
+security list-keychains -d user -s "$KEYCHAIN"
+# shellcheck disable=SC2064
+trap "security list-keychains -d user -s $ORIG_KEYCHAINS 2>/dev/null; security delete-keychain '$KEYCHAIN' 2>/dev/null || true" EXIT
 
 KEYFILE="$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8"
 mkdir -p "$(dirname "$KEYFILE")"
@@ -47,18 +70,18 @@ pnpm exec expo prebuild -p ios --no-install
 echo "▸ Pods"
 (cd ios && pod install)
 
-echo "▸ Archive"
+# Archive WITHOUT signing (no cert needed, no keychain prompt, no dev-cert
+# requirement). All signing happens at export with the distribution cert + App
+# Store profile.
+echo "▸ Archive (unsigned)"
 (cd ios && xcodebuild \
   -workspace DeVrijeHond.xcworkspace \
   -scheme DeVrijeHond \
   -configuration Release \
   -sdk iphoneos \
   -archivePath build/DeVrijeHond.xcarchive \
-  -allowProvisioningUpdates \
-  -authenticationKeyPath "$KEYFILE" \
-  -authenticationKeyID "$ASC_KEY_ID" \
-  -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
-  DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+  CODE_SIGNING_ALLOWED=NO \
+  CODE_SIGNING_REQUIRED=NO \
   archive)
 
 echo "▸ App Store profile + export (manual signing)"
