@@ -285,3 +285,107 @@ export function useMySpots(enabled = true) {
     },
   });
 }
+
+// ---------------------------------------------------------------------------
+// Moderator application (raw-fetch bearer pattern, not in generated client).
+// ---------------------------------------------------------------------------
+
+export type ModeratorApplicationStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+
+export interface ModeratorApplication {
+  id: string;
+  status: ModeratorApplicationStatus;
+  motivation: string;
+  createdAt: string;
+}
+
+/**
+ * GET /api/v1/me/moderator-application, the signed-in user's own application
+ * (null if none).
+ */
+export function useModeratorApplication(enabled = true) {
+  return useQuery({
+    queryKey: ['moderator-application'],
+    enabled,
+    queryFn: async ({ signal }): Promise<ModeratorApplication | null> => {
+      const session = await loadSession();
+      const res = await fetch(`${API_URL}/api/v1/me/moderator-application`, {
+        headers: session ? { Authorization: `Bearer ${session.token}` } : undefined,
+        signal,
+      });
+      if (res.status === 401) {
+        await clearSession();
+        setAuthToken(null);
+        throw new Error(`me/moderator-application 401`);
+      }
+      if (!res.ok) throw new Error(`me/moderator-application ${res.status}`);
+      const data = (await res.json()) as { application: ModeratorApplication | null };
+      return data.application;
+    },
+  });
+}
+
+/** POST /api/v1/me/moderator-application, submit a new application. */
+export function useApplyModerator() {
+  return useMutation({
+    mutationFn: async (args: { motivation: string }): Promise<ModeratorApplication> => {
+      const session = await loadSession();
+      const res = await fetch(`${API_URL}/api/v1/me/moderator-application`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session ? { Authorization: `Bearer ${session.token}` } : {}),
+        },
+        body: JSON.stringify({ motivation: args.motivation }),
+      });
+      if (res.status === 401) {
+        await clearSession();
+        setAuthToken(null);
+        throw new Error(`me/moderator-application 401`);
+      }
+      if (!res.ok) {
+        const err = (await res.json().catch(() => ({}))) as { error?: string };
+        throw Object.assign(new Error(err.error ?? `apply-moderator ${res.status}`), {
+          status: res.status,
+        });
+      }
+      return res.json() as Promise<ModeratorApplication>;
+    },
+  });
+}
+
+/**
+ * PATCH /api/v1/me/spots/:id/moderate, staff-only spot status update.
+ * Invalidates spot detail + list caches on success via the returned
+ * `invalidateQueries` helper (caller provides the QueryClient).
+ */
+export function useModerateSpot() {
+  return useMutation({
+    mutationFn: async (args: {
+      spotId: string;
+      status: 'VERIFIED' | 'UNVERIFIED' | 'HIDDEN' | 'REMOVED';
+    }): Promise<{ ok: boolean }> => {
+      const session = await loadSession();
+      const res = await fetch(`${API_URL}/api/v1/me/spots/${args.spotId}/moderate`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session ? { Authorization: `Bearer ${session.token}` } : {}),
+        },
+        body: JSON.stringify({ status: args.status }),
+      });
+      if (res.status === 401) {
+        await clearSession();
+        setAuthToken(null);
+        throw new Error(`moderate 401`);
+      }
+      if (!res.ok) {
+        const err = (await res.json().catch(() => ({}))) as { error?: string };
+        throw Object.assign(new Error(err.error ?? `moderate ${res.status}`), {
+          status: res.status,
+        });
+      }
+      return res.json() as Promise<{ ok: boolean }>;
+    },
+  });
+}

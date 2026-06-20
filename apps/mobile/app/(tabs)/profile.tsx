@@ -15,7 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQueryClient } from '@tanstack/react-query';
 import { setAuthToken } from '@devrijehond/api-client';
 
-import { useMe, useMySpots, type Dog, type SpotSummary } from '@/lib/api';
+import { useMe, useModeratorApplication, useMySpots, type Dog, type SpotSummary } from '@/lib/api';
 import { clearSession } from '@/lib/session';
 import { useAuth } from '@/lib/auth-context';
 import { colors, font, radius, space } from '@/lib/theme';
@@ -28,6 +28,7 @@ export default function ProfileScreen() {
   const { isAuthenticated, setAuthenticated } = useAuth();
   const { data: me, isLoading, isError: meError, refetch: meRefetch } = useMe(isAuthenticated);
   const { data: mySpots, isError: spotsError, refetch: spotsRefetch } = useMySpots(isAuthenticated);
+  const { data: modApplication } = useModeratorApplication(isAuthenticated);
 
   const signOut = async () => {
     await clearSession();
@@ -156,6 +157,30 @@ export default function ProfileScreen() {
         )}
       </View>
 
+      <View style={styles.section}>
+        <Text style={[styles.sectionTitle, { marginBottom: space.md }]}>Moderatie</Text>
+        {(me?.role as string) === 'MODERATOR' || me?.role === 'ADMIN' ? (
+          <View style={styles.modBadgeRow}>
+            <SymbolView name="shield.fill" size={15} tintColor={colors.mossDark} />
+            <Text style={styles.modBadgeText}>Je bent moderator</Text>
+          </View>
+        ) : modApplication?.status === 'PENDING' ? (
+          <View style={styles.modBadgeRow}>
+            <SymbolView name="clock.fill" size={15} tintColor={colors.terra} />
+            <Text style={[styles.modBadgeText, { color: colors.terra }]}>
+              Aanmelding in behandeling
+            </Text>
+          </View>
+        ) : (
+          <Button
+            label="Word moderator"
+            variant="secondary"
+            icon="shield"
+            onPress={() => router.push('/moderator-apply')}
+          />
+        )}
+      </View>
+
       <View style={{ paddingHorizontal: space.lg, marginTop: space.md }}>
         <Button
           label="Uitloggen"
@@ -255,4 +280,6 @@ const styles = StyleSheet.create({
   dogName: { fontFamily: font.bodyMedium, fontSize: 14, color: colors.ink },
   dogMeta: { fontFamily: font.body, fontSize: 12, color: colors.ink2 },
   placeholder: { fontFamily: font.body, fontSize: 13, color: colors.ink3 },
+  modBadgeRow: { flexDirection: 'row', alignItems: 'center', gap: 7 },
+  modBadgeText: { fontFamily: font.bodyMedium, fontSize: 13, color: colors.mossDark },
 });

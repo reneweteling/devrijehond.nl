@@ -31,6 +31,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import {
   useCastVote,
   useMe,
+  useModerateSpot,
   useSpotDetail,
   useSpotReviews,
   useSubmitReport,
@@ -92,8 +93,10 @@ export default function SpotDetailScreen() {
   const { data: me, isLoading: meLoading } = useMe(isAuthenticated);
   const castVote = useCastVote();
   const submitReport = useSubmitReport();
+  const moderateSpot = useModerateSpot();
   const [reportOpen, setReportOpen] = useState(false);
   const [reportError, setReportError] = useState(false);
+  const [moderateResult, setModerateResult] = useState<'success' | 'error' | null>(null);
 
   const reviews = reviewsData?.items ?? [];
   const region = useMemo(() => polygonCoords(spot?.geometry), [spot?.geometry]);
@@ -131,6 +134,7 @@ export default function SpotDetailScreen() {
   const v = spot.verification;
   const progress = Math.max(0, Math.min(1, v.netScore / 5));
   const isOwner = me?.id === spot.submittedBy.id;
+  const isStaff = (me?.role as string) === 'MODERATOR' || me?.role === 'ADMIN';
   const canVote = !!me && !isOwner && v.status === 'UNVERIFIED';
   // Buttons stay tappable for anonymous users on an open spot, the tap routes
   // to sign-in. Only an owner / already-resolved spot disables them.
@@ -167,6 +171,22 @@ export default function SpotDetailScreen() {
         onError: () => {
           // castVote.isError will be true; the Banner below renders the message.
         },
+      },
+    );
+  };
+
+  const moderate = (status: 'VERIFIED' | 'UNVERIFIED' | 'HIDDEN' | 'REMOVED') => {
+    setModerateResult(null);
+    moderateSpot.mutate(
+      { spotId: spot.id, status },
+      {
+        onSuccess: () => {
+          setModerateResult('success');
+          void qc.invalidateQueries({ queryKey: ['spot', slug] });
+          void qc.invalidateQueries({ queryKey: ['spots'] });
+          void qc.invalidateQueries({ queryKey: ['spots-map'] });
+        },
+        onError: () => setModerateResult('error'),
       },
     );
   };
@@ -379,6 +399,61 @@ export default function SpotDetailScreen() {
             <SymbolView name="flag" size={14} tintColor={colors.ink3} />
             <Text style={styles.reportText}>Probleem melden</Text>
           </Pressable>
+
+          {/* Moderation card — staff only */}
+          {isStaff ? (
+            <View style={styles.moderateBlock}>
+              <Text style={styles.moderateTitle}>Moderatie</Text>
+              {moderateResult === 'success' ? (
+                <Banner kind="success">Status bijgewerkt.</Banner>
+              ) : moderateResult === 'error' ? (
+                <Banner kind="error">Bijwerken mislukt. Probeer opnieuw.</Banner>
+              ) : null}
+              <View style={styles.moderateGrid}>
+                <View style={{ flex: 1 }}>
+                  <Button
+                    label="Verifieer"
+                    icon="checkmark.seal.fill"
+                    onPress={() => moderate('VERIFIED')}
+                    disabled={moderateSpot.isPending || v.status === 'VERIFIED'}
+                    loading={moderateSpot.isPending}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Button
+                    label="Herstel"
+                    variant="secondary"
+                    icon="arrow.uturn.left"
+                    onPress={() => moderate('UNVERIFIED')}
+                    disabled={moderateSpot.isPending || v.status === 'UNVERIFIED'}
+                    loading={moderateSpot.isPending}
+                  />
+                </View>
+              </View>
+              <View style={styles.moderateGrid}>
+                <View style={{ flex: 1 }}>
+                  <Button
+                    label="Verberg"
+                    variant="secondary"
+                    icon="eye.slash.fill"
+                    onPress={() => moderate('HIDDEN')}
+                    disabled={moderateSpot.isPending || v.status === 'HIDDEN'}
+                    loading={moderateSpot.isPending}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Button
+                    label="Verwijder"
+                    variant="accent"
+                    icon="trash.fill"
+                    onPress={() => moderate('REMOVED')}
+                    disabled={moderateSpot.isPending || v.status === 'REMOVED'}
+                    loading={moderateSpot.isPending}
+                  />
+                </View>
+              </View>
+            </View>
+          ) : null}
         </View>
       </ScrollView>
 
@@ -577,4 +652,13 @@ const styles = StyleSheet.create({
   reportOptionText: { fontFamily: font.bodyMedium, fontSize: 14, color: colors.ink },
   reportCancel: { alignItems: 'center', paddingVertical: 14, marginTop: space.sm },
   reportCancelText: { fontFamily: font.bodyMedium, fontSize: 14, color: colors.ink2 },
+  moderateBlock: {
+    backgroundColor: colors.sand,
+    borderRadius: radius.card,
+    padding: space.lg,
+    gap: space.sm,
+    marginTop: space.sm,
+  },
+  moderateTitle: { fontFamily: font.heading, fontSize: 14, lineHeight: 19, color: colors.ink },
+  moderateGrid: { flexDirection: 'row', gap: 10 },
 });

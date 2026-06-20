@@ -24,6 +24,7 @@ export type Report = $ModelResult<$Schema, 'Report'>;
 export type AdminAction = $ModelResult<$Schema, 'AdminAction'>;
 export type FeatureRequest = $ModelResult<$Schema, 'FeatureRequest'>;
 export type FeatureVote = $ModelResult<$Schema, 'FeatureVote'>;
+export type ModeratorApplication = $ModelResult<$Schema, 'ModeratorApplication'>;
 export type Auth = $TypeDefResult<$Schema, 'Auth'>;
 export const UserRole = $schema.enums.UserRole.values;
 export type UserRole = (typeof UserRole)[keyof typeof UserRole];
@@ -45,5 +46,8 @@ export const ReportReason = $schema.enums.ReportReason.values;
 export type ReportReason = (typeof ReportReason)[keyof typeof ReportReason];
 export const FeatureStatus = $schema.enums.FeatureStatus.values;
 export type FeatureStatus = (typeof FeatureStatus)[keyof typeof FeatureStatus];
+export const ModeratorApplicationStatus = $schema.enums.ModeratorApplicationStatus.values;
+export type ModeratorApplicationStatus =
+  (typeof ModeratorApplicationStatus)[keyof typeof ModeratorApplicationStatus];
 export const AdminActionType = $schema.enums.AdminActionType.values;
 export type AdminActionType = (typeof AdminActionType)[keyof typeof AdminActionType];

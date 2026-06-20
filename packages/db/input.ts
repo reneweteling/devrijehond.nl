@@ -531,3 +531,49 @@ export type FeatureVoteGetPayload<
   Args extends $SelectIncludeOmit<$Schema, 'FeatureVote', true>,
   Options extends $QueryOptions<$Schema> = $QueryOptions<$Schema>,
 > = $Result<$Schema, 'FeatureVote', Args, Options>;
+export type ModeratorApplicationFindManyArgs = $FindManyArgs<$Schema, 'ModeratorApplication'>;
+export type ModeratorApplicationFindUniqueArgs = $FindUniqueArgs<$Schema, 'ModeratorApplication'>;
+export type ModeratorApplicationFindFirstArgs = $FindFirstArgs<$Schema, 'ModeratorApplication'>;
+export type ModeratorApplicationExistsArgs = $ExistsArgs<$Schema, 'ModeratorApplication'>;
+export type ModeratorApplicationCreateArgs = $CreateArgs<$Schema, 'ModeratorApplication'>;
+export type ModeratorApplicationCreateManyArgs = $CreateManyArgs<$Schema, 'ModeratorApplication'>;
+export type ModeratorApplicationCreateManyAndReturnArgs = $CreateManyAndReturnArgs<
+  $Schema,
+  'ModeratorApplication'
+>;
+export type ModeratorApplicationUpdateArgs = $UpdateArgs<$Schema, 'ModeratorApplication'>;
+export type ModeratorApplicationUpdateManyArgs = $UpdateManyArgs<$Schema, 'ModeratorApplication'>;
+export type ModeratorApplicationUpdateManyAndReturnArgs = $UpdateManyAndReturnArgs<
+  $Schema,
+  'ModeratorApplication'
+>;
+export type ModeratorApplicationUpsertArgs = $UpsertArgs<$Schema, 'ModeratorApplication'>;
+export type ModeratorApplicationDeleteArgs = $DeleteArgs<$Schema, 'ModeratorApplication'>;
+export type ModeratorApplicationDeleteManyArgs = $DeleteManyArgs<$Schema, 'ModeratorApplication'>;
+export type ModeratorApplicationCountArgs = $CountArgs<$Schema, 'ModeratorApplication'>;
+export type ModeratorApplicationAggregateArgs = $AggregateArgs<$Schema, 'ModeratorApplication'>;
+export type ModeratorApplicationGroupByArgs = $GroupByArgs<$Schema, 'ModeratorApplication'>;
+export type ModeratorApplicationWhereInput = $WhereInput<$Schema, 'ModeratorApplication'>;
+export type ModeratorApplicationSelect = $SelectInput<$Schema, 'ModeratorApplication'>;
+export type ModeratorApplicationInclude = $IncludeInput<$Schema, 'ModeratorApplication'>;
+export type ModeratorApplicationOmit = $OmitInput<$Schema, 'ModeratorApplication'>;
+export type ModeratorApplicationUncheckedCreateInput = $UncheckedCreateInput<
+  $Schema,
+  'ModeratorApplication'
+>;
+export type ModeratorApplicationCheckedCreateInput = $CheckedCreateInput<
+  $Schema,
+  'ModeratorApplication'
+>;
+export type ModeratorApplicationUncheckedUpdateInput = $UncheckedUpdateInput<
+  $Schema,
+  'ModeratorApplication'
+>;
+export type ModeratorApplicationCheckedUpdateInput = $CheckedUpdateInput<
+  $Schema,
+  'ModeratorApplication'
+>;
+export type ModeratorApplicationGetPayload<
+  Args extends $SelectIncludeOmit<$Schema, 'ModeratorApplication', true>,
+  Options extends $QueryOptions<$Schema> = $QueryOptions<$Schema>,
+> = $Result<$Schema, 'ModeratorApplication', Args, Options>;

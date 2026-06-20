@@ -174,6 +174,30 @@ export class SchemaType implements SchemaDef {
           array: true,
           relation: { opposite: 'admin' },
         },
+        moderatorApplication: {
+          name: 'moderatorApplication',
+          type: 'ModeratorApplication',
+          optional: true,
+          attributes: [
+            {
+              name: '@relation',
+              args: [{ name: 'name', value: ExpressionUtils.literal('Applicant') }],
+            },
+          ] as readonly AttributeApplication[],
+          relation: { opposite: 'user', name: 'Applicant' },
+        },
+        decidedApplications: {
+          name: 'decidedApplications',
+          type: 'ModeratorApplication',
+          array: true,
+          attributes: [
+            {
+              name: '@relation',
+              args: [{ name: 'name', value: ExpressionUtils.literal('ApplicationDecider') }],
+            },
+          ] as readonly AttributeApplication[],
+          relation: { opposite: 'decidedBy', name: 'ApplicationDecider' },
+        },
         sessions: {
           name: 'sessions',
           type: 'Session',
@@ -2887,6 +2911,199 @@ export class SchemaType implements SchemaDef {
         requestId_userId: { requestId: { type: 'String' }, userId: { type: 'String' } },
       },
     },
+    ModeratorApplication: {
+      name: 'ModeratorApplication',
+      fields: {
+        id: {
+          name: 'id',
+          type: 'String',
+          id: true,
+          attributes: [
+            { name: '@id' },
+            { name: '@default', args: [{ name: 'value', value: ExpressionUtils.call('uuid') }] },
+            { name: '@db.Uuid' },
+          ] as readonly AttributeApplication[],
+          default: ExpressionUtils.call('uuid') as FieldDefault,
+        },
+        userId: {
+          name: 'userId',
+          type: 'String',
+          unique: true,
+          attributes: [
+            { name: '@unique' },
+            { name: '@db.Uuid' },
+          ] as readonly AttributeApplication[],
+          foreignKeyFor: ['user'] as readonly string[],
+        },
+        user: {
+          name: 'user',
+          type: 'User',
+          attributes: [
+            {
+              name: '@relation',
+              args: [
+                { name: 'name', value: ExpressionUtils.literal('Applicant') },
+                {
+                  name: 'fields',
+                  value: ExpressionUtils.array('String', [ExpressionUtils.field('userId')]),
+                },
+                {
+                  name: 'references',
+                  value: ExpressionUtils.array('String', [ExpressionUtils.field('id')]),
+                },
+                { name: 'onDelete', value: ExpressionUtils.literal('Cascade') },
+              ],
+            },
+          ] as readonly AttributeApplication[],
+          relation: {
+            opposite: 'moderatorApplication',
+            name: 'Applicant',
+            fields: ['userId'],
+            references: ['id'],
+            onDelete: 'Cascade',
+          },
+        },
+        motivation: {
+          name: 'motivation',
+          type: 'String',
+        },
+        status: {
+          name: 'status',
+          type: 'ModeratorApplicationStatus',
+          attributes: [
+            {
+              name: '@default',
+              args: [{ name: 'value', value: ExpressionUtils.literal('PENDING') }],
+            },
+          ] as readonly AttributeApplication[],
+          default: 'PENDING' as FieldDefault,
+        },
+        decidedById: {
+          name: 'decidedById',
+          type: 'String',
+          optional: true,
+          attributes: [{ name: '@db.Uuid' }] as readonly AttributeApplication[],
+          foreignKeyFor: ['decidedBy'] as readonly string[],
+        },
+        decidedBy: {
+          name: 'decidedBy',
+          type: 'User',
+          optional: true,
+          attributes: [
+            {
+              name: '@relation',
+              args: [
+                { name: 'name', value: ExpressionUtils.literal('ApplicationDecider') },
+                {
+                  name: 'fields',
+                  value: ExpressionUtils.array('String', [ExpressionUtils.field('decidedById')]),
+                },
+                {
+                  name: 'references',
+                  value: ExpressionUtils.array('String', [ExpressionUtils.field('id')]),
+                },
+                { name: 'onDelete', value: ExpressionUtils.literal('SetNull') },
+              ],
+            },
+          ] as readonly AttributeApplication[],
+          relation: {
+            opposite: 'decidedApplications',
+            name: 'ApplicationDecider',
+            fields: ['decidedById'],
+            references: ['id'],
+            onDelete: 'SetNull',
+          },
+        },
+        decidedAt: {
+          name: 'decidedAt',
+          type: 'DateTime',
+          optional: true,
+        },
+        createdAt: {
+          name: 'createdAt',
+          type: 'DateTime',
+          attributes: [
+            { name: '@default', args: [{ name: 'value', value: ExpressionUtils.call('now') }] },
+          ] as readonly AttributeApplication[],
+          default: ExpressionUtils.call('now') as FieldDefault,
+        },
+        updatedAt: {
+          name: 'updatedAt',
+          type: 'DateTime',
+          updatedAt: true,
+          attributes: [{ name: '@updatedAt' }] as readonly AttributeApplication[],
+        },
+      },
+      attributes: [
+        {
+          name: '@@allow',
+          args: [
+            { name: 'operation', value: ExpressionUtils.literal('read') },
+            {
+              name: 'condition',
+              value: ExpressionUtils.binary(
+                ExpressionUtils.binary(
+                  ExpressionUtils.binary(
+                    ExpressionUtils.member(ExpressionUtils.call('auth'), ['id']),
+                    '==',
+                    ExpressionUtils.field('userId'),
+                  ),
+                  '||',
+                  ExpressionUtils.binary(
+                    ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                    '==',
+                    ExpressionUtils.literal('ADMIN'),
+                  ),
+                ),
+                '||',
+                ExpressionUtils.binary(
+                  ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                  '==',
+                  ExpressionUtils.literal('MODERATOR'),
+                ),
+              ),
+            },
+          ],
+        },
+        {
+          name: '@@allow',
+          args: [
+            { name: 'operation', value: ExpressionUtils.literal('create') },
+            {
+              name: 'condition',
+              value: ExpressionUtils.binary(
+                ExpressionUtils.binary(ExpressionUtils.call('auth'), '!=', ExpressionUtils._null()),
+                '&&',
+                ExpressionUtils.binary(
+                  ExpressionUtils.member(ExpressionUtils.call('auth'), ['id']),
+                  '==',
+                  ExpressionUtils.field('userId'),
+                ),
+              ),
+            },
+          ],
+        },
+        {
+          name: '@@allow',
+          args: [
+            { name: 'operation', value: ExpressionUtils.literal('all') },
+            {
+              name: 'condition',
+              value: ExpressionUtils.binary(
+                ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                '==',
+                ExpressionUtils.literal('ADMIN'),
+              ),
+            },
+          ],
+        },
+      ] as readonly AttributeApplication[],
+      idFields: ['id'],
+      uniqueFields: {
+        id: { type: 'String' },
+        userId: { type: 'String' },
+      },
+    },
   } as const;
   typeDefs = {
     Auth: {
@@ -2985,6 +3202,14 @@ export class SchemaType implements SchemaDef {
         PLANNED: 'PLANNED',
         DONE: 'DONE',
         DECLINED: 'DECLINED',
+      },
+    },
+    ModeratorApplicationStatus: {
+      name: 'ModeratorApplicationStatus',
+      values: {
+        PENDING: 'PENDING',
+        APPROVED: 'APPROVED',
+        REJECTED: 'REJECTED',
       },
     },
     AdminActionType: {

@@ -102,6 +102,12 @@ enum FeatureStatus {
   DECLINED
 }
 
+enum ModeratorApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum AdminActionType {
   RESTORE
   FORCE_VERIFY
@@ -143,6 +149,8 @@ model User {
   proposedCategories Category[]     @relation("CategoryProposer")
   proposedAmenities  Amenity[]      @relation("AmenityProposer")
   adminActions    AdminAction[]
+  moderatorApplication ModeratorApplication? @relation("Applicant")
+  decidedApplications  ModeratorApplication[] @relation("ApplicationDecider")
   sessions        Session[]
   accounts        Account[]
 
@@ -497,4 +505,28 @@ model FeatureVote {
   @@id([requestId, userId])
   @@allow('read', true)
   @@allow('create,delete', auth() != null && auth().id == userId)
+}
+
+// ---------------------------------------------------------------------------
+// Moderator applications (apply in-app to become a MODERATOR; admin decides)
+// ---------------------------------------------------------------------------
+
+model ModeratorApplication {
+  id         String                     @id @default(uuid()) @db.Uuid
+  userId     String                     @unique @db.Uuid
+  user       User                       @relation("Applicant", fields: [userId], references: [id], onDelete: Cascade)
+  motivation String
+  status     ModeratorApplicationStatus @default(PENDING)
+
+  decidedById String? @db.Uuid
+  decidedBy   User?   @relation("ApplicationDecider", fields: [decidedById], references: [id], onDelete: SetNull)
+  decidedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Applicant reads + creates their own; staff read all; only ADMIN decides.
+  @@allow('read', auth().id == userId || auth().role == 'ADMIN' || auth().role == 'MODERATOR')
+  @@allow('create', auth() != null && auth().id == userId)
+  @@allow('all', auth().role == 'ADMIN')
 }
