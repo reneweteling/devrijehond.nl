@@ -36,7 +36,7 @@ jobs:
             -workspace DeVrijeHond.xcworkspace \
             -scheme DeVrijeHond \
             -configuration Release \
-            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
             build | tail -40
@@ -79,14 +79,12 @@ jobs:
           mkdir -p ~/.appstoreconnect/private_keys
           KEYFILE="$HOME/.appstoreconnect/private_keys/AuthKey_${{ secrets.ASC_KEY_ID }}.p8"
           echo "${{ secrets.ASC_API_KEY_P8 }}" | base64 --decode > "$KEYFILE"
-          cat > /tmp/asc_api_key.json <<JSON
-          {
-            "key_id": "${{ secrets.ASC_KEY_ID }}",
-            "issuer_id": "${{ secrets.ASC_ISSUER_ID }}",
-            "key_filepath": "$KEYFILE",
-            "in_house": false
-          }
-          JSON
+          # fastlane's Token.from_json_file wants the raw .p8 contents in "key".
+          jq -n \
+            --arg kid "${{ secrets.ASC_KEY_ID }}" \
+            --arg iss "${{ secrets.ASC_ISSUER_ID }}" \
+            --arg key "$(cat "$KEYFILE")" \
+            '{key_id:$kid, issuer_id:$iss, key:$key, in_house:false}' > /tmp/asc_api_key.json
 
       - name: Archive
         working-directory: apps/mobile/ios
