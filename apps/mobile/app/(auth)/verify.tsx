@@ -79,12 +79,20 @@ const styles = StyleSheet.create({
     gap: space.md,
     paddingHorizontal: 40,
   },
-  title: { fontFamily: font.heading, fontSize: 20, lineHeight: 26, color: colors.ink },
+  title: {
+    fontFamily: font.heading,
+    fontSize: 20,
+    lineHeight: 26,
+    color: colors.ink,
+    alignSelf: 'stretch',
+    textAlign: 'center',
+  },
   sub: {
     fontFamily: font.body,
     fontSize: 14,
     color: colors.ink2,
     textAlign: 'center',
+    alignSelf: 'stretch',
     lineHeight: 21,
   },
 });

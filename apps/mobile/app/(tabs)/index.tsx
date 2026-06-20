@@ -148,6 +148,39 @@ export default function MapScreen() {
     debounce.current = setTimeout(() => setBbox(regionToBbox(r)), 350);
   };
 
+  // Stable geofence polygons: recompute only when spots/categories change, not
+  // on every render, so react-native-maps doesn't redraw (flicker) them.
+  const regionPolygons = useMemo(
+    () =>
+      spots
+        .map((s) => {
+          const rings = regionRings(s);
+          if (!rings || !rings[0]) return null;
+          return {
+            id: s.id,
+            spot: s,
+            coordinates: rings[0],
+            holes: rings.slice(1),
+            color: catColor(catById.get(s.categoryId)),
+          };
+        })
+        .filter((p): p is NonNullable<typeof p> => p != null),
+    [spots, catById],
+  );
+
+  const recenterOnUser = () => {
+    if (!userLocation) return;
+    mapRef.current?.animateToRegion(
+      {
+        latitude: userLocation.lat,
+        longitude: userLocation.lng,
+        latitudeDelta: 0.05,
+        longitudeDelta: 0.05,
+      },
+      500,
+    );
+  };
+
   return (
     <View style={styles.root}>
       <MapView
@@ -157,27 +190,21 @@ export default function MapScreen() {
         onMapReady={flyToParams}
         onRegionChangeComplete={onRegionChange}
         showsUserLocation
-        showsMyLocationButton
         onPress={() => setSelected(null)}
       >
         {/* REGION geofences as filled polygons (tap to peek). */}
-        {spots.map((s) => {
-          const rings = regionRings(s);
-          if (!rings || !rings[0]) return null;
-          const color = catColor(catById.get(s.categoryId));
-          return (
-            <Polygon
-              key={`poly-${s.id}`}
-              coordinates={rings[0]}
-              holes={rings.slice(1)}
-              strokeColor={colors.mossDark}
-              strokeWidth={2.5}
-              fillColor={`${color}59`}
-              tappable
-              onPress={() => setSelected(s)}
-            />
-          );
-        })}
+        {regionPolygons.map((p) => (
+          <Polygon
+            key={`poly-${p.id}`}
+            coordinates={p.coordinates}
+            holes={p.holes}
+            strokeColor={colors.mossDark}
+            strokeWidth={2.5}
+            fillColor={`${p.color}59`}
+            tappable
+            onPress={() => setSelected(p.spot)}
+          />
+        ))}
         {/*
           The map DTO carries only the centroid (lat/lng), not full geometry, so
           REGION spots render as a circular moss marker and POIs as a teardrop
@@ -245,7 +272,7 @@ export default function MapScreen() {
         <View style={styles.searchPill}>
           <Pressable style={styles.searchTap} onPress={() => router.push('/search')}>
             <SymbolView name="magnifyingglass" size={16} tintColor={colors.ink3} />
-            <Text style={styles.searchPlaceholder}>Zoek een plek of gebied</Text>
+            <Text style={styles.searchPlaceholder}>Zoek een plek, gebied of adres</Text>
           </Pressable>
           <Pressable
             onPress={() => router.push('/(tabs)/profile')}
@@ -290,6 +317,20 @@ export default function MapScreen() {
             <Text style={styles.legendText}>Niet geverifieerd</Text>
           </View>
         </View>
+      )}
+
+      {/* Recenter on the user's location (iOS has no built-in button) */}
+      {userLocation && !selected && (
+        <Pressable
+          style={({ pressed }) => [
+            styles.recenterBtn,
+            { bottom: insets.bottom + 120, opacity: pressed ? 0.7 : 1 },
+          ]}
+          onPress={recenterOnUser}
+          hitSlop={8}
+        >
+          <SymbolView name="location.fill" size={20} tintColor={colors.mossDark} />
+        </Pressable>
       )}
 
       {/* Bottom-sheet peek card */}
@@ -406,6 +447,21 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   legendRow: { flexDirection: 'row', alignItems: 'center', gap: 7 },
+  recenterBtn: {
+    position: 'absolute',
+    right: space.lg,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: colors.ink,
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+  },
   legendDot: {
     width: 12,
     height: 12,

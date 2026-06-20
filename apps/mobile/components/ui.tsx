@@ -322,6 +322,7 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     color: colors.ink2,
     textAlign: 'center',
+    alignSelf: 'stretch',
   },
   listStateRetry: { fontFamily: font.bodyMedium, fontSize: 13.5, color: colors.moss },
   banner: {

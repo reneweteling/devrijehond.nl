@@ -5,7 +5,7 @@
  * spot detail.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
@@ -32,7 +32,7 @@ export default function SearchScreen() {
 
   // Geocode the query (debounced) so you can also jump to a place on the map,
   // e.g. "Hilversum", even when no spot matches.
-  const [geo, setGeo] = useState<GeoResult | null>(null);
+  const [geo, setGeo] = useState<GeoResult[]>([]);
   useEffect(() => {
     const term = q.trim();
     let cancelled = false;
@@ -40,7 +40,7 @@ export default function SearchScreen() {
     // effect body), and is debounced.
     const t = setTimeout(async () => {
       if (term.length < 2) {
-        if (!cancelled) setGeo(null);
+        if (!cancelled) setGeo([]);
         return;
       }
       const result = await geocodePlace(term);
@@ -52,10 +52,14 @@ export default function SearchScreen() {
     };
   }, [q]);
 
+  // A monotonic nonce so searching the same place twice still re-triggers the
+  // map's fly-to effect (a fresh param value), without an impure Date.now().
+  const nonce = useRef(0);
   const goToLocation = (g: GeoResult) => {
+    nonce.current += 1;
     router.replace({
       pathname: '/(tabs)',
-      params: { lat: String(g.lat), lng: String(g.lng), t: String(Date.now()) },
+      params: { lat: String(g.lat), lng: String(g.lng), t: String(nonce.current) },
     });
   };
 
@@ -107,7 +111,7 @@ export default function SearchScreen() {
             style={styles.input}
             value={q}
             onChangeText={setQ}
-            placeholder="Zoek een plek of gebied"
+            placeholder="Zoek een plek, gebied of adres"
             placeholderTextColor={colors.ink3}
             autoFocus
             autoCorrect={false}
@@ -130,24 +134,34 @@ export default function SearchScreen() {
         renderItem={renderItem}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
-          geo ? (
-            <Pressable style={styles.locRow} onPress={() => goToLocation(geo)}>
-              <View style={styles.locIcon}>
-                <SymbolView name="mappin.and.ellipse" size={18} tintColor={colors.mossDark} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.locTitle} numberOfLines={1}>
-                  Ga naar {geo.label}
-                </Text>
-                <Text style={styles.locMeta}>Open deze plek op de kaart</Text>
-              </View>
-              <SymbolView name="arrow.up.right" size={15} tintColor={colors.ink3} />
-            </Pressable>
+          geo.length > 0 ? (
+            <View>
+              {geo.map((g, i) => (
+                <Pressable
+                  key={`${g.lat}-${g.lng}-${i}`}
+                  style={styles.locRow}
+                  onPress={() => goToLocation(g)}
+                >
+                  <View style={styles.locIcon}>
+                    <SymbolView name="mappin.and.ellipse" size={18} tintColor={colors.mossDark} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.locTitle} numberOfLines={1}>
+                      {g.label}
+                    </Text>
+                    <Text style={styles.locMeta}>Ga naar deze plek op de kaart</Text>
+                  </View>
+                  <SymbolView name="arrow.up.right" size={15} tintColor={colors.ink3} />
+                </Pressable>
+              ))}
+            </View>
           ) : null
         }
         ListEmptyComponent={
           <Text style={styles.empty}>
-            {query ? 'Geen plekken gevonden.' : 'Typ om te zoeken op naam, categorie of plaats.'}
+            {query
+              ? 'Geen plekken gevonden. Typ een adres of plaats om naar de kaart te springen.'
+              : 'Typ om te zoeken op naam, categorie, plaats of adres.'}
           </Text>
         }
         contentContainerStyle={{ paddingTop: space.md, paddingBottom: insets.bottom + 40 }}

@@ -10,7 +10,7 @@
  * `pnpm --filter @devrijehond/api-client generate`.
  */
 
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
 
 import { API_URL } from './config';
 import { clearSession, loadSession } from './session';
@@ -116,6 +116,9 @@ export function useSpotsInViewport(
   return useQuery({
     queryKey: ['spots-map', bbox, opts?.type, opts?.categoryId],
     enabled: bbox != null,
+    // Keep the previous markers on screen while panning/zooming refetches, so
+    // the polygons + pins don't blink out and back in (the geofence flicker).
+    placeholderData: keepPreviousData,
     queryFn: ({ signal }) =>
       getApiV1SpotsMap(
         { ...(bbox as Bbox), type: opts?.type, categoryId: opts?.categoryId },
