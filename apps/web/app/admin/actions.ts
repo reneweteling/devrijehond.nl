@@ -183,7 +183,10 @@ export async function setSpotStatus(
   const data: { status: typeof status; verifiedAt?: Date | null; hiddenAt?: Date | null } = {
     status,
   };
-  if (status === 'VERIFIED') data.verifiedAt = new Date();
+  if (status === 'VERIFIED') {
+    data.verifiedAt = new Date();
+    data.hiddenAt = null; // verifying a hidden spot must clear hiddenAt
+  }
   if (status === 'HIDDEN' || status === 'REMOVED') data.hiddenAt = new Date();
   if (status === 'UNVERIFIED') data.hiddenAt = null;
   await db.spot.update({ where: { id: spotId }, data });
@@ -203,6 +206,18 @@ export async function setUserRole(
 ): Promise<void> {
   const ctx = await adminOnlyContext();
   const db = authDb(ctx.user);
+  // Guard rails: you can't change your own role (no self-demote lockout), and
+  // you can't remove the last remaining admin.
+  if (ctx.user.id === userId) {
+    throw new Error('Je kunt je eigen rol niet wijzigen.');
+  }
+  if (role !== 'ADMIN') {
+    const target = await db.user.findUnique({ where: { id: userId }, select: { role: true } });
+    if (target?.role === 'ADMIN') {
+      const admins = await db.user.count({ where: { role: 'ADMIN' } });
+      if (admins <= 1) throw new Error('Er moet minstens één beheerder blijven.');
+    }
+  }
   await db.user.update({ where: { id: userId }, data: { role } });
   await logAction(ctx, 'EDIT', 'USER', userId, role);
   revalidatePath('/admin/users');

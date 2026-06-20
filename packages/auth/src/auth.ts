@@ -208,7 +208,15 @@ export const auth = betterAuth({
           console.log(`\n[dev] Magic link for ${email}:\n${finalUrl}\n`);
         }
 
-        await sendMagicLink({ email, url: finalUrl });
+        // Never let an email-transport failure 500 the sign-in request: the
+        // link is already logged in dev, and a failed send shouldn't break the
+        // "check your mail" response.
+        try {
+          await sendMagicLink({ email, url: finalUrl });
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.error('[auth] sendMagicLink failed:', e);
+        }
       },
       // BetterAuth default is 5 min; short enough to mitigate forwarded-email
       // attacks, long enough for a user to tap through.

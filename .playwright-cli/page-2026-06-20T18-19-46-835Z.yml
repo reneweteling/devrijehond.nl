@@ -1,0 +1,240 @@
+- generic [active] [ref=e1]:
+    - generic [ref=e2]:
+        - link "Naar inhoud" [ref=e3] [cursor=pointer]:
+            - /url: '#main'
+        - banner [ref=e4]:
+            - navigation [ref=e5]:
+                - link "De Vrije Hond" [ref=e6] [cursor=pointer]:
+                    - /url: /
+                    - img [ref=e7]
+                    - text: De Vrije Hond
+                - link "Download de app" [ref=e15] [cursor=pointer]:
+                    - /url: /#app
+        - main [ref=e17]:
+            - generic [ref=e20]:
+                - generic [ref=e21]: 🐾 Voor hondenbazen, door hondenbazen
+                - heading "Vind de fijnste hondenplekken van Nederland" [level=1] [ref=e22]:
+                    - text: Vind de fijnste
+                    - emphasis [ref=e23]: hondenplekken
+                    - text: van Nederland
+                - paragraph [ref=e24]: Losloopgebieden, hondenstranden, hondvriendelijke horeca en waterpunten. Eén kaart, toegevoegd en geverifieerd door de community zelf.
+                - generic [ref=e25]:
+                    - link "Download in de App Store" [ref=e26] [cursor=pointer]:
+                        - /url: https://apps.apple.com/app/de-vrije-hond/id000000000
+                        - img [ref=e27]
+                        - generic [ref=e29]:
+                            - generic [ref=e30]: Download in de
+                            - generic [ref=e31]: App Store
+                    - link "Ontdek op Google Play" [ref=e32] [cursor=pointer]:
+                        - /url: https://play.google.com/store/apps/details?id=nl.devrijehond.app
+                        - img [ref=e33]
+                        - generic [ref=e35]:
+                            - generic [ref=e36]: Ontdek op
+                            - generic [ref=e37]: Google Play
+                    - link "Bekijk de kaart" [ref=e38] [cursor=pointer]:
+                        - /url: '#kaart'
+                - generic [ref=e39]:
+                    - generic [ref=e40]:
+                        - generic [ref=e41]: 95+
+                        - generic [ref=e42]: plekken
+                    - generic [ref=e43]:
+                        - generic [ref=e44]: '6'
+                        - generic [ref=e45]: categorieën
+                    - generic [ref=e46]:
+                        - generic [ref=e47]: heel NL
+                        - generic [ref=e48]: van strand tot stad
+            - generic [ref=e51]:
+                - generic [ref=e52]: Ontdek per soort
+                - heading "Alles voor een fijne wandeling" [level=2] [ref=e53]
+                - generic [ref=e54]:
+                    - link "🌳 Losloopgebied 48 plekken" [ref=e55] [cursor=pointer]:
+                        - /url: '#kaart'
+                        - generic [ref=e56]:
+                            - generic [ref=e57]: 🌳
+                            - generic [ref=e58]:
+                                - generic [ref=e59]: Losloopgebied
+                                - generic [ref=e60]: 48 plekken
+                    - link "🏖️ Zwemstrand 20 plekken" [ref=e61] [cursor=pointer]:
+                        - /url: '#kaart'
+                        - generic [ref=e62]:
+                            - generic [ref=e63]: 🏖️
+                            - generic [ref=e64]:
+                                - generic [ref=e65]: Zwemstrand
+                                - generic [ref=e66]: 20 plekken
+                    - link "☕ Hondvriendelijke horeca 12 plekken" [ref=e67] [cursor=pointer]:
+                        - /url: '#kaart'
+                        - generic [ref=e68]:
+                            - generic [ref=e69]: ☕
+                            - generic [ref=e70]:
+                                - generic [ref=e71]: Hondvriendelijke horeca
+                                - generic [ref=e72]: 12 plekken
+                    - link "🚿 Was- / spoelplek 6 plekken" [ref=e73] [cursor=pointer]:
+                        - /url: '#kaart'
+                        - generic [ref=e74]:
+                            - generic [ref=e75]: 🚿
+                            - generic [ref=e76]:
+                                - generic [ref=e77]: Was- / spoelplek
+                                - generic [ref=e78]: 6 plekken
+                    - link "🛍️ Winkel 6 plekken" [ref=e79] [cursor=pointer]:
+                        - /url: '#kaart'
+                        - generic [ref=e80]:
+                            - generic [ref=e81]: 🛍️
+                            - generic [ref=e82]:
+                                - generic [ref=e83]: Winkel
+                                - generic [ref=e84]: 6 plekken
+                    - link "🚰 Drinkpunt 3 plekken" [ref=e85] [cursor=pointer]:
+                        - /url: '#kaart'
+                        - generic [ref=e86]:
+                            - generic [ref=e87]: 🚰
+                            - generic [ref=e88]:
+                                - generic [ref=e89]: Drinkpunt
+                                - generic [ref=e90]: 3 plekken
+            - generic [ref=e93]:
+                - generic [ref=e94]: Zo werkt het
+                - heading "De community houdt de kaart eerlijk" [level=2] [ref=e95]
+                - paragraph [ref=e96]: Geen ondoorzichtige redactie. Een plek verschijnt meteen en wordt betrouwbaar zodra genoeg hondenbazen in de buurt hem bevestigen.
+                - generic [ref=e97]:
+                    - generic [ref=e98]:
+                        - generic [ref=e99]: '1'
+                        - heading "Ontdek" [level=3] [ref=e100]
+                        - paragraph [ref=e101]: Open de kaart en zie losloopgebieden, stranden en plekken bij jou in de buurt.
+                    - generic [ref=e102]:
+                        - generic [ref=e103]: '2'
+                        - heading "Voeg toe" [level=3] [ref=e104]
+                        - paragraph [ref=e105]: Ken je een plek die nog ontbreekt? Zet hem er in een paar tikken op.
+                    - generic [ref=e106]:
+                        - generic [ref=e107]: '3'
+                        - heading "Verifieer" [level=3] [ref=e108]
+                        - paragraph [ref=e109]: Ben je er geweest? Bevestig de plek. Genoeg bevestigingen en hij wordt geverifieerd.
+            - generic [ref=e112]:
+                - generic [ref=e113]: Geverifieerd door de community
+                - heading "Uitgelichte plekken" [level=2] [ref=e114]
+                - generic [ref=e115]:
+                    - link "Schoteroog, Losloopgebied Losloopgebied Schoteroog ✓ Geverifieerd ★ 4,0 · 1" [ref=e116] [cursor=pointer]:
+                        - /url: /gebied/schoteroog-haarlem
+                        - img "Schoteroog, Losloopgebied" [ref=e118]
+                        - generic [ref=e119]:
+                            - generic [ref=e122]: Losloopgebied
+                            - generic [ref=e123]: Schoteroog
+                            - generic [ref=e124]:
+                                - generic [ref=e125]: ✓ Geverifieerd
+                                - generic [ref=e126]: ★ 4,0 · 1
+                    - link "Appels en Peren, Hondvriendelijke horeca Hondvriendelijke horeca Appels en Peren ✓ Geverifieerd ★ 4,0 · 1" [ref=e127] [cursor=pointer]:
+                        - /url: /plek/appels-en-peren-den-haag
+                        - img "Appels en Peren, Hondvriendelijke horeca" [ref=e129]
+                        - generic [ref=e130]:
+                            - generic [ref=e133]: Hondvriendelijke horeca
+                            - generic [ref=e134]: Appels en Peren
+                            - generic [ref=e135]:
+                                - generic [ref=e136]: ✓ Geverifieerd
+                                - generic [ref=e137]: ★ 4,0 · 1
+                    - link "Overasseltse en Hatertse Vennen, Losloopgebied Losloopgebied Overasseltse en Hatertse Vennen ✓ Geverifieerd ★ 4,0 · 1" [ref=e138] [cursor=pointer]:
+                        - /url: /gebied/overasseltse-en-hatertse-vennen-overasselt
+                        - img "Overasseltse en Hatertse Vennen, Losloopgebied" [ref=e140]
+                        - generic [ref=e141]:
+                            - generic [ref=e144]: Losloopgebied
+                            - generic [ref=e145]: Overasseltse en Hatertse Vennen
+                            - generic [ref=e146]:
+                                - generic [ref=e147]: ✓ Geverifieerd
+                                - generic [ref=e148]: ★ 4,0 · 1
+                    - link "GroenRijk Hondenwasstraat, Was- / spoelplek Was- / spoelplek GroenRijk Hondenwasstraat ✓ Geverifieerd ★ 4,0 · 1" [ref=e149] [cursor=pointer]:
+                        - /url: /plek/groenrijk-hondenwasstraat-tilburg
+                        - img "GroenRijk Hondenwasstraat, Was- / spoelplek" [ref=e151]
+                        - generic [ref=e152]:
+                            - generic [ref=e155]: Was- / spoelplek
+                            - generic [ref=e156]: GroenRijk Hondenwasstraat
+                            - generic [ref=e157]:
+                                - generic [ref=e158]: ✓ Geverifieerd
+                                - generic [ref=e159]: ★ 4,0 · 1
+                    - link "Discus Kleverpark, Winkel Winkel Discus Kleverpark ✓ Geverifieerd ★ 4,0 · 1" [ref=e160] [cursor=pointer]:
+                        - /url: /plek/discus-kleverpark-haarlem
+                        - img "Discus Kleverpark, Winkel" [ref=e162]
+                        - generic [ref=e163]:
+                            - generic [ref=e166]: Winkel
+                            - generic [ref=e167]: Discus Kleverpark
+                            - generic [ref=e168]:
+                                - generic [ref=e169]: ✓ Geverifieerd
+                                - generic [ref=e170]: ★ 4,0 · 1
+                    - link "Mastbos, Losloopgebied Losloopgebied Mastbos ✓ Geverifieerd ★ 4,0 · 1" [ref=e171] [cursor=pointer]:
+                        - /url: /gebied/mastbos-breda
+                        - img "Mastbos, Losloopgebied" [ref=e173]
+                        - generic [ref=e174]:
+                            - generic [ref=e177]: Losloopgebied
+                            - generic [ref=e178]: Mastbos
+                            - generic [ref=e179]:
+                                - generic [ref=e180]: ✓ Geverifieerd
+                                - generic [ref=e181]: ★ 4,0 · 1
+            - generic [ref=e184]:
+                - generic [ref=e185]: De kaart
+                - heading "Verken alle plekken" [level=2] [ref=e186]
+                - paragraph [ref=e187]: Verplaats de kaart om plekken in een gebied te laden. Tik op een speld voor details.
+                - region "Kaart met hondvriendelijke plekken" [ref=e188]:
+                    - generic [ref=e189]:
+                        - generic: Kaart laden…
+            - generic [ref=e194]:
+                - generic [ref=e195]: Veelgestelde vragen
+                - heading "Goed om te weten" [level=2] [ref=e196]
+                - generic [ref=e197]:
+                    - group [ref=e198]:
+                        - generic "Hoe voeg ik een plek toe?" [ref=e199] [cursor=pointer]
+                    - group [ref=e200]:
+                        - generic "Is De Vrije Hond gratis?" [ref=e201] [cursor=pointer]
+                    - group [ref=e202]:
+                        - generic "Hoe weet ik of een plek klopt?" [ref=e203] [cursor=pointer]
+                    - group [ref=e204]:
+                        - generic "Welke plekken staan erop?" [ref=e205] [cursor=pointer]
+            - generic [ref=e208]:
+                - generic [ref=e209]:
+                    - heading "Neem de kaart mee op je wandeling" [level=2] [ref=e210]
+                    - paragraph [ref=e211]: De Vrije Hond vindt losloopgebieden, hondenstranden en hondvriendelijke plekken bij jou in de buurt. En jij helpt mee verifiëren.
+                - generic [ref=e212]:
+                    - link "Download in de App Store" [ref=e213] [cursor=pointer]:
+                        - /url: https://apps.apple.com/app/de-vrije-hond/id000000000
+                        - img [ref=e214]
+                        - generic [ref=e216]:
+                            - generic [ref=e217]: Download in de
+                            - generic [ref=e218]: App Store
+                    - link "Ontdek op Google Play" [ref=e219] [cursor=pointer]:
+                        - /url: https://play.google.com/store/apps/details?id=nl.devrijehond.app
+                        - img [ref=e220]
+                        - generic [ref=e222]:
+                            - generic [ref=e223]: Ontdek op
+                            - generic [ref=e224]: Google Play
+        - contentinfo [ref=e226]:
+            - generic [ref=e227]:
+                - generic [ref=e228]:
+                    - generic [ref=e229]:
+                        - img [ref=e230]
+                        - text: De Vrije Hond
+                    - paragraph [ref=e237]: De community-kaart van hondvriendelijke plekken in Nederland. Toegevoegd en geverifieerd door hondenbezitters zelf.
+                - generic [ref=e238]:
+                    - heading "Info" [level=3] [ref=e239]
+                    - list [ref=e240]:
+                        - listitem [ref=e241]:
+                            - link "Kaart" [ref=e242] [cursor=pointer]:
+                                - /url: /#kaart
+                        - listitem [ref=e243]:
+                            - link "Zo werkt het" [ref=e244] [cursor=pointer]:
+                                - /url: /#zo-werkt-het
+                        - listitem [ref=e245]:
+                            - link "Over & meebouwen" [ref=e246] [cursor=pointer]:
+                                - /url: /over
+                        - listitem [ref=e247]:
+                            - link "Privacyverklaring" [ref=e248] [cursor=pointer]:
+                                - /url: /privacy
+                        - listitem [ref=e249]:
+                            - link "Voorwaarden" [ref=e250] [cursor=pointer]:
+                                - /url: /terms
+                - generic [ref=e251]:
+                    - heading "Gemaakt door" [level=3] [ref=e252]
+                    - paragraph [ref=e253]:
+                        - link "René Weteling" [ref=e254] [cursor=pointer]:
+                            - /url: https://www.weteling.com
+                        - text: ', Felobo B.V.'
+                        - text: 'Van idee tot productie: web, mobiel & AI.'
+                        - link "rene@weteling.com" [ref=e255] [cursor=pointer]:
+                            - /url: mailto:rene@weteling.com
+                        - text: Hilversum, Nederland
+            - generic [ref=e257]: De Vrije Hond™ · © 2026 Felobo B.V. (KvK 80910483). Alle rechten voorbehouden.
+    - button "Open Next.js Dev Tools" [ref=e263] [cursor=pointer]:
+        - img [ref=e264]

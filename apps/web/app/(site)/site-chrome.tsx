@@ -40,17 +40,35 @@ function PlayGlyph() {
 }
 
 export function StoreButton({ href, kind }: { href: string; kind: 'ios' | 'android' }) {
-  return (
-    <a className="store-btn" href={href} target="_blank" rel="noreferrer">
-      {kind === 'ios' ? <AppleGlyph /> : <PlayGlyph />}
+  // Pre-launch: the store listings don't exist yet (placeholder id / unpublished
+  // package). Render a non-clickable "Binnenkort" pill instead of a dead link.
+  const comingSoon = href.includes('id000000000') || href.includes('details?id=nl.devrijehond.app');
+  const glyph = kind === 'ios' ? <AppleGlyph /> : <PlayGlyph />;
+  const small = comingSoon ? 'Binnenkort in de' : kind === 'ios' ? 'Download in de' : 'Ontdek op';
+  const big = kind === 'ios' ? 'App Store' : 'Google Play';
+  const inner = (
+    <>
+      {glyph}
       <span>
         <span className="store-small" style={{ display: 'block' }}>
-          {kind === 'ios' ? 'Download in de' : 'Ontdek op'}
+          {small}
         </span>
         <span className="store-big" style={{ display: 'block' }}>
-          {kind === 'ios' ? 'App Store' : 'Google Play'}
+          {big}
         </span>
       </span>
+    </>
+  );
+  if (comingSoon) {
+    return (
+      <span className="store-btn" aria-disabled="true" style={{ opacity: 0.62, cursor: 'default' }}>
+        {inner}
+      </span>
+    );
+  }
+  return (
+    <a className="store-btn" href={href} target="_blank" rel="noreferrer">
+      {inner}
     </a>
   );
 }

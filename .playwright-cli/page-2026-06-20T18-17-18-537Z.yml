@@ -1,0 +1,102 @@
+- generic [active] [ref=e1]:
+    - generic [ref=e2]:
+        - link "Naar inhoud" [ref=e3] [cursor=pointer]:
+            - /url: '#main'
+        - banner [ref=e4]:
+            - navigation [ref=e5]:
+                - link "De Vrije Hond" [ref=e6] [cursor=pointer]:
+                    - /url: /
+                    - img [ref=e7]
+                    - text: De Vrije Hond
+                - generic [ref=e14]:
+                    - link "Kaart" [ref=e15] [cursor=pointer]:
+                        - /url: /#kaart
+                    - link "Zo werkt het" [ref=e16] [cursor=pointer]:
+                        - /url: /#zo-werkt-het
+                    - link "Download de app" [ref=e17] [cursor=pointer]:
+                        - /url: /#app
+        - main [ref=e19]:
+            - navigation [ref=e20]:
+                - link "← Terug naar de kaart" [ref=e21] [cursor=pointer]:
+                    - /url: /
+            - heading "Over De Vrije Hond" [level=1] [ref=e22]
+            - paragraph [ref=e23]: 'Laatst bijgewerkt: 20 juni 2026'
+            - generic [ref=e24]:
+                - paragraph [ref=e25]: 'De Vrije Hond is een community-kaart van hondvriendelijke plekken in Nederland: losloopgebieden, hondenstranden, hondvriendelijke horeca, waterpunten en meer. Toegevoegd en geverifieerd door hondenbazen zelf.'
+                - generic [ref=e26]:
+                    - heading "Gemaakt door" [level=2] [ref=e27]
+                    - paragraph [ref=e28]:
+                        - text: De Vrije Hond is gemaakt door
+                        - link "René Weteling" [ref=e29] [cursor=pointer]:
+                            - /url: https://www.weteling.com
+                        - text: '(Felobo B.V.), uit liefde voor honden en mooie wandelingen. Van idee tot productie: web, mobiel en AI.'
+                - generic [ref=e30]:
+                    - heading "Open source, bouw mee" [level=2] [ref=e31]
+                    - paragraph [ref=e32]: De code is openbaar. Heb je een idee, vind je een bug, of wil je een plek-bron toevoegen? Je bent welkom om mee te bouwen.
+                    - list [ref=e33]:
+                        - listitem [ref=e34]:
+                            - text: 'Repository:'
+                            - link "github.com/reneweteling/devrijehond.nl" [ref=e35] [cursor=pointer]:
+                                - /url: https://github.com/reneweteling/devrijehond.nl
+                        - listitem [ref=e36]:
+                            - text: Een verbetering?
+                            - link "Open een pull request" [ref=e37] [cursor=pointer]:
+                                - /url: https://github.com/reneweteling/devrijehond.nl/pulls
+                            - text: .
+                        - listitem [ref=e38]:
+                            - text: Een bug of idee?
+                            - link "Maak een issue aan" [ref=e39] [cursor=pointer]:
+                                - /url: https://github.com/reneweteling/devrijehond.nl/issues/new
+                            - text: .
+                - generic [ref=e40]:
+                    - heading "Contact" [level=2] [ref=e41]
+                    - paragraph [ref=e42]:
+                        - text: Vragen, samenwerken of gewoon hallo zeggen? Mail naar
+                        - link "info@devrijehond.nl" [ref=e43] [cursor=pointer]:
+                            - /url: mailto:info@devrijehond.nl
+                        - text: .
+            - separator [ref=e44]
+            - paragraph [ref=e45]:
+                - text: Vragen? Mail naar
+                - link "hallo@devrijehond.nl" [ref=e46] [cursor=pointer]:
+                    - /url: mailto:hallo@devrijehond.nl
+                - text: .
+        - contentinfo [ref=e47]:
+            - generic [ref=e48]:
+                - generic [ref=e49]:
+                    - generic [ref=e50]:
+                        - img [ref=e51]
+                        - text: De Vrije Hond
+                    - paragraph [ref=e58]: De community-kaart van hondvriendelijke plekken in Nederland. Toegevoegd en geverifieerd door hondenbezitters zelf.
+                - generic [ref=e59]:
+                    - heading "Info" [level=3] [ref=e60]
+                    - list [ref=e61]:
+                        - listitem [ref=e62]:
+                            - link "Kaart" [ref=e63] [cursor=pointer]:
+                                - /url: /#kaart
+                        - listitem [ref=e64]:
+                            - link "Zo werkt het" [ref=e65] [cursor=pointer]:
+                                - /url: /#zo-werkt-het
+                        - listitem [ref=e66]:
+                            - link "Over & meebouwen" [ref=e67] [cursor=pointer]:
+                                - /url: /over
+                        - listitem [ref=e68]:
+                            - link "Privacyverklaring" [ref=e69] [cursor=pointer]:
+                                - /url: /privacy
+                        - listitem [ref=e70]:
+                            - link "Voorwaarden" [ref=e71] [cursor=pointer]:
+                                - /url: /terms
+                - generic [ref=e72]:
+                    - heading "Gemaakt door" [level=3] [ref=e73]
+                    - paragraph [ref=e74]:
+                        - link "René Weteling" [ref=e75] [cursor=pointer]:
+                            - /url: https://www.weteling.com
+                        - text: ', Felobo B.V.'
+                        - text: 'Van idee tot productie: web, mobiel & AI.'
+                        - link "rene@weteling.com" [ref=e76] [cursor=pointer]:
+                            - /url: mailto:rene@weteling.com
+                        - text: Hilversum, Nederland
+            - generic [ref=e78]: De Vrije Hond™ · © 2026 Felobo B.V. (KvK 80910483). Alle rechten voorbehouden.
+    - button "Open Next.js Dev Tools" [ref=e84] [cursor=pointer]:
+        - img [ref=e85]
+    - alert [ref=e88]

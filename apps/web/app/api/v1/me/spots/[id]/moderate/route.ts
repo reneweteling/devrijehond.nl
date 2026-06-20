@@ -55,7 +55,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     hiddenAt?: Date | null;
   } = { status: status as SpotStatus };
 
-  if (status === 'VERIFIED') data.verifiedAt = new Date();
+  if (status === 'VERIFIED') {
+    data.verifiedAt = new Date();
+    data.hiddenAt = null; // verifying a hidden spot must clear hiddenAt
+  }
   if (status === 'HIDDEN' || status === 'REMOVED') data.hiddenAt = new Date();
   if (status === 'UNVERIFIED') data.hiddenAt = null;
 

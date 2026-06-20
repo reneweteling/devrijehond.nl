@@ -1,0 +1,10 @@
+- generic [active] [ref=e1]:
+    - main [ref=e2]:
+        - heading "Inloggen" [level=1] [ref=e3]
+        - paragraph [ref=e4]: Vraag een inloglink aan om toegang te krijgen tot het beheer.
+        - generic [ref=e5]:
+            - textbox "jij@voorbeeld.nl" [ref=e6]
+            - button "Stuur inloglink" [ref=e7] [cursor=pointer]
+    - button "Open Next.js Dev Tools" [ref=e13] [cursor=pointer]:
+        - img [ref=e14]
+    - alert [ref=e17]

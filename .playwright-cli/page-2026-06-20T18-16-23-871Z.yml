@@ -1,0 +1,141 @@
+- generic [active] [ref=e1]:
+    - generic [ref=e2]:
+        - link "Naar inhoud" [ref=e3] [cursor=pointer]:
+            - /url: '#main'
+        - banner [ref=e4]:
+            - navigation [ref=e5]:
+                - link "De Vrije Hond" [ref=e6] [cursor=pointer]:
+                    - /url: /
+                    - img [ref=e7]
+                    - text: De Vrije Hond
+                - generic [ref=e14]:
+                    - link "Kaart" [ref=e15] [cursor=pointer]:
+                        - /url: /#kaart
+                    - link "Zo werkt het" [ref=e16] [cursor=pointer]:
+                        - /url: /#zo-werkt-het
+                    - link "Download de app" [ref=e17] [cursor=pointer]:
+                        - /url: /#app
+        - main [ref=e19]:
+            - generic [ref=e20]:
+                - navigation "Kruimelpad" [ref=e21]:
+                    - link "De Vrije Hond" [ref=e22] [cursor=pointer]:
+                        - /url: /
+                    - generic [ref=e23]: / Hondvriendelijke horeca
+                - generic [ref=e24]: Hondvriendelijke horeca
+                - heading "Appels en Peren" [level=1] [ref=e25]
+                - generic [ref=e26]:
+                    - generic [ref=e27]:
+                        - img [ref=e28]
+                        - text: Geverifieerd
+                    - generic [ref=e30]: ★ 4,0 · 1 beoordeling
+            - img "Foto van Appels en Peren, Hondvriendelijke horeca" [ref=e32]
+            - generic [ref=e33]:
+                - generic [ref=e34]:
+                    - paragraph [ref=e35]: Buurtrestaurant in de Vruchtenbuurt; honden welkom. (Den Haag)
+                    - generic [ref=e36]:
+                        - heading "Voorzieningen" [level=2] [ref=e37]
+                        - generic [ref=e38]:
+                            - generic [ref=e39]: Snoepjes
+                            - generic [ref=e40]: Waterbak
+                            - generic [ref=e41]: Binnen ok
+                            - generic [ref=e42]: Terras
+                    - img "Appels en Peren, foto 2" [ref=e43]
+                - complementary [ref=e44]:
+                    - link "Route via Google Maps" [ref=e45] [cursor=pointer]:
+                        - /url: https://www.google.com/maps/dir/?api=1&destination=52.0668,4.2735
+                        - img [ref=e46]
+                        - text: Route via Google Maps
+                    - generic [ref=e48]:
+                        - heading "Open in de app" [level=3] [ref=e49]
+                        - paragraph [ref=e50]: Routebeschrijving, bevestigen en beoordelen doe je in de app.
+                        - generic [ref=e51]:
+                            - link "Download in de App Store" [ref=e52] [cursor=pointer]:
+                                - /url: https://apps.apple.com/app/de-vrije-hond/id000000000
+                                - img [ref=e53]
+                                - generic [ref=e55]:
+                                    - generic [ref=e56]: Download in de
+                                    - generic [ref=e57]: App Store
+                            - link "Ontdek op Google Play" [ref=e58] [cursor=pointer]:
+                                - /url: https://play.google.com/store/apps/details?id=nl.devrijehond.app
+                                - img [ref=e59]
+                                - generic [ref=e61]:
+                                    - generic [ref=e62]: Ontdek op
+                                    - generic [ref=e63]: Google Play
+            - generic [ref=e64]:
+                - heading "In de buurt" [level=2] [ref=e65]
+                - generic [ref=e66]:
+                    - link "Was- / spoelplek Avonturia Hondenwasstraat Avonturia Hondenwasstraat Was- / spoelplek · 658 m" [ref=e67] [cursor=pointer]:
+                        - /url: /plek/avonturia-hondenwasstraat-den-haag
+                        - img "Was- / spoelplek Avonturia Hondenwasstraat" [ref=e69]
+                        - generic [ref=e70]:
+                            - generic [ref=e71]: Avonturia Hondenwasstraat
+                            - generic [ref=e72]: Was- / spoelplek · 658 m
+                    - link "Losloopgebied Zuiderpark Zuiderpark Losloopgebied · 1,2 km" [ref=e73] [cursor=pointer]:
+                        - /url: /gebied/zuiderpark-den-haag
+                        - img "Losloopgebied Zuiderpark" [ref=e75]
+                        - generic [ref=e76]:
+                            - generic [ref=e77]: Zuiderpark
+                            - generic [ref=e78]: Losloopgebied · 1,2 km
+                    - link "Losloopgebied Bosjes van Poot Bosjes van Poot Losloopgebied · 2,8 km" [ref=e79] [cursor=pointer]:
+                        - /url: /gebied/bosjes-van-poot-den-haag
+                        - img "Losloopgebied Bosjes van Poot" [ref=e81]
+                        - generic [ref=e82]:
+                            - generic [ref=e83]: Bosjes van Poot
+                            - generic [ref=e84]: Losloopgebied · 2,8 km
+                    - link "Losloopgebied Westduinpark Westduinpark Losloopgebied · 2,6 km" [ref=e85] [cursor=pointer]:
+                        - /url: /gebied/westduinpark-den-haag
+                        - img "Losloopgebied Westduinpark" [ref=e87]
+                        - generic [ref=e88]:
+                            - generic [ref=e89]: Westduinpark
+                            - generic [ref=e90]: Losloopgebied · 2,6 km
+                    - link "Zwemstrand Hondenstrand Scheveningen Hondenstrand Scheveningen Zwemstrand · 5,0 km" [ref=e91] [cursor=pointer]:
+                        - /url: /gebied/hondenstrand-scheveningen-den-haag
+                        - img "Zwemstrand Hondenstrand Scheveningen" [ref=e93]
+                        - generic [ref=e94]:
+                            - generic [ref=e95]: Hondenstrand Scheveningen
+                            - generic [ref=e96]: Zwemstrand · 5,0 km
+                    - link "Zwemstrand Hondenstrand Kijkduin Hondenstrand Kijkduin Zwemstrand · 3,4 km" [ref=e97] [cursor=pointer]:
+                        - /url: /gebied/hondenstrand-kijkduin-den-haag
+                        - img "Zwemstrand Hondenstrand Kijkduin" [ref=e99]
+                        - generic [ref=e100]:
+                            - generic [ref=e101]: Hondenstrand Kijkduin
+                            - generic [ref=e102]: Zwemstrand · 3,4 km
+        - contentinfo [ref=e103]:
+            - generic [ref=e104]:
+                - generic [ref=e105]:
+                    - generic [ref=e106]:
+                        - img [ref=e107]
+                        - text: De Vrije Hond
+                    - paragraph [ref=e114]: De community-kaart van hondvriendelijke plekken in Nederland. Toegevoegd en geverifieerd door hondenbezitters zelf.
+                - generic [ref=e115]:
+                    - heading "Info" [level=3] [ref=e116]
+                    - list [ref=e117]:
+                        - listitem [ref=e118]:
+                            - link "Kaart" [ref=e119] [cursor=pointer]:
+                                - /url: /#kaart
+                        - listitem [ref=e120]:
+                            - link "Zo werkt het" [ref=e121] [cursor=pointer]:
+                                - /url: /#zo-werkt-het
+                        - listitem [ref=e122]:
+                            - link "Over & meebouwen" [ref=e123] [cursor=pointer]:
+                                - /url: /over
+                        - listitem [ref=e124]:
+                            - link "Privacyverklaring" [ref=e125] [cursor=pointer]:
+                                - /url: /privacy
+                        - listitem [ref=e126]:
+                            - link "Voorwaarden" [ref=e127] [cursor=pointer]:
+                                - /url: /terms
+                - generic [ref=e128]:
+                    - heading "Gemaakt door" [level=3] [ref=e129]
+                    - paragraph [ref=e130]:
+                        - link "René Weteling" [ref=e131] [cursor=pointer]:
+                            - /url: https://www.weteling.com
+                        - text: ', Felobo B.V.'
+                        - text: 'Van idee tot productie: web, mobiel & AI.'
+                        - link "rene@weteling.com" [ref=e132] [cursor=pointer]:
+                            - /url: mailto:rene@weteling.com
+                        - text: Hilversum, Nederland
+            - generic [ref=e134]: De Vrije Hond™ · © 2026 Felobo B.V. (KvK 80910483). Alle rechten voorbehouden.
+    - button "Open Next.js Dev Tools" [ref=e140] [cursor=pointer]:
+        - img [ref=e141]
+    - alert [ref=e144]

@@ -34,6 +34,15 @@ export interface SendEmailOptions {
 export async function sendEmail(options: SendEmailOptions) {
   const { to, subject, react, html, text, from } = options;
 
+  // No transport configured (local dev / preview without RESEND_API_KEY): skip
+  // sending instead of throwing, so flows like magic-link sign-in still return
+  // 200. The auth layer prints the link to the server console in dev.
+  if (!process.env.RESEND_API_KEY) {
+    // eslint-disable-next-line no-console
+    console.warn(`[email] RESEND_API_KEY unset, not sending "${subject}" to ${String(to)}`);
+    return null;
+  }
+
   const resolvedHtml = react ? await render(react) : html;
   const resolvedText = text ?? (react ? await render(react, { plainText: true }) : undefined);
 
