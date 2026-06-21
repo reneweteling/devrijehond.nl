@@ -39,6 +39,20 @@ pnpm dev                   # turbo runs web + mobile
 - Server Components by default in `apps/web`; `"use client"` only when needed.
 - Mobile never imports the db client — all data access via the generated HTTP client.
 
+## External accounts
+
+Secrets live in `.env.local` (local) and the deploy secrets, never in git.
+
+| Service                                                             | Purpose                                                  | Account / access                                                                                               |
+| ------------------------------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| [AWS](https://identitycenter.amazonaws.com/ssoins-69875f1030ee29e4) | Media hosting: S3 + CloudFront + IAM (`infra/terraform`) | Account `devrijehond` **262517452192**, SSO profile `devrijehond` (`AdministratorAccess`), region `eu-west-1`. |
+| [Resend](https://resend.com/)                                       | Magic-link + transactional email (`packages/email`)      | info@devrijehond.nl                                                                                            |
+| [TransIP](https://www.transip.nl/cp/)                               | Domain registrar + DNS for `devrijehond.nl`              | TODO (account holder)                                                                                          |
+| [Google Cloud](https://console.cloud.google.com/)                   | Google Sign-In (OAuth) + Maps JS API key                 | OAuth project `762592672284`. TODO (owning Google account)                                                     |
+| [Apple Developer](https://developer.apple.com/account)              | iOS provisioning, TestFlight, App Store                  | Team `ND82KXRD2Q`, bundle `nl.devrijehond.app`                                                                 |
+| [Expo / EAS](https://expo.dev/)                                     | Mobile builds, OTA updates, push                         | TODO (Expo org/project)                                                                                        |
+| [GitHub](https://github.com/)                                       | Source repo + CI                                         | TODO (org/repo)                                                                                                |
+
 ## Dokku setup
 
 ```sh
