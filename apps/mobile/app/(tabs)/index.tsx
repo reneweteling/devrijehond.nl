@@ -96,6 +96,15 @@ export default function MapScreen() {
 
   const userLocation = useUserLocation();
 
+  // onMapReady is unreliable on iOS / Apple Maps (it can fail to fire), which
+  // would leave the map stuck on the default region. Flip mapReady on a short
+  // timeout as a fallback so centring + fly-to always happen.
+  useEffect(() => {
+    if (mapReady) return;
+    const t = setTimeout(() => setMapReady(true), 1200);
+    return () => clearTimeout(t);
+  }, [mapReady]);
+
   // (C) Search fly-to has priority: when search hands us lat/lng (with a nonce
   // 't' so the same place re-triggers), fly there once the map is ready, mark
   // "centred" so the boot-centre effect can't yank it back, refetch the
@@ -156,7 +165,16 @@ export default function MapScreen() {
   // First-load spinner: only before the very first response ever lands.
   // `spotsData` is undefined only until the first success (keepPreviousData
   // keeps it set afterwards), so this can't stay stuck once anything loaded.
-  const isFirstLoad = isLoading && spotsData === undefined;
+  // Safety net: if a first load is still pending after 12s (e.g. a flaky
+  // connection), stop blocking the UI with a spinner — the map stays usable.
+  const [spinnerTimedOut, setSpinnerTimedOut] = useState(false);
+  const pendingFirstLoad = isLoading && spotsData === undefined;
+  useEffect(() => {
+    if (!pendingFirstLoad) return;
+    const t = setTimeout(() => setSpinnerTimedOut(true), 12000);
+    return () => clearTimeout(t);
+  }, [pendingFirstLoad]);
+  const isFirstLoad = pendingFirstLoad && !spinnerTimedOut;
 
   const onRegionChange = (r: Region) => {
     if (debounce.current) clearTimeout(debounce.current);
