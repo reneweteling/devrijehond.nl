@@ -40,18 +40,21 @@
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^8.5.0",
+    "@devrijehond/s3": "workspace:*",
     "@zenstackhq/better-auth": "^3.0.0",
     "@zenstackhq/orm": "^3.0.0",
     "@zenstackhq/plugin-policy": "^3.0.0",
     "@zenstackhq/schema": "^3.0.0",
     "@zenstackhq/zod": "^3.0.0",
     "pg": "^8.13.1",
+    "sharp": "^0.34.5",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@better-auth/cli": "^1.2.0",
     "@types/node": "^22.10.5",
     "@types/pg": "^8.11.10",
+    "@types/sharp": "^0.32.0",
     "@zenstackhq/cli": "^3.0.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"

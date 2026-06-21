@@ -2,21 +2,43 @@
  * Deterministic, content-rich seed for De Vrije Hond.
  *
  * Ensures the PostGIS extension, then seeds taxonomy (categories + amenities),
- * an admin, a handful of community users, and a realistic set of Amsterdam dog
+ * an admin, a handful of community users, and a realistic set of Dutch dog
  * spots: off-leash areas + swim beaches as polygons, and horeca / wash / shop /
- * drinking-point POIs. Spots carry amenities, photos, community votes (so some
- * reach VERIFIED), and reviews (so ratings are populated). Geometry is written
- * via raw PostGIS (the ORM models `geom` as Unsupported): a point for POIs, a
- * generated ring for REGIONs.
+ * drinking-point POIs spread across NL. Spots carry amenities, photos uploaded
+ * to S3, community votes (so some reach VERIFIED), and reviews.
+ *
+ * Images are downloaded from stable Unsplash CDN URLs, resized to max 1600px
+ * via sharp, and uploaded to S3 once per unique source URL (cached). The
+ * resulting SpotPhoto.url always points at S3_PUBLIC_BASE_URL, never an
+ * external hotlink or local path.
  *
  * Re-runnable: wipes spots + community users first, then rebuilds. Uses the raw
  * `db` client (policies bypassed), seeding is a system action.
  */
+
+// Remap S3_* env vars to AWS SDK defaults before any import touches the SDK.
+if (process.env.S3_ACCESS_KEY_ID) {
+  process.env.AWS_ACCESS_KEY_ID = process.env.S3_ACCESS_KEY_ID;
+}
+if (process.env.S3_SECRET_ACCESS_KEY) {
+  process.env.AWS_SECRET_ACCESS_KEY = process.env.S3_SECRET_ACCESS_KEY;
+}
+if (process.env.S3_REGION) {
+  process.env.AWS_REGION = process.env.S3_REGION;
+}
+
+import { randomUUID } from 'crypto';
 import { Pool } from 'pg';
+import sharp from 'sharp';
+import { uploadObject } from '@devrijehond/s3';
 import { db } from './src/client';
 import { tallyVotesLike } from './seed-helpers';
 
 const ADMIN_EMAIL = 'rene@weteling.com';
+
+// ---------------------------------------------------------------------------
+// Taxonomy
+// ---------------------------------------------------------------------------
 
 const CATEGORIES = [
   {
@@ -72,6 +94,112 @@ const AMENITIES_BY_CATEGORY: Record<string, string[]> = {
   'drinking-point': ['water-bowl', 'free', 'shade'],
 };
 
+// ---------------------------------------------------------------------------
+// Category → source image pool (all curl-verified HTTP 200 + image/jpeg).
+// 2-3 per category. Each unique URL is uploaded to S3 once and reused.
+// ---------------------------------------------------------------------------
+
+const CATEGORY_IMAGES: Record<string, string[]> = {
+  'off-leash': [
+    // Dog running free on a green meadow / park field
+    'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=1600&q=80&fm=jpg',
+    // Dog in a forest / wooded path
+    'https://images.unsplash.com/photo-1448375240586-882707db888b?w=1600&q=80&fm=jpg',
+    // Wide open heathland / nature area
+    'https://images.unsplash.com/photo-1444465693019-aa0b6392460d?w=1600&q=80&fm=jpg',
+  ],
+  'swim-beach': [
+    // Sandy beach with clear water
+    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1600&q=80&fm=jpg',
+    // Coastal dunes and sea
+    'https://images.unsplash.com/photo-1473116763249-2faaef81ccda?w=1600&q=80&fm=jpg',
+    // Beach with waves
+    'https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=1600&q=80&fm=jpg',
+  ],
+  horeca: [
+    // Dog-friendly cafe interior
+    'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=1600&q=80&fm=jpg',
+    // Cafe exterior / terrace
+    'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1600&q=80&fm=jpg',
+    // Sunny outdoor terrace
+    'https://images.unsplash.com/photo-1559305616-3f99cd43e353?w=1600&q=80&fm=jpg',
+  ],
+  wash: [
+    // Dog being bathed / groomed
+    'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1600&q=80&fm=jpg',
+    // Dog wash station
+    'https://images.unsplash.com/photo-1523867574998-1a336b6ded04?w=1600&q=80&fm=jpg',
+  ],
+  shop: [
+    // Pet shop / animal store
+    'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=1600&q=80&fm=jpg',
+    // Dog with shopping / store
+    'https://images.unsplash.com/photo-1582798358481-d199fb7347bb?w=1600&q=80&fm=jpg',
+  ],
+  'drinking-point': [
+    // Dog drinking water
+    'https://images.unsplash.com/photo-1504006833117-8886a355efbf?w=1600&q=80&fm=jpg',
+    // Dog at water bowl / fountain
+    'https://images.unsplash.com/photo-1558788353-f76d92427f16?w=1600&q=80&fm=jpg',
+  ],
+};
+
+// ---------------------------------------------------------------------------
+// Image upload helpers
+// ---------------------------------------------------------------------------
+
+/** Map from source URL → already-uploaded S3 public URL. */
+const uploadedCache = new Map<string, string>();
+
+/**
+ * Download a source image, sharp-process it (max 1600px, JPEG Q80), and
+ * upload it to S3. Returns the public URL. Throws on network/S3 error so
+ * callers can decide whether to skip or abort.
+ */
+async function fetchAndUpload(sourceUrl: string): Promise<string> {
+  const cached = uploadedCache.get(sourceUrl);
+  if (cached) return cached;
+
+  // Download
+  const res = await fetch(sourceUrl, { signal: AbortSignal.timeout(30_000) });
+  if (!res.ok) throw new Error(`HTTP ${res.status} fetching ${sourceUrl}`);
+  const raw = Buffer.from(await res.arrayBuffer());
+
+  // Resize + encode
+  const processed = await sharp(raw)
+    .resize({ width: 1600, height: 1600, fit: 'inside', withoutEnlargement: true })
+    .jpeg({ quality: 80, mozjpeg: true })
+    .toBuffer();
+
+  const key = `spots/seed/${randomUUID()}.jpg`;
+  const { publicUrl } = await uploadObject(key, processed, 'image/jpeg');
+
+  uploadedCache.set(sourceUrl, publicUrl);
+  return publicUrl;
+}
+
+/**
+ * Attempt to upload a category-appropriate photo for a spot.
+ * Returns the S3 public URL, or null if the upload fails (non-fatal).
+ * Cycles through the category's source images using the spot index so
+ * each consecutive spot in the same category uses a different source image.
+ */
+async function photoUrlForSpot(category: string, spotIndex: number): Promise<string | null> {
+  const pool = CATEGORY_IMAGES[category];
+  if (!pool || pool.length === 0) return null;
+  const sourceUrl = pool[spotIndex % pool.length]!;
+  try {
+    return await fetchAndUpload(sourceUrl);
+  } catch (err) {
+    console.warn(`[seed] photo upload skipped for category=${category}: ${String(err)}`);
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Users
+// ---------------------------------------------------------------------------
+
 const USERS = [
   {
     email: 'seed-anna@devrijehond.nl',
@@ -124,6 +252,10 @@ const USERS = [
   },
 ] as const;
 
+// ---------------------------------------------------------------------------
+// Spots
+// ---------------------------------------------------------------------------
+
 type VoteSpec = { user: number; value: 'CONFIRM' | 'DENY' };
 type ReviewSpec = { user: number; stars: number; body: string };
 
@@ -137,7 +269,7 @@ interface SpotSeed {
   status?: 'UNVERIFIED' | 'VERIFIED' | 'HIDDEN';
   submitter?: number; // index into USERS, else admin
   amenities?: string[]; // override AMENITIES_BY_CATEGORY subset
-  photos?: number; // how many stock photos
+  photos?: number; // how many photos to upload
   votes?: VoteSpec[];
   reviews?: ReviewSpec[];
   address?: string;
@@ -152,7 +284,7 @@ const RESEARCH: {
   lat: number;
   lng: number;
   description: string;
-  radiusM?: number; // geofence size for REGION spots (metres)
+  radiusM?: number;
 }[] = [
   {
     name: 'Amsterdamse Bos',
@@ -934,7 +1066,7 @@ function slugify(s: string): string {
   return s
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
 }
@@ -949,9 +1081,8 @@ const REVIEW_SNIPPETS = [
 ];
 
 // Build the seed spots from the researched dataset. Deterministic: every third
-// spot reaches VERIFIED with a handful of weighted confirms (and sometimes a
-// review); the rest stay UNVERIFIED with a few or no votes. The submitter never
-// votes on their own spot.
+// spot reaches VERIFIED with a handful of weighted confirms; the rest stay
+// UNVERIFIED with a few or no votes.
 function buildSpots(): SpotSeed[] {
   const N = USERS.length;
   return RESEARCH.map((r, i): SpotSeed => {
@@ -990,7 +1121,7 @@ function buildSpots(): SpotSeed[] {
 
 const SPOTS: SpotSeed[] = buildSpots();
 
-/** A rough N-point ring around a centroid (metres → degrees), closed. */
+/** A rough N-point ring around a centroid (metres to degrees), closed. */
 function ring(lat: number, lng: number, radiusM: number): number[][] {
   const pts: number[][] = [];
   const n = 7;
@@ -998,7 +1129,6 @@ function ring(lat: number, lng: number, radiusM: number): number[][] {
   const lngM = 111_320 * Math.cos((lat * Math.PI) / 180);
   for (let i = 0; i < n; i++) {
     const a = (i / n) * 2 * Math.PI;
-    // slight per-vertex jitter so it isn't a perfect circle
     const r = radiusM * (0.82 + 0.18 * Math.abs(Math.sin(a * 2)));
     const dLat = (r * Math.sin(a)) / latM;
     const dLng = (r * Math.cos(a)) / lngM;
@@ -1007,6 +1137,10 @@ function ring(lat: number, lng: number, radiusM: number): number[][] {
   pts.push(pts[0]!); // close the ring
   return pts;
 }
+
+// ---------------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------------
 
 async function main() {
   const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -1073,7 +1207,6 @@ async function main() {
         email: u.email,
         name: u.name,
         handle: u.handle,
-        // Anna is seeded as a MODERATOR so the role is demonstrable in admin.
         role: u.email === 'seed-anna@devrijehond.nl' ? 'MODERATOR' : 'USER',
         emailVerified: true,
         reputation: u.reputation,
@@ -1086,7 +1219,11 @@ async function main() {
     s.submitter == null ? admin.id : (userId[s.submitter] ?? admin.id);
 
   // --- Spots ---
+  // Track how many spots per category for image cycling.
+  const categoryPhotoIndex: Record<string, number> = {};
   const regionGeoms: { id: string; coords: number[][] }[] = [];
+  let totalPhotos = 0;
+
   for (const s of SPOTS) {
     const cat = CATEGORIES.find((c) => c.slug === s.category)!;
     const votes = s.votes ?? [];
@@ -1134,18 +1271,26 @@ async function main() {
       });
     }
 
-    // Photos (deterministic stock images).
+    // Photos: upload to S3, one at a time, cycling through category sources.
     const photoN = s.photos ?? 0;
     if (photoN > 0) {
-      await db.spotPhoto.createMany({
-        data: Array.from({ length: photoN }, (_, n) => ({
-          spotId: spot.id,
-          url: `https://picsum.photos/seed/${s.slug}-${n}/900/675`,
-          uploadedById: submitterOf(s),
-          status: 'ACTIVE' as const,
-          sortOrder: n,
-        })),
-      });
+      const baseIdx = categoryPhotoIndex[s.category] ?? 0;
+      categoryPhotoIndex[s.category] = baseIdx + photoN;
+
+      for (let n = 0; n < photoN; n++) {
+        const url = await photoUrlForSpot(s.category, baseIdx + n);
+        if (!url) continue; // upload failed, skip this photo non-fatally
+        await db.spotPhoto.create({
+          data: {
+            spotId: spot.id,
+            url,
+            uploadedById: submitterOf(s),
+            status: 'ACTIVE',
+            sortOrder: n,
+          },
+        });
+        totalPhotos++;
+      }
     }
 
     // Votes (one per distinct user).
@@ -1272,13 +1417,26 @@ async function main() {
   await pool.end();
 
   const verified = SPOTS.filter((s) => s.status === 'VERIFIED').length;
+  const s3Host = new URL(process.env.S3_PUBLIC_BASE_URL ?? 'https://unknown').host;
   console.log(
     `Seeded: admin=${admin.email}, users=${USERS.length}, categories=${CATEGORIES.length}, ` +
       `amenities=${AMENITIES.length}, spots=${SPOTS.length} (verified=${verified}), ` +
+      `photos=${totalPhotos} (S3 host: ${s3Host}), ` +
+      `unique S3 uploads=${uploadedCache.size}, ` +
       `reviews=${SPOTS.reduce((n, s) => n + (s.reviews?.length ?? 0), 0)}, ` +
       `votes=${SPOTS.reduce((n, s) => n + (s.votes?.length ?? 0), 0)}, ` +
       `featureRequests=${FEATURE_REQUESTS.length}`,
   );
+
+  // Print a sample of S3 URLs for verification.
+  if (uploadedCache.size > 0) {
+    console.log('Sample S3 URLs (first 3 unique uploads):');
+    let shown = 0;
+    for (const url of uploadedCache.values()) {
+      console.log(`  ${url}`);
+      if (++shown >= 3) break;
+    }
+  }
 }
 
 main()
