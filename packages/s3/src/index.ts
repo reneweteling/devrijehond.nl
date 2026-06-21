@@ -2,6 +2,7 @@
  * @devrijehond/s3, S3 upload helpers.
  *
  * Exports:
+ *   - `uploadObject`   , server-side PUT of (already-processed) bytes to S3.
  *   - `createUploadUrl`, presigned PUT URL for direct browser/app uploads.
  *   - `publicUrl`      , resolve a stored object key to its public URL.
  */
@@ -11,6 +12,28 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { getS3, bucketName, publicBaseUrl } from './client';
 
 export { getS3, bucketName, publicBaseUrl, S3_REGION } from './client';
+
+/**
+ * Upload bytes to S3 from the server (e.g. after resizing/compressing an image).
+ * Returns the public URL the object is readable at. Long cache headers since
+ * object keys are content-unique (uuid), so the URL is effectively immutable.
+ */
+export async function uploadObject(
+  key: string,
+  body: Buffer | Uint8Array,
+  contentType: string,
+): Promise<{ key: string; publicUrl: string }> {
+  await getS3().send(
+    new PutObjectCommand({
+      Bucket: bucketName(),
+      Key: key,
+      Body: body,
+      ContentType: contentType,
+      CacheControl: 'public, max-age=31536000, immutable',
+    }),
+  );
+  return { key, publicUrl: publicUrl(key) };
+}
 
 export interface CreateUploadUrlOptions {
   /** The object key to upload to, e.g. `avatars/<userId>/<uuid>.jpg`. */

@@ -171,6 +171,15 @@ function Footer() {
               <a href="/over">Over &amp; meebouwen</a>
             </li>
             <li>
+              <a
+                href="https://github.com/reneweteling/devrijehond.nl"
+                target="_blank"
+                rel="noreferrer"
+              >
+                GitHub (open source) ↗
+              </a>
+            </li>
+            <li>
               <a href="/privacy">Privacyverklaring</a>
             </li>
             <li>

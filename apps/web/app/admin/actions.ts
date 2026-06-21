@@ -245,6 +245,60 @@ export async function updateSpotGeometry(
   revalidatePath('/admin/spots');
 }
 
+/** Add a photo (already uploaded to S3) to a spot. Staff only. */
+export async function addSpotPhoto(spotId: string, url: string): Promise<void> {
+  const ctx = await staffContext();
+  const db = authDb(ctx.user);
+  const count = await db.spotPhoto.count({ where: { spotId } });
+  await db.spotPhoto.create({
+    data: { spotId, url, uploadedById: ctx.user.id, sortOrder: count },
+  });
+  await logAction(ctx, 'EDIT', 'SPOT', spotId, 'photo+');
+  revalidatePath(`/admin/spots/${spotId}`);
+}
+
+/** Remove a spot photo (hard delete). Staff only. */
+export async function removeSpotPhoto(photoId: string, spotId: string): Promise<void> {
+  const ctx = await staffContext();
+  const db = authDb(ctx.user);
+  await db.spotPhoto.delete({ where: { id: photoId } });
+  await logAction(ctx, 'EDIT', 'SPOT', spotId, 'photo-');
+  revalidatePath(`/admin/spots/${spotId}`);
+}
+
+/** Set a spot's amenities (replace the whole set). Staff only. */
+export async function setSpotAmenities(spotId: string, amenityIds: string[]): Promise<void> {
+  const ctx = await staffContext();
+  const db = authDb(ctx.user);
+  await db.spotAmenity.deleteMany({ where: { spotId } });
+  if (amenityIds.length > 0) {
+    await db.spotAmenity.createMany({
+      data: amenityIds.map((amenityId) => ({ spotId, amenityId })),
+    });
+  }
+  await logAction(ctx, 'EDIT', 'SPOT', spotId, 'amenities');
+  revalidatePath(`/admin/spots/${spotId}`);
+}
+
+/** Edit a spot's contact details (address / phone / website). Staff only. */
+export async function updateSpotContact(
+  spotId: string,
+  patch: { address?: string | null; phone?: string | null; website?: string | null },
+): Promise<void> {
+  const ctx = await staffContext();
+  const db = authDb(ctx.user);
+  await db.spot.update({
+    where: { id: spotId },
+    data: {
+      ...(patch.address !== undefined && { address: patch.address || null }),
+      ...(patch.phone !== undefined && { phone: patch.phone || null }),
+      ...(patch.website !== undefined && { website: patch.website || null }),
+    },
+  });
+  await logAction(ctx, 'EDIT', 'SPOT', spotId, 'contact');
+  revalidatePath(`/admin/spots/${spotId}`);
+}
+
 // ---------------------------------------------------------------------------
 // User management (ADMIN only)
 // ---------------------------------------------------------------------------

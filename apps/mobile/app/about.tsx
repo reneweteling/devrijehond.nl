@@ -69,8 +69,14 @@ export default function AboutScreen() {
         <Text style={styles.sectionLabel}>Gemaakt door</Text>
         <Text style={styles.para}>
           De Vrije Hond is gemaakt door René Weteling (Felobo B.V.), uit liefde voor honden en mooie
-          wandelingen.
+          wandelingen. Van idee tot productie: web, mobiel en AI.
         </Text>
+        <Row
+          icon="globe"
+          title="weteling.com"
+          sub="Mijn website"
+          onPress={() => Linking.openURL('https://www.weteling.com')}
+        />
 
         <Text style={styles.sectionLabel}>Open source, bouw mee</Text>
         <Text style={styles.para}>

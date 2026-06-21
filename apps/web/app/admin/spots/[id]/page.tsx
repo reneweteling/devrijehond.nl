@@ -13,14 +13,6 @@ const STATUS_META: Record<string, { label: string; bg: string; fg: string }> = {
   REMOVED: { label: 'Verwijderd', bg: '#f5e0de', fg: 'var(--rust, #a33b2d)' },
 };
 
-function fmtDate(iso: string) {
-  return new Date(iso).toLocaleDateString('nl-NL', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
-}
-
 function fmtDateTime(iso: string) {
   return new Date(iso).toLocaleString('nl-NL', {
     day: 'numeric',
@@ -65,7 +57,8 @@ export default async function AdminSpotDetailPage({ params }: { params: Promise<
     const rings = geojson.coordinates as Array<Array<[number, number]>>;
     const outer = rings[0];
     if (outer) {
-      polygonCoords = outer.map(([lng, lat]) => ({ lat, lng }));
+      // GeoJSON is [lng, lat]; close the ring by skipping the last repeated point.
+      polygonCoords = outer.slice(0, -1).map(([lng, lat]) => ({ lat, lng }));
     }
   }
 
@@ -77,9 +70,12 @@ export default async function AdminSpotDetailPage({ params }: { params: Promise<
 
   const publicUrl = spot.type === 'REGION' ? `/gebied/${spot.slug}` : `/plek/${spot.slug}`;
 
+  const initialAmenityIds = spot.amenities.map((sa) => sa.amenity.id);
+  const initialPhotos = spot.photos.map((p) => ({ id: p.id, url: p.url }));
+
   return (
     <div>
-      {/* Breadcrumb + header */}
+      {/* Breadcrumb */}
       <nav style={{ fontSize: 13, color: 'var(--ink-3)', marginBottom: 12 }}>
         <Link href="/admin/spots" style={{ color: 'var(--ink-3)' }}>
           ← Terug naar plekken
@@ -87,7 +83,7 @@ export default async function AdminSpotDetailPage({ params }: { params: Promise<
       </nav>
 
       <span className="eyebrow">Beheer · Plekken</span>
-      <h1 style={{ fontSize: 'clamp(24px, 4vw, 34px)', margin: '8px 0 4px' }}>{spot.name}</h1>
+      <h1 style={{ fontSize: 'clamp(22px, 3.5vw, 30px)', margin: '8px 0 4px' }}>{spot.name}</h1>
 
       <div
         style={{
@@ -117,184 +113,61 @@ export default async function AdminSpotDetailPage({ params }: { params: Promise<
         </a>
       </div>
 
-      {/* Two-column layout: info left, edit right */}
+      {/* Meta strip */}
       <div
+        className="card"
         style={{
-          display: 'grid',
-          gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)',
-          gap: 36,
-          alignItems: 'start',
+          padding: '12px 18px',
+          marginBottom: 28,
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '6px 24px',
+          fontSize: 13.5,
+          color: 'var(--ink-2)',
         }}
       >
-        {/* Left: full info */}
-        <div style={{ display: 'grid', gap: 24 }}>
-          <section className="card" style={{ padding: 20 }}>
-            <h2
-              style={{
-                fontSize: 15,
-                textTransform: 'uppercase',
-                letterSpacing: '0.06em',
-                color: 'var(--ink-3)',
-                margin: '0 0 14px',
-              }}
-            >
-              Gegevens
-            </h2>
-            <dl
-              style={{ display: 'grid', gap: 10, gridTemplateColumns: 'auto 1fr', fontSize: 14.5 }}
-            >
-              <DtDd label="Naam" value={spot.name} />
-              <DtDd label="Slug" value={spot.slug} />
-              <DtDd label="Type" value={spot.type} />
-              <DtDd label="Categorie" value={spot.category.label} />
-              <DtDd
-                label="Status"
-                value={
-                  statusMeta ? (
-                    <span
-                      className="badge"
-                      style={{ background: statusMeta.bg, color: statusMeta.fg }}
-                    >
-                      {statusMeta.label}
-                    </span>
-                  ) : (
-                    spot.status
-                  )
-                }
-              />
-              <DtDd
-                label="Score"
-                value={`${spot.netScore >= 0 ? '+' : ''}${spot.netScore} (${spot.confirmCount} ✓ / ${spot.denyCount} ✕)`}
-              />
-              <DtDd label="Stemmen" value={String(spot._count.votes)} />
-              <DtDd label="Reviews" value={String(spot._count.reviews)} />
-              <DtDd label="Foto's" value={String(spot._count.photos)} />
-              <DtDd label="Inzender" value={submitterLabel} />
-              {spot.address ? <DtDd label="Adres" value={spot.address} /> : null}
-              {spot.phone ? <DtDd label="Telefoon" value={spot.phone} /> : null}
-              {spot.website ? (
-                <DtDd
-                  label="Website"
-                  value={
-                    <a href={spot.website} target="_blank" rel="noreferrer">
-                      {spot.website}
-                    </a>
-                  }
-                />
-              ) : null}
-              <DtDd label="Aangemaakt" value={fmtDateTime(spot.createdAt.toISOString())} />
-              <DtDd label="Bijgewerkt" value={fmtDate(spot.updatedAt.toISOString())} />
-              {spot.verifiedAt ? (
-                <DtDd label="Geverifieerd op" value={fmtDate(spot.verifiedAt.toISOString())} />
-              ) : null}
-            </dl>
-          </section>
-
-          {spot.description ? (
-            <section className="card" style={{ padding: 20 }}>
-              <h2
-                style={{
-                  fontSize: 15,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
-                  color: 'var(--ink-3)',
-                  margin: '0 0 10px',
-                }}
-              >
-                Beschrijving
-              </h2>
-              <p style={{ fontSize: 15, lineHeight: 1.6, color: 'var(--ink-2)', margin: 0 }}>
-                {spot.description}
-              </p>
-            </section>
-          ) : null}
-
-          {spot.amenities.length > 0 ? (
-            <section className="card" style={{ padding: 20 }}>
-              <h2
-                style={{
-                  fontSize: 15,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
-                  color: 'var(--ink-3)',
-                  margin: '0 0 10px',
-                }}
-              >
-                Voorzieningen
-              </h2>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                {spot.amenities.map((sa) => (
-                  <span key={sa.amenity.id} className="chip">
-                    {sa.amenity.label}
-                  </span>
-                ))}
-              </div>
-            </section>
-          ) : null}
-
-          {spot.photos.length > 0 ? (
-            <section className="card" style={{ padding: 20 }}>
-              <h2
-                style={{
-                  fontSize: 15,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
-                  color: 'var(--ink-3)',
-                  margin: '0 0 10px',
-                }}
-              >
-                Foto's
-              </h2>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
-                  gap: 8,
-                }}
-              >
-                {spot.photos.map((p) => (
-                  <img
-                    key={p.id}
-                    src={p.url}
-                    alt=""
-                    style={{
-                      width: '100%',
-                      aspectRatio: '4/3',
-                      objectFit: 'cover',
-                      borderRadius: 'var(--radius)',
-                    }}
-                  />
-                ))}
-              </div>
-            </section>
-          ) : null}
-        </div>
-
-        {/* Right: edit island */}
-        <div className="card" style={{ padding: 24, position: 'sticky', top: 84 }}>
-          <h2 style={{ fontSize: 17, marginBottom: 20 }}>Bewerken</h2>
-          <EditSpot
-            spotId={spot.id}
-            spotType={spot.type as 'POI' | 'REGION'}
-            initialName={spot.name}
-            initialDescription={spot.description ?? null}
-            initialCategoryId={spot.categoryId}
-            initialStatus={spot.status as 'UNVERIFIED' | 'VERIFIED' | 'HIDDEN' | 'REMOVED'}
-            lat={spot.lat ?? null}
-            lng={spot.lng ?? null}
-            polygonCoords={polygonCoords}
-          />
-        </div>
+        <span>
+          Inzender: <strong>{submitterLabel}</strong>
+        </span>
+        <span>
+          Score:{' '}
+          <strong>
+            {spot.netScore >= 0 ? '+' : ''}
+            {spot.netScore}
+          </strong>{' '}
+          ({spot.confirmCount} ✓ / {spot.denyCount} ✕)
+        </span>
+        <span>
+          Stemmen: <strong>{spot._count.votes}</strong>
+        </span>
+        <span>
+          Reviews: <strong>{spot._count.reviews}</strong>
+        </span>
+        <span>
+          Aangemaakt: <strong>{fmtDateTime(spot.createdAt.toISOString())}</strong>
+        </span>
+        <span>
+          Slug: <code style={{ fontFamily: 'monospace', fontSize: 13 }}>{spot.slug}</code>
+        </span>
       </div>
-    </div>
-  );
-}
 
-function DtDd({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <>
-      <dt style={{ color: 'var(--ink-3)', fontWeight: 500, whiteSpace: 'nowrap' }}>{label}</dt>
-      <dd style={{ margin: 0, color: 'var(--ink-2)' }}>{value}</dd>
-    </>
+      {/* Full-width edit island — all sections stacked */}
+      <EditSpot
+        spotId={spot.id}
+        spotType={spot.type as 'POI' | 'REGION'}
+        initialName={spot.name}
+        initialDescription={spot.description ?? null}
+        initialCategoryId={spot.categoryId}
+        initialStatus={spot.status as 'UNVERIFIED' | 'VERIFIED' | 'HIDDEN' | 'REMOVED'}
+        initialAddress={spot.address ?? null}
+        initialPhone={spot.phone ?? null}
+        initialWebsite={spot.website ?? null}
+        initialAmenityIds={initialAmenityIds}
+        initialPhotos={initialPhotos}
+        lat={spot.lat ?? null}
+        lng={spot.lng ?? null}
+        polygonCoords={polygonCoords}
+      />
+    </div>
   );
 }

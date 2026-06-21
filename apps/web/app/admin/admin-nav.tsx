@@ -25,6 +25,9 @@ export function AdminNav({ isAdmin = false }: { isAdmin?: boolean }) {
           {label}
         </a>
       ))}
+      <a href="/api/v1/openapi.json" target="_blank" rel="noreferrer">
+        API ↗
+      </a>
       <a href="/" target="_blank" rel="noreferrer">
         Bekijk site ↗
       </a>
