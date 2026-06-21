@@ -34,7 +34,31 @@ export class SchemaType implements SchemaDef {
           name: 'email',
           type: 'String',
           unique: true,
-          attributes: [{ name: '@unique' }] as readonly AttributeApplication[],
+          attributes: [
+            { name: '@unique' },
+            {
+              name: '@deny',
+              args: [
+                { name: 'operation', value: ExpressionUtils.literal('read') },
+                {
+                  name: 'condition',
+                  value: ExpressionUtils.binary(
+                    ExpressionUtils.binary(
+                      ExpressionUtils.member(ExpressionUtils.call('auth'), ['id']),
+                      '!=',
+                      ExpressionUtils.field('id'),
+                    ),
+                    '&&',
+                    ExpressionUtils.binary(
+                      ExpressionUtils.member(ExpressionUtils.call('auth'), ['role']),
+                      '!=',
+                      ExpressionUtils.literal('ADMIN'),
+                    ),
+                  ),
+                },
+              ],
+            },
+          ] as readonly AttributeApplication[],
         },
         name: {
           name: 'name',

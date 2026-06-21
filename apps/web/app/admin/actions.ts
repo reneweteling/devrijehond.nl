@@ -3,7 +3,8 @@
 import { headers } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { authDb } from '@devrijehond/db';
-import { withContext, withStaffContext } from '@devrijehond/server';
+import { withContext, withStaffContext, pgQuery } from '@devrijehond/server';
+import { normaliseGeometry } from '@/lib/geo';
 
 /**
  * Admin server actions, the moderation safety-net + taxonomy curation.
@@ -193,6 +194,55 @@ export async function setSpotStatus(
   await logAction(ctx, 'EDIT', 'SPOT', spotId, status);
   revalidatePath('/admin/spots');
   revalidatePath('/admin');
+}
+
+/** Edit a spot's core fields (staff). Policy-bound: only ADMIN/MODERATOR. */
+export async function updateSpotFields(
+  spotId: string,
+  patch: { name?: string; description?: string | null; categoryId?: string },
+): Promise<void> {
+  const ctx = await staffContext();
+  const db = authDb(ctx.user);
+  await db.spot.update({
+    where: { id: spotId },
+    data: {
+      ...(patch.name !== undefined && { name: patch.name }),
+      ...(patch.description !== undefined && { description: patch.description ?? null }),
+      ...(patch.categoryId !== undefined && { categoryId: patch.categoryId }),
+    },
+  });
+  await logAction(ctx, 'EDIT', 'SPOT', spotId);
+  revalidatePath(`/admin/spots/${spotId}`);
+  revalidatePath('/admin/spots');
+}
+
+/**
+ * Replace a spot's geometry (staff). Accepts a friendly point ({lat,lng}) or a
+ * polygon ([{lat,lng},…]); writes the PostGIS geom + the lat/lng centroid via
+ * the policy-bound client (so the staff edit grant is enforced) plus a raw geom
+ * UPDATE (the geom column is Unsupported in Prisma).
+ */
+export async function updateSpotGeometry(
+  spotId: string,
+  geom: { point?: { lat: number; lng: number }; polygon?: { lat: number; lng: number }[] },
+): Promise<void> {
+  const ctx = await staffContext();
+  const db = authDb(ctx.user);
+  const normalised = normaliseGeometry({ point: geom.point, polygon: geom.polygon });
+  if (!normalised) throw new Error('Geen geldige geometrie meegegeven.');
+  // The authDb update enforces the staff edit policy on this spot; the raw geom
+  // write only runs after that authorization succeeds.
+  await db.spot.update({
+    where: { id: spotId },
+    data: { lat: normalised.lat, lng: normalised.lng },
+  });
+  await pgQuery(
+    `UPDATE "Spot" SET "geom" = ST_SetSRID(ST_GeomFromGeoJSON($1), 4326) WHERE "id" = $2`,
+    [JSON.stringify(normalised.geojson), spotId],
+  );
+  await logAction(ctx, 'EDIT', 'SPOT', spotId, 'geometry');
+  revalidatePath(`/admin/spots/${spotId}`);
+  revalidatePath('/admin/spots');
 }
 
 // ---------------------------------------------------------------------------

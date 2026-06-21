@@ -403,16 +403,28 @@ img {
   margin-top: 18px;
 }
 .admin-pager a,
-.admin-pager span {
+.admin-pager span,
+.admin-pager button {
   padding: 7px 13px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--line);
   font-size: 13.5px;
   color: var(--ink-2);
+  background: transparent;
+  cursor: pointer;
 }
-.admin-pager a:hover {
+.admin-pager a:hover,
+.admin-pager button:not(.disabled):hover {
   background: var(--cream);
   text-decoration: none;
+}
+.admin-table .sort-ind {
+  font-size: 9px;
+  color: var(--ink-3);
+}
+.admin-table th[aria-sort='ascending'] .sort-ind,
+.admin-table th[aria-sort='descending'] .sort-ind {
+  color: var(--moss);
 }
 .admin-pager .current {
   background: var(--moss);

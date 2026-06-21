@@ -125,7 +125,10 @@ enum AdminActionType {
 
 model User {
   id            String   @id @default(uuid()) @db.Uuid
-  email         String   @unique
+  // Email is only readable by the user themselves or an ADMIN, so a public
+  // profile read (handle/name/image) can never leak it. The BetterAuth adapter
+  // uses the raw `db` client (policies bypassed), so sign-in is unaffected.
+  email         String   @unique @deny('read', auth().id != id && auth().role != 'ADMIN')
   name          String?
   image         String?  // avatar URL
   emailVerified Boolean  @default(false)
