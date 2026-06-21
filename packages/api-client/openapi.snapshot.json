@@ -3,9 +3,9 @@
   "info": {
     "title": "De Vrije Hond API",
     "version": "v1",
-    "description": "Typed contract between the De Vrije Hond website/API (apps/web) and the Expo mobile app. Generated from Zod schemas in @devrijehond/types. The community-driven map of dog-friendly spots — public reads are anonymous + CDN-cacheable; user-scoped writes live under `/me/*`."
+    "description": "Typed contract between the De Vrije Hond website/API (apps/web) and the Expo mobile app. Generated from Zod schemas in @devrijehond/types. The community-driven map of dog-friendly spots, public reads are anonymous + CDN-cacheable; user-scoped writes live under `/me/*`."
   },
-  "servers": [{ "url": "https://devrijehond.local", "description": "current" }],
+  "servers": [{ "url": "http://localhost:3030", "description": "current" }],
   "components": {
     "securitySchemes": {
       "bearerAuth": {
@@ -18,7 +18,7 @@
     "schemas": {
       "UserRole": {
         "type": "string",
-        "enum": ["USER", "ADMIN"],
+        "enum": ["USER", "MODERATOR", "ADMIN"],
         "description": "Application role. `USER` = mobile app + website. `ADMIN` = moderation safety-net.",
         "example": "USER"
       },
@@ -77,7 +77,7 @@
           }
         },
         "required": ["lat", "lng"],
-        "description": "A geographic point — latitude/longitude in WGS84."
+        "description": "A geographic point, latitude/longitude in WGS84."
       },
       "ApiError": {
         "type": "object",
@@ -974,6 +974,15 @@
             "type": "boolean",
             "description": "Whether the signed-in user has upvoted. False for anonymous reads."
           },
+          "author": {
+            "type": "object",
+            "properties": {
+              "handle": { "type": ["string", "null"] },
+              "image": { "type": ["string", "null"] }
+            },
+            "required": ["handle", "image"],
+            "description": "The submitter (username + avatar only)."
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time",
@@ -989,6 +998,7 @@
           "status",
           "upvoteCount",
           "viewerHasVoted",
+          "author",
           "createdAt"
         ],
         "description": "A community feature request."
@@ -1119,11 +1129,11 @@
             "schema": {
               "type": ["string", "null"],
               "format": "date-time",
-              "description": "Delta-sync cursor — return only spots changed at/after this timestamp.",
+              "description": "Delta-sync cursor, return only spots changed at/after this timestamp.",
               "example": "2026-06-19T12:00:00Z"
             },
             "required": false,
-            "description": "Delta-sync cursor — return only spots changed at/after this timestamp.",
+            "description": "Delta-sync cursor, return only spots changed at/after this timestamp.",
             "name": "since",
             "in": "query"
           },

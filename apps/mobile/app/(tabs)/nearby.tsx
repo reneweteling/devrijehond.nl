@@ -4,20 +4,29 @@
  * distance (when location is granted), rating and a verified badge. With
  * location the list is sorted nearest-first; otherwise newest-first from the
  * API. Search isn't limited to the viewport, you might be looking elsewhere.
+ *
+ * Tapping a row flies the map to that spot (router.replace /(tabs) with
+ * lat/lng/t params) rather than opening the detail page.
  */
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { FlatList, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useCategories, useSpots, type SpotSummary } from '@/lib/api';
+import { useCategories, useSpots, type Category, type SpotSummary } from '@/lib/api';
 import { useUserLocation, haversineMeters, formatDistance } from '@/lib/location';
-import { colors, font, radius, space } from '@/lib/theme';
+import { categoryColors, colors, font, radius, space, TAB_BAR_CLEARANCE } from '@/lib/theme';
 import { Chip, ScreenTitle, Stars, VerifiedBadge } from '@/components/ui';
 
 type Row = SpotSummary & { _distanceM?: number };
+
+function catColor(category: Category | undefined): string {
+  if (category?.color) return category.color;
+  if (category) return categoryColors[category.slug] ?? colors.moss;
+  return colors.moss;
+}
 
 export default function NearbyScreen() {
   const insets = useSafeAreaInsets();
@@ -25,6 +34,8 @@ export default function NearbyScreen() {
   const [activeCat, setActiveCat] = useState<string | undefined>(undefined);
   const [q, setQ] = useState('');
   const loc = useUserLocation();
+  // Incrementing nonce per tap so the same spot can re-trigger a fly-to.
+  const tapNonce = useRef(0);
 
   const { data: categoriesData } = useCategories();
   const categories = categoriesData?.items ?? [];
@@ -57,38 +68,58 @@ export default function NearbyScreen() {
     return list;
   }, [data, loc, query, catById]);
 
-  const renderItem = ({ item }: { item: Row }) => (
-    <Pressable style={styles.row} onPress={() => router.push(`/spot/${item.slug}`)}>
-      <View style={styles.thumb}>
-        {item.photoUrl ? (
-          <Image source={{ uri: item.photoUrl }} style={styles.thumbImg} resizeMode="cover" />
-        ) : (
-          <SymbolView name="photo.fill" size={22} tintColor={colors.ink3} />
-        )}
-      </View>
-      <View style={{ flex: 1, gap: 3 }}>
-        <Text style={styles.title} numberOfLines={1}>
-          {item.name}
-        </Text>
-        <Text style={styles.meta}>
-          {catById.get(item.categoryId)?.label ?? ''}
-          {item._distanceM != null ? ` · ${formatDistance(item._distanceM)}` : ''}
-        </Text>
-        <View style={styles.metaRow}>
-          <VerifiedBadge status={item.status} />
-          {item.rating.count > 0 ? (
-            <View style={styles.ratingInline}>
-              <Stars value={item.rating.average} size={11} />
-              <Text style={styles.ratingText}>
-                {item.rating.average.toFixed(1).replace('.', ',')} · {item.rating.count}
-              </Text>
-            </View>
-          ) : null}
+  const handleRowPress = (item: Row) => {
+    if (item.lat == null || item.lng == null) return;
+    tapNonce.current += 1;
+    router.replace({
+      pathname: '/(tabs)',
+      params: {
+        lat: String(item.lat),
+        lng: String(item.lng),
+        t: String(tapNonce.current),
+      },
+    });
+  };
+
+  const renderItem = ({ item }: { item: Row }) => {
+    const category = catById.get(item.categoryId);
+    const dotColor = catColor(category);
+    return (
+      <Pressable style={styles.row} onPress={() => handleRowPress(item)}>
+        <View style={styles.thumb}>
+          {item.photoUrl ? (
+            <Image source={{ uri: item.photoUrl }} style={styles.thumbImg} resizeMode="cover" />
+          ) : (
+            <SymbolView name="photo.fill" size={22} tintColor={colors.ink3} />
+          )}
         </View>
-      </View>
-      <SymbolView name="chevron.right" size={16} tintColor={colors.ink3} />
-    </Pressable>
-  );
+        <View style={{ flex: 1, gap: 3 }}>
+          <Text style={styles.title} numberOfLines={1}>
+            {item.name}
+          </Text>
+          <View style={styles.catRow}>
+            <View style={[styles.catDot, { backgroundColor: dotColor }]} />
+            <Text style={styles.meta} numberOfLines={1}>
+              {category?.label ?? ''}
+              {item._distanceM != null ? ` · ${formatDistance(item._distanceM)}` : ''}
+            </Text>
+          </View>
+          <View style={styles.metaRow}>
+            <VerifiedBadge status={item.status} />
+            {item.rating.count > 0 ? (
+              <View style={styles.ratingInline}>
+                <Stars value={item.rating.average} size={11} />
+                <Text style={styles.ratingText}>
+                  {item.rating.average.toFixed(1).replace('.', ',')} · {item.rating.count}
+                </Text>
+              </View>
+            ) : null}
+          </View>
+        </View>
+        <SymbolView name="map" size={16} tintColor={colors.ink3} />
+      </Pressable>
+    );
+  };
 
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
@@ -122,7 +153,7 @@ export default function NearbyScreen() {
             </View>
             <FlatList
               horizontal
-              data={[{ id: '__all', label: 'Alles' }, ...categories]}
+              data={[{ id: '__all', label: 'Alles', slug: '', color: '' }, ...categories]}
               keyExtractor={(c) => c.id}
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.chipRow}
@@ -131,8 +162,9 @@ export default function NearbyScreen() {
                   <Chip label="Alles" active={!activeCat} onPress={() => setActiveCat(undefined)} />
                 ) : (
                   <Chip
-                    label={(item as { label: string }).label}
+                    label={item.label}
                     active={activeCat === item.id}
+                    color={catColor(item as Category)}
                     onPress={() => setActiveCat(item.id)}
                   />
                 )
@@ -145,7 +177,7 @@ export default function NearbyScreen() {
             {isLoading ? 'Laden…' : query ? 'Geen plekken gevonden.' : 'Nog geen plekken hier.'}
           </Text>
         }
-        contentContainerStyle={{ paddingBottom: insets.bottom + 110 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + TAB_BAR_CLEARANCE }}
       />
     </View>
   );
@@ -191,7 +223,9 @@ const styles = StyleSheet.create({
   },
   thumbImg: { width: 60, height: 60 },
   title: { fontFamily: font.heading, fontSize: 15, lineHeight: 20, color: colors.ink },
-  meta: { fontFamily: font.body, fontSize: 12, color: colors.ink2 },
+  catRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  catDot: { width: 7, height: 7, borderRadius: 4 },
+  meta: { fontFamily: font.body, fontSize: 12, color: colors.ink2, flexShrink: 1 },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 2 },
   ratingInline: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   ratingText: { fontFamily: font.body, fontSize: 11, color: colors.ink2 },

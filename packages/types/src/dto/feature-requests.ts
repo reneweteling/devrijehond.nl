@@ -21,6 +21,13 @@ export const FeatureRequestSchema = z
     viewerHasVoted: z.boolean().openapi({
       description: 'Whether the signed-in user has upvoted. False for anonymous reads.',
     }),
+    // Who submitted it: username (handle) + avatar only, never the real name.
+    author: z
+      .object({
+        handle: z.string().nullable(),
+        image: z.string().nullable(),
+      })
+      .openapi({ description: 'The submitter (username + avatar only).' }),
     createdAt: IsoDateTimeSchema,
   })
   .openapi('FeatureRequest', { description: 'A community feature request.' });

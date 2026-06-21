@@ -35,7 +35,7 @@ import {
 } from '@/lib/api';
 import { useUserLocation } from '@/lib/location';
 import { categoryColors, colors, font, radius, space } from '@/lib/theme';
-import { Chip, VerifiedBadge, Stars } from '@/components/ui';
+import { Button, Chip, VerifiedBadge, Stars } from '@/components/ui';
 
 // Amsterdam-centre default region (covers the seeded spots from the Bos in the
 // south to the NDSM in the north). The map recentres on the user when location
@@ -83,18 +83,46 @@ export default function MapScreen() {
   // Search can hand us a location to fly to (e.g. "Hilversum"); see lib/geocode.
   const params = useLocalSearchParams<{ lat?: string; lng?: string; t?: string }>();
   const [bbox, setBbox] = useState<Bbox>(() => regionToBbox(INITIAL_REGION));
-  const [activeCat, setActiveCat] = useState<string | undefined>(undefined);
+  // Multi-select category filter. Empty = "Alles" (show everything). Tapping a
+  // category toggles it; tapping "Alles" clears back to everything.
+  const [activeCats, setActiveCats] = useState<Set<string>>(() => new Set());
   const [selected, setSelected] = useState<SpotSummary | null>(null);
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // Track whether we've done the initial user-location fly-to (only once).
+  // Becomes true once the native map is laid out, so fly-to / centre calls
+  // aren't issued before the map can honour them (they'd be no-ops).
+  const [mapReady, setMapReady] = useState(false);
+  // Once we've centred (on the user or a search target) we don't auto-recentre.
   const centredOnUser = useRef(false);
 
-  // (B) Always centre on the user as soon as location resolves (that's where
-  // they're walking). Walking-scale zoom, not the whole city. Runs once; a
-  // search fly-to or manual pan can move it afterwards.
   const userLocation = useUserLocation();
+
+  // (C) Search fly-to has priority: when search hands us lat/lng (with a nonce
+  // 't' so the same place re-triggers), fly there once the map is ready, mark
+  // "centred" so the boot-centre effect can't yank it back, refetch the
+  // viewport, and consume the params so a later remount doesn't re-fly.
   useEffect(() => {
-    if (centredOnUser.current || !userLocation) return;
+    const lat = params.lat ? Number(params.lat) : NaN;
+    const lng = params.lng ? Number(params.lng) : NaN;
+    if (!mapReady || !Number.isFinite(lat) || !Number.isFinite(lng)) return;
+    centredOnUser.current = true;
+    const region: Region = {
+      latitude: lat,
+      longitude: lng,
+      latitudeDelta: 0.06,
+      longitudeDelta: 0.06,
+    };
+    mapRef.current?.animateToRegion(region, 600);
+    setTimeout(() => {
+      setBbox(regionToBbox(region));
+      router.setParams({ lat: undefined, lng: undefined, t: undefined });
+    }, 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapReady, params.lat, params.lng, params.t]);
+
+  // (B) Centre on the user once, after the map is ready and location resolves,
+  // unless a search target is pending (search wins). That's where they walk.
+  useEffect(() => {
+    if (!mapReady || centredOnUser.current || !userLocation || params.lat) return;
     centredOnUser.current = true;
     const region: Region = {
       latitude: userLocation.lat,
@@ -103,48 +131,28 @@ export default function MapScreen() {
       longitudeDelta: 0.04,
     };
     mapRef.current?.animateToRegion(region, 600);
-    // Defer the viewport sync out of the synchronous effect body.
     setTimeout(() => setBbox(regionToBbox(region)), 0);
-  }, [userLocation]);
-
-  // (C) Fly to a location handed in by search (e.g. "Hilversum"). Runs both on
-  // param change (including nonce 't') and once the map is ready, so it never
-  // races the map mount. After flying, clear the params so a remount doesn't
-  // yank the user back to a stale location.
-  const flyToParams = () => {
-    const lat = params.lat ? Number(params.lat) : NaN;
-    const lng = params.lng ? Number(params.lng) : NaN;
-    if (Number.isFinite(lat) && Number.isFinite(lng)) {
-      const region: Region = {
-        latitude: lat,
-        longitude: lng,
-        latitudeDelta: 0.08,
-        longitudeDelta: 0.08,
-      };
-      mapRef.current?.animateToRegion(region, 700);
-      // animateToRegion doesn't always fire onRegionChangeComplete, so refetch
-      // the viewport spots explicitly (otherwise you land on an empty map).
-      // Deferred so it doesn't run setState synchronously in the effect body.
-      setTimeout(() => {
-        setBbox(regionToBbox(region));
-        router.setParams({ lat: undefined, lng: undefined, t: undefined });
-      }, 0);
-    }
-  };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(flyToParams, [params.lat, params.lng, params.t]);
+  }, [mapReady, userLocation, params.lat]);
 
   const { data: categoriesData } = useCategories();
   const categories = categoriesData?.items ?? [];
   const catById = useMemo(() => new Map(categories.map((c) => [c.id, c] as const)), [categories]);
 
-  const {
-    data: spotsData,
-    isLoading,
-    isError,
-    refetch,
-  } = useSpotsInViewport(bbox, { categoryId: activeCat });
-  const spots = spotsData?.items ?? [];
+  const { data: spotsData, isLoading, isError, refetch } = useSpotsInViewport(bbox);
+  // Client-side category filter so multiple categories can be active at once
+  // (the viewport endpoint takes a single categoryId).
+  const spots = useMemo(() => {
+    const all = spotsData?.items ?? [];
+    return activeCats.size === 0 ? all : all.filter((s) => activeCats.has(s.categoryId));
+  }, [spotsData, activeCats]);
+
+  const toggleCat = (id: string) =>
+    setActiveCats((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   // First-load spinner: only before the very first response ever lands.
   // `spotsData` is undefined only until the first success (keepPreviousData
   // keeps it set afterwards), so this can't stay stuck once anything loaded.
@@ -194,7 +202,7 @@ export default function MapScreen() {
         ref={mapRef}
         style={StyleSheet.absoluteFill}
         initialRegion={INITIAL_REGION}
-        onMapReady={flyToParams}
+        onMapReady={() => setMapReady(true)}
         onRegionChangeComplete={onRegionChange}
         showsUserLocation
         onPress={() => setSelected(null)}
@@ -288,13 +296,18 @@ export default function MapScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.chipRow}
         >
-          <Chip label="Alles" active={!activeCat} onPress={() => setActiveCat(undefined)} />
+          <Chip
+            label="Alles"
+            active={activeCats.size === 0}
+            onPress={() => setActiveCats(new Set())}
+          />
           {categories.map((c) => (
             <Chip
               key={c.id}
               label={c.label}
-              active={activeCat === c.id}
-              onPress={() => setActiveCat(c.id)}
+              active={activeCats.has(c.id)}
+              color={catColor(c)}
+              onPress={() => toggleCat(c.id)}
             />
           ))}
         </ScrollView>
@@ -333,19 +346,13 @@ export default function MapScreen() {
         </Pressable>
       )}
 
-      {/* Bottom-sheet peek card */}
+      {/* Bottom-sheet peek card: tapping a marker/region shows this; the CTA
+          opens the full info page. The card itself doesn't navigate. */}
       {selected && (
-        <Pressable
-          style={[styles.sheet, { paddingBottom: insets.bottom + 100 }]}
-          onPress={() => router.push(`/spot/${selected.slug}`)}
-        >
-          {/* (D) Close affordance */}
+        <View style={[styles.sheet, { paddingBottom: insets.bottom + 100 }]}>
           <Pressable
             style={({ pressed }) => [styles.sheetClose, { opacity: pressed ? 0.5 : 1 }]}
-            onPress={(e) => {
-              e.stopPropagation();
-              setSelected(null);
-            }}
+            onPress={() => setSelected(null)}
             hitSlop={12}
           >
             <SymbolView name="xmark" size={13} tintColor={colors.ink3} />
@@ -382,9 +389,11 @@ export default function MapScreen() {
                 ) : null}
               </View>
             </View>
-            <SymbolView name="chevron.right" size={18} tintColor={colors.ink3} />
           </View>
-        </Pressable>
+          <View style={{ marginTop: space.sm }}>
+            <Button label="Bekijk plek" onPress={() => router.push(`/spot/${selected.slug}`)} />
+          </View>
+        </View>
       )}
     </View>
   );

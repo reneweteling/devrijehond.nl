@@ -103,6 +103,55 @@ export async function refreshSessionIfNeeded(
 }
 
 /**
+ * Validate the persisted token against the server on boot. Unlike
+ * `refreshSessionIfNeeded` (which only calls out near expiry), this always asks
+ * the server whether the session is still real, so a token that's locally
+ * unexpired but server-side gone (e.g. after a DB reseed) is detected and the
+ * user is dropped to anonymous instead of hanging on authed requests.
+ *
+ * - 401 / no session in the body → clear + return null (sign out).
+ * - ok with a session → return it (refreshing token/expiry when present).
+ * - network/timeout error → keep the current session (don't sign out offline).
+ */
+export async function verifySession(current: PersistedSession): Promise<PersistedSession | null> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 6000);
+  try {
+    const response = await fetch(`${AUTH_URL}/api/auth/get-session`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${current.token}`, 'Content-Type': 'application/json' },
+      signal: controller.signal,
+    });
+    if (response.status === 401) {
+      await clearSession();
+      return null;
+    }
+    if (!response.ok) return current; // server hiccup: stay logged in
+    const body = (await response.json()) as {
+      user?: unknown;
+      session?: { token?: string; expiresAt?: string };
+    } | null;
+    // BetterAuth returns null (or no user) when the session is invalid/missing.
+    if (!body || !body.user) {
+      await clearSession();
+      return null;
+    }
+    const nextToken = extractTokenFromResponse(response) ?? body.session?.token;
+    const nextExpiresAt = body.session?.expiresAt ? new Date(body.session.expiresAt) : null;
+    if (nextToken && nextExpiresAt && !Number.isNaN(nextExpiresAt.getTime())) {
+      const next: PersistedSession = { token: nextToken, expiresAt: nextExpiresAt };
+      await saveSession(next.token, next.expiresAt);
+      return next;
+    }
+    return current;
+  } catch {
+    return current; // offline: keep the session
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+/**
  * Parse a BetterAuth session token out of an HTTP response.
  *
  * Primary channel: the `set-auth-token` header emitted by BetterAuth's

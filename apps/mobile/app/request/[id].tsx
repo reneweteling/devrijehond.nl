@@ -1,11 +1,10 @@
 /**
- * Feature request detail. Shows the full title, body, status, component, and
- * the upvote control (with live count). The FeatureRequest DTO from the API does
- * not expose an author/submitter field, so no author row is shown.
+ * Feature request detail. Shows the full title, body, status, component, who
+ * submitted it (username + avatar, never the real name), and the upvote control.
  */
 
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -135,6 +134,20 @@ export default function RequestDetailScreen() {
         {/* Title */}
         <Text style={styles.title}>{item.title}</Text>
 
+        {/* Who submitted it: username + avatar only (never the real name) */}
+        <View style={styles.authorRow}>
+          <View style={styles.avatar}>
+            {item.author?.image ? (
+              <Image source={{ uri: item.author.image }} style={styles.avatarImg} />
+            ) : (
+              <SymbolView name="person.fill" size={15} tintColor={colors.mossDark} />
+            )}
+          </View>
+          <Text style={styles.authorName}>
+            {item.author?.handle ? `@${item.author.handle}` : 'Een hondenbaas'}
+          </Text>
+        </View>
+
         {/* Body */}
         {item.body ? (
           <Text style={styles.body}>{item.body}</Text>
@@ -258,8 +271,20 @@ const styles = StyleSheet.create({
     fontSize: 22,
     lineHeight: 29,
     color: colors.ink,
-    marginBottom: space.md,
+    marginBottom: space.sm,
   },
+  authorRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: space.lg },
+  avatar: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: colors.mossSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  avatarImg: { width: 28, height: 28, borderRadius: 14 },
+  authorName: { fontFamily: font.bodyMedium, fontSize: 13.5, color: colors.ink2 },
   body: {
     fontFamily: font.body,
     fontSize: 14,

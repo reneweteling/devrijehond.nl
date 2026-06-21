@@ -13,6 +13,7 @@ export type UserRole = (typeof UserRole)[keyof typeof UserRole];
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const UserRole = {
   USER: 'USER',
+  MODERATOR: 'MODERATOR',
   ADMIN: 'ADMIN',
 } as const;
 
@@ -903,6 +904,18 @@ export type FeatureRequestBody = string | null;
  */
 export type FeatureRequestComponent = string | null;
 
+export type FeatureRequestAuthorHandle = string | null;
+
+export type FeatureRequestAuthorImage = string | null;
+
+/**
+ * The submitter (username + avatar only).
+ */
+export type FeatureRequestAuthor = {
+  handle: FeatureRequestAuthorHandle;
+  image: FeatureRequestAuthorImage;
+};
+
 /**
  * A community feature request.
  */
@@ -918,6 +931,8 @@ export interface FeatureRequest {
   upvoteCount: number;
   /** Whether the signed-in user has upvoted. False for anonymous reads. */
   viewerHasVoted: boolean;
+  /** The submitter (username + avatar only). */
+  author: FeatureRequestAuthor;
   /** RFC 3339 datetime in UTC. */
   createdAt: string;
 }

@@ -90,15 +90,25 @@ export function Chip({
   active,
   onPress,
   icon,
+  color,
 }: {
   label: string;
   active?: boolean;
   onPress?: () => void;
   icon?: SymbolViewProps['name'];
+  /** When active, tint the pill in this colour (the category's own colour). */
+  color?: string;
 }) {
+  const activeBg = color ?? colors.moss;
   return (
     <Pressable onPress={onPress} style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}>
-      <View style={[styles.chip, active && styles.chipActive]}>
+      <View
+        style={[
+          styles.chip,
+          active && styles.chipActive,
+          active && { backgroundColor: activeBg, borderColor: activeBg },
+        ]}
+      >
         {icon ? (
           <SymbolView name={icon} size={12} tintColor={active ? '#fff' : colors.ink2} />
         ) : null}
@@ -262,12 +272,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    minHeight: 46,
+    minHeight: 52,
     paddingHorizontal: space.lg,
     borderRadius: radius.button,
   },
   buttonSecondary: { borderWidth: 1, borderColor: colors.line },
-  buttonText: { fontFamily: font.bodyMedium, fontSize: 15, lineHeight: 20 },
+  buttonText: { fontFamily: font.bodyMedium, fontSize: 16, lineHeight: 21 },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -36,6 +36,7 @@ export async function POST(request: NextRequest) {
       component: parsed.data.component ?? null,
       createdById: ctx.user.id,
     },
+    include: { createdBy: { select: { handle: true, image: true } } },
   });
 
   const dto: FeatureRequestDto = {
@@ -46,6 +47,7 @@ export async function POST(request: NextRequest) {
     status: created.status,
     upvoteCount: created.upvoteCount,
     viewerHasVoted: false,
+    author: { handle: created.createdBy?.handle ?? null, image: created.createdBy?.image ?? null },
     createdAt: created.createdAt.toISOString(),
   };
   return ok(dto, { status: 201, cacheControl: NO_STORE_CACHE_CONTROL });

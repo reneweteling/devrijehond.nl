@@ -11,7 +11,7 @@ import { QueryClient } from '@tanstack/react-query';
 import { setAuthToken } from '@devrijehond/api-client';
 
 import { API_URL } from './config';
-import { loadSession, refreshSessionIfNeeded } from './session';
+import { loadSession, verifySession } from './session';
 
 // Mirror the base URL into the global the api-client resolves from. Doing this
 // at module load guarantees any hook resolving a URL before first render sees
@@ -56,12 +56,15 @@ export async function bootApiClient(): Promise<BootResult> {
       return { authenticated: false };
     }
     setAuthToken(loaded.token);
-    const refreshed = await refreshSessionIfNeeded(loaded);
-    if (!refreshed) {
+    // Always verify the token against the server: a locally-unexpired token can
+    // be dead server-side (e.g. after a DB reseed), and we must sign out cleanly
+    // instead of letting every authed request 401 in a loop.
+    const verified = await verifySession(loaded);
+    if (!verified) {
       setAuthToken(null);
       return { authenticated: false };
     }
-    setAuthToken(refreshed.token);
+    setAuthToken(verified.token);
     return { authenticated: true };
   } catch {
     // Best-effort boot, a corrupt SecureStore entry must not wedge the splash.

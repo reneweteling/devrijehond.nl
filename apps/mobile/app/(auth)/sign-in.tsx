@@ -10,6 +10,7 @@
 
 import { useState } from 'react';
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -18,7 +19,6 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import * as AppleAuthentication from 'expo-apple-authentication';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -29,6 +29,141 @@ import { useAuth } from '@/lib/auth-context';
 import { colors, font, radius, space } from '@/lib/theme';
 import { Button } from '@/components/ui';
 
+// ---------------------------------------------------------------------------
+// Coloured Google G – built from plain RN Views (no react-native-svg).
+// The G letterform is approximated with a row of coloured blocks behind a
+// white mask so we get the four quadrant colours without SVG.
+// ---------------------------------------------------------------------------
+function GoogleG({ size = 20 }: { size?: number }) {
+  // Four quadrant colours of the official Google logo.
+  const blue = '#4285F4';
+  const red = '#EA4335';
+  const yellow = '#FBBC05';
+  const green = '#34A853';
+  const half = size / 2;
+  const q = size / 4; // quarter, used for the notch
+
+  return (
+    <View style={{ width: size, height: size, borderRadius: size / 2, overflow: 'hidden' }}>
+      {/* top-left: blue */}
+      <View
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: half,
+          height: half,
+          backgroundColor: blue,
+        }}
+      />
+      {/* top-right: red */}
+      <View
+        style={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          width: half,
+          height: half,
+          backgroundColor: red,
+        }}
+      />
+      {/* bottom-left: green */}
+      <View
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          width: half,
+          height: half,
+          backgroundColor: green,
+        }}
+      />
+      {/* bottom-right: yellow */}
+      <View
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          right: 0,
+          width: half,
+          height: half,
+          backgroundColor: yellow,
+        }}
+      />
+      {/* white circle cut-out for the ring */}
+      <View
+        style={{
+          position: 'absolute',
+          top: q,
+          left: q,
+          width: half,
+          height: half,
+          borderRadius: half / 2,
+          backgroundColor: '#fff',
+        }}
+      />
+      {/* white block to open the right side of the G (the notch) */}
+      <View
+        style={{
+          position: 'absolute',
+          top: half - q / 2,
+          right: 0,
+          width: half,
+          height: q,
+          backgroundColor: '#fff',
+        }}
+      />
+      {/* yellow bar for the horizontal stroke of the G */}
+      <View
+        style={{
+          position: 'absolute',
+          top: half - q / 2,
+          right: 0,
+          width: half + q / 2,
+          height: q,
+          backgroundColor: yellow,
+        }}
+      />
+    </View>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Uniform social button – same sizing contract as <Button> from ui.tsx.
+// ---------------------------------------------------------------------------
+function SocialButton({
+  onPress,
+  disabled,
+  loading,
+  dark,
+  children,
+}: {
+  onPress: () => void;
+  disabled?: boolean;
+  loading?: boolean;
+  /** When true: black background + white text (Apple). Otherwise white + border. */
+  dark?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={disabled || loading}
+      style={({ pressed }) => ({ opacity: pressed || disabled || loading ? 0.6 : 1 })}
+    >
+      <View style={[styles.socialBtn, dark ? styles.socialBtnDark : styles.socialBtnLight]}>
+        {loading ? (
+          <ActivityIndicator color={dark ? '#fff' : colors.ink} />
+        ) : (
+          <View style={styles.socialBtnInner}>{children}</View>
+        )}
+      </View>
+    </Pressable>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Close button
+// ---------------------------------------------------------------------------
 function CloseButton({ top, onClose }: { top: number; onClose: () => void }) {
   return (
     <Pressable onPress={onClose} hitSlop={12} style={[styles.close, { top }]}>
@@ -37,6 +172,9 @@ function CloseButton({ top, onClose }: { top: number; onClose: () => void }) {
   );
 }
 
+// ---------------------------------------------------------------------------
+// Screen
+// ---------------------------------------------------------------------------
 export default function SignInScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -113,6 +251,9 @@ export default function SignInScreen() {
     }
   };
 
+  // -------------------------------------------------------------------------
+  // "Check je inbox" confirmation state
+  // -------------------------------------------------------------------------
   if (sent) {
     return (
       <View style={[styles.root, styles.center, { paddingTop: insets.top }]}>
@@ -129,6 +270,9 @@ export default function SignInScreen() {
     );
   }
 
+  // -------------------------------------------------------------------------
+  // Main sign-in form
+  // -------------------------------------------------------------------------
   return (
     <KeyboardAvoidingView
       style={styles.root}
@@ -138,13 +282,16 @@ export default function SignInScreen() {
       <View
         style={[styles.inner, { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 24 }]}
       >
+        {/* Wordmark */}
         <View style={styles.brand}>
           <SymbolView name="pawprint.fill" size={28} tintColor={colors.moss} />
           <Text style={styles.wordmark}>De Vrije Hond</Text>
           <Text style={styles.tagline}>Vind de fijnste hondenplekken bij jou in de buurt.</Text>
         </View>
 
+        {/* Form */}
         <View style={styles.form}>
+          {/* Magic link */}
           <Text style={styles.label}>E-mailadres</Text>
           <TextInput
             style={styles.input}
@@ -160,36 +307,29 @@ export default function SignInScreen() {
           <Button label="Stuur inloglink" onPress={onMagicLink} loading={sending} disabled={busy} />
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
+          {/* Divider */}
           <View style={styles.divider}>
-            <View style={styles.line} />
-            <Text style={styles.or}>of</Text>
-            <View style={styles.line} />
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerOr}>of</Text>
+            <View style={styles.dividerLine} />
           </View>
 
+          {/* Apple – iOS only, custom button to match styling */}
           {Platform.OS === 'ios' && (
-            <View
-              pointerEvents={busy || sending ? 'none' : 'auto'}
-              style={{ opacity: busy || sending ? 0.5 : 1 }}
-            >
-              <AppleAuthentication.AppleAuthenticationButton
-                buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
-                buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
-                cornerRadius={radius.button}
-                style={styles.appleBtn}
-                onPress={onApple}
-              />
-            </View>
+            <SocialButton onPress={onApple} disabled={busy || sending} loading={busy} dark>
+              <SymbolView name="apple.logo" size={18} tintColor="#fff" />
+              <Text style={[styles.socialLabel, styles.socialLabelDark]}>Doorgaan met Apple</Text>
+            </SocialButton>
           )}
-          <Button
-            label="Doorgaan met Google"
-            variant="secondary"
-            icon="g.circle.fill"
-            onPress={onGoogle}
-            loading={busy}
-            disabled={busy || sending}
-          />
+
+          {/* Google */}
+          <SocialButton onPress={onGoogle} disabled={busy || sending} loading={busy}>
+            <GoogleG size={20} />
+            <Text style={styles.socialLabel}>Doorgaan met Google</Text>
+          </SocialButton>
         </View>
 
+        {/* Legal */}
         <Text style={styles.legal}>
           Door verder te gaan ga je akkoord met onze voorwaarden en privacyverklaring.
         </Text>
@@ -246,9 +386,37 @@ const styles = StyleSheet.create({
   },
   error: { fontFamily: font.body, fontSize: 12, color: colors.rust },
   divider: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  line: { flex: 1, height: 1, backgroundColor: colors.line },
-  or: { fontFamily: font.body, fontSize: 12, color: colors.ink3 },
-  appleBtn: { height: 46, width: '100%' },
+  dividerLine: { flex: 1, height: 1, backgroundColor: colors.line },
+  dividerOr: { fontFamily: font.body, fontSize: 12, color: colors.ink3 },
+
+  // Social buttons
+  socialBtn: {
+    height: 52,
+    borderRadius: radius.button,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: space.lg,
+  },
+  socialBtnDark: { backgroundColor: '#000' },
+  socialBtnLight: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: colors.line,
+  },
+  socialBtnInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  socialLabel: {
+    fontFamily: font.bodyMedium,
+    fontSize: 16,
+    lineHeight: 21,
+    color: colors.ink,
+  },
+  socialLabelDark: { color: '#fff' },
+
+  // "Check je inbox" state
   title: {
     fontFamily: font.heading,
     fontSize: 22,

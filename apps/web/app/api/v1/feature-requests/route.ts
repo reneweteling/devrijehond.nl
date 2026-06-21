@@ -39,6 +39,7 @@ export async function GET(request: NextRequest) {
     where: { ...(parsed.data.status ? { status: parsed.data.status } : {}) },
     orderBy: [{ upvoteCount: 'desc' }, { createdAt: 'desc' }],
     take: parsed.data.limit,
+    include: { createdBy: { select: { handle: true, image: true } } },
   });
 
   // Resolve the viewer's votes in one query when signed in.
@@ -60,6 +61,7 @@ export async function GET(request: NextRequest) {
       status: r.status,
       upvoteCount: r.upvoteCount,
       viewerHasVoted: votedIds.has(r.id),
+      author: { handle: r.createdBy?.handle ?? null, image: r.createdBy?.image ?? null },
       createdAt: r.createdAt.toISOString(),
     })),
     nextCursor: null,
