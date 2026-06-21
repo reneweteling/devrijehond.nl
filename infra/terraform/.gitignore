@@ -1,0 +1,20 @@
+# Local Terraform state holds IAM secret keys — never commit it.
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+crash.log
+crash.*.log
+
+# Provider plugins / lock dirs
+.terraform/
+.terraform.lock.hcl
+
+# Variable files may carry secrets/overrides
+*.tfvars.local
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Plan output
+*.tfplan

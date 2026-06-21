@@ -57,6 +57,18 @@ pnpm lint
 
 Mobile dev loop: local Metro + iOS simulator (`cd apps/mobile && pnpm exec expo start --ios`).
 
+## Infrastructure (AWS)
+
+- **All AWS infra lives in the `devrijehond` account, ID `262517452192`.** Never
+  use a personal account. Always operate via the SSO profile `devrijehond`
+  (`AdministratorAccess`).
+- If you don't have AWS access (expired token / `AccessDenied`), the user must
+  run `aws sso login --profile devrijehond`. Ask them to, then verify with
+  `aws sts get-caller-identity --profile devrijehond` (must report `262517452192`).
+- Media (S3 + CloudFront + IAM users) is Terraform in `infra/terraform`
+  (`envs/dev`, `envs/prod`). See `infra/terraform/README.md`. State is local and
+  gitignored (holds IAM secret keys).
+
 ## Conventions
 
 - **Commits: English, Conventional Commits** (`feat:`, `fix:`, `chore:`, `docs:`, scoped like `feat(db):`). Enforced by commitlint + husky. Wrap body at 100 chars.
