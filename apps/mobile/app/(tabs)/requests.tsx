@@ -9,16 +9,10 @@ import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useQueryClient } from '@tanstack/react-query';
 
-import {
-  useFeatureRequests,
-  useToggleFeatureVote,
-  type FeatureRequest,
-  type FeatureStatus,
-} from '@/lib/api';
+import { useFeatureRequests, type FeatureRequest, type FeatureStatus } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
-import { colors, font, radius, space } from '@/lib/theme';
+import { colors, font, radius, space, TAB_BAR_CLEARANCE } from '@/lib/theme';
 import { Chip, ListState, ScreenTitle } from '@/components/ui';
 
 const STATUS_META: Record<FeatureStatus, { label: string; bg: string; fg: string }> = {
@@ -38,72 +32,20 @@ const FILTERS: { label: string; status?: FeatureStatus }[] = [
 export default function RequestsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const qc = useQueryClient();
   const { isAuthenticated } = useAuth();
 
   const [filter, setFilter] = useState<FeatureStatus | undefined>(undefined);
   const { data, isLoading, isError, refetch, isRefetching } = useFeatureRequests(filter);
-  const toggleVote = useToggleFeatureVote();
 
-  // Optimistic vote state: maps id -> toggled {viewerHasVoted, upvoteCount}
-  const [optimistic, setOptimistic] = useState<
-    Record<string, { viewerHasVoted: boolean; upvoteCount: number }>
-  >({});
-
-  const baseItems = data?.items ?? [];
-  const requests = baseItems.map((r) => (optimistic[r.id] ? { ...r, ...optimistic[r.id] } : r));
-
-  const onVote = (item: FeatureRequest) => {
-    if (!isAuthenticated) {
-      router.push('/(auth)/sign-in');
-      return;
-    }
-    const next = {
-      viewerHasVoted: !item.viewerHasVoted,
-      upvoteCount: item.viewerHasVoted ? item.upvoteCount - 1 : item.upvoteCount + 1,
-    };
-    setOptimistic((prev) => ({ ...prev, [item.id]: next }));
-    toggleVote.mutate(item.id, {
-      onError: () => {
-        setOptimistic((prev) => {
-          const copy = { ...prev };
-          delete copy[item.id];
-          return copy;
-        });
-      },
-      onSettled: () => {
-        setOptimistic((prev) => {
-          const copy = { ...prev };
-          delete copy[item.id];
-          return copy;
-        });
-        qc.invalidateQueries({ queryKey: ['feature-requests'] });
-      },
-    });
-  };
+  const requests = data?.items ?? [];
 
   const renderItem = ({ item }: { item: FeatureRequest }) => {
     const meta = STATUS_META[item.status];
     return (
-      <View style={styles.card}>
-        <Pressable
-          style={({ pressed }) => [
-            styles.voteBtn,
-            item.viewerHasVoted && styles.voteBtnActive,
-            { opacity: pressed ? 0.6 : 1 },
-          ]}
-          onPress={() => onVote(item)}
-          hitSlop={6}
-        >
-          <SymbolView
-            name="chevron.up"
-            size={15}
-            tintColor={item.viewerHasVoted ? '#fff' : colors.mossDark}
-          />
-          <Text style={[styles.voteCount, item.viewerHasVoted && styles.voteCountActive]}>
-            {item.upvoteCount}
-          </Text>
-        </Pressable>
+      <Pressable
+        style={({ pressed }) => [styles.card, { opacity: pressed ? 0.75 : 1 }]}
+        onPress={() => router.push(`/request/${item.id}`)}
+      >
         <View style={{ flex: 1 }}>
           <Text style={styles.title}>{item.title}</Text>
           {item.body ? (
@@ -116,11 +58,18 @@ export default function RequestsScreen() {
               <Text style={[styles.statusText, { color: meta.fg }]}>{meta.label}</Text>
             </View>
             {item.component ? <Text style={styles.component}>{item.component}</Text> : null}
+            <View style={styles.voteCount}>
+              <SymbolView name="chevron.up" size={12} tintColor={colors.mossDark} />
+              <Text style={styles.voteCountText}>{item.upvoteCount}</Text>
+            </View>
           </View>
         </View>
-      </View>
+      </Pressable>
     );
   };
+
+  // FAB bottom: sits above the tab bar + standard safe-area.
+  const fabBottom = insets.bottom + TAB_BAR_CLEARANCE + space.md;
 
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
@@ -153,11 +102,12 @@ export default function RequestsScreen() {
             onRetry={refetch}
           />
         }
-        contentContainerStyle={{ paddingBottom: insets.bottom + 170 }}
+        // Extra bottom padding so the last card clears the floating FAB.
+        contentContainerStyle={{ paddingBottom: fabBottom + 56 }}
       />
 
       <Pressable
-        style={[styles.fab, { bottom: insets.bottom + 96 }]}
+        style={({ pressed }) => [styles.fab, { bottom: fabBottom, opacity: pressed ? 0.8 : 1 }]}
         onPress={() =>
           isAuthenticated ? router.push('/request-new') : router.push('/(auth)/sign-in')
         }
@@ -189,24 +139,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.line,
   },
-  voteBtn: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 48,
-    minHeight: 44,
-    paddingVertical: 8,
-    borderRadius: radius.card,
-    backgroundColor: colors.mossSoft,
-  },
-  voteBtnActive: { backgroundColor: colors.moss },
-  voteCount: { fontFamily: font.bodyMedium, fontSize: 14, color: colors.mossDark, marginTop: 2 },
-  voteCountActive: { color: '#fff' },
   title: { fontFamily: font.heading, fontSize: 15, lineHeight: 20, color: colors.ink },
   body: { fontFamily: font.body, fontSize: 13, color: colors.ink2, marginTop: 3, lineHeight: 18 },
-  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 8 },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 8, flexWrap: 'wrap' },
   statusTag: { borderRadius: radius.pill, paddingVertical: 3, paddingHorizontal: 9 },
   statusText: { fontFamily: font.bodyMedium, fontSize: 11 },
   component: { fontFamily: font.body, fontSize: 11, color: colors.ink3 },
+  voteCount: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    marginLeft: 'auto',
+  },
+  voteCountText: { fontFamily: font.bodyMedium, fontSize: 13, color: colors.mossDark },
   fab: {
     position: 'absolute',
     alignSelf: 'center',
@@ -216,7 +161,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.moss,
     borderRadius: radius.pill,
     paddingVertical: 12,
-    paddingHorizontal: 20,
+    paddingHorizontal: 22,
     shadowColor: colors.ink,
     shadowOpacity: 0.2,
     shadowRadius: 10,
