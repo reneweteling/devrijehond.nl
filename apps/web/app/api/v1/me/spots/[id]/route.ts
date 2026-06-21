@@ -5,6 +5,7 @@ import { UpdateSpotRequestSchema, type SubmitSpotResponseDto } from '@devrijehon
 import { ok, error, NO_STORE_CACHE_CONTROL } from '@/lib/api-response';
 import { normaliseGeometry } from '@/lib/geo';
 import { loadSpotDetail } from '@/lib/spot-detail';
+import { sanitizeRichText } from '@/lib/rich-text';
 
 /**
  * PATCH /api/v1/me/spots/:id, owner edit while the spot is still UNVERIFIED.
@@ -67,7 +68,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     where: { id },
     data: {
       ...(dto.name !== undefined && { name: dto.name }),
-      ...(dto.description !== undefined && { description: dto.description ?? null }),
+      ...(dto.description !== undefined && { description: sanitizeRichText(dto.description) }),
       ...(dto.categoryId !== undefined && { categoryId: dto.categoryId }),
       ...(dto.address !== undefined && { address: dto.address ?? null }),
       ...(dto.phone !== undefined && { phone: dto.phone ?? null }),

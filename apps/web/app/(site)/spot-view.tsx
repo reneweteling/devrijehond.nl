@@ -154,17 +154,11 @@ export function SpotView({
       <div className="container spot-body" style={{ marginTop: 32 }}>
         <div>
           {spot.description ? (
-            <p
-              style={{
-                fontSize: 18,
-                lineHeight: 1.7,
-                color: 'var(--ink-2)',
-                margin: 0,
-                maxWidth: '64ch',
-              }}
-            >
-              {spot.description}
-            </p>
+            <div
+              className="rich-text"
+              style={{ fontSize: 18, color: 'var(--ink-2)', maxWidth: '64ch' }}
+              dangerouslySetInnerHTML={{ __html: spot.description }}
+            />
           ) : null}
 
           {spot.amenities.length > 0 ? (

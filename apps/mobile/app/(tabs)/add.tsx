@@ -98,6 +98,8 @@ export default function AddScreen() {
   };
   const moveVertex = (i: number, c: LatLng) =>
     setPolygon((prev) => prev.map((v, idx) => (idx === i ? c : v)));
+  // Tap a vertex to remove it (the mobile equivalent of the web right-click).
+  const removeVertex = (i: number) => setPolygon((prev) => prev.filter((_, idx) => idx !== i));
 
   // Polygon outline that follows the finger live while a vertex is dragged.
   const livePolygon =
@@ -424,6 +426,7 @@ export default function AddScreen() {
                     anchor={{ x: 0.5, y: 0.5 }}
                     draggable
                     tracksViewChanges={dragIdx === i}
+                    onPress={() => removeVertex(i)}
                     onDragStart={() => {
                       setDragIdx(i);
                       setDragCoord(v);
@@ -435,9 +438,11 @@ export default function AddScreen() {
                       setDragCoord(null);
                     }}
                   >
-                    {/* Big transparent hit area; the visible dot lifts while dragged. */}
+                    {/* Big transparent hit area; the numbered dot lifts while dragged. */}
                     <View style={styles.vertexHit}>
-                      <View style={[styles.vertex, dragIdx === i && styles.vertexActive]} />
+                      <View style={[styles.vertex, dragIdx === i && styles.vertexActive]}>
+                        <Text style={styles.vertexNum}>{i + 1}</Text>
+                      </View>
                     </View>
                   </Marker>
                 ))
@@ -505,8 +510,8 @@ export default function AddScreen() {
             <Text style={styles.editorHint}>
               {type === 'REGION'
                 ? polygon.length < 3
-                  ? 'Tik op de kaart om hoekpunten te zetten (min. 3). Houd een punt ingedrukt en sleep om het te verplaatsen.'
-                  : `${polygon.length} hoekpunten. Houd een punt ingedrukt en sleep om bij te stellen.`
+                  ? `Tik op de kaart om punten te zetten (min. 3). Sleep een punt om het te verplaatsen, tik erop om het te verwijderen. Punten: ${polygon.length}`
+                  : `Punten: ${polygon.length}. Sleep een punt om bij te stellen, tik erop om het te verwijderen.`
                 : point
                   ? 'Houd de pin ingedrukt en sleep om de plek precies te zetten.'
                   : 'Tik op de kaart om de pin neer te zetten.'}
@@ -597,17 +602,20 @@ const styles = StyleSheet.create({
   // Large transparent touch target so a vertex is easy to grab + drag.
   vertexHit: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   vertex: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     backgroundColor: colors.moss,
     borderWidth: 3,
     borderColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
     shadowColor: colors.ink,
     shadowOpacity: 0.3,
     shadowRadius: 2,
     shadowOffset: { width: 0, height: 1 },
   },
+  vertexNum: { fontFamily: font.bodyMedium, fontSize: 11, color: '#fff', lineHeight: 13 },
   // "Lifted" look while being dragged (bigger + terracotta), like Google Maps.
   vertexActive: {
     width: 30,

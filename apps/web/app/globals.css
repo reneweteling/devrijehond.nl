@@ -805,6 +805,108 @@ img {
   margin-right: auto;
 }
 
+/* ---- Rich text renderer (.rich-text) ------------------------------------ */
+/* Used in spot-view.tsx (dangerouslySetInnerHTML, server-sanitised HTML) and
+   in the admin spot detail header. Keep it readable and on-brand.           */
+.rich-text p {
+  margin: 0 0 0.85em;
+  line-height: 1.7;
+}
+.rich-text p:last-child {
+  margin-bottom: 0;
+}
+.rich-text ul,
+.rich-text ol {
+  padding-left: 1.5em;
+  margin: 0.6em 0 0.85em;
+}
+.rich-text li {
+  margin-bottom: 0.3em;
+  line-height: 1.65;
+}
+.rich-text ul {
+  list-style: disc;
+}
+.rich-text ol {
+  list-style: decimal;
+}
+.rich-text a {
+  color: var(--moss-700);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.rich-text a:hover {
+  color: var(--moss-600);
+}
+.rich-text h3 {
+  font-size: 1.15em;
+  font-weight: 600;
+  margin: 1.2em 0 0.4em;
+  color: var(--ink);
+}
+.rich-text blockquote {
+  margin: 0.8em 0;
+  padding: 0.5em 0 0.5em 1em;
+  border-left: 3px solid var(--moss-soft);
+  color: var(--ink-2);
+  font-style: italic;
+}
+
+/* ---- TipTap admin editor (.rte-content / .ProseMirror) ------------------ */
+.rte-content .ProseMirror {
+  min-height: 140px;
+  padding: 10px 12px;
+  outline: none;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink);
+}
+.rte-content .ProseMirror p {
+  margin: 0 0 0.75em;
+}
+.rte-content .ProseMirror p:last-child {
+  margin-bottom: 0;
+}
+.rte-content .ProseMirror ul,
+.rte-content .ProseMirror ol {
+  padding-left: 1.4em;
+  margin: 0.5em 0 0.75em;
+}
+.rte-content .ProseMirror li {
+  margin-bottom: 0.25em;
+}
+.rte-content .ProseMirror ul {
+  list-style: disc;
+}
+.rte-content .ProseMirror ol {
+  list-style: decimal;
+}
+.rte-content .ProseMirror h3 {
+  font-size: 1.1em;
+  font-weight: 600;
+  margin: 1em 0 0.35em;
+}
+.rte-content .ProseMirror blockquote {
+  margin: 0.7em 0;
+  padding: 0.4em 0 0.4em 0.9em;
+  border-left: 3px solid var(--moss-soft);
+  color: var(--ink-2);
+  font-style: italic;
+}
+.rte-content .ProseMirror a {
+  color: var(--moss-700);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+/* Placeholder (shown when editor is empty) */
+.rte-content .ProseMirror p.is-editor-empty:first-child::before {
+  content: var(--rte-placeholder, 'Schrijf hier\2026');
+  color: var(--ink-3);
+  pointer-events: none;
+  float: left;
+  height: 0;
+}
+
 @media (max-width: 860px) {
   .hero-grid {
     grid-template-columns: 1fr;

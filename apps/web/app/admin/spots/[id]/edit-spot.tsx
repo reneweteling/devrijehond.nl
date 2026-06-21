@@ -20,6 +20,7 @@ import {
   addSpotPhoto,
   removeSpotPhoto,
 } from '../../actions';
+import { RichTextEditor } from '../../_components/rich-text-editor';
 
 const GOOGLE_MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '';
 
@@ -768,11 +769,10 @@ export function EditSpot({
           </div>
           <div>
             <label style={labelStyle}>Beschrijving</label>
-            <textarea
-              style={{ ...inputStyle, resize: 'vertical' }}
+            <RichTextEditor
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={4}
+              onChange={setDescription}
+              placeholder="Wat maakt deze plek bijzonder voor honden?"
             />
           </div>
           <div>

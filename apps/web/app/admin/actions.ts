@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { authDb } from '@devrijehond/db';
 import { withContext, withStaffContext, pgQuery } from '@devrijehond/server';
 import { normaliseGeometry } from '@/lib/geo';
+import { sanitizeRichText } from '@/lib/rich-text';
 
 /**
  * Admin server actions, the moderation safety-net + taxonomy curation.
@@ -207,7 +208,10 @@ export async function updateSpotFields(
     where: { id: spotId },
     data: {
       ...(patch.name !== undefined && { name: patch.name }),
-      ...(patch.description !== undefined && { description: patch.description ?? null }),
+      // Descriptions are rich text (TipTap HTML); sanitise before storing.
+      ...(patch.description !== undefined && {
+        description: sanitizeRichText(patch.description),
+      }),
       ...(patch.categoryId !== undefined && { categoryId: patch.categoryId }),
     },
   });

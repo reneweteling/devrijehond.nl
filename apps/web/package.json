@@ -16,6 +16,10 @@
     "@devrijehond/s3": "workspace:*",
     "@devrijehond/server": "workspace:*",
     "@devrijehond/types": "workspace:*",
+    "@tiptap/extension-link": "^2.22.0",
+    "@tiptap/pm": "^2.22.0",
+    "@tiptap/react": "^2.22.0",
+    "@tiptap/starter-kit": "^2.22.0",
     "@vis.gl/react-google-maps": "^1.8.3",
     "better-auth": "^1.2.0",
     "framer-motion": "^12.40.0",
@@ -24,13 +28,15 @@
     "react-dom": "^19.2.7",
     "zod": "^4.4.3",
     "@tanstack/react-table": "^8.21.3",
-    "sharp": "^0.34.5"
+    "sharp": "^0.34.5",
+    "sanitize-html": "^2.14.0"
   },
   "devDependencies": {
     "@types/google.maps": "^3.65.1",
     "@types/node": "^22.10.5",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "@types/sanitize-html": "^2.13.0"
   }
 }

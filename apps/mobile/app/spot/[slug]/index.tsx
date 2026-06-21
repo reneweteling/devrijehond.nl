@@ -43,6 +43,7 @@ import { useAuth } from '@/lib/auth-context';
 import { amenitySymbol } from '@/lib/icons';
 import { colors, font, radius, space } from '@/lib/theme';
 import { AmenityTile, Banner, Button, Stars, VerifiedBadge } from '@/components/ui';
+import { RichText } from '@/components/rich-text';
 
 function polygonCoords(geometry: unknown): { latitude: number; longitude: number }[] {
   const g = geometry as { type?: string; coordinates?: number[][][] } | null;
@@ -247,7 +248,7 @@ export default function SpotDetailScreen() {
             ) : null}
           </View>
 
-          {spot.description ? <Text style={styles.desc}>{spot.description}</Text> : null}
+          {spot.description ? <RichText html={spot.description} /> : null}
 
           {/* Region geofence map */}
           {spot.type === 'REGION' && region.length >= 3 ? (
@@ -567,7 +568,6 @@ const styles = StyleSheet.create({
   badgeRow: { flexDirection: 'row', alignItems: 'center', gap: 12, flexWrap: 'wrap' },
   ratingInline: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   ratingText: { fontFamily: font.body, fontSize: 12, color: colors.ink2 },
-  desc: { fontFamily: font.body, fontSize: 14, color: colors.ink2, lineHeight: 21 },
   mapBox: { height: 180, borderRadius: radius.card, overflow: 'hidden', marginTop: space.sm },
   checkBlock: {
     backgroundColor: colors.sand,

@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from 'react';
 import { APIProvider, Map, Marker } from '@vis.gl/react-google-maps';
 import { authClient } from '@devrijehond/auth/client';
 import type { CategoryDto, AmenityDto } from '@devrijehond/types';
+import { RichTextEditor } from '@/app/admin/_components/rich-text-editor';
 
 const GOOGLE_MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '';
 // Amsterdam-ish default (same as map-shared.ts).
@@ -403,17 +404,13 @@ export function AddSpotForm() {
 
         {/* Description */}
         <div style={fieldStyle}>
-          <label htmlFor="description" style={labelStyle}>
+          <label style={labelStyle}>
             Beschrijving <span style={hintStyle}>(optioneel)</span>
           </label>
-          <textarea
-            id="description"
-            maxLength={4000}
-            rows={4}
+          <RichTextEditor
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={setDescription}
             placeholder="Wat maakt deze plek bijzonder voor honden?"
-            style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.6 }}
           />
         </div>
       </div>

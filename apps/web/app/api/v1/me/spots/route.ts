@@ -6,6 +6,7 @@ import {
   type SubmitSpotResponseDto,
   type SpotSummaryDto,
 } from '@devrijehond/types';
+import { sanitizeRichText } from '@/lib/rich-text';
 import { ok, error, NO_STORE_CACHE_CONTROL } from '@/lib/api-response';
 import { uniqueSlug } from '@/lib/slug';
 import { normaliseGeometry } from '@/lib/geo';
@@ -132,7 +133,7 @@ export async function POST(request: NextRequest) {
         type: dto.type,
         categoryId: dto.categoryId,
         name: dto.name,
-        description: dto.description ?? null,
+        description: sanitizeRichText(dto.description),
         status: 'UNVERIFIED',
         lat: geom.lat,
         lng: geom.lng,
