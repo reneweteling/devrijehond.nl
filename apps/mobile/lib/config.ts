@@ -18,14 +18,20 @@
 /** Production origin, the fallback when the env var wasn't inlined at build time. */
 const DEFAULT_API_URL = 'https://www.devrijehond.nl';
 
+/** A localhost / private-LAN origin must never ship in a release build. */
+function isLocalUrl(url: string): boolean {
+  return /localhost|127\.0\.0\.1|\b10\.|\b192\.168\.|\b172\.(1[6-9]|2\d|3[01])\./.test(url);
+}
+
 function resolveApiUrl(): string {
   const value = process.env.EXPO_PUBLIC_API_URL;
+  // In a RELEASE build, never trust a local URL: it means a dev value leaked
+  // into the bundle (e.g. a stale Metro transform cache from `expo run:ios`).
+  // Talking to localhost on a device hangs every request and triggers the iOS
+  // local-network prompt, so force production instead.
+  if (!__DEV__ && (!value || isLocalUrl(value))) return DEFAULT_API_URL;
   if (typeof value === 'string' && value.length > 0) return value;
-  // Fail fast in dev (a misconfigured local build), but NEVER hard-crash a
-  // production app at launch over a missing inline: fall back to production.
-  // A top-level throw here crashed the first TestFlight build, because
-  // EXPO_PUBLIC_* is inlined at JS-bundle time and the archive's bundling phase
-  // didn't have the var set.
+  // Dev with no env: fail fast so the misconfig is obvious.
   if (__DEV__) {
     throw new Error(
       '[config] EXPO_PUBLIC_API_URL is not set. Configure it in ' +
@@ -37,7 +43,13 @@ function resolveApiUrl(): string {
 
 export const API_URL: string = resolveApiUrl();
 
-export const AUTH_URL: string = process.env.EXPO_PUBLIC_AUTH_URL ?? API_URL;
+function resolveAuthUrl(): string {
+  const value = process.env.EXPO_PUBLIC_AUTH_URL;
+  if (!__DEV__ && (!value || isLocalUrl(value))) return API_URL;
+  return value && value.length > 0 ? value : API_URL;
+}
+
+export const AUTH_URL: string = resolveAuthUrl();
 
 /**
  * Web OAuth client id for native Google Sign-In (Android picker). The ID token

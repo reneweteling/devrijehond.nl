@@ -75,6 +75,12 @@ export EXPO_PUBLIC_AUTH_URL="${EXPO_PUBLIC_AUTH_URL:-https://www.devrijehond.nl}
 export EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID="${EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID:-762592672284-cr47iv5jq6d0p2ghvmrcrf1lar90vpiq.apps.googleusercontent.com}"
 export EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID="${EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID:-762592672284-8atreoupa0ic702gnrg61bds9h88qrmp.apps.googleusercontent.com}"
 
+# Wipe the Metro transform cache so a stale dev transform (e.g. config.ts with
+# EXPO_PUBLIC_API_URL=localhost from a prior `expo run:ios`) can NEVER leak its
+# inlined local URL into the release bundle.
+echo "▸ Clear Metro / Expo caches"
+rm -rf "${TMPDIR:-/tmp}"/metro-* "${TMPDIR:-/tmp}"/haste-map-* node_modules/.cache 2>/dev/null || true
+
 echo "▸ Prebuild (regenerate ios/)"
 pnpm exec expo prebuild -p ios --no-install
 
