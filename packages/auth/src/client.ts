@@ -20,11 +20,10 @@ import { createAuthClient } from 'better-auth/react';
 import { magicLinkClient } from 'better-auth/client/plugins';
 
 export const authClient = createAuthClient({
-  // The canonical origin both apps talk to:
-  //   - web dev:   https://devrijehond.local
-  //   - web prod:  https://devrijehond.nl
-  //   - mobile:    the accept / prod app origin
-  baseURL: process.env.NEXT_PUBLIC_APP_URL,
+  // In the browser, always talk to the SAME origin the page is served from, so
+  // auth requests are never cross-origin (apex vs www) — a mismatch there made
+  // Google sign-in fail CORS. Fall back to the configured origin for SSR.
+  baseURL: typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_APP_URL,
   plugins: [magicLinkClient()],
 });
 

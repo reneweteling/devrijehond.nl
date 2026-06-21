@@ -23,6 +23,19 @@ const ADMIN_PREFIX = '/admin';
 export async function proxy(request: NextRequest): Promise<NextResponse> {
   const { pathname, search } = request.nextUrl;
 
+  // Canonical host: redirect the apex (devrijehond.nl) to www. Keeping one host
+  // means the page origin always matches the auth/API origin, so the BetterAuth
+  // social sign-in fetch is same-origin (a no-www page POSTing to www was a
+  // cross-origin CORS failure). Also good for SEO.
+  const host = request.headers.get('host') ?? '';
+  if (host === 'devrijehond.nl') {
+    const url = request.nextUrl.clone();
+    url.host = 'www.devrijehond.nl';
+    url.protocol = 'https:';
+    url.port = '';
+    return NextResponse.redirect(url, 308);
+  }
+
   // Only the admin section is gated here. Everything else (public site + API)
   // passes through; API routes enforce auth per-route via `requireAuth`.
   if (!(pathname === ADMIN_PREFIX || pathname.startsWith(`${ADMIN_PREFIX}/`))) {

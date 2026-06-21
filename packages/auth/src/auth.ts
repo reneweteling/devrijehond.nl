@@ -46,6 +46,10 @@ function resolveTrustedOrigins(): string[] {
       'https://app.devrijehond.local',
     );
   }
+  // Production web hosts (both apex and www) are always trusted so social/magic
+  // sign-in works regardless of which the visitor hit (the proxy canonicalises
+  // apex -> www, but trust both for safety).
+  origins.push('https://www.devrijehond.nl', 'https://devrijehond.nl');
   // The mobile app's callbackURL uses a custom scheme: `vrijehond://` (native
   // deep link, prod + dev-client) and `exp://` (Expo Go convenience). In
   // BetterAuth, callbackURLs must match an allowed origin and `*` wildcards
