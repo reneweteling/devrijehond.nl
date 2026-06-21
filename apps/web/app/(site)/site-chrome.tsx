@@ -84,7 +84,7 @@ function Header() {
           De Vrije Hond
         </a>
         <div className="nav-links">
-          <a href="/#kaart">Kaart</a>
+          <a href="/kaart">Kaart</a>
           <a href="/#zo-werkt-het">Zo werkt het</a>
           <a className="btn btn-primary" href="/#app">
             Download de app
@@ -162,7 +162,7 @@ function Footer() {
           <h3>Info</h3>
           <ul className="foot-links">
             <li>
-              <a href="/#kaart">Kaart</a>
+              <a href="/kaart">Kaart</a>
             </li>
             <li>
               <a href="/#zo-werkt-het">Zo werkt het</a>

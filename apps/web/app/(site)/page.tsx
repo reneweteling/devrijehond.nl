@@ -116,7 +116,7 @@ export default async function HomePage() {
             <div className="hero-cta">
               <StoreButton href={IOS_URL} kind="ios" />
               <StoreButton href={ANDROID_URL} kind="android" />
-              <a className="btn btn-ghost" href="#kaart">
+              <a className="btn btn-ghost" href="/kaart">
                 Bekijk de kaart
               </a>
             </div>
@@ -159,7 +159,7 @@ export default async function HomePage() {
               {cats.map((c) => (
                 <a
                   key={c.slug}
-                  href="#kaart"
+                  href="/kaart"
                   className="card card-link"
                   style={{ display: 'block' }}
                 >
