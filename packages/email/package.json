@@ -5,9 +5,13 @@
   "description": "Transactional email (Resend + React Email): magic-link template and generic sender for De Vrije Hond.",
   "type": "module",
   "exports": {
-    ".": { "types": "./src/index.ts", "default": "./src/index.ts" }
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
   },
   "scripts": {
+    "dev": "email dev --dir templates --port 3031",
     "check-types": "tsc --noEmit",
     "lint": "eslint ."
   },
@@ -22,6 +26,8 @@
     "@types/node": "^22.10.5",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@react-email/preview-server": "5.2.11",
+    "react-email": "5.2.11",
     "typescript": "^5.7.2"
   }
 }

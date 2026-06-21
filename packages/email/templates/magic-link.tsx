@@ -59,6 +59,12 @@ export function MagicLinkEmail({ url }: MagicLinkEmailProps) {
   );
 }
 
+// Sample data so the React Email preview (pnpm dev → :3031) can render this
+// template without a real link.
+MagicLinkEmail.PreviewProps = {
+  url: 'https://www.devrijehond.nl/verify-mobile?token=preview-token',
+} satisfies MagicLinkEmailProps;
+
 export default MagicLinkEmail;
 
 const body: React.CSSProperties = {
