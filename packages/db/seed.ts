@@ -346,15 +346,6 @@ function slugify(s: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-const REVIEW_SNIPPETS = [
-  'Heerlijke plek, onze hond vindt het top.',
-  'Veel ruimte en andere honden om mee te spelen.',
-  'Mooi stuk natuur, vaste favoriet voor ons rondje.',
-  'Personeel is dol op honden, echt een aanrader.',
-  'Lekker rustig doordeweeks, schoon en goed onderhouden.',
-  'Fijn dat de hond hier los mag, dat is zeldzaam.',
-];
-
 // Build the seed spots from the researched dataset. Deterministic: every third
 // spot reaches VERIFIED with a handful of weighted confirms; the rest stay
 // UNVERIFIED with a few or no votes.
@@ -398,23 +389,6 @@ function buildSpots(): SpotSeed[] {
 }
 
 const SPOTS: SpotSeed[] = buildSpots();
-
-/** A rough N-point ring around a centroid (metres to degrees), closed. */
-function ring(lat: number, lng: number, radiusM: number): number[][] {
-  const pts: number[][] = [];
-  const n = 7;
-  const latM = 111_320;
-  const lngM = 111_320 * Math.cos((lat * Math.PI) / 180);
-  for (let i = 0; i < n; i++) {
-    const a = (i / n) * 2 * Math.PI;
-    const r = radiusM * (0.82 + 0.18 * Math.abs(Math.sin(a * 2)));
-    const dLat = (r * Math.sin(a)) / latM;
-    const dLng = (r * Math.cos(a)) / lngM;
-    pts.push([+(lng + dLng).toFixed(6), +(lat + dLat).toFixed(6)]);
-  }
-  pts.push(pts[0]!); // close the ring
-  return pts;
-}
 
 // ---------------------------------------------------------------------------
 // Main
@@ -599,11 +573,11 @@ async function main() {
       });
     }
 
-    if (cat.type === 'REGION') {
-      regionGeoms.push({
-        id: spot.id,
-        coords: s.geometry ?? ring(s.lat, s.lng, s.regionRadiusM ?? 280),
-      });
+    // Only draw a polygon when we have a real boundary (OSM geometry). Without
+    // one we don't invent a circle: the spot keeps a point geom (set below) and
+    // renders as a marker, which is honest about not knowing the exact area.
+    if (cat.type === 'REGION' && s.geometry && s.geometry.length >= 4) {
+      regionGeoms.push({ id: spot.id, coords: s.geometry });
     }
   }
 
