@@ -11,10 +11,12 @@
  * Markers are loaded for the current viewport via GET /api/v1/spots/map.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Animated,
   Image,
+  PanResponder,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -28,12 +30,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   useCategories,
+  useSpotDetail,
   useSpotsInViewport,
+  type Amenity,
   type Bbox,
   type Category,
   type SpotSummary,
 } from '@/lib/api';
-import { useUserLocation } from '@/lib/location';
+import { useUserLocation, haversineMeters, type LatLng } from '@/lib/location';
+import { amenitySymbol } from '@/lib/icons';
 import { categoryColors, colors, font, radius, space } from '@/lib/theme';
 import { Button, Chip, VerifiedBadge, Stars } from '@/components/ui';
 
@@ -192,6 +197,165 @@ function RegionLabel({
         </Text>
       </View>
     </Marker>
+  );
+}
+
+function stripHtml(html: string | null | undefined): string {
+  if (!html) return '';
+  return html
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function formatDistance(meters: number): string {
+  if (meters < 1000) return `${Math.round(meters / 10) * 10} m`;
+  return `${(meters / 1000).toFixed(1).replace('.', ',')} km`;
+}
+
+/**
+ * Bottom peek sheet for a selected spot/region. Slides up from the bottom on
+ * mount, can be flicked down to dismiss, and lazy-loads the spot detail to add a
+ * description snippet + amenities + distance on top of the summary fields. Keyed
+ * by spot id in the parent so picking a different spot replays the slide-in.
+ */
+function PeekSheet({
+  spot,
+  category,
+  userLocation,
+  onClose,
+  onOpen,
+}: {
+  spot: SpotSummary;
+  category: Category | undefined;
+  userLocation: LatLng | null;
+  onClose: () => void;
+  onOpen: () => void;
+}) {
+  const insets = useSafeAreaInsets();
+  const { data: detail } = useSpotDetail(spot.slug);
+  const translateY = useRef(new Animated.Value(600)).current;
+
+  useEffect(() => {
+    Animated.spring(translateY, {
+      toValue: 0,
+      useNativeDriver: true,
+      speed: 16,
+      bounciness: 3,
+    }).start();
+  }, [translateY]);
+
+  const pan = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, g) => g.dy > 6 && Math.abs(g.dy) > Math.abs(g.dx),
+      onPanResponderMove: (_, g) => {
+        if (g.dy > 0) translateY.setValue(g.dy);
+      },
+      onPanResponderRelease: (_, g) => {
+        if (g.dy > 90 || g.vy > 0.8) {
+          Animated.timing(translateY, { toValue: 600, duration: 180, useNativeDriver: true }).start(
+            () => onClose(),
+          );
+        } else {
+          Animated.spring(translateY, { toValue: 0, useNativeDriver: true, speed: 18 }).start();
+        }
+      },
+    }),
+  ).current;
+
+  const dismiss = () =>
+    Animated.timing(translateY, { toValue: 600, duration: 200, useNativeDriver: true }).start(() =>
+      onClose(),
+    );
+
+  const summary = stripHtml(detail?.description);
+  const amenities = detail?.amenities ?? [];
+  const distance =
+    userLocation && spot.lat != null && spot.lng != null
+      ? haversineMeters(userLocation, { lat: spot.lat, lng: spot.lng })
+      : null;
+
+  return (
+    <Animated.View
+      style={[styles.sheet, { paddingBottom: insets.bottom + 78, transform: [{ translateY }] }]}
+      {...pan.panHandlers}
+    >
+      <View style={styles.sheetHandle} />
+      <Pressable
+        style={({ pressed }) => [styles.sheetClose, { opacity: pressed ? 0.5 : 1 }]}
+        onPress={dismiss}
+        hitSlop={12}
+      >
+        <SymbolView name="xmark" size={13} tintColor={colors.ink3} />
+      </Pressable>
+
+      <View style={styles.sheetRow}>
+        <View style={styles.thumb}>
+          {spot.photoUrl ? (
+            <Image source={{ uri: spot.photoUrl }} style={styles.thumbImg} resizeMode="cover" />
+          ) : (
+            <SymbolView name="photo.fill" size={20} tintColor={colors.ink3} />
+          )}
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.sheetTitle} numberOfLines={2}>
+            {spot.name}
+          </Text>
+          <Text style={styles.sheetMeta} numberOfLines={1}>
+            {category?.label ?? ''}
+          </Text>
+          <View style={styles.sheetMetaRow}>
+            <VerifiedBadge status={spot.status} />
+            {spot.rating.count > 0 ? (
+              <View style={styles.ratingInline}>
+                <Stars value={spot.rating.average} size={11} />
+                <Text style={styles.ratingText}>
+                  {spot.rating.average.toFixed(1).replace('.', ',')} ({spot.rating.count})
+                </Text>
+              </View>
+            ) : null}
+            {distance != null ? (
+              <View style={styles.ratingInline}>
+                <SymbolView name="location.fill" size={10} tintColor={colors.ink3} />
+                <Text style={styles.ratingText}>{formatDistance(distance)}</Text>
+              </View>
+            ) : null}
+          </View>
+        </View>
+      </View>
+
+      {summary ? (
+        <Text style={styles.sheetDesc} numberOfLines={2}>
+          {summary}
+        </Text>
+      ) : null}
+
+      {amenities.length > 0 ? (
+        <View style={styles.sheetAmenities}>
+          {amenities.slice(0, 4).map((a: Amenity) => (
+            <View key={a.id} style={styles.sheetAmenity}>
+              <SymbolView
+                name={amenitySymbol(a.icon ?? a.slug)}
+                size={12}
+                tintColor={colors.mossDark}
+              />
+              <Text style={styles.sheetAmenityText} numberOfLines={1}>
+                {a.label}
+              </Text>
+            </View>
+          ))}
+          {amenities.length > 4 ? (
+            <Text style={styles.sheetAmenityMore}>+{amenities.length - 4}</Text>
+          ) : null}
+        </View>
+      ) : null}
+
+      <View style={{ marginTop: space.md }}>
+        <Button label="Bekijk plek" onPress={onOpen} />
+      </View>
+    </Animated.View>
   );
 }
 
@@ -520,54 +684,17 @@ export default function MapScreen() {
         </Pressable>
       )}
 
-      {/* Bottom-sheet peek card: tapping a marker/region shows this; the CTA
-          opens the full info page. The card itself doesn't navigate. */}
+      {/* Bottom peek sheet: slides up on select, flick down to dismiss, "Bekijk
+          plek" opens the full detail page. Keyed by id so a new pick replays it. */}
       {selected && (
-        <View style={[styles.sheet, { paddingBottom: insets.bottom + 100 }]}>
-          <Pressable
-            style={({ pressed }) => [styles.sheetClose, { opacity: pressed ? 0.5 : 1 }]}
-            onPress={() => setSelected(null)}
-            hitSlop={12}
-          >
-            <SymbolView name="xmark" size={13} tintColor={colors.ink3} />
-          </Pressable>
-          <View style={styles.sheetHandle} />
-          <View style={styles.sheetRow}>
-            <View style={styles.thumb}>
-              {selected.photoUrl ? (
-                <Image
-                  source={{ uri: selected.photoUrl }}
-                  style={styles.thumbImg}
-                  resizeMode="cover"
-                />
-              ) : (
-                <SymbolView name="photo.fill" size={20} tintColor={colors.ink3} />
-              )}
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.sheetTitle} numberOfLines={1}>
-                {selected.name}
-              </Text>
-              <Text style={styles.sheetMeta} numberOfLines={1}>
-                {catById.get(selected.categoryId)?.label ?? ''}
-              </Text>
-              <View style={styles.sheetMetaRow}>
-                <VerifiedBadge status={selected.status} />
-                {selected.rating.count > 0 ? (
-                  <View style={styles.ratingInline}>
-                    <Stars value={selected.rating.average} size={11} />
-                    <Text style={styles.ratingText}>
-                      {selected.rating.average.toFixed(1).replace('.', ',')}
-                    </Text>
-                  </View>
-                ) : null}
-              </View>
-            </View>
-          </View>
-          <View style={{ marginTop: space.sm }}>
-            <Button label="Bekijk plek" onPress={() => router.push(`/spot/${selected.slug}`)} />
-          </View>
-        </View>
+        <PeekSheet
+          key={selected.id}
+          spot={selected}
+          category={catById.get(selected.categoryId)}
+          userLocation={userLocation}
+          onClose={() => setSelected(null)}
+          onOpen={() => router.push(`/spot/${selected.slug}`)}
+        />
       )}
     </View>
   );
@@ -710,6 +837,36 @@ const styles = StyleSheet.create({
   sheetMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 },
   ratingInline: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   ratingText: { fontFamily: font.bodyMedium, fontSize: 12, color: colors.ink2 },
+  sheetDesc: {
+    fontFamily: font.body,
+    fontSize: 13,
+    lineHeight: 18,
+    color: colors.ink2,
+    marginTop: space.sm,
+  },
+  sheetAmenities: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: 7,
+    marginTop: space.sm,
+  },
+  sheetAmenity: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: colors.mossSoft,
+    borderRadius: radius.pill,
+    paddingVertical: 4,
+    paddingHorizontal: 9,
+  },
+  sheetAmenityText: {
+    fontFamily: font.bodyMedium,
+    fontSize: 11.5,
+    color: colors.mossDark,
+    maxWidth: 110,
+  },
+  sheetAmenityMore: { fontFamily: font.bodyMedium, fontSize: 11.5, color: colors.ink3 },
   statusPill: {
     position: 'absolute',
     alignSelf: 'center',
