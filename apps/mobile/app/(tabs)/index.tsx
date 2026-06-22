@@ -76,6 +76,52 @@ function regionRings(s: SpotSummary): { latitude: number; longitude: number }[][
   );
 }
 
+/**
+ * A single map pin. react-native-maps re-rasterises a custom marker view on
+ * every render while `tracksViewChanges` is true, which makes pins flicker and
+ * "jump" when the spot list changes on pan/zoom. We rasterise once on mount,
+ * then switch tracking off so the pin stays put. Reused markers (same key/id)
+ * keep tracking off, so only genuinely new pins ever redraw.
+ */
+function SpotMarker({
+  spot,
+  color,
+  isRegion,
+  onPress,
+}: {
+  spot: SpotSummary;
+  color: string;
+  isRegion: boolean;
+  onPress: () => void;
+}) {
+  const [tracks, setTracks] = useState(true);
+  useEffect(() => {
+    const t = setTimeout(() => setTracks(false), 600);
+    return () => clearTimeout(t);
+  }, []);
+
+  if (spot.lat == null || spot.lng == null) return null;
+  const verified = spot.status === 'VERIFIED';
+  return (
+    <Marker
+      coordinate={{ latitude: spot.lat, longitude: spot.lng }}
+      onPress={onPress}
+      tracksViewChanges={tracks}
+    >
+      <View style={styles.pinWrap}>
+        <View
+          style={[
+            isRegion ? styles.regionDot : styles.pin,
+            verified
+              ? { backgroundColor: color, borderColor: '#fff' }
+              : { backgroundColor: '#fff', borderColor: colors.terra, borderStyle: 'dashed' },
+          ]}
+        />
+      </View>
+    </Marker>
+  );
+}
+
 export default function MapScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -195,11 +241,15 @@ export default function MapScreen() {
             coordinates: rings[0],
             holes: rings.slice(1),
             color: catColor(catById.get(s.categoryId)),
+            verified: s.status === 'VERIFIED',
           };
         })
         .filter((p): p is NonNullable<typeof p> => p != null),
     [spots, catById],
   );
+  // Region spots that already render as an outlined polygon, so we don't also
+  // drop a redundant centre dot on top of them.
+  const polygonIds = useMemo(() => new Set(regionPolygons.map((p) => p.id)), [regionPolygons]);
 
   const recenterOnUser = () => {
     if (!userLocation) return;
@@ -225,55 +275,42 @@ export default function MapScreen() {
         showsUserLocation
         onPress={() => setSelected(null)}
       >
-        {/* REGION geofences as filled polygons (tap to peek). */}
+        {/*
+          REGION geofences render as their outline. The stroke carries the
+          verification status the same way the legend does: a solid category
+          colour when verified, a dashed terracotta outline when not yet
+          verified. Tap anywhere in the area to peek the spot.
+        */}
         {regionPolygons.map((p) => (
           <Polygon
             key={`poly-${p.id}`}
             coordinates={p.coordinates}
             holes={p.holes}
-            strokeColor={colors.mossDark}
-            strokeWidth={2.5}
-            fillColor={`${p.color}59`}
+            strokeColor={p.verified ? p.color : colors.terra}
+            strokeWidth={p.verified ? 2.5 : 2}
+            lineDashPattern={p.verified ? undefined : [7, 6]}
+            fillColor={p.verified ? `${p.color}40` : `${colors.terra}1f`}
             tappable
             onPress={() => setSelected(p.spot)}
           />
         ))}
         {/*
-          The map DTO carries only the centroid (lat/lng), not full geometry, so
-          REGION spots render as a circular moss marker and POIs as a teardrop
-          pin. Verified = solid category colour; unverified = white with a dashed
-          terracotta outline. TODO(verify): add polygon geometry to the map DTO
-          (or lazy-fetch detail) to shade REGION outlines as filled polygons.
+          POIs render as a teardrop pin; REGION spots that lack polygon geometry
+          fall back to a circular dot. Verified = solid category colour;
+          unverified = white with a dashed terracotta outline. Regions that
+          already drew an outlined polygon are skipped (no redundant centre dot).
         */}
-        {spots.map((s) => {
-          if (s.lat == null || s.lng == null) return null;
-          const category = catById.get(s.categoryId);
-          const color = catColor(category);
-          const verified = s.status === 'VERIFIED';
-          const isRegion = s.type === 'REGION';
-          return (
-            <Marker
+        {spots
+          .filter((s) => !(s.type === 'REGION' && polygonIds.has(s.id)))
+          .map((s) => (
+            <SpotMarker
               key={s.id}
-              coordinate={{ latitude: s.lat, longitude: s.lng }}
+              spot={s}
+              color={catColor(catById.get(s.categoryId))}
+              isRegion={s.type === 'REGION'}
               onPress={() => setSelected(s)}
-            >
-              <View style={styles.pinWrap}>
-                <View
-                  style={[
-                    isRegion ? styles.regionDot : styles.pin,
-                    verified
-                      ? { backgroundColor: color, borderColor: '#fff' }
-                      : {
-                          backgroundColor: '#fff',
-                          borderColor: colors.terra,
-                          borderStyle: 'dashed',
-                        },
-                  ]}
-                />
-              </View>
-            </Marker>
-          );
-        })}
+            />
+          ))}
       </MapView>
 
       {/* (A) Floating status pill: subtle spinner on first load, tappable error on failure */}
