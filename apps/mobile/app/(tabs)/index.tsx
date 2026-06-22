@@ -122,6 +122,54 @@ function SpotMarker({
   );
 }
 
+/**
+ * Tappable label at a geofence centroid. react-native-maps Polygon `onPress`
+ * doesn't fire on Apple Maps (iOS), so the outline alone isn't tappable and a
+ * bare dot didn't say what the area is. This pill shows the name (so you can
+ * read what it is straight away) and is a real Marker, which IS tappable on
+ * iOS, so it opens the spot. Rasterised once then tracking off, like SpotMarker.
+ */
+function RegionLabel({
+  spot,
+  color,
+  onPress,
+}: {
+  spot: SpotSummary;
+  color: string;
+  onPress: () => void;
+}) {
+  const [tracks, setTracks] = useState(true);
+  useEffect(() => {
+    const t = setTimeout(() => setTracks(false), 600);
+    return () => clearTimeout(t);
+  }, []);
+
+  if (spot.lat == null || spot.lng == null) return null;
+  const verified = spot.status === 'VERIFIED';
+  return (
+    <Marker
+      coordinate={{ latitude: spot.lat, longitude: spot.lng }}
+      onPress={onPress}
+      tracksViewChanges={tracks}
+      anchor={{ x: 0.5, y: 0.5 }}
+    >
+      <View style={styles.regionLabel}>
+        <View
+          style={[
+            styles.regionLabelDot,
+            verified
+              ? { backgroundColor: color, borderColor: color }
+              : { backgroundColor: '#fff', borderColor: colors.terra, borderStyle: 'dashed' },
+          ]}
+        />
+        <Text style={styles.regionLabelText} numberOfLines={1}>
+          {spot.name}
+        </Text>
+      </View>
+    </Marker>
+  );
+}
+
 export default function MapScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -251,6 +299,56 @@ export default function MapScreen() {
   // drop a redundant centre dot on top of them.
   const polygonIds = useMemo(() => new Set(regionPolygons.map((p) => p.id)), [regionPolygons]);
 
+  // Memoise the map children as stable element arrays. The screen re-renders on
+  // every GPS tick (useUserLocation) and on every select; without this the
+  // Polygon/Marker elements are rebuilt each time and react-native-maps redraws
+  // them, which is the flicker. These only rebuild when the data behind them
+  // changes, not on location/selection churn.
+  const polygonEls = useMemo(
+    () =>
+      regionPolygons.map((p) => (
+        <Polygon
+          key={`poly-${p.id}`}
+          coordinates={p.coordinates}
+          holes={p.holes}
+          strokeColor={p.verified ? p.color : colors.terra}
+          strokeWidth={p.verified ? 2.5 : 2}
+          lineDashPattern={p.verified ? undefined : [7, 6]}
+          fillColor={p.verified ? `${p.color}40` : `${colors.terra}1f`}
+          tappable
+          onPress={() => setSelected(p.spot)}
+        />
+      )),
+    [regionPolygons],
+  );
+  const regionLabelEls = useMemo(
+    () =>
+      regionPolygons.map((p) => (
+        <RegionLabel
+          key={`label-${p.id}`}
+          spot={p.spot}
+          color={p.color}
+          onPress={() => setSelected(p.spot)}
+        />
+      )),
+    [regionPolygons],
+  );
+  const markerEls = useMemo(
+    () =>
+      spots
+        .filter((s) => !(s.type === 'REGION' && polygonIds.has(s.id)))
+        .map((s) => (
+          <SpotMarker
+            key={s.id}
+            spot={s}
+            color={catColor(catById.get(s.categoryId))}
+            isRegion={s.type === 'REGION'}
+            onPress={() => setSelected(s)}
+          />
+        )),
+    [spots, polygonIds, catById],
+  );
+
   const recenterOnUser = () => {
     if (!userLocation) return;
     mapRef.current?.animateToRegion(
@@ -276,41 +374,15 @@ export default function MapScreen() {
         onPress={() => setSelected(null)}
       >
         {/*
-          REGION geofences render as their outline. The stroke carries the
-          verification status the same way the legend does: a solid category
-          colour when verified, a dashed terracotta outline when not yet
-          verified. Tap anywhere in the area to peek the spot.
+          REGION geofences: a verification-styled outline (solid when verified,
+          dashed terracotta when not) plus a tappable RegionLabel pill naming the
+          area (the outline isn't reliably tappable on Apple Maps). POIs render
+          as a teardrop pin; regions without geometry fall back to a dot. All
+          memoised above so location/selection re-renders don't redraw them.
         */}
-        {regionPolygons.map((p) => (
-          <Polygon
-            key={`poly-${p.id}`}
-            coordinates={p.coordinates}
-            holes={p.holes}
-            strokeColor={p.verified ? p.color : colors.terra}
-            strokeWidth={p.verified ? 2.5 : 2}
-            lineDashPattern={p.verified ? undefined : [7, 6]}
-            fillColor={p.verified ? `${p.color}40` : `${colors.terra}1f`}
-            tappable
-            onPress={() => setSelected(p.spot)}
-          />
-        ))}
-        {/*
-          POIs render as a teardrop pin; REGION spots that lack polygon geometry
-          fall back to a circular dot. Verified = solid category colour;
-          unverified = white with a dashed terracotta outline. Regions that
-          already drew an outlined polygon are skipped (no redundant centre dot).
-        */}
-        {spots
-          .filter((s) => !(s.type === 'REGION' && polygonIds.has(s.id)))
-          .map((s) => (
-            <SpotMarker
-              key={s.id}
-              spot={s}
-              color={catColor(catById.get(s.categoryId))}
-              isRegion={s.type === 'REGION'}
-              onPress={() => setSelected(s)}
-            />
-          ))}
+        {polygonEls}
+        {regionLabelEls}
+        {markerEls}
       </MapView>
 
       {/* (A) Floating status pill: subtle spinner on first load, tappable error on failure */}
@@ -498,6 +570,23 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 3,
   },
+  regionLabel: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    maxWidth: 170,
+    backgroundColor: '#fff',
+    borderRadius: radius.pill,
+    paddingVertical: 5,
+    paddingHorizontal: 9,
+    shadowColor: colors.ink,
+    shadowOpacity: 0.18,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+  },
+  regionLabelDot: { width: 11, height: 11, borderRadius: 6, borderWidth: 2 },
+  regionLabelText: { fontFamily: font.bodyMedium, fontSize: 11.5, color: colors.ink },
   legend: {
     position: 'absolute',
     left: space.lg,
