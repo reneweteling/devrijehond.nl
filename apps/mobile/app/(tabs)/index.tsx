@@ -372,6 +372,7 @@ export default function MapScreen() {
   // category toggles it; tapping "Alles" clears back to everything.
   const [activeCats, setActiveCats] = useState<Set<string>>(() => new Set());
   const [selected, setSelected] = useState<SpotSummary | null>(null);
+  const [satellite, setSatellite] = useState(false);
   // Whether the current zoom is close enough to show geofence name labels.
   const [showRegionNames, setShowRegionNames] = useState(
     INITIAL_REGION.latitudeDelta < REGION_LABEL_MAX_DELTA,
@@ -629,6 +630,7 @@ export default function MapScreen() {
         ref={mapRef}
         style={StyleSheet.absoluteFill}
         initialRegion={INITIAL_REGION}
+        mapType={satellite ? 'hybrid' : 'standard'}
         onMapReady={() => setMapReady(true)}
         onRegionChangeComplete={onRegionChange}
         showsUserLocation
@@ -718,6 +720,25 @@ export default function MapScreen() {
             <Text style={styles.legendText}>Niet geverifieerd</Text>
           </View>
         </View>
+      )}
+
+      {/* Satellite / map toggle */}
+      {!selected && (
+        <Pressable
+          style={({ pressed }) => [
+            styles.recenterBtn,
+            satellite && styles.recenterBtnActive,
+            { bottom: insets.bottom + (userLocation ? 116 : 64), opacity: pressed ? 0.7 : 1 },
+          ]}
+          onPress={() => setSatellite((v) => !v)}
+          hitSlop={8}
+        >
+          <SymbolView
+            name="globe.europe.africa.fill"
+            size={20}
+            tintColor={satellite ? '#fff' : colors.mossDark}
+          />
+        </Pressable>
       )}
 
       {/* Recenter on the user's location (iOS has no built-in button) */}
@@ -839,6 +860,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 4,
   },
+  recenterBtnActive: { backgroundColor: colors.moss },
   legendDot: {
     width: 12,
     height: 12,

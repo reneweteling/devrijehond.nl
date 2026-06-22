@@ -184,6 +184,7 @@ export function FullMap() {
 
   // Recenter trigger counter; incrementing it fires the geolocation request.
   const [recenterTrigger, setRecenterTrigger] = useState(0);
+  const [satellite, setSatellite] = useState(false);
 
   // Category colors keyed by id for polygon rendering.
   const categoryColors = useRef<Record<string, string>>({});
@@ -336,6 +337,7 @@ export function FullMap() {
         <Map
           defaultCenter={DEFAULT_CENTER}
           defaultZoom={DEFAULT_ZOOM}
+          mapTypeId={satellite ? 'hybrid' : 'roadmap'}
           gestureHandling="greedy"
           disableDefaultUI
           style={{ width: '100%', height: '100%' }}
@@ -676,6 +678,43 @@ export function FullMap() {
           gap: 10,
         }}
       >
+        {/* Satellite / map toggle */}
+        <button
+          type="button"
+          title={satellite ? 'Kaartweergave' : 'Satellietweergave'}
+          aria-label={satellite ? 'Kaartweergave' : 'Satellietweergave'}
+          onClick={() => setSatellite((v) => !v)}
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: '50%',
+            background: satellite ? 'var(--moss)' : '#fff',
+            border: satellite ? '1px solid var(--moss)' : '1px solid var(--line)',
+            boxShadow: '0 2px 10px rgba(35,42,27,0.16)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {/* Globe / layers icon */}
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke={satellite ? '#fff' : 'var(--moss-700)'}
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="9" />
+            <path d="M3 12h18" />
+            <path d="M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18" />
+          </svg>
+        </button>
+
         {/* Recenter on user button */}
         <button
           type="button"
