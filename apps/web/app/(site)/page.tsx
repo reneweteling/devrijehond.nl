@@ -9,10 +9,13 @@ import { Reveal, FadeIn } from './motion';
  * Map home (`/`). A rich, crawlable landing page (hero, categories, the
  * community-verification story, featured verified spots, the live map and an
  * app-download push) over the public data. Per-spot SSR pages remain the
- * deep-indexable surface. Revalidated periodically so featured content stays
- * fresh.
+ * deep-indexable surface.
+ *
+ * Rendered dynamically (not prerendered at build): the build container has no
+ * DB, so a build-time render would bake in the loadData() catch fallback
+ * (0 plekken). Per-request SSR queries the live DB instead.
  */
-export const revalidate = 1800;
+export const dynamic = 'force-dynamic';
 
 const IOS_URL = 'https://apps.apple.com/app/de-vrije-hond/id000000000';
 const ANDROID_URL = 'https://play.google.com/store/apps/details?id=nl.devrijehond.app';
