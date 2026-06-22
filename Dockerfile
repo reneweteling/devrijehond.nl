@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # De Vrije Hond — web (Next.js API + site + admin) for Dokku.
 #
 # Single image that builds the pnpm/turbo monorepo and keeps the workspace so
@@ -30,7 +31,10 @@ ARG NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 ENV NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=$NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 
-RUN pnpm --filter web build
+# Persist Next's build cache (.next/cache) across rebuilds via a BuildKit cache
+# mount, so rebuilds aren't cold ("No build cache found"). Needs BuildKit, which
+# Dokku uses for Dockerfile builds by default.
+RUN --mount=type=cache,target=/app/apps/web/.next/cache pnpm --filter web build
 
 ENV NODE_ENV=production
 EXPOSE 3000
