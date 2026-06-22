@@ -75,6 +75,14 @@ function formatReviewDate(iso: string): string {
   return `${d.getDate()} ${NL_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 }
 
+// Weighted net score is a float; show it rounded to one decimal with a Dutch
+// comma and a leading + for non-negative, so it never reads "+2.9000000004".
+function formatScore(n: number): string {
+  const r = Math.round(n * 10) / 10;
+  const s = (Number.isInteger(r) ? String(r) : r.toFixed(1)).replace('.', ',');
+  return r >= 0 ? `+${s}` : s;
+}
+
 const REPORT_REASONS = [
   { value: 'DUPLICATE', label: 'Dubbele plek' },
   { value: 'WRONG_INFO', label: 'Verkeerde informatie' },
@@ -294,7 +302,7 @@ export default function SpotDetailScreen() {
               <Text style={styles.checkTitle}>Klopt deze plek?</Text>
               <Text style={styles.checkScore}>
                 {v.confirmCount} bevestigd · {v.denyCount} afgewezen · netto{' '}
-                {v.netScore >= 0 ? `+${v.netScore}` : v.netScore}
+                {formatScore(v.netScore)}
               </Text>
               <View style={styles.progressTrack}>
                 <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />

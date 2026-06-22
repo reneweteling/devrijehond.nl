@@ -521,9 +521,69 @@ export default function MapScreen() {
   // drop a redundant centre dot on top of them.
   const polygonIds = useMemo(() => new Set(regionPolygons.map((p) => p.id)), [regionPolygons]);
 
-  // POI pins shown as markers: everything that isn't a region already drawn as a
-  // polygon. Region centroids without geometry fall back to a dot here too.
-  const pinSpots = spots.filter((s) => !(s.type === 'REGION' && polygonIds.has(s.id)));
+  // Memoise the map children. Without this, every re-render (select, zoom, or a
+  // refetch returning the same data) rebuilds the Polygon/Marker elements, and
+  // react-native-maps redraws them — the "keeps redrawing while dragging" bug.
+  // They rebuild only when the underlying data changes. The React Compiler would
+  // do this automatically but isn't enabled here, so the manual memo is needed;
+  // its preserve-memoization healthcheck is a false positive in that case.
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
+  const polygonEls = useMemo(
+    () =>
+      regionPolygons.map((p) => (
+        <Polygon
+          key={`poly-${p.id}`}
+          coordinates={p.coordinates}
+          holes={p.holes}
+          strokeColor={p.verified ? p.color : colors.terra}
+          strokeWidth={p.verified ? 2.5 : 2}
+          lineDashPattern={p.verified ? undefined : [7, 6]}
+          fillColor={p.verified ? `${p.color}40` : `${colors.terra}1f`}
+          tappable
+          onPress={() => setSelected(p.spot)}
+        />
+      )),
+    [regionPolygons],
+  );
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
+  const regionMarkerEls = useMemo(
+    () =>
+      regionPolygons.map((p) =>
+        showRegionNames ? (
+          <RegionLabel
+            key={`region-${p.id}`}
+            spot={p.spot}
+            color={p.color}
+            onPress={() => setSelected(p.spot)}
+          />
+        ) : (
+          <SpotMarker
+            key={`region-${p.id}`}
+            spot={p.spot}
+            color={p.color}
+            isRegion
+            onPress={() => setSelected(p.spot)}
+          />
+        ),
+      ),
+    [regionPolygons, showRegionNames],
+  );
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
+  const pinEls = useMemo(
+    () =>
+      spots
+        .filter((s) => !(s.type === 'REGION' && polygonIds.has(s.id)))
+        .map((s) => (
+          <SpotMarker
+            key={s.id}
+            spot={s}
+            color={catColor(catById.get(s.categoryId))}
+            isRegion={s.type === 'REGION'}
+            onPress={() => setSelected(s)}
+          />
+        )),
+    [spots, polygonIds, catById],
+  );
 
   const recenterOnUser = () => {
     if (!userLocation) return;
@@ -556,46 +616,9 @@ export default function MapScreen() {
           zoomed out it collapses to a dot. POIs render as a teardrop pin; pins
           don't redraw thanks to each marker's tracksViewChanges=false.
         */}
-        {regionPolygons.map((p) => (
-          <Polygon
-            key={`poly-${p.id}`}
-            coordinates={p.coordinates}
-            holes={p.holes}
-            strokeColor={p.verified ? p.color : colors.terra}
-            strokeWidth={p.verified ? 2.5 : 2}
-            lineDashPattern={p.verified ? undefined : [7, 6]}
-            fillColor={p.verified ? `${p.color}40` : `${colors.terra}1f`}
-            tappable
-            onPress={() => setSelected(p.spot)}
-          />
-        ))}
-        {regionPolygons.map((p) =>
-          showRegionNames ? (
-            <RegionLabel
-              key={`region-${p.id}`}
-              spot={p.spot}
-              color={p.color}
-              onPress={() => setSelected(p.spot)}
-            />
-          ) : (
-            <SpotMarker
-              key={`region-${p.id}`}
-              spot={p.spot}
-              color={p.color}
-              isRegion
-              onPress={() => setSelected(p.spot)}
-            />
-          ),
-        )}
-        {pinSpots.map((s) => (
-          <SpotMarker
-            key={s.id}
-            spot={s}
-            color={catColor(catById.get(s.categoryId))}
-            isRegion={s.type === 'REGION'}
-            onPress={() => setSelected(s)}
-          />
-        ))}
+        {polygonEls}
+        {regionMarkerEls}
+        {pinEls}
       </MapView>
 
       {/* (A) Floating status pill: subtle spinner on first load, tappable error on failure */}
