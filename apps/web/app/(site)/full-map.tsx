@@ -23,6 +23,11 @@ const GOOGLE_MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '';
 const BOUNDS_DEBOUNCE = 400;
 const SEARCH_DEBOUNCE = 350;
 
+// Maximum number of Google Maps Polygon overlays rendered at once.
+// Creating >1200 polygons causes noticeable jank; anything beyond this cap
+// gets a lightweight centroid pin so it stays visible and clickable.
+const POLYGON_CAP = 1200;
+
 // ---- types ------------------------------------------------------------------
 
 type MapItem = {
@@ -57,10 +62,13 @@ function RegionPolygons({
   items,
   categoryColors,
   onSelect,
+  onOverflowChange,
 }: {
   items: MapItem[];
   categoryColors: Record<string, string>;
   onSelect: (item: MapItem) => void;
+  /** Called with the list of regions that could not be drawn as polygons (cap exceeded). */
+  onOverflowChange: (overflow: MapItem[]) => void;
 }) {
   const map = useMap();
   // Keep a ref to the polygon objects so we can clean them up on updates.
@@ -73,15 +81,15 @@ function RegionPolygons({
     polysRef.current.forEach((p) => p.setMap(null));
     polysRef.current = [];
 
-    // Cap the number of drawn polygons: with the full NL dataset a wide
-    // viewport can return >1500 regions, and creating that many
-    // google.maps.Polygon overlays freezes the browser. 300 is plenty for any
-    // view; zooming in narrows the viewport fetch so everything stays reachable.
-    const regions = items
-      .filter((s) => s.type === 'REGION' && s.geometry?.type === 'Polygon')
-      .slice(0, 300);
+    // Split polygon regions into drawn vs overflow. Creating too many
+    // google.maps.Polygon overlays at once freezes the browser; anything
+    // beyond POLYGON_CAP gets a centroid pin instead so it stays clickable.
+    const allRegions = items.filter((s) => s.type === 'REGION' && s.geometry?.type === 'Polygon');
+    const drawn = allRegions.slice(0, POLYGON_CAP);
+    const overflow = allRegions.slice(POLYGON_CAP);
+    onOverflowChange(overflow);
 
-    for (const spot of regions) {
+    for (const spot of drawn) {
       if (!spot.geometry || spot.geometry.type !== 'Polygon') continue;
       const rings = spot.geometry.coordinates as LngLat[][];
       if (!rings?.length) continue;
@@ -106,7 +114,7 @@ function RegionPolygons({
       polysRef.current.forEach((p) => p.setMap(null));
       polysRef.current = [];
     };
-  }, [map, items, categoryColors, onSelect]);
+  }, [map, items, categoryColors, onSelect, onOverflowChange]);
 
   return null;
 }
@@ -156,11 +164,26 @@ function FlyToTrigger({ target }: { target: { lat: number; lng: number; zoom?: n
 
 // ---- Main component ---------------------------------------------------------
 
+// Returns true when the viewport is <= 640 px wide. SSR-safe: defaults to false.
+function useNarrow() {
+  const [narrow, setNarrow] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 640px)');
+    setNarrow(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setNarrow(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+  return narrow;
+}
+
 export function FullMap() {
   // Fetched spots for current viewport.
   const [spots, setSpots] = useState<MapItem[]>([]);
   const [loadingSpots, setLoadingSpots] = useState(false);
   const lastBboxKey = useRef('');
+
+  const narrow = useNarrow();
 
   // Categories for filter chips.
   const [categories, setCategories] = useState<CategoryDto[]>([]);
@@ -185,6 +208,12 @@ export function FullMap() {
   // Recenter trigger counter; incrementing it fires the geolocation request.
   const [recenterTrigger, setRecenterTrigger] = useState(0);
   const [satellite, setSatellite] = useState(false);
+
+  // Regions that exceeded POLYGON_CAP and are shown as centroid pins instead.
+  const [polygonOverflow, setPolygonOverflow] = useState<MapItem[]>([]);
+  const handleOverflowChange = useCallback((overflow: MapItem[]) => {
+    setPolygonOverflow(overflow);
+  }, []);
 
   // Category colors keyed by id for polygon rendering.
   const categoryColors = useRef<Record<string, string>>({});
@@ -365,6 +394,7 @@ export function FullMap() {
             items={visibleSpots}
             categoryColors={categoryColors.current}
             onSelect={setSelected}
+            onOverflowChange={handleOverflowChange}
           />
 
           {/* POI markers */}
@@ -392,6 +422,19 @@ export function FullMap() {
             .map((s) => (
               <Marker
                 key={s.id}
+                position={{ lat: s.lat as number, lng: s.lng as number }}
+                title={s.name}
+                icon={pinIcon(spotColor(s))}
+                onClick={() => setSelected(s)}
+              />
+            ))}
+
+          {/* Centroid pins for regions that exceeded POLYGON_CAP */}
+          {polygonOverflow
+            .filter((s) => s.lat != null && s.lng != null)
+            .map((s) => (
+              <Marker
+                key={`overflow-${s.id}`}
                 position={{ lat: s.lat as number, lng: s.lng as number }}
                 title={s.name}
                 icon={pinIcon(spotColor(s))}
@@ -462,17 +505,27 @@ export function FullMap() {
         </Map>
       </APIProvider>
 
-      {/* ---- Search box (top-center) --------------------------------------- */}
+      {/* ---- Search box (top-center on wide / second row on narrow) --------- */}
       <div
         ref={searchRef}
-        style={{
-          position: 'absolute',
-          top: 14,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 10,
-          width: 'min(420px, calc(100vw - 120px))',
-        }}
+        style={
+          narrow
+            ? {
+                position: 'absolute',
+                top: 64,
+                left: 14,
+                right: 14,
+                zIndex: 10,
+              }
+            : {
+                position: 'absolute',
+                top: 14,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                zIndex: 10,
+                width: 'min(420px, calc(100vw - 120px))',
+              }
+        }
       >
         <div
           style={{
@@ -483,6 +536,7 @@ export function FullMap() {
             alignItems: 'center',
             padding: '10px 16px',
             gap: 9,
+            minHeight: 44,
           }}
         >
           {/* Search icon */}
@@ -502,7 +556,7 @@ export function FullMap() {
           </svg>
           <input
             type="search"
-            placeholder="Zoek een plek of adres…"
+            placeholder={narrow ? 'Zoek een plek of adres…' : 'Zoek een plek of adres…'}
             value={searchQuery}
             onChange={(e) => handleSearchChange(e.target.value)}
             onFocus={() => searchResults.length > 0 && setSearchOpen(true)}
@@ -514,6 +568,7 @@ export function FullMap() {
               color: 'var(--ink)',
               background: 'transparent',
               fontFamily: 'var(--font-body-stack)',
+              minWidth: 0,
             }}
           />
           {searchQuery && (
@@ -816,6 +871,35 @@ export function FullMap() {
         />
         {loadingSpots ? 'Laden…' : `${visibleSpots.length} plekken`}
       </div>
+
+      {/* ---- Empty state (active filter, 0 results) ------------------------- */}
+      {!loadingSpots && activeCats.size > 0 && visibleSpots.length === 0 && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 10,
+            background: '#fff',
+            borderRadius: 16,
+            boxShadow: '0 4px 20px rgba(35,42,27,0.18)',
+            padding: '18px 24px',
+            maxWidth: 280,
+            textAlign: 'center',
+            fontFamily: 'var(--font-body-stack)',
+            pointerEvents: 'none',
+          }}
+        >
+          <div style={{ fontSize: 26, marginBottom: 8 }}>🐾</div>
+          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)', marginBottom: 6 }}>
+            Geen plekken gevonden
+          </div>
+          <div style={{ fontSize: 13, color: 'var(--ink-3)', lineHeight: 1.5 }}>
+            Geen plekken in deze categorie hier. Versleep of zoom de kaart om verder te zoeken.
+          </div>
+        </div>
+      )}
     </div>
   );
 }

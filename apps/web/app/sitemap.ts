@@ -15,6 +15,9 @@ type SpotRow = { slug: string; type: 'REGION' | 'POI'; updated_at: Date };
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticEntries: MetadataRoute.Sitemap = [
     { url: `${BASE}/`, changeFrequency: 'daily', priority: 1 },
+    { url: `${BASE}/kaart`, changeFrequency: 'daily', priority: 0.9 },
+    { url: `${BASE}/over`, changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${BASE}/wensen`, changeFrequency: 'weekly', priority: 0.4 },
     { url: `${BASE}/privacy`, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${BASE}/terms`, changeFrequency: 'yearly', priority: 0.3 },
   ];

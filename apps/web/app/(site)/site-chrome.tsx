@@ -82,16 +82,21 @@ function Header() {
     <header className="site-header">
       <nav className="container">
         <a className="brand" href="/">
-          <Image src="/logo.png" alt="" width={33} height={30} style={{ display: 'block' }} />
+          <Image src="/logo.png" alt="" width={46} height={36} style={{ display: 'block' }} />
           De Vrije Hond
         </a>
         <div className="nav-links">
           <a href="/kaart">Kaart</a>
           <a href="/#zo-werkt-het">Zo werkt het</a>
-          <a className="btn btn-primary" href="/#app">
-            Download de app
+          <a className="btn btn-primary" href="/#app" style={{ whiteSpace: 'nowrap' }}>
+            <span className="nav-cta-full">Download de app</span>
+            <span className="nav-cta-short" aria-hidden="true">
+              App
+            </span>
           </a>
-          <HeaderAccount />
+          <span className="nav-account">
+            <HeaderAccount />
+          </span>
         </div>
       </nav>
     </header>
@@ -146,8 +151,8 @@ function Footer() {
             <Image
               src="/logo-light.png"
               alt=""
-              width={33}
-              height={30}
+              width={46}
+              height={36}
               style={{ display: 'block' }}
             />
             De Vrije Hond

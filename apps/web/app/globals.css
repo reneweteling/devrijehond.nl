@@ -734,6 +734,31 @@ img {
   align-items: start;
 }
 
+/* When the main column has little content (no photos, no reviews) the sidebar
+   is far taller and the left column becomes a sea of white. Collapse to a
+   single centred column so the page reads balanced. The sidebar goes first so
+   the map/actions appear before the description text.
+   On ≤860 px the standard single-column rule already handles this. */
+.spot-body.spot-body--sparse {
+  grid-template-columns: minmax(0, 640px);
+  justify-content: center;
+}
+.spot-body.spot-body--sparse > div {
+  order: 2;
+}
+.spot-body.spot-body--sparse > aside {
+  order: 1;
+  position: static;
+}
+
+/* ---- Add-spot two-column grid ------------------------------------------- */
+.add-spot-grid {
+  display: grid;
+  gap: 40px;
+  grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr);
+  align-items: start;
+}
+
 /* Phone mockup */
 .phone {
   justify-self: center;
@@ -929,20 +954,51 @@ img {
   }
 }
 
-/* Compact header on phones: keep only the brand + primary CTA so nothing
-   spills off-screen (the secondary links live in the footer too). */
+@media (max-width: 860px) {
+  .add-spot-grid {
+    grid-template-columns: 1fr;
+  }
+  .add-spot-grid aside {
+    position: static;
+  }
+}
+
+/* Hide the full CTA label on desktop (shown by default) */
+.nav-cta-short {
+  display: none;
+}
+
+/* Compact header on phones: hide secondary nav links but keep Inloggen
+   reachable. The primary CTA stays on one line (shortened to "App"). */
 @media (max-width: 720px) {
   .site-header nav {
     gap: 10px;
   }
   .nav-links {
-    gap: 12px;
+    gap: 10px;
   }
-  .nav-links a:not(.btn) {
+  /* Hide Kaart and Zo werkt het; keep .nav-account (Inloggen / account) and .btn */
+  .nav-links > a:not(.btn) {
     display: none;
   }
   .nav-links a.btn {
-    padding: 9px 16px;
-    font-size: 14px;
+    padding: 9px 14px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  /* Show short CTA label, hide the full one */
+  .nav-cta-full {
+    display: none;
+  }
+  .nav-cta-short {
+    display: inline;
+  }
+  /* Keep account/inloggen link visible and compact */
+  .nav-account {
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  .nav-account a {
+    font-size: 13px !important;
   }
 }

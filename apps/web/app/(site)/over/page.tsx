@@ -4,7 +4,7 @@ import { LegalPage, LegalSection } from '../legal';
 export const dynamic = 'force-static';
 
 export const metadata: Metadata = {
-  title: 'Over De Vrije Hond',
+  title: 'Over & meebouwen',
   description:
     'Wie De Vrije Hond maakt, waar de open-source code staat en hoe je meebouwt of contact opneemt.',
 };

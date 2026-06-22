@@ -107,7 +107,9 @@ export function MapIsland() {
             marginTop: 18,
           }}
         >
-          {spots.map((s) => (
+          {/* A teaser/SEO list, not the full set: a wide viewport can hold
+              thousands of spots, so cap it and point to the map for the rest. */}
+          {spots.slice(0, 24).map((s) => (
             <a
               key={s.id}
               href={spotHref(s)}
@@ -132,6 +134,14 @@ export function MapIsland() {
             </a>
           ))}
         </div>
+      ) : null}
+      {spots.length > 24 ? (
+        <p className="muted" style={{ marginTop: 12, fontSize: 13.5 }}>
+          en {spots.length - 24} meer in beeld.{' '}
+          <a href="/kaart" style={{ color: 'var(--moss)', fontWeight: 600 }}>
+            Open de kaart
+          </a>
+        </p>
       ) : null}
     </section>
   );

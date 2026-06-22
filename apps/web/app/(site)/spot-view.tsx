@@ -83,6 +83,12 @@ export function SpotView({
   const [lead, ...rest] = spot.photos;
   const isPoi = spot.type === 'POI';
 
+  // Detect sparse content: no photos and no reviews. When the main column
+  // lacks media and user content the sidebar (map, route, participation, app
+  // download) will be far taller, leaving a large white gap on the left.
+  // Collapse to a single centred column so the page reads balanced.
+  const isSparse = !lead && rest.length === 0 && reviews.length === 0;
+
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.devrijehond.nl';
   const url = `${baseUrl}/${isPoi ? 'plek' : 'gebied'}/${spot.slug}`;
   const jsonLd = {
@@ -151,7 +157,10 @@ export function SpotView({
       ) : null}
 
       {/* Two-column body */}
-      <div className="container spot-body" style={{ marginTop: 32 }}>
+      <div
+        className={`container spot-body${isSparse ? ' spot-body--sparse' : ''}`}
+        style={{ marginTop: 32 }}
+      >
         <div>
           {spot.description ? (
             <div

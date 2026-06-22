@@ -8,7 +8,7 @@ import { AccountView } from './account-view';
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Account – De Vrije Hond',
+  title: 'Account',
 };
 
 export default function AccountPage() {

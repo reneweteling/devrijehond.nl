@@ -189,7 +189,7 @@ export default async function HomePage() {
                         {c.label}
                       </div>
                       <div className="muted" style={{ fontSize: 14 }}>
-                        {c.n} {c.n === 1 ? 'plek' : 'plekken'}
+                        {c.n > 0 ? `${c.n} ${c.n === 1 ? 'plek' : 'plekken'}` : 'Binnenkort'}
                       </div>
                     </div>
                   </div>
@@ -249,7 +249,22 @@ export default async function HomePage() {
                     <div className="card-media">
                       {s.photo ? (
                         <img src={s.photo} alt={`${s.name}, ${s.cat_label}`} loading="lazy" />
-                      ) : null}
+                      ) : (
+                        <span
+                          aria-hidden="true"
+                          style={{
+                            position: 'absolute',
+                            inset: 0,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: 40,
+                            opacity: 0.55,
+                          }}
+                        >
+                          🐾
+                        </span>
+                      )}
                     </div>
                     <div className="card-body">
                       <div

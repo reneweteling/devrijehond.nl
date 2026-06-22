@@ -21,7 +21,7 @@ export async function generateMetadata({
 
   const desc =
     spot.description?.slice(0, 160) ?? `${spot.category.label} in De Vrije Hond, ${spot.name}.`;
-  const url = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://devrijehond.nl'}/gebied/${spot.slug}`;
+  const url = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.devrijehond.nl'}/gebied/${spot.slug}`;
 
   return {
     title: spot.name,

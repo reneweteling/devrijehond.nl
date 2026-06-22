@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { FullMap } from '../full-map';
 
 export const metadata: Metadata = {
-  title: 'Kaart | De Vrije Hond',
+  title: 'Kaart',
   description:
     'Bekijk alle hondvriendelijke plekken in Nederland op de kaart: losloopgebieden, hondenstranden, horeca en waterpunten.',
 };

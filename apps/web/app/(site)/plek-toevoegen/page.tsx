@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic';
 import { AddSpotForm } from './add-spot-form';
 
 export const metadata = {
-  title: 'Plek toevoegen | De Vrije Hond',
+  title: 'Plek toevoegen',
   description:
     'Voeg een hondvriendelijke plek toe aan de kaart. Hondvriendelijke horeca, waterpunten, speelplekken en meer.',
 };
@@ -43,14 +43,7 @@ export default function AddSpotPage() {
         </div>
 
         {/* Two-column layout: form left, tips right */}
-        <div
-          style={{
-            display: 'grid',
-            gap: 40,
-            gridTemplateColumns: 'minmax(0, 2fr) minmax(240px, 1fr)',
-            alignItems: 'start',
-          }}
-        >
+        <div className="add-spot-grid">
           <div>
             <AddSpotForm />
           </div>
