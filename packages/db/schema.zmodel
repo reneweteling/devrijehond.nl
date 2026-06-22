@@ -322,6 +322,9 @@ model Spot {
   hours   Json? // opening hours structure (validated at API boundary)
   phone   String?
   website String?
+  // Raw imported data (scraped source payload incl. its sourceUrl) so an
+  // imported spot can be re-checked / refreshed against its origin later.
+  rawData Json?
 
   // Verification scoring (denormalized; recomputed on each vote — see queue job)
   confirmScore Float @default(0) // sum of weighted CONFIRM votes

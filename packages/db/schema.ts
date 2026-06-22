@@ -1363,6 +1363,11 @@ export class SchemaType implements SchemaDef {
           type: 'String',
           optional: true,
         },
+        rawData: {
+          name: 'rawData',
+          type: 'Json',
+          optional: true,
+        },
         confirmScore: {
           name: 'confirmScore',
           type: 'Float',

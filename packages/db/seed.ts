@@ -28,6 +28,7 @@ if (process.env.S3_REGION) {
 }
 
 import { randomUUID } from 'crypto';
+import { readFileSync } from 'node:fs';
 import { Pool } from 'pg';
 import sharp from 'sharp';
 import { uploadObject } from '@devrijehond/s3';
@@ -35,6 +36,32 @@ import { db } from './src/client';
 import { tallyVotesLike } from './seed-helpers';
 
 const ADMIN_EMAIL = 'rene@weteling.com';
+
+// ---------------------------------------------------------------------------
+// Imported dog off-leash areas. Scraped from public directories (doggydating
+// + others) into packages/db/data/losloopgebieden.json. Each record keeps its
+// sourceUrl so the spot's rawData can be re-checked / refreshed later.
+// ---------------------------------------------------------------------------
+type RawLosloop = {
+  source: string;
+  sourceUrl: string;
+  name: string;
+  town: string | null;
+  province: string | null;
+  address: string | null;
+  lat: number;
+  lng: number;
+  description: string | null;
+  offLeash: boolean | null;
+  water: boolean | null;
+  parking: boolean | null;
+  fenced: boolean | null;
+  osmId?: string;
+  osmTags?: Record<string, string>;
+};
+const LOSLOOP: RawLosloop[] = JSON.parse(
+  readFileSync(new URL('./data/losloopgebieden.json', import.meta.url), 'utf8'),
+);
 
 // ---------------------------------------------------------------------------
 // Taxonomy
@@ -275,8 +302,12 @@ interface SpotSeed {
   address?: string;
   website?: string;
   regionRadiusM?: number; // for REGION polygon size
+  rawData?: unknown; // imported source payload (incl. sourceUrl) -> Spot.rawData
 }
 
+// Imported losloopgebieden -> the RESEARCH shape buildSpots consumes. Amenities
+// are mapped from the scraped flags; the full source record is carried as `raw`
+// so it lands in Spot.rawData (incl. sourceUrl) for later refresh.
 const RESEARCH: {
   name: string;
   category: string;
@@ -285,782 +316,24 @@ const RESEARCH: {
   lng: number;
   description: string;
   radiusM?: number;
-}[] = [
-  {
-    name: 'Amsterdamse Bos',
+  amenities?: string[];
+  raw: RawLosloop;
+}[] = LOSLOOP.map((r) => {
+  const amenities: string[] = ['free'];
+  if (r.fenced) amenities.push('fenced');
+  if (r.parking) amenities.push('parking');
+  return {
+    name: r.name,
     category: 'off-leash',
-    city: 'Amstelveen',
-    lat: 52.3186,
-    lng: 4.8358,
-    description: 'Groot bosgebied met meerdere losloopzones waar honden het hele jaar los mogen.',
-  },
-  {
-    name: 'Westerpark',
-    category: 'off-leash',
-    city: 'Amsterdam',
-    lat: 52.387,
-    lng: 4.874,
-    description: 'Stadspark met losloopstroken langs het spoor en bij de rietvelden.',
-  },
-  {
-    name: 'Vondelpark',
-    category: 'off-leash',
-    city: 'Amsterdam',
-    lat: 52.358,
-    lng: 4.8686,
-    description: 'Centraal stadspark met een aangewezen hondenlosloopveld.',
-  },
-  {
-    name: 'Sloterpark',
-    category: 'off-leash',
-    city: 'Amsterdam',
-    lat: 52.3636,
-    lng: 4.809,
-    description: 'Park rond de Sloterplas met losloopgebieden waar honden ook kunnen zwemmen.',
-  },
-  {
-    name: 'Gaasperpark',
-    category: 'off-leash',
-    city: 'Amsterdam',
-    lat: 52.3107,
-    lng: 4.9939,
-    description: 'Aan de westkant van de Gaasperplas ligt een hondenstrand met grasveld.',
-  },
-  {
-    name: 'Diemerbos',
-    category: 'off-leash',
-    city: 'Diemen',
-    lat: 52.338,
-    lng: 4.999,
-    description: 'Bos waar honden bijna overal het hele jaar los mogen (max 3 per persoon).',
-  },
-  {
-    name: 'Het Twiske',
-    category: 'off-leash',
-    city: 'Oostzaan',
-    lat: 52.45,
-    lng: 4.88,
-    description:
-      'Groot natuur- en recreatiegebied met vijf losloopgebieden en twee hondenstranden.',
-  },
-  {
-    name: 'Kralingse Bos',
-    category: 'off-leash',
-    city: 'Rotterdam',
-    lat: 51.9395,
-    lng: 4.516,
-    description: 'Grootste stadspark van Rotterdam; in het oosten mogen honden het hele jaar los.',
-  },
-  {
-    name: 'Hondeneiland Zuiderpark',
-    category: 'off-leash',
-    city: 'Rotterdam',
-    lat: 51.878,
-    lng: 4.479,
-    description: 'De enige plek in het Zuiderpark waar honden los mogen; open veld en water.',
-  },
-  {
-    name: 'Het Park',
-    category: 'off-leash',
-    city: 'Rotterdam',
-    lat: 51.905,
-    lng: 4.473,
-    description: 'Historisch park bij de Euromast; honden welkom met aangewezen losloopplekken.',
-  },
-  {
-    name: 'Haagse Bos',
-    category: 'off-leash',
-    city: 'Den Haag',
-    lat: 52.093,
-    lng: 4.329,
-    description: 'Historisch bos in het centrum met losloopplekken en volop ruimte.',
-  },
-  {
-    name: 'Zuiderpark',
-    category: 'off-leash',
-    city: 'Den Haag',
-    lat: 52.0533,
-    lng: 4.287,
-    description: 'Grootste park van Den Haag met twee aangewezen hondenlosloopvelden.',
-  },
-  {
-    name: 'Bosjes van Poot',
-    category: 'off-leash',
-    city: 'Den Haag',
-    lat: 52.095,
-    lng: 4.253,
-    description: 'Losloopgebied op duingrond met dennen en eiken, naast het Westduinpark.',
-  },
-  {
-    name: 'Westduinpark',
-    category: 'off-leash',
-    city: 'Den Haag',
-    lat: 52.084,
-    lng: 4.235,
-    description: 'Groot duingebied tussen Kijkduin en Scheveningen; deels losloopgebied.',
-  },
-  {
-    name: 'Maximapark',
-    category: 'off-leash',
-    city: 'Utrecht',
-    lat: 52.089,
-    lng: 5.026,
-    description: 'Park in Leidsche Rijn met losloopvelden langs Het Lint en een strandje.',
-  },
-  {
-    name: 'Wilhelminapark',
-    category: 'off-leash',
-    city: 'Utrecht',
-    lat: 52.0855,
-    lng: 5.143,
-    description: 'Stadspark met een aangewezen hondenlosloopveld.',
-  },
-  {
-    name: 'Haarlemmerhout',
-    category: 'off-leash',
-    city: 'Haarlem',
-    lat: 52.369,
-    lng: 4.63,
-    description: 'Oud stadsbos waar honden tussen de Wagenweg en Fonteinlaan los mogen.',
-  },
-  {
-    name: 'Veerplas Spaarnwoude',
-    category: 'off-leash',
-    city: 'Haarlem',
-    lat: 52.383,
-    lng: 4.684,
-    description: 'Plas aan de oostkant van Haarlem; van oktober tot april los rennen en zwemmen.',
-  },
-  {
-    name: 'Schoteroog',
-    category: 'off-leash',
-    city: 'Haarlem',
-    lat: 52.395,
-    lng: 4.672,
-    description: 'Recreatiegebied met grasvelden en waterkant waar honden los mogen.',
-  },
-  {
-    name: 'Stadswandelpark',
-    category: 'off-leash',
-    city: 'Eindhoven',
-    lat: 51.4255,
-    lng: 5.479,
-    description: 'Stadspark ten zuiden van het centrum met losloopstroken op de grasvelden.',
-  },
-  {
-    name: 'Losloopterrein Hanevoet',
-    category: 'off-leash',
-    city: 'Eindhoven',
-    lat: 51.412598,
-    lng: 5.436441,
-    description: 'Aangewezen hondenlosloopterrein in de wijk Hanevoet langs het Dommeldal.',
-  },
-  {
-    name: 'Park Meerland',
-    category: 'off-leash',
-    city: 'Eindhoven',
-    lat: 51.441776,
-    lng: 5.404036,
-    description: 'Losloopterrein in Park Meerland met ruime grasvelden.',
-  },
-  {
-    name: 'Blixembosch-Oost',
-    category: 'off-leash',
-    city: 'Eindhoven',
-    lat: 51.484387,
-    lng: 5.470337,
-    description: 'Aangewezen losloopterrein in de noordelijke wijk Blixembosch-Oost.',
-  },
-  {
-    name: 'Urkhoven Tongelre',
-    category: 'off-leash',
-    city: 'Eindhoven',
-    lat: 51.43752,
-    lng: 5.530981,
-    description: 'Losloopterrein nabij het beekdal van de Kleine Dommel.',
-  },
-  {
-    name: 'Stadspark hondenspeeltuin',
-    category: 'off-leash',
-    city: 'Groningen',
-    lat: 53.2018,
-    lng: 6.544,
-    description: 'Aangewezen losloopgebied met hondenspeeltuin in het grote Stadspark.',
-  },
-  {
-    name: 'Noorderplantsoen',
-    category: 'off-leash',
-    city: 'Groningen',
-    lat: 53.2245,
-    lng: 6.5615,
-    description: 'Stadspark met meerdere losloopgebieden en een hondenweide.',
-  },
-  {
-    name: 'Kardinge Bevrijdingsbos',
-    category: 'off-leash',
-    city: 'Groningen',
-    lat: 53.2475,
-    lng: 6.6175,
-    description: 'Losloopgebied van ca. 12 ha in het Bevrijdingsbos.',
-  },
-  {
-    name: 'Hoornseplas',
-    category: 'off-leash',
-    city: 'Groningen',
-    lat: 53.188,
-    lng: 6.554,
-    description: 'Losloopstroken langs de Hoornseplas; seizoens- en weekendregels gelden.',
-  },
-  {
-    name: 'Goffertpark',
-    category: 'off-leash',
-    city: 'Nijmegen',
-    lat: 51.8245,
-    lng: 5.839,
-    description: 'Twee kleine losloopgebieden in het Goffertpark.',
-  },
-  {
-    name: 'Heumensoord',
-    category: 'off-leash',
-    city: 'Nijmegen',
-    lat: 51.795,
-    lng: 5.848,
-    description: 'Bosrijk losloopgebied ten zuidoosten van Nijmegen.',
-  },
-  {
-    name: 'Overasseltse en Hatertse Vennen',
-    category: 'off-leash',
-    city: 'Overasselt',
-    lat: 51.772,
-    lng: 5.774,
-    description: 'Losloopgebied met een groot ven en strandjes om te zwemmen.',
-  },
-  {
-    name: 'Berendonck',
-    category: 'off-leash',
-    city: 'Wijchen',
-    lat: 51.8055,
-    lng: 5.773,
-    description: 'Strand en plas waar honden buiten het hoogseizoen los mogen en zwemmen.',
-  },
-  {
-    name: 'Oude Warande',
-    category: 'off-leash',
-    city: 'Tilburg',
-    lat: 51.561,
-    lng: 5.0335,
-    description: 'Losloopzone in het sterrenbos de Oude Warande.',
-  },
-  {
-    name: 'Reeshofbos',
-    category: 'off-leash',
-    city: 'Tilburg',
-    lat: 51.565,
-    lng: 4.999,
-    description: 'Aangewezen losloopzone in het Reeshofbos.',
-  },
-  {
-    name: 'Reuselpad',
-    category: 'off-leash',
-    city: 'Tilburg',
-    lat: 51.538,
-    lng: 5.053,
-    description: 'Losloopzone langs het Reuselpad in Stadsbos013.',
-  },
-  {
-    name: 'Loonse en Drunense Duinen',
-    category: 'off-leash',
-    city: 'Udenhout',
-    lat: 51.6351,
-    lng: 5.1115,
-    description: 'Groot losloopgebied met routes door zandverstuiving en bos.',
-  },
-  {
-    name: 'Mastbos',
-    category: 'off-leash',
-    city: 'Breda',
-    lat: 51.556,
-    lng: 4.778,
-    description: 'Losloopgebied van ca. 82 ha met uitgezette Snuffelroute en poedelpoel.',
-  },
-  {
-    name: 'Sonse Bergen',
-    category: 'off-leash',
-    city: 'Son en Breugel',
-    lat: 51.507,
-    lng: 5.487,
-    description: 'Bospaden, open zand en een strandje aan de Dommel.',
-  },
-  {
-    name: 'Hondenstrand Zandvoort',
-    category: 'swim-beach',
-    city: 'Zandvoort',
-    lat: 52.365911,
-    lng: 4.523213,
-    description: 'Honden los rennen en zwemmen ten noorden van paal 47 en zuiden van paal 36.',
-  },
-  {
-    name: 'Hondenstrand Bloemendaal',
-    category: 'swim-beach',
-    city: 'Bloemendaal aan Zee',
-    lat: 52.415875,
-    lng: 4.554048,
-    description: 'Rustig losloopstrand tussen Parnassia en het naaktstrand, hele jaar los.',
-  },
-  {
-    name: 'Hondenstrand Scheveningen',
-    category: 'swim-beach',
-    city: 'Den Haag',
-    lat: 52.117,
-    lng: 4.288,
-    description: 'Op het Noorderstrand na het Zwarte Pad het hele jaar los en zwemmen.',
-  },
-  {
-    name: 'Hondenstrand Kijkduin',
-    category: 'swim-beach',
-    city: 'Den Haag',
-    lat: 52.062475,
-    lng: 4.216277,
-    description: 'Vanaf strandslag 2 zuidwaarts het hele jaar los op het Zuiderstrand.',
-  },
-  {
-    name: 'Hondenstrand Wijk aan Zee',
-    category: 'swim-beach',
-    city: 'Wijk aan Zee',
-    lat: 52.494644,
-    lng: 4.58883,
-    description: 'Brede strook waar honden het hele jaar los mogen.',
-  },
-  {
-    name: 'Hondenstrand IJmuiderslag',
-    category: 'swim-beach',
-    city: 'IJmuiden',
-    lat: 52.448346,
-    lng: 4.572802,
-    description: 'Permanent losloopgebied langs het Kennemerstrand.',
-  },
-  {
-    name: 'Hondenstrand Hoek van Holland',
-    category: 'swim-beach',
-    city: 'Hoek van Holland',
-    lat: 51.985329,
-    lng: 4.106054,
-    description: 'Zuidelijkste deel van het strand bij de Nieuwe Waterweg, hele jaar los.',
-  },
-  {
-    name: 'Hondenstrand Katwijk',
-    category: 'swim-beach',
-    city: 'Katwijk aan Zee',
-    lat: 52.211354,
-    lng: 4.404273,
-    description: 'Losloopstrand bij de Coepelduynen richting Noordwijk.',
-  },
-  {
-    name: 'Hondenstrand Noordwijk',
-    category: 'swim-beach',
-    city: 'Noordwijk',
-    lat: 52.23374,
-    lng: 4.420345,
-    description: 'Groot losloopstrand vanaf strandopgang 1 tot Katwijk.',
-  },
-  {
-    name: 'Hondenstrand Callantsoog',
-    category: 'swim-beach',
-    city: 'Callantsoog',
-    lat: 52.833469,
-    lng: 4.695024,
-    description: 'Strand waar honden buiten het hoogseizoen de hele dag los mogen.',
-  },
-  {
-    name: 'Hondenstrand Petten',
-    category: 'swim-beach',
-    city: 'Petten',
-    lat: 52.770721,
-    lng: 4.658675,
-    description: 'Strand waar honden tussen oktober en mei de hele dag los mogen.',
-  },
-  {
-    name: 'Hondenstrand Texel Paal 9',
-    category: 'swim-beach',
-    city: 'Den Hoorn',
-    lat: 53.045,
-    lng: 4.737,
-    description: 'Bij Paal 9 mogen honden het hele jaar los rennen en zwemmen.',
-  },
-  {
-    name: 'Hondenstrand Westerschouwen',
-    category: 'swim-beach',
-    city: 'Burgh-Haamstede',
-    lat: 51.710702,
-    lng: 3.691122,
-    description: 'Populair losloopstrand aan de westpunt van Schouwen.',
-  },
-  {
-    name: 'Brouwersdam-Zuid',
-    category: 'swim-beach',
-    city: 'Scharendijke',
-    lat: 51.742609,
-    lng: 3.824315,
-    description: 'Strandstrook aan de Noordzeekant van de Brouwersdam, buiten seizoen los.',
-  },
-  {
-    name: 'Oosterstrand Domburg',
-    category: 'swim-beach',
-    city: 'Domburg',
-    lat: 51.561854,
-    lng: 3.477968,
-    description: 'Speciaal hondenstrand ten noorden van Domburg.',
-  },
-  {
-    name: 'Hondenstrand Cadzand',
-    category: 'swim-beach',
-    city: 'Cadzand',
-    lat: 51.376408,
-    lng: 3.373051,
-    description: 'Breed wit strand; honden buiten het hoogseizoen de hele dag los.',
-  },
-  {
-    name: 'Hondenstrand Bussloo',
-    category: 'swim-beach',
-    city: 'Wilp',
-    lat: 52.204845,
-    lng: 6.100116,
-    description: 'Hondenstrand aan de recreatieplas om te zwemmen en spelen.',
-  },
-  {
-    name: 'Strand Nulde',
-    category: 'swim-beach',
-    city: 'Putten',
-    lat: 52.266277,
-    lng: 5.531933,
-    description: 'Recreatiegebied aan het Nuldernauw met een hondenstrand.',
-  },
-  {
-    name: 'Woof & Me',
-    category: 'horeca',
-    city: 'Amsterdam',
-    lat: 52.3543,
-    lng: 4.8945,
-    description: 'Hondencafe in De Pijp; honden binnen en buiten welkom, met hondenmenu.',
-  },
-  {
-    name: 'Pension Homeland',
-    category: 'horeca',
-    city: 'Amsterdam',
-    lat: 52.3713,
-    lng: 4.9197,
-    description: 'Cafe-restaurant op het Marineterrein; honden welkom op het terras.',
-  },
-  {
-    name: 'Pllek',
-    category: 'horeca',
-    city: 'Amsterdam',
-    lat: 52.4012,
-    lng: 4.8939,
-    description: 'Hotspot op de NDSM-werf; honden welkom op het strandterras aan het IJ.',
-  },
-  {
-    name: 'Cafecito',
-    category: 'horeca',
-    city: 'Rotterdam',
-    lat: 51.9229,
-    lng: 4.4823,
-    description: 'Koffiebranderij aan de Meent; je aangelijnde hond mag mee.',
-  },
-  {
-    name: 'Appels en Peren',
-    category: 'horeca',
-    city: 'Den Haag',
-    lat: 52.0668,
-    lng: 4.2735,
-    description: 'Buurtrestaurant in de Vruchtenbuurt; honden welkom.',
-  },
-  {
-    name: 'Loft 88',
-    category: 'horeca',
-    city: 'Utrecht',
-    lat: 52.0954,
-    lng: 5.1242,
-    description: 'Koffiebar aan de Voorstraat; honden krijgen vers water en zijn welkom.',
-  },
-  {
-    name: 'Parkpaviljoen Philips de Jongh',
-    category: 'horeca',
-    city: 'Eindhoven',
-    lat: 51.4525,
-    lng: 5.447,
-    description: 'Paviljoen in het park; honden welkom met eigen hondenmenu.',
-  },
-  {
-    name: 'Rabauw Brewpub',
-    category: 'horeca',
-    city: 'Eindhoven',
-    lat: 51.4485,
-    lng: 5.4585,
-    description: 'Brouwerij-taproom op Strijp-S; aangelijnde honden welkom.',
-  },
-  {
-    name: 'Fernweh',
-    category: 'horeca',
-    city: 'Groningen',
-    lat: 53.228,
-    lng: 6.5705,
-    description: 'Restaurant en koffiebar; honden welkom met eigen menu en waterbak.',
-  },
-  {
-    name: 'Restaurant Frenchie',
-    category: 'horeca',
-    city: 'Haarlem',
-    lat: 52.3795,
-    lng: 4.636,
-    description: 'Frans-Europees restaurant in het centrum; honden welkom.',
-  },
-  {
-    name: 'Eetcafe De Plak',
-    category: 'horeca',
-    city: 'Nijmegen',
-    lat: 51.847,
-    lng: 5.8615,
-    description: 'Vegetarisch-vegan eetcafe; je hond mag mee naar binnen.',
-  },
-  {
-    name: 'Cafe Brandpunt',
-    category: 'horeca',
-    city: 'Tilburg',
-    lat: 51.556,
-    lng: 5.0905,
-    description: 'Bruin cafe aan het Piusplein; honden welkom.',
-  },
-  {
-    name: 'Ranzijn Hondenwasstraat',
-    category: 'wash',
-    city: 'Amsterdam',
-    lat: 52.3347,
-    lng: 4.9233,
-    description: 'Zelf je hond wassen in speciale baden met warm water en fohn.',
-  },
-  {
-    name: 'Dogwash Rotterdam',
-    category: 'wash',
-    city: 'Rotterdam',
-    lat: 51.897,
-    lng: 4.467,
-    description: 'Zelfbediening dogwash bij dierenspeciaalzaak Yardic.',
-  },
-  {
-    name: 'Steck Hondenwasstraat',
-    category: 'wash',
-    city: 'Utrecht',
-    lat: 52.1175,
-    lng: 5.1095,
-    description: 'Gratis hondenwasstraat voor Vrienden van Steck.',
-  },
-  {
-    name: 'Avonturia Hondenwasstraat',
-    category: 'wash',
-    city: 'Den Haag',
-    lat: 52.066,
-    lng: 4.264,
-    description: 'Zelfbediening dogwash met touchscreen en 8 wasprogrammas.',
-  },
-  {
-    name: 'GroenRijk Hondenwasstraat',
-    category: 'wash',
-    city: 'Tilburg',
-    lat: 51.582,
-    lng: 5.079,
-    description: 'Zelf je hond wassen met automatische shampoo en droger.',
-  },
-  {
-    name: 'Maxi Zoo Dogwash',
-    category: 'wash',
-    city: 'Groningen',
-    lat: 53.233,
-    lng: 6.531,
-    description: 'Zelfbediening dogwash bij de Maxi Zoo aan de Reitdiephaven.',
-  },
-  {
-    name: 'Pets Place West',
-    category: 'shop',
-    city: 'Amsterdam',
-    lat: 52.369,
-    lng: 4.873,
-    description: 'Dierenspeciaalzaak in Amsterdam-West waar honden welkom zijn.',
-  },
-  {
-    name: 'Jumper Utrecht',
-    category: 'shop',
-    city: 'Utrecht',
-    lat: 52.111,
-    lng: 5.098,
-    description: 'Grote dierenwinkel waar je hond van harte welkom is.',
-  },
-  {
-    name: 'Pets Place Boerenbond',
-    category: 'shop',
-    city: 'Eindhoven',
-    lat: 51.463,
-    lng: 5.505,
-    description: 'Dierenspeciaalzaak en tuincentrum in een; honden welkom.',
-  },
-  {
-    name: 'Jumper Nijmegen',
-    category: 'shop',
-    city: 'Nijmegen',
-    lat: 51.842,
-    lng: 5.843,
-    description: 'Dierenspeciaalzaak aan de Wolfskuilseweg; honden welkom.',
-  },
-  {
-    name: 'Discus Kleverpark',
-    category: 'shop',
-    city: 'Haarlem',
-    lat: 52.392,
-    lng: 4.631,
-    description: 'Onafhankelijke dierenwinkel in de Kleverparkbuurt; honden welkom.',
-  },
-  {
-    name: 'Discus Animo',
-    category: 'shop',
-    city: 'Tilburg',
-    lat: 51.561,
-    lng: 5.083,
-    description: 'Dierenspeciaalzaak aan de Gasthuisring; honden welkom.',
-  },
-  {
-    name: 'Waterpomp Landgoed Marlot',
-    category: 'drinking-point',
-    city: 'Den Haag',
-    lat: 52.101,
-    lng: 4.346,
-    description: 'Bij de parkingang staat een waterpomp waar de hond kan drinken.',
-  },
-  {
-    name: 'Drinkwater Chez Favie',
-    category: 'drinking-point',
-    city: 'Amstelveen',
-    lat: 52.316,
-    lng: 4.829,
-    description: 'Bij het hondenterras staan altijd drinkbakken met vers water klaar.',
-  },
-  {
-    name: 'Hondenspeelplaats De Buitenhof',
-    category: 'drinking-point',
-    city: 'Utrecht',
-    lat: 52.102,
-    lng: 5.026,
-    description: 'Omheinde hondenspeelplaats met water om te zwemmen en drinken.',
-  },
-  {
-    name: 'De Hei (Laarder Wasmeren)',
-    category: 'off-leash',
-    city: 'Laren',
-    lat: 52.2725,
-    lng: 5.2345,
-    description:
-      'Groot losloopgebied op de Gooise heide; eindeloos struinen over de hei en door het bos.',
-    radiusM: 1900,
-  },
-  {
-    name: 'Westerheide',
-    category: 'off-leash',
-    city: 'Hilversum',
-    lat: 52.2585,
-    lng: 5.1865,
-    description: 'Uitgestrekte heide tussen Hilversum en Laren waar honden vrij mogen rennen.',
-    radiusM: 1700,
-  },
-  {
-    name: 'Bussumerheide en Franse Kampheide',
-    category: 'off-leash',
-    city: 'Hilversum',
-    lat: 52.2735,
-    lng: 5.1645,
-    description: 'Grote aaneengesloten heide; populair losloopgebied in het Gooi.',
-    radiusM: 1600,
-  },
-  {
-    name: 'Spanderswoud',
-    category: 'off-leash',
-    city: 'Bussum',
-    lat: 52.2515,
-    lng: 5.1455,
-    description: 'Bosgebied tussen Bussum en Hilversum met losloopzones en vennen.',
-    radiusM: 1100,
-  },
-  {
-    name: 'Amelisweerd',
-    category: 'off-leash',
-    city: 'Bunnik',
-    lat: 52.0735,
-    lng: 5.1655,
-    description: 'Landgoed met oude lanen langs de Kromme Rijn; deels losloopgebied.',
-    radiusM: 1200,
-  },
-  {
-    name: 'Beatrixpark',
-    category: 'off-leash',
-    city: 'Amsterdam',
-    lat: 52.3385,
-    lng: 4.8815,
-    description: 'Stadspark bij de Zuidas met aangewezen losloopveld.',
-    radiusM: 500,
-  },
-  {
-    name: 'Flevopark',
-    category: 'off-leash',
-    city: 'Amsterdam',
-    lat: 52.3625,
-    lng: 4.9515,
-    description: 'Park aan het IJ in Oost met losloopstroken en een zwemplek.',
-    radiusM: 700,
-  },
-  {
-    name: 'Park Frankendael',
-    category: 'off-leash',
-    city: 'Amsterdam',
-    lat: 52.3515,
-    lng: 4.9285,
-    description: 'Groen park in de Watergraafsmeer met een hondenlosloopgebied.',
-    radiusM: 500,
-  },
-  {
-    name: 'Park Sonsbeek',
-    category: 'off-leash',
-    city: 'Arnhem',
-    lat: 51.99,
-    lng: 5.905,
-    description: 'Glooiend stadspark met vijvers en waterval; aangewezen losloopplekken.',
-    radiusM: 900,
-  },
-  {
-    name: 'Park Transwijk',
-    category: 'off-leash',
-    city: 'Utrecht',
-    lat: 52.073,
-    lng: 5.105,
-    description: 'Ruim stadspark in Kanaleneiland met een hondenlosloopveld.',
-    radiusM: 600,
-  },
-  {
-    name: 'Kralingse Plas hondenstrand',
-    category: 'swim-beach',
-    city: 'Rotterdam',
-    lat: 51.9365,
-    lng: 4.5205,
-    description: 'Strandje aan de Kralingse Plas waar honden mogen zwemmen.',
-    radiusM: 500,
-  },
-  {
-    name: 'IJzeren Man',
-    category: 'swim-beach',
-    city: 'Vught',
-    lat: 51.6555,
-    lng: 5.2735,
-    description: 'Vennen bij Vught met een hondenstrand om te zwemmen.',
-    radiusM: 600,
-  },
-];
+    city: r.town ?? r.province ?? 'Nederland',
+    lat: r.lat,
+    lng: r.lng,
+    description: r.description ?? 'Hondenlosloopgebied.',
+    radiusM: r.source === 'osm' ? 130 : 400,
+    amenities,
+    raw: r,
+  };
+});
 
 function slugify(s: string): string {
   return s
@@ -1085,36 +358,38 @@ const REVIEW_SNIPPETS = [
 // UNVERIFIED with a few or no votes.
 function buildSpots(): SpotSeed[] {
   const N = USERS.length;
+  const seen = new Map<string, number>();
   return RESEARCH.map((r, i): SpotSeed => {
     const isRegion = r.category === 'off-leash' || r.category === 'swim-beach';
     const submitter = i % N;
-    const verified = i % 3 === 0;
+    // Curated directory imports (doggydating) start VERIFIED with weighted
+    // confirms; OSM auto-data lands UNVERIFIED for the community to confirm.
+    const isDoggy = r.raw.source === 'doggydating';
+    const status: 'VERIFIED' | 'UNVERIFIED' = isDoggy ? 'VERIFIED' : 'UNVERIFIED';
     const pool = Array.from({ length: N }, (_, u) => u).filter((u) => u !== submitter);
-    const nVotes = verified ? 5 : i % 3;
-    const votes: VoteSpec[] = pool.slice(0, nVotes).map((u) => ({ user: u, value: 'CONFIRM' }));
-    const reviews: ReviewSpec[] =
-      verified && i % 2 === 0
-        ? [
-            {
-              user: pool[0] ?? 1,
-              stars: 4 + (i % 2),
-              body: REVIEW_SNIPPETS[i % REVIEW_SNIPPETS.length] ?? '',
-            },
-          ]
-        : [];
+    const votes: VoteSpec[] = isDoggy
+      ? pool.slice(0, 5).map((u) => ({ user: u, value: 'CONFIRM' as const }))
+      : [];
+    // Slugs must be unique; many OSM areas share "Hondenlosloopgebied <town>".
+    let slug = `${slugify(r.name)}-${slugify(r.city)}`;
+    const seq = (seen.get(slug) ?? 0) + 1;
+    seen.set(slug, seq);
+    if (seq > 1) slug = `${slug}-${seq}`;
     return {
-      slug: `${slugify(r.name)}-${slugify(r.city)}`,
+      slug,
       category: r.category,
       name: r.name,
-      description: `${r.description} (${r.city})`,
+      description: r.description,
       lat: r.lat,
       lng: r.lng,
-      status: verified ? 'VERIFIED' : 'UNVERIFIED',
+      status,
       submitter,
-      photos: verified ? 2 : 1,
+      photos: 0,
       votes,
-      reviews,
-      regionRadiusM: isRegion ? (r.radiusM ?? 700) : undefined,
+      reviews: [],
+      amenities: r.amenities,
+      rawData: r.raw,
+      regionRadiusM: isRegion ? (r.radiusM ?? 400) : undefined,
     };
   });
 }
@@ -1249,6 +524,8 @@ async function main() {
         lng: s.lng,
         address: s.address ?? null,
         website: s.website ?? null,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        rawData: (s.rawData ?? undefined) as any,
         confirmScore: tally.confirmScore,
         denyScore: tally.denyScore,
         netScore: tally.netScore,
