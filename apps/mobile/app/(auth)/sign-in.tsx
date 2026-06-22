@@ -11,6 +11,7 @@
 import { useState } from 'react';
 import {
   ActivityIndicator,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -284,7 +285,11 @@ export default function SignInScreen() {
       >
         {/* Wordmark */}
         <View style={styles.brand}>
-          <SymbolView name="pawprint.fill" size={28} tintColor={colors.moss} />
+          <Image
+            source={require('@/assets/logo.png')}
+            style={{ width: 32, height: 29 }}
+            resizeMode="contain"
+          />
           <Text style={styles.wordmark}>De Vrije Hond</Text>
           <Text style={styles.tagline}>Vind de fijnste hondenplekken bij jou in de buurt.</Text>
         </View>

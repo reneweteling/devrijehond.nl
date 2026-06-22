@@ -5,7 +5,7 @@
  */
 
 import { type ReactNode } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SymbolView, type SymbolViewProps } from 'expo-symbols';
 
 import { colors, font, radius, space } from '@/lib/theme';
@@ -13,7 +13,11 @@ import { colors, font, radius, space } from '@/lib/theme';
 export function Wordmark() {
   return (
     <View style={styles.wordmark}>
-      <SymbolView name="pawprint.fill" size={16} tintColor={colors.moss} />
+      <Image
+        source={require('@/assets/logo.png')}
+        style={{ width: 22, height: 20 }}
+        resizeMode="contain"
+      />
       <Text style={styles.wordmarkText}>De Vrije Hond</Text>
     </View>
   );

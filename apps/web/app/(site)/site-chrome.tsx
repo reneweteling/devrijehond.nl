@@ -4,6 +4,8 @@
  * Server components, styled via globals.css. Wraps every page in (site).
  */
 
+import Image from 'next/image';
+
 import { HeaderAccount } from './header-account';
 
 const IOS_URL = 'https://apps.apple.com/app/de-vrije-hond/id000000000';
@@ -80,7 +82,7 @@ function Header() {
     <header className="site-header">
       <nav className="container">
         <a className="brand" href="/">
-          <PawMark size={26} />
+          <Image src="/logo.png" alt="" width={33} height={30} style={{ display: 'block' }} />
           De Vrije Hond
         </a>
         <div className="nav-links">
@@ -141,7 +143,13 @@ function Footer() {
       <div className="container foot-grid">
         <div>
           <div className="brand" style={{ color: '#fff', marginBottom: 12 }}>
-            <PawMark size={26} color="#cdd3b0" />
+            <Image
+              src="/logo-light.png"
+              alt=""
+              width={33}
+              height={30}
+              style={{ display: 'block' }}
+            />
             De Vrije Hond
           </div>
           <p
