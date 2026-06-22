@@ -377,6 +377,8 @@ export default function MapScreen() {
     INITIAL_REGION.latitudeDelta < REGION_LABEL_MAX_DELTA,
   );
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Current visible latitude span, used to scale the tap hit-test radius.
+  const regionDeltaRef = useRef(INITIAL_REGION.latitudeDelta);
   // Becomes true once the native map is laid out, so fly-to / centre calls
   // aren't issued before the map can honour them (they'd be no-ops).
   const [mapReady, setMapReady] = useState(false);
@@ -468,15 +470,19 @@ export default function MapScreen() {
   const onRegionChange = (r: Region) => {
     if (debounce.current) clearTimeout(debounce.current);
     debounce.current = setTimeout(() => setBbox(regionToBbox(r)), 350);
+    regionDeltaRef.current = r.latitudeDelta;
     // Toggle name labels vs dots at the zoom threshold. Only setState on an
     // actual change so we don't re-render (and rebuild the markers) every pan.
     const next = r.latitudeDelta < REGION_LABEL_MAX_DELTA;
     setShowRegionNames((prev) => (prev === next ? prev : next));
   };
 
-  // Tapping the map: if the point falls inside a geofence (and not in a hole),
-  // select that region; otherwise deselect. This makes the whole area tappable
-  // and works where Polygon/Marker onPress doesn't (Apple Maps + New Arch).
+  // Tapping the map. Marker/Polygon onPress is unreliable on Apple Maps + the
+  // New Architecture, so we resolve the tap ourselves from the coordinate:
+  //   1. inside a geofence (and not a hole) -> that region;
+  //   2. else the nearest pin within a finger-sized radius (scaled to the zoom),
+  //      so POIs and geometry-less region dots are tappable too;
+  //   3. else deselect.
   const onMapPress = (e: {
     nativeEvent: { coordinate?: { latitude: number; longitude: number } };
   }) => {
@@ -485,12 +491,31 @@ export default function MapScreen() {
       setSelected(null);
       return;
     }
-    const hit = regionPolygons.find(
+    const region = regionPolygons.find(
       (p) =>
         pointInRing(c.latitude, c.longitude, p.coordinates) &&
         !p.holes.some((h) => pointInRing(c.latitude, c.longitude, h)),
     );
-    setSelected(hit ? hit.spot : null);
+    if (region) {
+      setSelected(region.spot);
+      return;
+    }
+    // Nearest pin within ~a marker's reach. lng is compressed by cos(lat).
+    const cosLat = Math.cos((c.latitude * Math.PI) / 180);
+    const reach = regionDeltaRef.current * 0.05;
+    let best: SpotSummary | null = null;
+    let bestDist = Infinity;
+    for (const s of spots) {
+      if (s.lat == null || s.lng == null) continue;
+      const dLat = s.lat - c.latitude;
+      const dLng = (s.lng - c.longitude) * cosLat;
+      const dist = Math.sqrt(dLat * dLat + dLng * dLng);
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = s;
+      }
+    }
+    setSelected(best && bestDist <= reach ? best : null);
   };
 
   // Stable geofence polygons: recompute only when spots/categories change, not
