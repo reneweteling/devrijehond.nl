@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { authClient } from '@devrijehond/auth/client';
 import type { MeProfileDto, DogDto, SpotSummaryDto } from '@devrijehond/types';
 
@@ -186,16 +186,266 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
 }
 
 // ---------------------------------------------------------------------------
+// Dogs section — helpers
+// ---------------------------------------------------------------------------
+
+const DOG_INPUT_STYLE: React.CSSProperties = {
+  padding: '10px 12px',
+  borderRadius: 10,
+  border: '1px solid var(--line)',
+  fontSize: 15,
+};
+
+/** Returns age string like "3 jr" or "8 mnd", computed from birthDate (YYYY-MM-DD) or birthYear. */
+function dogAge(d: DogDto): string | null {
+  const today = new Date();
+
+  if (d.birthDate) {
+    const birth = new Date(d.birthDate);
+    if (isNaN(birth.getTime())) return null;
+    const months =
+      (today.getFullYear() - birth.getFullYear()) * 12 +
+      (today.getMonth() - birth.getMonth()) -
+      (today.getDate() < birth.getDate() ? 1 : 0);
+    if (months < 0) return null;
+    if (months < 12) return `${months} mnd`;
+    return `${Math.floor(months / 12)} jr`;
+  }
+
+  if (d.birthYear) {
+    const years = today.getFullYear() - d.birthYear;
+    if (years < 0) return null;
+    return `${years} jr`;
+  }
+
+  return null;
+}
+
+/** Upload a single File to /api/v1/me/uploads and return its publicUrl. */
+async function uploadDogPhoto(file: File): Promise<string> {
+  const form = new FormData();
+  form.append('file', file);
+  const res = await fetch('/api/v1/me/uploads', {
+    method: 'POST',
+    credentials: 'include',
+    body: form,
+  });
+  if (!res.ok) throw new Error('Upload mislukt.');
+  const { publicUrl } = (await res.json()) as { publicUrl: string };
+  return publicUrl;
+}
+
+// ---------------------------------------------------------------------------
+// Inline edit form for a single dog
+// ---------------------------------------------------------------------------
+
+function DogEditRow({
+  dog,
+  onSaved,
+  onCancel,
+}: {
+  dog: DogDto;
+  onSaved: (updated: DogDto) => void;
+  onCancel: () => void;
+}) {
+  const [name, setName] = useState(dog.name);
+  const [breed, setBreed] = useState(dog.breed ?? '');
+  const [birthDate, setBirthDate] = useState(dog.birthDate ?? '');
+  const [photoUrl, setPhotoUrl] = useState(dog.photoUrl ?? '');
+  const [photoPreview, setPhotoPreview] = useState(dog.photoUrl ?? '');
+  const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState('');
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const handlePhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setErr('');
+    setUploading(true);
+    try {
+      const preview = URL.createObjectURL(file);
+      const url = await uploadDogPhoto(file);
+      setPhotoUrl(url);
+      setPhotoPreview(preview);
+    } catch {
+      setErr('Foto uploaden mislukt.');
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  };
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim()) return;
+    setSaving(true);
+    setErr('');
+    try {
+      const body: Record<string, unknown> = { name: name.trim() };
+      if (breed.trim()) body.breed = breed.trim();
+      if (birthDate) body.birthDate = birthDate;
+      if (photoUrl) body.photoUrl = photoUrl;
+      const updated = await apiFetch<DogDto>(`/api/v1/me/dogs/${dog.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(body),
+      });
+      onSaved(updated);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : 'Opslaan mislukt.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <form
+      onSubmit={save}
+      className="card"
+      style={{ padding: '16px 18px', display: 'grid', gap: 12 }}
+    >
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+        <label style={{ display: 'grid', gap: 4 }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink-2)' }}>Naam *</span>
+          <input
+            type="text"
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            maxLength={60}
+            placeholder="Naam"
+            style={DOG_INPUT_STYLE}
+          />
+        </label>
+        <label style={{ display: 'grid', gap: 4 }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink-2)' }}>Ras</span>
+          <input
+            type="text"
+            value={breed}
+            onChange={(e) => setBreed(e.target.value)}
+            maxLength={80}
+            placeholder="Bijv. Labrador"
+            style={DOG_INPUT_STYLE}
+          />
+        </label>
+      </div>
+      <label style={{ display: 'grid', gap: 4 }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink-2)' }}>Geboortedatum</span>
+        <input
+          type="date"
+          value={birthDate}
+          onChange={(e) => setBirthDate(e.target.value)}
+          max={new Date().toISOString().slice(0, 10)}
+          style={DOG_INPUT_STYLE}
+        />
+      </label>
+      <div style={{ display: 'grid', gap: 4 }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink-2)' }}>Foto</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {photoPreview && (
+            <img
+              src={photoPreview}
+              alt=""
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: '50%',
+                objectFit: 'cover',
+                border: '1px solid var(--line)',
+                flexShrink: 0,
+              }}
+            />
+          )}
+          <label
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '7px 14px',
+              borderRadius: 999,
+              border: '1.5px solid var(--line)',
+              background: uploading ? 'var(--moss-soft)' : 'var(--cream)',
+              fontSize: 13,
+              fontWeight: 500,
+              color: 'var(--ink-2)',
+              cursor: uploading ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {uploading ? 'Uploaden…' : photoPreview ? 'Andere foto' : 'Foto kiezen'}
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/heic"
+              disabled={uploading}
+              onChange={handlePhoto}
+              style={{ display: 'none' }}
+            />
+          </label>
+          {photoPreview && !uploading && (
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              onClick={() => {
+                setPhotoUrl('');
+                setPhotoPreview('');
+              }}
+              style={{ fontSize: 13, color: 'var(--rust)', padding: '4px 8px' }}
+            >
+              Verwijderen
+            </button>
+          )}
+        </div>
+      </div>
+      {err && <p style={{ margin: 0, color: 'var(--rust)', fontSize: 13.5 }}>{err}</p>}
+      <div style={{ display: 'flex', gap: 10 }}>
+        <button type="submit" className="btn btn-primary btn-sm" disabled={saving || uploading}>
+          {saving ? 'Opslaan…' : 'Opslaan'}
+        </button>
+        <button type="button" className="btn btn-ghost btn-sm" onClick={onCancel}>
+          Annuleren
+        </button>
+      </div>
+    </form>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Dogs section
 // ---------------------------------------------------------------------------
 
 function DogsSection({ dogs: initialDogs }: { dogs: DogDto[] }) {
   const [dogs, setDogs] = useState<DogDto[]>(initialDogs);
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  // Add form state
   const [name, setName] = useState('');
   const [breed, setBreed] = useState('');
+  const [birthDate, setBirthDate] = useState('');
+  const [addPhotoUrl, setAddPhotoUrl] = useState('');
+  const [addPhotoPreview, setAddPhotoPreview] = useState('');
+  const [addUploading, setAddUploading] = useState(false);
+  const addFileRef = useRef<HTMLInputElement>(null);
   const [adding, setAdding] = useState(false);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState('');
+
+  const handleAddPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setErr('');
+    setAddUploading(true);
+    try {
+      const preview = URL.createObjectURL(file);
+      const url = await uploadDogPhoto(file);
+      setAddPhotoUrl(url);
+      setAddPhotoPreview(preview);
+    } catch {
+      setErr('Foto uploaden mislukt.');
+    } finally {
+      setAddUploading(false);
+      if (addFileRef.current) addFileRef.current.value = '';
+    }
+  };
 
   const addDog = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -203,13 +453,20 @@ function DogsSection({ dogs: initialDogs }: { dogs: DogDto[] }) {
     setSaving(true);
     setErr('');
     try {
+      const body: Record<string, unknown> = { name: name.trim() };
+      if (breed.trim()) body.breed = breed.trim();
+      if (birthDate) body.birthDate = birthDate;
+      if (addPhotoUrl) body.photoUrl = addPhotoUrl;
       const created = await apiFetch<DogDto>('/api/v1/me/dogs', {
         method: 'POST',
-        body: JSON.stringify({ name: name.trim(), breed: breed.trim() || undefined }),
+        body: JSON.stringify(body),
       });
       setDogs((prev) => [...prev, created]);
       setName('');
       setBreed('');
+      setBirthDate('');
+      setAddPhotoUrl('');
+      setAddPhotoPreview('');
       setAdding(false);
     } catch (e) {
       setErr(e instanceof Error ? e.message : 'Toevoegen mislukt.');
@@ -225,6 +482,11 @@ function DogsSection({ dogs: initialDogs }: { dogs: DogDto[] }) {
     } catch {
       // show nothing, optimistic is fine here
     }
+  };
+
+  const handleSaved = (updated: DogDto) => {
+    setDogs((prev) => prev.map((d) => (d.id === updated.id ? updated : d)));
+    setEditingId(null);
   };
 
   return (
@@ -253,36 +515,97 @@ function DogsSection({ dogs: initialDogs }: { dogs: DogDto[] }) {
 
       {dogs.length > 0 && (
         <div style={{ display: 'grid', gap: 10, marginBottom: adding ? 16 : 0 }}>
-          {dogs.map((d) => (
-            <div
-              key={d.id}
-              className="card"
-              style={{
-                padding: '14px 18px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 12,
-              }}
-            >
-              <div>
-                <span style={{ fontWeight: 600, fontSize: 16 }}>{d.name}</span>
-                {d.breed && (
-                  <span className="muted" style={{ fontSize: 13.5, marginLeft: 8 }}>
-                    {d.breed}
-                  </span>
-                )}
-              </div>
-              <button
-                type="button"
-                className="btn btn-ghost btn-sm"
-                onClick={() => removeDog(d.id)}
-                style={{ color: 'var(--rust)', borderColor: 'transparent', padding: '4px 10px' }}
+          {dogs.map((d) => {
+            if (editingId === d.id) {
+              return (
+                <DogEditRow
+                  key={d.id}
+                  dog={d}
+                  onSaved={handleSaved}
+                  onCancel={() => setEditingId(null)}
+                />
+              );
+            }
+            const age = dogAge(d);
+            const subtitle = [d.breed, age].filter(Boolean).join(' · ');
+            return (
+              <div
+                key={d.id}
+                className="card"
+                style={{
+                  padding: '12px 18px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 12,
+                }}
               >
-                Verwijderen
-              </button>
-            </div>
-          ))}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+                  {d.photoUrl ? (
+                    <img
+                      src={d.photoUrl}
+                      alt={d.name}
+                      style={{
+                        width: 44,
+                        height: 44,
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        border: '1px solid var(--line)',
+                        flexShrink: 0,
+                      }}
+                    />
+                  ) : (
+                    <div
+                      aria-hidden="true"
+                      style={{
+                        width: 44,
+                        height: 44,
+                        borderRadius: '50%',
+                        background: 'var(--moss-soft)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 22,
+                        flexShrink: 0,
+                      }}
+                    >
+                      🐾
+                    </div>
+                  )}
+                  <div style={{ minWidth: 0 }}>
+                    <span style={{ fontWeight: 600, fontSize: 16 }}>{d.name}</span>
+                    {subtitle && (
+                      <span className="muted" style={{ fontSize: 13.5, marginLeft: 8 }}>
+                        {subtitle}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => setEditingId(d.id)}
+                    style={{ padding: '4px 10px' }}
+                  >
+                    Aanpassen
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => removeDog(d.id)}
+                    style={{
+                      color: 'var(--rust)',
+                      borderColor: 'transparent',
+                      padding: '4px 10px',
+                    }}
+                  >
+                    Verwijderen
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -292,42 +615,109 @@ function DogsSection({ dogs: initialDogs }: { dogs: DogDto[] }) {
           className="card"
           style={{ padding: '20px 22px', display: 'grid', gap: 12 }}
         >
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <label style={{ display: 'grid', gap: 4 }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink-2)' }}>Naam *</span>
+              <input
+                type="text"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                maxLength={60}
+                placeholder="Naam van je hond"
+                style={DOG_INPUT_STYLE}
+              />
+            </label>
+            <label style={{ display: 'grid', gap: 4 }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink-2)' }}>Ras</span>
+              <input
+                type="text"
+                value={breed}
+                onChange={(e) => setBreed(e.target.value)}
+                maxLength={80}
+                placeholder="Bijv. Labrador"
+                style={DOG_INPUT_STYLE}
+              />
+            </label>
+          </div>
           <label style={{ display: 'grid', gap: 4 }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink-2)' }}>Naam *</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink-2)' }}>
+              Geboortedatum
+            </span>
             <input
-              type="text"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              maxLength={60}
-              placeholder="Naam van je hond"
-              style={{
-                padding: '10px 12px',
-                borderRadius: 10,
-                border: '1px solid var(--line)',
-                fontSize: 15,
-              }}
+              type="date"
+              value={birthDate}
+              onChange={(e) => setBirthDate(e.target.value)}
+              max={new Date().toISOString().slice(0, 10)}
+              style={DOG_INPUT_STYLE}
             />
           </label>
-          <label style={{ display: 'grid', gap: 4 }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink-2)' }}>Ras</span>
-            <input
-              type="text"
-              value={breed}
-              onChange={(e) => setBreed(e.target.value)}
-              maxLength={80}
-              placeholder="Bijv. Labrador"
-              style={{
-                padding: '10px 12px',
-                borderRadius: 10,
-                border: '1px solid var(--line)',
-                fontSize: 15,
-              }}
-            />
-          </label>
+          <div style={{ display: 'grid', gap: 4 }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink-2)' }}>
+              Foto <span style={{ fontWeight: 400, color: 'var(--ink-3)' }}>(optioneel)</span>
+            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              {addPhotoPreview && (
+                <img
+                  src={addPhotoPreview}
+                  alt=""
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                    border: '1px solid var(--line)',
+                    flexShrink: 0,
+                  }}
+                />
+              )}
+              <label
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '7px 14px',
+                  borderRadius: 999,
+                  border: '1.5px solid var(--line)',
+                  background: addUploading ? 'var(--moss-soft)' : 'var(--cream)',
+                  fontSize: 13,
+                  fontWeight: 500,
+                  color: 'var(--ink-2)',
+                  cursor: addUploading ? 'not-allowed' : 'pointer',
+                }}
+              >
+                {addUploading ? 'Uploaden…' : addPhotoPreview ? 'Andere foto' : 'Foto kiezen'}
+                <input
+                  ref={addFileRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/heic"
+                  disabled={addUploading}
+                  onChange={handleAddPhoto}
+                  style={{ display: 'none' }}
+                />
+              </label>
+              {addPhotoPreview && !addUploading && (
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => {
+                    setAddPhotoUrl('');
+                    setAddPhotoPreview('');
+                  }}
+                  style={{ fontSize: 13, color: 'var(--rust)', padding: '4px 8px' }}
+                >
+                  Verwijderen
+                </button>
+              )}
+            </div>
+          </div>
           {err && <p style={{ margin: 0, color: 'var(--rust)', fontSize: 13.5 }}>{err}</p>}
           <div style={{ display: 'flex', gap: 10 }}>
-            <button type="submit" className="btn btn-primary btn-sm" disabled={saving}>
+            <button
+              type="submit"
+              className="btn btn-primary btn-sm"
+              disabled={saving || addUploading}
+            >
               {saving ? 'Opslaan…' : 'Toevoegen'}
             </button>
             <button type="button" className="btn btn-ghost btn-sm" onClick={() => setAdding(false)}>

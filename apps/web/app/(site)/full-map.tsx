@@ -73,7 +73,13 @@ function RegionPolygons({
     polysRef.current.forEach((p) => p.setMap(null));
     polysRef.current = [];
 
-    const regions = items.filter((s) => s.type === 'REGION' && s.geometry?.type === 'Polygon');
+    // Cap the number of drawn polygons: with the full NL dataset a wide
+    // viewport can return >1500 regions, and creating that many
+    // google.maps.Polygon overlays freezes the browser. 300 is plenty for any
+    // view; zooming in narrows the viewport fetch so everything stays reachable.
+    const regions = items
+      .filter((s) => s.type === 'REGION' && s.geometry?.type === 'Polygon')
+      .slice(0, 300);
 
     for (const spot of regions) {
       if (!spot.geometry || spot.geometry.type !== 'Polygon') continue;
