@@ -48,7 +48,8 @@ export default function ProfileScreen() {
         />
         <Text style={styles.signedOutTitle}>Niet ingelogd</Text>
         <Text style={styles.signedOutSub}>
-          Log in om plekken toe te voegen, te bevestigen en reviews te schrijven.
+          Vul je e-mailadres in om plekken toe te voegen, te bevestigen en reviews te schrijven.
+          Geen registratie nodig, we maken automatisch een account voor je aan.
         </Text>
         <View style={{ width: '100%', paddingHorizontal: space.lg, gap: space.sm }}>
           <Button label="Inloggen" onPress={() => router.push('/(auth)/sign-in')} />

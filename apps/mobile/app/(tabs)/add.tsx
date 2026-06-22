@@ -188,10 +188,10 @@ export default function AddScreen() {
         <ScreenTitle sub="Voeg een hondenplek of -gebied toe">Toevoegen</ScreenTitle>
         <View style={styles.gate}>
           <SymbolView name="plus.circle.fill" size={48} tintColor={colors.moss} />
-          <Text style={styles.gateTitle}>Log in om een plek toe te voegen</Text>
+          <Text style={styles.gateTitle}>Even je e-mail om een plek toe te voegen</Text>
           <Text style={styles.gateSub}>
-            Met een account kun je nieuwe hondenplekken inzenden. Ze gaan direct live en worden door
-            de community geverifieerd.
+            Je hoeft je niet te registreren. Vul je e-mailadres in, dan maken we automatisch een
+            account voor je aan. Je plek gaat direct live en wordt door de community geverifieerd.
           </Text>
           <View style={{ width: '100%' }}>
             <Button label="Inloggen" onPress={() => router.push('/(auth)/sign-in')} />

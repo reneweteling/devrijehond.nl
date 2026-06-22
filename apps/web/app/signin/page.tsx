@@ -17,9 +17,10 @@ export default async function SignInPage({
   const target = next && next.startsWith('/') ? next : '/account';
   return (
     <main style={{ maxWidth: 420, margin: '80px auto', padding: '0 20px', textAlign: 'center' }}>
-      <h1 style={{ marginBottom: 8 }}>Inloggen</h1>
+      <h1 style={{ marginBottom: 8 }}>Inloggen of aanmelden</h1>
       <p style={{ color: 'var(--ink-2)', margin: 0 }}>
-        Voer je e-mailadres in, dan sturen we je een inloglink.
+        Voer je e-mailadres in, dan sturen we je een inloglink. Geen registratie nodig, nog geen
+        account? Dan maken we er automatisch een voor je aan.
       </p>
       <SignInForm next={target} />
     </main>

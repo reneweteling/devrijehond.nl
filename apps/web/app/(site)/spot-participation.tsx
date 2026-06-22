@@ -426,7 +426,8 @@ export function SpotParticipation({ spotId, status }: SpotParticipationProps) {
         }}
       >
         <p style={{ margin: '0 0 14px', fontSize: 15, color: 'var(--moss-700)' }}>
-          Log in om deze plek te beoordelen of verifiëren.
+          Vul je e-mailadres in om deze plek te beoordelen of verifiëren. Geen registratie nodig, we
+          maken automatisch een account voor je aan.
         </p>
         <a
           className="btn btn-primary btn-sm"

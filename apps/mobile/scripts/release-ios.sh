@@ -69,8 +69,8 @@ cp "$ROOT/secrets/AuthKey_${ASC_KEY_ID}.p8" "$KEYFILE"
 jq -n --arg kid "$ASC_KEY_ID" --arg iss "$ASC_ISSUER_ID" --arg key "$(cat "$KEYFILE")" \
   '{key_id:$kid, issuer_id:$iss, key:$key, in_house:false}' >/tmp/asc_api_key.json
 
-export EXPO_PUBLIC_API_URL="${EXPO_PUBLIC_API_URL:-https://www.devrijehond.nl}"
-export EXPO_PUBLIC_AUTH_URL="${EXPO_PUBLIC_AUTH_URL:-https://www.devrijehond.nl}"
+export EXPO_PUBLIC_API_URL="${EXPO_PUBLIC_API_URL:-https://api.devrijehond.nl}"
+export EXPO_PUBLIC_AUTH_URL="${EXPO_PUBLIC_AUTH_URL:-https://api.devrijehond.nl}"
 # Google web OAuth client id (public, not a secret) for native Google Sign-In.
 export EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID="${EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID:-762592672284-cr47iv5jq6d0p2ghvmrcrf1lar90vpiq.apps.googleusercontent.com}"
 export EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID="${EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID:-762592672284-8atreoupa0ic702gnrg61bds9h88qrmp.apps.googleusercontent.com}"

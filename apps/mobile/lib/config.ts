@@ -15,8 +15,13 @@
  * runtime lookup that comes back undefined on device and silently breaks boot.
  */
 
-/** Production origin, the fallback when the env var wasn't inlined at build time. */
-const DEFAULT_API_URL = 'https://www.devrijehond.nl';
+/**
+ * Production origin: the API is served through CloudFront at api.devrijehond.nl
+ * (the direct dokku origin was unreachable from some devices/networks while the
+ * CDN edge is reached fine). This is also the fallback when EXPO_PUBLIC_API_URL
+ * wasn't inlined at build time.
+ */
+const DEFAULT_API_URL = 'https://api.devrijehond.nl';
 
 /** A localhost / private-LAN origin must never ship in a release build. */
 function isLocalUrl(url: string): boolean {
