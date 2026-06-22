@@ -328,90 +328,36 @@ export default function MapScreen() {
   };
 
   // Stable geofence polygons: recompute only when spots/categories change, not
-  // on every render, so react-native-maps doesn't redraw (flicker) them.
+  // on every render, so react-native-maps keeps the same coordinate refs and
+  // doesn't redraw (flicker) the outlines on a select/pan re-render. The React
+  // Compiler isn't enabled in this app, so this manual memo is doing real work;
+  // its preserve-memoization healthcheck is a false positive here.
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const regionPolygons = useMemo(
     () =>
-      spots
-        .map((s) => {
-          const rings = regionRings(s);
-          if (!rings || !rings[0]) return null;
-          return {
+      spots.flatMap((s) => {
+        const rings = regionRings(s);
+        if (!rings || !rings[0]) return [];
+        return [
+          {
             id: s.id,
             spot: s,
             coordinates: rings[0],
             holes: rings.slice(1),
             color: catColor(catById.get(s.categoryId)),
             verified: s.status === 'VERIFIED',
-          };
-        })
-        .filter((p): p is NonNullable<typeof p> => p != null),
+          },
+        ];
+      }),
     [spots, catById],
   );
   // Region spots that already render as an outlined polygon, so we don't also
   // drop a redundant centre dot on top of them.
   const polygonIds = useMemo(() => new Set(regionPolygons.map((p) => p.id)), [regionPolygons]);
 
-  // Memoise the map children as stable element arrays. The screen re-renders on
-  // every GPS tick (useUserLocation) and on every select; without this the
-  // Polygon/Marker elements are rebuilt each time and react-native-maps redraws
-  // them, which is the flicker. These only rebuild when the data behind them
-  // changes, not on location/selection churn.
-  const polygonEls = useMemo(
-    () =>
-      regionPolygons.map((p) => (
-        <Polygon
-          key={`poly-${p.id}`}
-          coordinates={p.coordinates}
-          holes={p.holes}
-          strokeColor={p.verified ? p.color : colors.terra}
-          strokeWidth={p.verified ? 2.5 : 2}
-          lineDashPattern={p.verified ? undefined : [7, 6]}
-          fillColor={p.verified ? `${p.color}40` : `${colors.terra}1f`}
-          tappable
-          onPress={() => setSelected(p.spot)}
-        />
-      )),
-    [regionPolygons],
-  );
-  const regionLabelEls = useMemo(
-    () =>
-      regionPolygons.map((p) =>
-        showRegionNames ? (
-          <RegionLabel
-            key={`region-${p.id}`}
-            spot={p.spot}
-            color={p.color}
-            onPress={() => setSelected(p.spot)}
-          />
-        ) : (
-          // Zoomed out: a compact tappable dot instead of the full name pill, so
-          // dense areas don't turn into a wall of overlapping labels.
-          <SpotMarker
-            key={`region-${p.id}`}
-            spot={p.spot}
-            color={p.color}
-            isRegion
-            onPress={() => setSelected(p.spot)}
-          />
-        ),
-      ),
-    [regionPolygons, showRegionNames],
-  );
-  const markerEls = useMemo(
-    () =>
-      spots
-        .filter((s) => !(s.type === 'REGION' && polygonIds.has(s.id)))
-        .map((s) => (
-          <SpotMarker
-            key={s.id}
-            spot={s}
-            color={catColor(catById.get(s.categoryId))}
-            isRegion={s.type === 'REGION'}
-            onPress={() => setSelected(s)}
-          />
-        )),
-    [spots, polygonIds, catById],
-  );
+  // POI pins shown as markers: everything that isn't a region already drawn as a
+  // polygon. Region centroids without geometry fall back to a dot here too.
+  const pinSpots = spots.filter((s) => !(s.type === 'REGION' && polygonIds.has(s.id)));
 
   const recenterOnUser = () => {
     if (!userLocation) return;
@@ -439,14 +385,51 @@ export default function MapScreen() {
       >
         {/*
           REGION geofences: a verification-styled outline (solid when verified,
-          dashed terracotta when not) plus a tappable RegionLabel pill naming the
-          area (the outline isn't reliably tappable on Apple Maps). POIs render
-          as a teardrop pin; regions without geometry fall back to a dot. All
-          memoised above so location/selection re-renders don't redraw them.
+          dashed terracotta when not). Tapping inside the area selects it via the
+          MapView.onPress hit-test above. Zoomed in, a RegionLabel names it;
+          zoomed out it collapses to a dot. POIs render as a teardrop pin; pins
+          don't redraw thanks to each marker's tracksViewChanges=false.
         */}
-        {polygonEls}
-        {regionLabelEls}
-        {markerEls}
+        {regionPolygons.map((p) => (
+          <Polygon
+            key={`poly-${p.id}`}
+            coordinates={p.coordinates}
+            holes={p.holes}
+            strokeColor={p.verified ? p.color : colors.terra}
+            strokeWidth={p.verified ? 2.5 : 2}
+            lineDashPattern={p.verified ? undefined : [7, 6]}
+            fillColor={p.verified ? `${p.color}40` : `${colors.terra}1f`}
+            tappable
+            onPress={() => setSelected(p.spot)}
+          />
+        ))}
+        {regionPolygons.map((p) =>
+          showRegionNames ? (
+            <RegionLabel
+              key={`region-${p.id}`}
+              spot={p.spot}
+              color={p.color}
+              onPress={() => setSelected(p.spot)}
+            />
+          ) : (
+            <SpotMarker
+              key={`region-${p.id}`}
+              spot={p.spot}
+              color={p.color}
+              isRegion
+              onPress={() => setSelected(p.spot)}
+            />
+          ),
+        )}
+        {pinSpots.map((s) => (
+          <SpotMarker
+            key={s.id}
+            spot={s}
+            color={catColor(catById.get(s.categoryId))}
+            isRegion={s.type === 'REGION'}
+            onPress={() => setSelected(s)}
+          />
+        ))}
       </MapView>
 
       {/* (A) Floating status pill: subtle spinner on first load, tappable error on failure */}
