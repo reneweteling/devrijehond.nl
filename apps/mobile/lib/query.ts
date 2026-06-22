@@ -18,8 +18,6 @@ import { loadSession, verifySession } from './session';
 // the right value.
 (globalThis as typeof globalThis & { __DEVRIJEHOND_API_URL__?: string }).__DEVRIJEHOND_API_URL__ =
   API_URL;
-// eslint-disable-next-line no-console
-console.warn(`[dvh-net] API_URL = ${API_URL}`);
 
 // Clear any stale token from a previous Fast Refresh cycle. The real token is
 // loaded in `bootApiClient` below.

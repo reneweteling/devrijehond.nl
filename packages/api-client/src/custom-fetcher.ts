@@ -127,23 +127,13 @@ function isMeRoute(path: string): boolean {
 }
 
 async function executeFetch(input: string, init: RequestInit): Promise<Response> {
-  try {
-    const first = await fetch(input, init);
-    if (!RETRYABLE_STATUS.has(first.status)) return first;
+  const first = await fetch(input, init);
+  if (!RETRYABLE_STATUS.has(first.status)) return first;
 
-    // One retry on 5xx with a 500ms backoff. Keep it simple, mobile carries its
-    // own offline/queue semantics; this is just a short-hop smoother.
-    await new Promise((r) => setTimeout(r, 500));
-    return fetch(input, init);
-  } catch (e) {
-    // Surface the real transport-level failure (DNS / TLS / refused / blocked)
-    // unmasked in the device log so on-device API failures can be diagnosed.
-    // eslint-disable-next-line no-console
-    console.error(
-      `[dvh-net] FETCH FAILED ${input} :: ${e instanceof Error ? e.message : String(e)}`,
-    );
-    throw e;
-  }
+  // One retry on 5xx with a 500ms backoff. Keep it simple, mobile carries its
+  // own offline/queue semantics; this is just a short-hop smoother.
+  await new Promise((r) => setTimeout(r, 500));
+  return fetch(input, init);
 }
 
 export async function customFetcher<T>(config: ResolvedConfig): Promise<T> {

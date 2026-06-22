@@ -34,7 +34,6 @@ import {
   type SpotSummary,
 } from '@/lib/api';
 import { useUserLocation } from '@/lib/location';
-import { API_URL } from '@/lib/config';
 import { categoryColors, colors, font, radius, space } from '@/lib/theme';
 import { Button, Chip, VerifiedBadge, Stars } from '@/components/ui';
 
@@ -148,7 +147,7 @@ export default function MapScreen() {
   const categories = categoriesData?.items ?? [];
   const catById = useMemo(() => new Map(categories.map((c) => [c.id, c] as const)), [categories]);
 
-  const { data: spotsData, isLoading, isError, error, refetch } = useSpotsInViewport(bbox);
+  const { data: spotsData, isLoading, isError, refetch } = useSpotsInViewport(bbox);
   // Client-side category filter so multiple categories can be active at once
   // (the viewport endpoint takes a single categoryId).
   const spots = useMemo(() => {
@@ -287,30 +286,15 @@ export default function MapScreen() {
             <ActivityIndicator size="small" color={colors.mossDark} />
           ) : (
             <Pressable
-              style={({ pressed }) => [
-                styles.statusPillRow,
-                { opacity: pressed ? 0.7 : 1, flexDirection: 'column', alignItems: 'flex-start' },
-              ]}
+              style={({ pressed }) => [styles.statusPillRow, { opacity: pressed ? 0.7 : 1 }]}
               onPress={() => refetch()}
             >
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
-                <SymbolView
-                  name="exclamationmark.triangle.fill"
-                  size={13}
-                  tintColor={colors.terraDark}
-                />
-                <Text style={styles.statusPillText}>Kon plekken niet laden. Tik om opnieuw.</Text>
-              </View>
-              {/* Diagnostics so a failure can actually be read off the screen. */}
-              <Text style={styles.diagText} numberOfLines={1}>
-                API: {API_URL.replace(/^https?:\/\//, '')}
-              </Text>
-              <Text style={styles.diagText} numberOfLines={3}>
-                {(error as { status?: number; message?: string } | null)?.status
-                  ? `status ${(error as { status?: number }).status} · `
-                  : ''}
-                {(error as Error | null)?.message ?? 'onbekende fout'}
-              </Text>
+              <SymbolView
+                name="exclamationmark.triangle.fill"
+                size={13}
+                tintColor={colors.terraDark}
+              />
+              <Text style={styles.statusPillText}>Kon plekken niet laden. Opnieuw</Text>
             </Pressable>
           )}
         </View>
@@ -556,10 +540,9 @@ const styles = StyleSheet.create({
   statusPill: {
     position: 'absolute',
     alignSelf: 'center',
-    maxWidth: '92%',
     backgroundColor: '#fff',
-    borderRadius: radius.card,
-    paddingVertical: 8,
+    borderRadius: radius.pill,
+    paddingVertical: 7,
     paddingHorizontal: 14,
     shadowColor: colors.ink,
     shadowOpacity: 0.12,
@@ -570,7 +553,6 @@ const styles = StyleSheet.create({
   statusPillError: { backgroundColor: colors.terraSoft },
   statusPillRow: { flexDirection: 'row', alignItems: 'center', gap: 7 },
   statusPillText: { fontFamily: font.bodyMedium, fontSize: 12.5, color: colors.terraDark },
-  diagText: { fontFamily: font.body, fontSize: 10.5, color: colors.terraDark, marginTop: 3 },
   sheetClose: {
     position: 'absolute',
     top: 10,
