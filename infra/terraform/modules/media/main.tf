@@ -165,8 +165,8 @@ resource "aws_iam_user" "app" {
 
 data "aws_iam_policy_document" "app" {
   statement {
-    sid     = "BucketObjects"
-    actions = ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"]
+    sid       = "BucketObjects"
+    actions   = ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"]
     resources = ["${aws_s3_bucket.this.arn}/*"]
   }
   statement {

@@ -1,7 +1,13 @@
 variable "attach_custom_domain" {
   type        = bool
+  default     = true
+  description = "Media custom domain. Already live, keep true."
+}
+
+variable "api_attach_custom_domain" {
+  type        = bool
   default     = false
-  description = "Flip to true and re-apply after the DNS validation records are live."
+  description = "Flip to true and re-apply after the api.devrijehond.nl DNS records (ACM validation + CNAME) are live."
 }
 
 module "media" {
@@ -35,4 +41,28 @@ output "media" {
 output "secret_access_key" {
   value     = module.media.secret_access_key
   sensitive = true
+}
+
+module "api" {
+  source = "../../modules/api"
+
+  providers = {
+    aws           = aws
+    aws.us_east_1 = aws.us_east_1
+  }
+
+  environment          = "prod"
+  domain_name          = "api.devrijehond.nl"
+  origin_domain        = "www.devrijehond.nl"
+  attach_custom_domain = var.api_attach_custom_domain
+}
+
+output "api" {
+  value = {
+    cloudfront_domain       = module.api.cloudfront_domain
+    cloudfront_distribution = module.api.cloudfront_distribution_id
+    api_base_url            = module.api.api_base_url
+    acm_validation_records  = module.api.acm_validation_records
+    api_cname               = module.api.api_cname
+  }
 }
