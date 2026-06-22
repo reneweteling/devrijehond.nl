@@ -3,7 +3,7 @@
  * and how to get in touch. Reachable from the profile tab; no auth needed.
  */
 
-import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SymbolView, type SymbolViewProps } from 'expo-symbols';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, font, radius, space } from '@/lib/theme';
 
 const REPO = 'https://github.com/reneweteling/devrijehond.nl';
+const APP_ICON = require('@/assets/icon.png');
 
 function Row({
   icon,
@@ -48,24 +49,30 @@ export default function AboutScreen() {
     <ScrollView
       style={styles.root}
       contentContainerStyle={{
-        paddingTop: insets.top + space.md,
+        paddingTop: insets.top + space.sm,
         paddingBottom: insets.bottom + 40,
       }}
     >
-      <View style={styles.head}>
+      <View style={styles.navbar}>
         <Pressable onPress={() => router.back()} hitSlop={10} style={styles.back}>
           <SymbolView name="chevron.left" size={18} tintColor={colors.ink} />
         </Pressable>
+      </View>
+
+      <View style={styles.hero}>
+        <Image source={APP_ICON} style={styles.heroIcon} resizeMode="cover" />
+        <View style={styles.brandRow}>
+          <SymbolView name="pawprint.fill" size={15} tintColor={colors.moss} />
+          <Text style={styles.brandText}>De Vrije Hond</Text>
+        </View>
         <Text style={styles.title}>Over De Vrije Hond</Text>
+        <Text style={styles.lead}>
+          Een community-kaart van hondvriendelijke plekken in Nederland. Losloopgebieden,
+          hondenstranden, horeca en waterpunten, toegevoegd en geverifieerd door hondenbazen zelf.
+        </Text>
       </View>
 
       <View style={styles.body}>
-        <Text style={styles.lead}>
-          De Vrije Hond is een community-kaart van hondvriendelijke plekken in Nederland.
-          Losloopgebieden, hondenstranden, horeca en waterpunten, toegevoegd en geverifieerd door
-          hondenbazen zelf.
-        </Text>
-
         <Text style={styles.sectionLabel}>Gemaakt door</Text>
         <Text style={styles.para}>
           De Vrije Hond is gemaakt door René Weteling (Felobo B.V.), uit liefde voor honden en mooie
@@ -115,32 +122,74 @@ export default function AboutScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.sand },
-  head: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: space.lg },
+  navbar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: space.lg,
+    height: 44,
+  },
   back: {
     width: 38,
     height: 38,
     borderRadius: 19,
     backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.line,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  title: { fontFamily: font.heading, fontSize: 22, lineHeight: 29, color: colors.ink, flex: 1 },
-  body: { padding: space.lg, gap: space.sm },
-  lead: { fontFamily: font.body, fontSize: 15, lineHeight: 22, color: colors.ink2 },
+  hero: {
+    paddingHorizontal: space.lg,
+    paddingTop: space.sm,
+    paddingBottom: space.lg,
+  },
+  heroIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 16,
+    backgroundColor: colors.mossSoft,
+  },
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: space.md,
+  },
+  brandText: {
+    fontFamily: font.heading,
+    color: colors.moss,
+    fontSize: 15,
+    lineHeight: 20,
+  },
+  title: {
+    fontFamily: font.heading,
+    fontSize: 26,
+    lineHeight: 33,
+    color: colors.ink,
+    marginTop: 2,
+  },
+  lead: {
+    fontFamily: font.body,
+    fontSize: 15,
+    lineHeight: 22,
+    color: colors.ink2,
+    marginTop: space.sm,
+  },
+  body: { paddingHorizontal: space.lg, paddingBottom: space.lg, gap: space.sm },
   sectionLabel: {
     fontFamily: font.bodyMedium,
     fontSize: 12,
     color: colors.ink2,
     textTransform: 'uppercase',
     letterSpacing: 0.6,
-    marginTop: space.md,
+    marginTop: space.lg,
   },
   para: { fontFamily: font.body, fontSize: 14, lineHeight: 21, color: colors.ink2 },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderRadius: radius.card,
     padding: 14,
     borderWidth: 1,
