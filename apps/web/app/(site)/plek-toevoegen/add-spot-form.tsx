@@ -292,7 +292,6 @@ function EditablePolygonInner({
     if (!map) return;
 
     const poly = new google.maps.Polygon({
-      paths: points.length > 0 ? points : [],
       editable: true,
       draggable: false,
       strokeColor: '#4c5622',
@@ -300,6 +299,10 @@ function EditablePolygonInner({
       fillColor: '#6e7b33',
       fillOpacity: 0.25,
     });
+    // Always set a single (possibly empty) path so getPath() is defined. A
+    // Polygon created with `paths: []` has zero paths and getPath() is
+    // undefined, which would crash addListener below on first mount.
+    poly.setPath(points);
     poly.setMap(map);
     polyRef.current = poly;
 
@@ -361,7 +364,9 @@ function EditablePolygonInner({
     externalUpdate.current = true;
     listenersRef.current.forEach((l) => l.remove());
 
-    poly.setPaths(points);
+    // setPath (single path), not setPaths, so getPath() stays defined even when
+    // points is empty (undo/clear back to zero vertices).
+    poly.setPath(points);
 
     const newPath = poly.getPath();
     const onPoints_ = onPoints;

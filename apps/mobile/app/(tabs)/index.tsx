@@ -349,7 +349,7 @@ export default function MapScreen() {
 
       {/* (D) Legend — hidden while a spot is selected */}
       {!selected && (
-        <View style={[styles.legend, { bottom: insets.bottom + 120 }]} pointerEvents="none">
+        <View style={[styles.legend, { bottom: insets.bottom + 64 }]} pointerEvents="none">
           <View style={styles.legendRow}>
             <View style={[styles.legendDot, { backgroundColor: colors.moss }]} />
             <Text style={styles.legendText}>Geverifieerd</Text>
@@ -371,7 +371,7 @@ export default function MapScreen() {
         <Pressable
           style={({ pressed }) => [
             styles.recenterBtn,
-            { bottom: insets.bottom + 120, opacity: pressed ? 0.7 : 1 },
+            { bottom: insets.bottom + 64, opacity: pressed ? 0.7 : 1 },
           ]}
           onPress={recenterOnUser}
           hitSlop={8}
