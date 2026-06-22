@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
+import { DatePicker, Host } from '@expo/ui/swift-ui';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -39,15 +40,13 @@ export default function AddDogScreen() {
   const create = useCreateDog();
   const [name, setName] = useState('');
   const [breed, setBreed] = useState('');
-  const [birthYear, setBirthYear] = useState('');
+  const [birthDate, setBirthDate] = useState<Date | null>(null);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
   if (status === 'loading' || !isAuthenticated) return <ListState loading />;
 
-  const year = parseInt(birthYear, 10);
-  const yearValid = !birthYear || (year >= 1990 && year <= new Date().getFullYear());
-  const canSave = name.trim().length >= 1 && yearValid;
+  const canSave = name.trim().length >= 1;
 
   const onPickPhoto = async () => {
     setUploading(true);
@@ -67,7 +66,10 @@ export default function AddDogScreen() {
       {
         name: name.trim(),
         breed: breed.trim() || undefined,
-        birthYear: birthYear && yearValid ? year : undefined,
+        // Date-only ISO (YYYY-MM-DD) from the picker's local date.
+        birthDate: birthDate
+          ? `${birthDate.getFullYear()}-${String(birthDate.getMonth() + 1).padStart(2, '0')}-${String(birthDate.getDate()).padStart(2, '0')}`
+          : undefined,
         photoUrl: photoUrl ?? undefined,
       },
       {
@@ -137,16 +139,16 @@ export default function AddDogScreen() {
         </View>
 
         <View style={{ gap: space.sm }}>
-          <Text style={styles.label}>Geboortejaar (optioneel)</Text>
-          <TextInput
-            style={styles.input}
-            value={birthYear}
-            onChangeText={(t) => setBirthYear(t.replace(/[^0-9]/g, '').slice(0, 4))}
-            placeholder="2021"
-            placeholderTextColor={colors.ink3}
-            keyboardType="number-pad"
-          />
-          {!yearValid ? <Text style={styles.error}>Vul een jaar tussen 1990 en nu in.</Text> : null}
+          <Text style={styles.label}>Geboortedatum (optioneel)</Text>
+          <View style={styles.dateRow}>
+            <Host matchContents>
+              <DatePicker
+                selection={birthDate ?? undefined}
+                displayedComponents={['date']}
+                onDateChange={setBirthDate}
+              />
+            </Host>
+          </View>
         </View>
 
         <Button
@@ -209,6 +211,7 @@ const styles = StyleSheet.create({
   },
   dogPhotoAction: { fontFamily: font.bodyMedium, fontSize: 13, color: colors.moss },
   label: { fontFamily: font.bodyMedium, fontSize: 12, color: colors.ink2 },
+  dateRow: { alignSelf: 'flex-start' },
   input: {
     minHeight: 48,
     borderWidth: 1,

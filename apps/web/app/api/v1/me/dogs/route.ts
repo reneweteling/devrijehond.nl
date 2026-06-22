@@ -1,11 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { authDb } from '@devrijehond/db';
 import { requireAuth } from '@devrijehond/server';
-import {
-  CreateDogRequestSchema,
-  type DogDto,
-  type DogsResponseDto,
-} from '@devrijehond/types';
+import { CreateDogRequestSchema, type DogDto, type DogsResponseDto } from '@devrijehond/types';
 import { ok, error, NO_STORE_CACHE_CONTROL } from '@/lib/api-response';
 
 /** GET (list) + POST (create) the authenticated user's dogs. */
@@ -16,6 +12,7 @@ function toDto(d: {
   name: string;
   breed: string | null;
   birthYear: number | null;
+  birthDate: Date | null;
   photoUrl: string | null;
   note: string | null;
   createdAt: Date;
@@ -26,6 +23,8 @@ function toDto(d: {
     name: d.name,
     breed: d.breed ?? null,
     birthYear: d.birthYear ?? null,
+    // Date-only column: serialise as YYYY-MM-DD.
+    birthDate: d.birthDate ? d.birthDate.toISOString().slice(0, 10) : null,
     photoUrl: d.photoUrl ?? null,
     note: d.note ?? null,
     createdAt: d.createdAt.toISOString(),
@@ -76,6 +75,7 @@ export async function POST(request: NextRequest) {
       name: parsed.data.name,
       breed: parsed.data.breed ?? null,
       birthYear: parsed.data.birthYear ?? null,
+      birthDate: parsed.data.birthDate ? new Date(parsed.data.birthDate) : null,
       photoUrl: parsed.data.photoUrl ?? null,
       note: parsed.data.note ?? null,
     },

@@ -5,7 +5,7 @@
     "version": "v1",
     "description": "Typed contract between the De Vrije Hond website/API (apps/web) and the Expo mobile app. Generated from Zod schemas in @devrijehond/types. The community-driven map of dog-friendly spots, public reads are anonymous + CDN-cacheable; user-scoped writes live under `/me/*`."
   },
-  "servers": [{ "url": "http://localhost:3030", "description": "current" }],
+  "servers": [{ "url": "https://devrijehond.local", "description": "current" }],
   "components": {
     "securitySchemes": {
       "bearerAuth": {
@@ -820,6 +820,11 @@
           "name": { "type": "string" },
           "breed": { "type": ["string", "null"] },
           "birthYear": { "type": ["integer", "null"] },
+          "birthDate": {
+            "type": ["string", "null"],
+            "description": "ISO date of birth (YYYY-MM-DD).",
+            "example": "2021-06-15"
+          },
           "photoUrl": { "type": ["string", "null"], "format": "uri" },
           "note": { "type": ["string", "null"] },
           "createdAt": {
@@ -840,6 +845,7 @@
           "name",
           "breed",
           "birthYear",
+          "birthDate",
           "photoUrl",
           "note",
           "createdAt",
@@ -864,8 +870,14 @@
             "type": "integer",
             "minimum": 1990,
             "maximum": 2026,
-            "description": "Year of birth.",
+            "description": "Year of birth (legacy, prefer birthDate).",
             "example": 2021
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Date of birth (YYYY-MM-DD).",
+            "example": "2021-06-15"
           },
           "photoUrl": { "type": "string", "format": "uri" },
           "note": { "type": "string", "maxLength": 500 }
@@ -882,8 +894,14 @@
             "type": "integer",
             "minimum": 1990,
             "maximum": 2026,
-            "description": "Year of birth.",
+            "description": "Year of birth (legacy, prefer birthDate).",
             "example": 2021
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Date of birth (YYYY-MM-DD).",
+            "example": "2021-06-15"
           },
           "photoUrl": { "type": "string", "format": "uri" },
           "note": { "type": "string", "maxLength": 500 }

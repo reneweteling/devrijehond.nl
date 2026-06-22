@@ -220,7 +220,9 @@ model Dog {
   owner     User    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   name      String
   breed     String?
+  // birthYear is kept for back-compat; new dogs store a full birthDate.
   birthYear Int?
+  birthDate DateTime? @db.Date
   photoUrl  String?
   note      String?
 

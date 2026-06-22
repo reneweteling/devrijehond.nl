@@ -22,6 +22,25 @@ import { useAuth } from '@/lib/auth-context';
 import { colors, font, radius, space } from '@/lib/theme';
 import { Button, ListState, VerifiedBadge } from '@/components/ui';
 
+/** Dog age label, from the full birthDate when set, else the legacy birthYear. */
+function dogAge(d: Dog): string | null {
+  if (d.birthDate) {
+    const b = new Date(d.birthDate);
+    if (!Number.isNaN(b.getTime())) {
+      const now = new Date();
+      let age = now.getFullYear() - b.getFullYear();
+      if (
+        now.getMonth() < b.getMonth() ||
+        (now.getMonth() === b.getMonth() && now.getDate() < b.getDate())
+      ) {
+        age--;
+      }
+      return age >= 0 ? `${age} jr` : null;
+    }
+  }
+  return d.birthYear ? `${new Date().getFullYear() - d.birthYear} jr` : null;
+}
+
 /** A card heading: a soft-moss glyph tile + a title, optional trailing action. */
 function SectionHead({
   icon,
@@ -176,9 +195,7 @@ export default function ProfileScreen() {
                 <View style={{ flex: 1 }}>
                   <Text style={styles.rowTitle}>{d.name}</Text>
                   <Text style={styles.rowMeta}>
-                    {[d.breed, d.birthYear ? `${new Date().getFullYear() - d.birthYear} jr` : null]
-                      .filter(Boolean)
-                      .join(' · ') || 'Hond'}
+                    {[d.breed, dogAge(d)].filter(Boolean).join(' · ') || 'Hond'}
                   </Text>
                 </View>
               </View>

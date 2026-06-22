@@ -12,6 +12,10 @@ export const DogSchema = z
     name: z.string(),
     breed: z.string().nullable(),
     birthYear: z.number().int().nullable(),
+    birthDate: z
+      .string()
+      .nullable()
+      .openapi({ description: 'ISO date of birth (YYYY-MM-DD).', example: '2021-06-15' }),
     photoUrl: z.string().url().nullable(),
     note: z.string().nullable(),
     createdAt: IsoDateTimeSchema,
@@ -37,7 +41,12 @@ export const CreateDogRequestSchema = z
       .min(1990)
       .max(new Date().getFullYear())
       .optional()
-      .openapi({ description: 'Year of birth.', example: 2021 }),
+      .openapi({ description: 'Year of birth (legacy, prefer birthDate).', example: 2021 }),
+    birthDate: z
+      .string()
+      .date()
+      .optional()
+      .openapi({ description: 'Date of birth (YYYY-MM-DD).', example: '2021-06-15' }),
     photoUrl: z.string().url().optional(),
     note: z.string().max(500).optional(),
   })

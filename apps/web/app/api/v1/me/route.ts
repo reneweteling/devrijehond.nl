@@ -34,6 +34,7 @@ async function load(user: {
       name: d.name,
       breed: d.breed ?? null,
       birthYear: d.birthYear ?? null,
+      birthDate: d.birthDate ? d.birthDate.toISOString().slice(0, 10) : null,
       photoUrl: d.photoUrl ?? null,
       note: d.note ?? null,
       createdAt: d.createdAt.toISOString(),

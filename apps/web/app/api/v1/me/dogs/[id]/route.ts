@@ -7,10 +7,7 @@ import { ok, error, NO_STORE_CACHE_CONTROL } from '@/lib/api-response';
 /** PATCH (update) + DELETE the authenticated user's dog. Ownership is policy-enforced. */
 export const runtime = 'nodejs';
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   let ctx;
   try {
     ctx = await requireAuth(request);
@@ -50,6 +47,9 @@ export async function PATCH(
       ...(p.name !== undefined && { name: p.name }),
       ...(p.breed !== undefined && { breed: p.breed ?? null }),
       ...(p.birthYear !== undefined && { birthYear: p.birthYear ?? null }),
+      ...(p.birthDate !== undefined && {
+        birthDate: p.birthDate ? new Date(p.birthDate) : null,
+      }),
       ...(p.photoUrl !== undefined && { photoUrl: p.photoUrl ?? null }),
       ...(p.note !== undefined && { note: p.note ?? null }),
     },
@@ -60,6 +60,7 @@ export async function PATCH(
     name: updated.name,
     breed: updated.breed ?? null,
     birthYear: updated.birthYear ?? null,
+    birthDate: updated.birthDate ? updated.birthDate.toISOString().slice(0, 10) : null,
     photoUrl: updated.photoUrl ?? null,
     note: updated.note ?? null,
     createdAt: updated.createdAt.toISOString(),

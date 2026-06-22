@@ -744,6 +744,11 @@ export type DogBreed = string | null;
 
 export type DogBirthYear = number | null;
 
+/**
+ * ISO date of birth (YYYY-MM-DD).
+ */
+export type DogBirthDate = string | null;
+
 export type DogPhotoUrl = string | null;
 
 export type DogNote = string | null;
@@ -757,6 +762,8 @@ export interface Dog {
   name: string;
   breed: DogBreed;
   birthYear: DogBirthYear;
+  /** ISO date of birth (YYYY-MM-DD). */
+  birthDate: DogBirthDate;
   photoUrl: DogPhotoUrl;
   note: DogNote;
   /** RFC 3339 datetime in UTC. */
@@ -784,11 +791,13 @@ export interface CreateDogRequest {
   /** @maxLength 80 */
   breed?: string;
   /**
-   * Year of birth.
+   * Year of birth (legacy, prefer birthDate).
    * @minimum 1990
    * @maximum 2026
    */
   birthYear?: number;
+  /** Date of birth (YYYY-MM-DD). */
+  birthDate?: string;
   photoUrl?: string;
   /** @maxLength 500 */
   note?: string;
@@ -806,11 +815,13 @@ export interface UpdateDogRequest {
   /** @maxLength 80 */
   breed?: string;
   /**
-   * Year of birth.
+   * Year of birth (legacy, prefer birthDate).
    * @minimum 1990
    * @maximum 2026
    */
   birthYear?: number;
+  /** Date of birth (YYYY-MM-DD). */
+  birthDate?: string;
   photoUrl?: string;
   /** @maxLength 500 */
   note?: string;

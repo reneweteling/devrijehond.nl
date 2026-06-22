@@ -672,6 +672,12 @@ export class SchemaType implements SchemaDef {
           type: 'Int',
           optional: true,
         },
+        birthDate: {
+          name: 'birthDate',
+          type: 'DateTime',
+          optional: true,
+          attributes: [{ name: '@db.Date' }] as readonly AttributeApplication[],
+        },
         photoUrl: {
           name: 'photoUrl',
           type: 'String',
