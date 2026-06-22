@@ -58,6 +58,7 @@ type RawLosloop = {
   fenced: boolean | null;
   osmId?: string;
   osmTags?: Record<string, string>;
+  geometry?: number[][]; // real [lng,lat] polygon ring (OSM); else circle from centroid
 };
 const LOSLOOP: RawLosloop[] = JSON.parse(
   readFileSync(new URL('./data/losloopgebieden.json', import.meta.url), 'utf8'),
@@ -302,6 +303,7 @@ interface SpotSeed {
   address?: string;
   website?: string;
   regionRadiusM?: number; // for REGION polygon size
+  geometry?: number[][]; // real [lng,lat] polygon ring; falls back to a circle
   rawData?: unknown; // imported source payload (incl. sourceUrl) -> Spot.rawData
 }
 
@@ -389,6 +391,7 @@ function buildSpots(): SpotSeed[] {
       reviews: [],
       amenities: r.amenities,
       rawData: r.raw,
+      geometry: isRegion ? r.raw.geometry : undefined,
       regionRadiusM: isRegion ? (r.radiusM ?? 400) : undefined,
     };
   });
@@ -597,7 +600,10 @@ async function main() {
     }
 
     if (cat.type === 'REGION') {
-      regionGeoms.push({ id: spot.id, coords: ring(s.lat, s.lng, s.regionRadiusM ?? 280) });
+      regionGeoms.push({
+        id: spot.id,
+        coords: s.geometry ?? ring(s.lat, s.lng, s.regionRadiusM ?? 280),
+      });
     }
   }
 
