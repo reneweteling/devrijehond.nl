@@ -1,23 +1,33 @@
 'use client';
 
 /**
- * Client island for /plek-toevoegen. Manages the full POI-first add-spot flow:
- * pick a point on a Google map (draggable pin), fill in the form, submit.
+ * Client island for /plek-toevoegen.
+ *
+ * Supports both spot types:
+ *   - POI  ("Plek")    — draggable marker, point geometry
+ *   - REGION ("Gebied") — editable polygon, geofence geometry
+ *
+ * Features: type toggle, address geocode search, map editor (pin / polygon),
+ * multiple photo upload, categories filtered by type, amenities, contact fields.
  */
 
-import { useEffect, useRef, useState } from 'react';
-import { APIProvider, Map, Marker } from '@vis.gl/react-google-maps';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { APIProvider, Map, Marker, useMap } from '@vis.gl/react-google-maps';
 import { authClient } from '@devrijehond/auth/client';
 import type { CategoryDto, AmenityDto } from '@devrijehond/types';
 import { RichTextEditor } from '@/app/admin/_components/rich-text-editor';
 
 const GOOGLE_MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '';
-// Amsterdam-ish default (same as map-shared.ts).
 const DEFAULT_CENTER = { lat: 52.37, lng: 4.89 };
 const DEFAULT_ZOOM = 9;
+const GEOCODE_DEBOUNCE_MS = 350;
+const ALLOWED_PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
+
+type SpotType = 'POI' | 'REGION';
+type Point = { lat: number; lng: number };
 
 /* -------------------------------------------------------------------------- */
-/* Tiny inline icon (Lucide-style paths, same convention as spot-view.tsx)     */
+/* Inline icon helper (Lucide-style paths)                                     */
 /* -------------------------------------------------------------------------- */
 function Ico({ d, size = 15 }: { d: string; size?: number }) {
   return (
@@ -37,15 +47,16 @@ function Ico({ d, size = 15 }: { d: string; size?: number }) {
     </svg>
   );
 }
-const PIN = 'M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0ZM12 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z';
+const D_PIN = 'M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0ZM12 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z';
+const D_SEARCH = 'M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0Z';
+const D_CHECK = 'M20 6 9 17l-5-5';
+const D_X = 'M18 6 6 18M6 6l12 12';
+const D_IMG = 'M21 15l-5-5L5 21M3 3h18v18H3zM8.5 8.5a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Z';
 
 /* -------------------------------------------------------------------------- */
-/* Shared input / label styling                                                 */
+/* Shared style tokens                                                          */
 /* -------------------------------------------------------------------------- */
-const fieldStyle: React.CSSProperties = {
-  display: 'grid',
-  gap: 6,
-};
+const fieldStyle: React.CSSProperties = { display: 'grid', gap: 6 };
 const labelStyle: React.CSSProperties = {
   fontSize: 14,
   fontWeight: 600,
@@ -61,38 +72,189 @@ const inputStyle: React.CSSProperties = {
   color: 'var(--ink)',
   fontFamily: 'inherit',
 };
-const hintStyle: React.CSSProperties = {
-  fontSize: 13,
-  color: 'var(--ink-3)',
-};
+const hintStyle: React.CSSProperties = { fontSize: 13, color: 'var(--ink-3)' };
 
 /* -------------------------------------------------------------------------- */
-/* Map picker sub-component                                                     */
+/* Address geocode search                                                       */
 /* -------------------------------------------------------------------------- */
-function PinMap({
+type GeocodeItem = { label: string; lat: number; lng: number };
+
+function AddressSearch({ onSelect }: { onSelect: (item: GeocodeItem) => void }) {
+  const [query, setQuery] = useState('');
+  const [items, setItems] = useState<GeocodeItem[]>([]);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const val = e.target.value;
+    setQuery(val);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    if (!val.trim()) {
+      setItems([]);
+      setOpen(false);
+      return;
+    }
+    timerRef.current = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/v1/geocode?q=${encodeURIComponent(val.trim())}`);
+        if (!res.ok) throw new Error();
+        const data = (await res.json()) as { items: GeocodeItem[] };
+        setItems(data.items ?? []);
+        setOpen(true);
+      } catch {
+        setItems([]);
+      } finally {
+        setLoading(false);
+      }
+    }, GEOCODE_DEBOUNCE_MS);
+  }
+
+  function pick(item: GeocodeItem) {
+    setQuery(item.label);
+    setOpen(false);
+    setItems([]);
+    onSelect(item);
+  }
+
+  // Close on outside click.
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <div ref={containerRef} style={{ position: 'relative' }}>
+      <div style={{ position: 'relative' }}>
+        <span
+          style={{
+            position: 'absolute',
+            left: 13,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            color: 'var(--ink-3)',
+            pointerEvents: 'none',
+          }}
+        >
+          <Ico d={D_SEARCH} size={16} />
+        </span>
+        <input
+          type="search"
+          value={query}
+          onChange={handleChange}
+          placeholder="Zoek op adres of plaatsnaam…"
+          autoComplete="off"
+          style={{ ...inputStyle, paddingLeft: 38 }}
+        />
+        {loading ? (
+          <span
+            style={{
+              position: 'absolute',
+              right: 13,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              fontSize: 12,
+              color: 'var(--ink-3)',
+            }}
+          >
+            Zoeken…
+          </span>
+        ) : null}
+      </div>
+      {open && items.length > 0 ? (
+        <ul
+          role="listbox"
+          style={{
+            position: 'absolute',
+            zIndex: 100,
+            top: 'calc(100% + 4px)',
+            left: 0,
+            right: 0,
+            background: 'var(--cream)',
+            border: '1px solid var(--line)',
+            borderRadius: 10,
+            boxShadow: 'var(--shadow)',
+            margin: 0,
+            padding: '4px 0',
+            listStyle: 'none',
+            maxHeight: 240,
+            overflowY: 'auto',
+          }}
+        >
+          {items.map((item, i) => (
+            <li key={i}>
+              <button
+                type="button"
+                role="option"
+                aria-selected={false}
+                onClick={() => pick(item)}
+                style={{
+                  width: '100%',
+                  textAlign: 'left',
+                  padding: '10px 14px',
+                  background: 'none',
+                  border: 'none',
+                  fontSize: 14,
+                  color: 'var(--ink)',
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.background = 'var(--moss-soft)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.background = 'none';
+                }}
+              >
+                {item.label}
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* POI pin map                                                                  */
+/* -------------------------------------------------------------------------- */
+function PinMapInner({
   point,
   onChange,
+  panTarget,
 }: {
-  point: { lat: number; lng: number } | null;
-  onChange: (p: { lat: number; lng: number }) => void;
+  point: Point | null;
+  onChange: (p: Point) => void;
+  panTarget: (Point & { zoom: number }) | null;
 }) {
-  // After the user pans / clicks once, they keep control of the center.
-  const userControlled = useRef(false);
+  const map = useMap();
+  const prevPanTarget = useRef<typeof panTarget>(null);
+
+  useEffect(() => {
+    if (!map || !panTarget) return;
+    if (prevPanTarget.current === panTarget) return;
+    prevPanTarget.current = panTarget;
+    map.panTo({ lat: panTarget.lat, lng: panTarget.lng });
+    map.setZoom(panTarget.zoom);
+  }, [map, panTarget]);
 
   return (
     <Map
       defaultCenter={DEFAULT_CENTER}
       defaultZoom={DEFAULT_ZOOM}
       gestureHandling="greedy"
-      disableDefaultUI={false}
       style={{ width: '100%', height: '100%' }}
       onClick={(e) => {
         if (!e.detail.latLng) return;
-        userControlled.current = true;
         onChange({ lat: e.detail.latLng.lat, lng: e.detail.latLng.lng });
-      }}
-      onDrag={() => {
-        userControlled.current = true;
       }}
     >
       {point ? (
@@ -111,17 +273,407 @@ function PinMap({
 }
 
 /* -------------------------------------------------------------------------- */
-/* Success state                                                                */
+/* Editable polygon inner — must run inside <Map>                              */
+/* -------------------------------------------------------------------------- */
+function EditablePolygonInner({
+  points,
+  onPoints,
+}: {
+  points: Point[];
+  onPoints: (p: Point[]) => void;
+}) {
+  const map = useMap();
+  const polyRef = useRef<google.maps.Polygon | null>(null);
+  const listenersRef = useRef<google.maps.MapsEventListener[]>([]);
+  const externalUpdate = useRef(false);
+
+  // Bootstrap on mount.
+  useEffect(() => {
+    if (!map) return;
+
+    const poly = new google.maps.Polygon({
+      paths: points.length > 0 ? points : [],
+      editable: true,
+      draggable: false,
+      strokeColor: '#4c5622',
+      strokeWeight: 2,
+      fillColor: '#6e7b33',
+      fillOpacity: 0.25,
+    });
+    poly.setMap(map);
+    polyRef.current = poly;
+
+    function readCoords() {
+      if (!polyRef.current || externalUpdate.current) return;
+      const path = polyRef.current.getPath();
+      const coords: Point[] = [];
+      for (let i = 0; i < path.getLength(); i++) {
+        const ll = path.getAt(i);
+        coords.push({ lat: ll.lat(), lng: ll.lng() });
+      }
+      onPoints(coords);
+    }
+
+    const path = poly.getPath();
+    const mapClickL = map.addListener('click', (e: google.maps.MapMouseEvent) => {
+      if (!e.latLng || !polyRef.current) return;
+      polyRef.current.getPath().push(e.latLng);
+    });
+    const rightClickL = poly.addListener('rightclick', (e: google.maps.PolyMouseEvent) => {
+      if (e.vertex != null && polyRef.current) {
+        polyRef.current.getPath().removeAt(e.vertex);
+      }
+    });
+
+    listenersRef.current = [
+      path.addListener('set_at', readCoords),
+      path.addListener('insert_at', readCoords),
+      path.addListener('remove_at', readCoords),
+      mapClickL,
+      rightClickL,
+    ];
+
+    return () => {
+      poly.setMap(null);
+      listenersRef.current.forEach((l) => l.remove());
+      listenersRef.current = [];
+      polyRef.current = null;
+    };
+  }, [map]); // intentionally re-runs only when map instance changes
+
+  // Sync undo / clear / pan back into the google.maps.Polygon.
+  useEffect(() => {
+    if (!polyRef.current) return;
+    const poly = polyRef.current;
+    const path = poly.getPath();
+
+    const curLen = path.getLength();
+    if (
+      curLen === points.length &&
+      points.every((p, i) => {
+        const ll = path.getAt(i);
+        return Math.abs(ll.lat() - p.lat) < 1e-9 && Math.abs(ll.lng() - p.lng) < 1e-9;
+      })
+    ) {
+      return;
+    }
+
+    externalUpdate.current = true;
+    listenersRef.current.forEach((l) => l.remove());
+
+    poly.setPaths(points);
+
+    const newPath = poly.getPath();
+    const onPoints_ = onPoints;
+
+    function readCoords() {
+      if (externalUpdate.current) return;
+      const coords: Point[] = [];
+      for (let i = 0; i < newPath.getLength(); i++) {
+        const ll = newPath.getAt(i);
+        coords.push({ lat: ll.lat(), lng: ll.lng() });
+      }
+      onPoints_(coords);
+    }
+
+    const mapEl = (poly as unknown as { map: google.maps.Map }).map;
+    const mapClickL =
+      mapEl &&
+      mapEl.addListener('click', (e: google.maps.MapMouseEvent) => {
+        if (!e.latLng || !polyRef.current) return;
+        polyRef.current.getPath().push(e.latLng);
+      });
+    const rightClickL = poly.addListener('rightclick', (e: google.maps.PolyMouseEvent) => {
+      if (e.vertex != null && polyRef.current) {
+        polyRef.current.getPath().removeAt(e.vertex);
+      }
+    });
+
+    listenersRef.current = [
+      newPath.addListener('set_at', readCoords),
+      newPath.addListener('insert_at', readCoords),
+      newPath.addListener('remove_at', readCoords),
+      rightClickL,
+      ...(mapClickL ? [mapClickL] : []),
+    ];
+
+    externalUpdate.current = false;
+  }, [points, onPoints]);
+
+  return null;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Polygon map + toolbar                                                        */
+/* -------------------------------------------------------------------------- */
+function PolygonMap({
+  points,
+  onPoints,
+  panTarget,
+}: {
+  points: Point[];
+  onPoints: (p: Point[]) => void;
+  panTarget: (Point & { zoom: number }) | null;
+}) {
+  const map = useMap();
+  const prevPanTarget = useRef<typeof panTarget>(null);
+
+  useEffect(() => {
+    if (!map || !panTarget) return;
+    if (prevPanTarget.current === panTarget) return;
+    prevPanTarget.current = panTarget;
+    map.panTo({ lat: panTarget.lat, lng: panTarget.lng });
+    map.setZoom(panTarget.zoom);
+  }, [map, panTarget]);
+
+  return (
+    <>
+      <Map
+        defaultCenter={DEFAULT_CENTER}
+        defaultZoom={DEFAULT_ZOOM}
+        gestureHandling="greedy"
+        style={{ width: '100%', height: '100%' }}
+      >
+        <EditablePolygonInner points={points} onPoints={onPoints} />
+        {points.map((p, i) => (
+          <Marker
+            key={i}
+            position={p}
+            label={{
+              text: String(i + 1),
+              color: '#fff',
+              fontWeight: '700',
+              fontSize: '12px',
+            }}
+          />
+        ))}
+      </Map>
+    </>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Photo upload section                                                         */
+/* -------------------------------------------------------------------------- */
+type UploadedPhoto = { localId: string; url: string; previewUrl: string };
+
+function PhotoUpload({
+  photos,
+  onChange,
+}: {
+  photos: UploadedPhoto[];
+  onChange: (photos: UploadedPhoto[]) => void;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  async function handleFiles(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
+    setUploadError('');
+
+    const invalid = files.find((f) => !ALLOWED_PHOTO_TYPES.includes(f.type));
+    if (invalid) {
+      setUploadError('Bestandstype niet ondersteund. Gebruik jpeg, png, webp of heic.');
+      if (fileRef.current) fileRef.current.value = '';
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const uploaded: UploadedPhoto[] = [];
+      for (const file of files) {
+        const preview = URL.createObjectURL(file);
+        const form = new FormData();
+        form.append('file', file);
+        const res = await fetch('/api/v1/me/uploads', {
+          method: 'POST',
+          credentials: 'include',
+          body: form,
+        });
+        if (!res.ok) throw new Error('Upload mislukt.');
+        const { publicUrl } = (await res.json()) as { publicUrl: string };
+        uploaded.push({ localId: crypto.randomUUID(), url: publicUrl, previewUrl: preview });
+      }
+      onChange([...photos, ...uploaded]);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'Upload mislukt.');
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  }
+
+  function remove(localId: string) {
+    const removed = photos.find((p) => p.localId === localId);
+    if (removed) URL.revokeObjectURL(removed.previewUrl);
+    onChange(photos.filter((p) => p.localId !== localId));
+  }
+
+  return (
+    <div>
+      <div style={{ marginBottom: 12 }}>
+        <span style={labelStyle}>{"Foto's"}</span>
+        <p style={{ ...hintStyle, marginTop: 4 }}>
+          Meerdere foto's toegestaan. Max 10, jpeg/png/webp/heic.
+        </p>
+      </div>
+
+      {photos.length > 0 ? (
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))',
+            gap: 10,
+            marginBottom: 14,
+          }}
+        >
+          {photos.map((p) => (
+            <div key={p.localId} style={{ position: 'relative' }}>
+              <img
+                src={p.previewUrl}
+                alt=""
+                style={{
+                  width: '100%',
+                  aspectRatio: '4/3',
+                  objectFit: 'cover',
+                  borderRadius: 8,
+                  display: 'block',
+                  border: '1px solid var(--line)',
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => remove(p.localId)}
+                title="Foto verwijderen"
+                style={{
+                  position: 'absolute',
+                  top: 4,
+                  right: 4,
+                  width: 22,
+                  height: 22,
+                  borderRadius: '50%',
+                  background: 'rgba(163,59,45,0.9)',
+                  border: 'none',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: 0,
+                }}
+              >
+                <Ico d={D_X} size={12} />
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : null}
+
+      <label
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 8,
+          padding: '9px 18px',
+          borderRadius: 999,
+          border: '1.5px solid var(--line)',
+          background: uploading ? 'var(--moss-soft)' : 'var(--cream)',
+          fontSize: 14,
+          fontWeight: 500,
+          color: 'var(--ink-2)',
+          cursor: uploading || photos.length >= 10 ? 'not-allowed' : 'pointer',
+          opacity: photos.length >= 10 ? 0.5 : 1,
+        }}
+      >
+        <Ico d={D_IMG} size={15} />
+        {uploading ? 'Uploaden…' : "Foto's toevoegen"}
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/heic"
+          multiple
+          disabled={uploading || photos.length >= 10}
+          onChange={handleFiles}
+          style={{ display: 'none' }}
+        />
+      </label>
+
+      {uploadError ? (
+        <p role="alert" style={{ ...hintStyle, color: 'var(--rust)', marginTop: 8 }}>
+          {uploadError}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Type toggle                                                                  */
+/* -------------------------------------------------------------------------- */
+function TypeToggle({ value, onChange }: { value: SpotType; onChange: (v: SpotType) => void }) {
+  const opts: { val: SpotType; label: string; hint: string }[] = [
+    { val: 'POI', label: 'Plek', hint: 'café, park, strand…' },
+    { val: 'REGION', label: 'Gebied', hint: 'losloopgebied, bos…' },
+  ];
+
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: 10,
+      }}
+    >
+      {opts.map((o) => {
+        const active = value === o.val;
+        return (
+          <button
+            key={o.val}
+            type="button"
+            onClick={() => onChange(o.val)}
+            style={{
+              padding: '14px 16px',
+              borderRadius: 'var(--radius-sm)',
+              border: `2px solid ${active ? 'var(--moss)' : 'var(--line)'}`,
+              background: active ? 'var(--moss-soft)' : 'var(--cream)',
+              color: active ? 'var(--moss-700)' : 'var(--ink-2)',
+              fontFamily: 'inherit',
+              fontWeight: 700,
+              fontSize: 15,
+              cursor: 'pointer',
+              textAlign: 'left',
+              transition: 'border-color 0.12s, background 0.12s',
+            }}
+          >
+            {o.label}
+            <span
+              style={{
+                display: 'block',
+                fontWeight: 400,
+                fontSize: 13,
+                color: active ? 'var(--moss-700)' : 'var(--ink-3)',
+                marginTop: 3,
+              }}
+            >
+              {o.hint}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Success card                                                                 */
 /* -------------------------------------------------------------------------- */
 function SuccessCard({ spotSlug, spotName }: { spotSlug: string; spotName: string }) {
   return (
     <div
       className="card"
-      style={{
-        padding: 28,
-        textAlign: 'center',
-        borderTop: '3px solid var(--moss)',
-      }}
+      style={{ padding: 28, textAlign: 'center', borderTop: '3px solid var(--moss)' }}
     >
       <div
         style={{
@@ -136,7 +688,7 @@ function SuccessCard({ spotSlug, spotName }: { spotSlug: string; spotName: strin
           marginBottom: 16,
         }}
       >
-        <Ico d="M20 6 9 17l-5-5" size={22} />
+        <Ico d={D_CHECK} size={22} />
       </div>
       <h2 style={{ fontSize: 22, marginBottom: 10 }}>Plek toegevoegd!</h2>
       <p style={{ color: 'var(--ink-2)', marginBottom: 20 }}>
@@ -161,35 +713,52 @@ function SuccessCard({ spotSlug, spotName }: { spotSlug: string; spotName: strin
 export function AddSpotForm() {
   const { data: session, isPending } = authClient.useSession();
 
+  // Spot type toggle.
+  const [spotType, setSpotType] = useState<SpotType>('POI');
+
+  // Taxonomy.
   const [categories, setCategories] = useState<CategoryDto[]>([]);
   const [amenities, setAmenities] = useState<AmenityDto[]>([]);
-
-  // Form state.
   const [categoryId, setCategoryId] = useState('');
+  const [amenityIds, setAmenityIds] = useState<string[]>([]);
+
+  // Geometry.
+  const [point, setPoint] = useState<Point | null>(null);
+  const [polyPoints, setPolyPoints] = useState<Point[]>([]);
+
+  // Pan target shared across both map types.
+  const [panTarget, setPanTarget] = useState<(Point & { zoom: number }) | null>(null);
+
+  // Text fields.
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
   const [website, setWebsite] = useState('');
-  const [amenityIds, setAmenityIds] = useState<string[]>([]);
-  const [point, setPoint] = useState<{ lat: number; lng: number } | null>(null);
 
+  // Photos.
+  const [photos, setPhotos] = useState<UploadedPhoto[]>([]);
+
+  // Submit state.
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState<{ slug: string; name: string } | null>(null);
 
-  // Load POI categories once.
+  // Load categories whenever the type changes.
   useEffect(() => {
-    fetch('/api/v1/categories?type=POI')
+    setCategoryId('');
+    setAmenities([]);
+    setAmenityIds([]);
+    fetch(`/api/v1/categories?type=${spotType}`)
       .then((r) => r.json() as Promise<{ items: CategoryDto[] }>)
       .then((d) => {
         setCategories(d.items ?? []);
         if (d.items?.length) setCategoryId(d.items[0]!.id);
       })
       .catch(() => {});
-  }, []);
+  }, [spotType]);
 
-  // Load amenities filtered by the selected category.
+  // Load amenities when category changes.
   useEffect(() => {
     if (!categoryId) {
       setAmenities([]);
@@ -208,10 +777,38 @@ export function AddSpotForm() {
     setAmenityIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   }
 
+  function handleTypeChange(t: SpotType) {
+    setSpotType(t);
+    // Reset geometry when switching types.
+    setPoint(null);
+    setPolyPoints([]);
+    setPanTarget(null);
+  }
+
+  function handleGeocodePick(item: GeocodeItem) {
+    setPanTarget({ lat: item.lat, lng: item.lng, zoom: 14 });
+    // For POI, also place the pin at the geocoded location.
+    if (spotType === 'POI') {
+      setPoint({ lat: item.lat, lng: item.lng });
+    }
+    // Pre-fill address field if empty.
+    if (!address.trim()) {
+      setAddress(item.label);
+    }
+  }
+
+  const handlePolyPoints = useCallback((p: Point[]) => setPolyPoints(p), []);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!point) {
+    setError('');
+
+    if (spotType === 'POI' && !point) {
       setError('Zet eerst een punt op de kaart door erop te klikken.');
+      return;
+    }
+    if (spotType === 'REGION' && polyPoints.length < 3) {
+      setError('Teken het gebied in op de kaart (minimaal 3 punten).');
       return;
     }
     if (!categoryId) {
@@ -220,17 +817,21 @@ export function AddSpotForm() {
     }
 
     setSubmitting(true);
-    setError('');
-
     try {
       const body: Record<string, unknown> = {
-        type: 'POI',
+        type: spotType,
         categoryId,
         name: name.trim(),
-        point,
         amenityIds,
-        photos: [],
+        photos: photos.map((p) => p.url),
       };
+
+      if (spotType === 'POI' && point) {
+        body.point = point;
+      } else if (spotType === 'REGION') {
+        body.polygon = polyPoints;
+      }
+
       if (description.trim()) body.description = description.trim();
       if (address.trim()) body.address = address.trim();
       if (phone.trim()) body.phone = phone.trim();
@@ -258,14 +859,14 @@ export function AddSpotForm() {
     }
   }
 
-  // Auth loading state.
+  // Auth loading.
   if (isPending) {
     return (
       <div style={{ padding: '48px 0', textAlign: 'center', color: 'var(--ink-3)' }}>Laden…</div>
     );
   }
 
-  // Not signed in: show CTA.
+  // Not signed in.
   if (!session) {
     return (
       <div
@@ -285,11 +886,12 @@ export function AddSpotForm() {
             marginBottom: 16,
           }}
         >
-          <Ico d={PIN} size={22} />
+          <Ico d={D_PIN} size={22} />
         </div>
-        <h2 style={{ fontSize: 22, marginBottom: 10 }}>Inloggen vereist</h2>
+        <h2 style={{ fontSize: 22, marginBottom: 10 }}>Even je e-mailadres</h2>
         <p style={{ color: 'var(--ink-2)', marginBottom: 22 }}>
-          Je hebt een account nodig om een plek toe te voegen. Log in met je e-mailadres.
+          Je hoeft je niet te registreren. Vul je e-mailadres in, dan maken we automatisch een
+          account voor je aan.
         </p>
         <a
           href={`/signin?next=${encodeURIComponent('/plek-toevoegen')}`}
@@ -301,24 +903,41 @@ export function AddSpotForm() {
     );
   }
 
-  // Success state.
+  // Success.
   if (success) {
     return <SuccessCard spotSlug={success.slug} spotName={success.name} />;
   }
 
+  const tooFewPoints = spotType === 'REGION' && polyPoints.length > 0 && polyPoints.length < 3;
+
   return (
     <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 32 }}>
-      {/* Map picker */}
+      {/* 1 — Type toggle */}
+      <div style={fieldStyle}>
+        <span style={labelStyle}>Wat wil je toevoegen?</span>
+        <TypeToggle value={spotType} onChange={handleTypeChange} />
+      </div>
+
+      {/* 2 — Locatie */}
       <div>
         <div style={{ marginBottom: 10 }}>
           <span style={labelStyle}>Locatie</span>
           <p style={{ ...hintStyle, marginTop: 4 }}>
-            Klik op de kaart om een punt te zetten. Sleep de speld om hem te verplaatsen.
+            {spotType === 'POI'
+              ? 'Zoek het adres of klik op de kaart. Sleep de speld om hem te verplaatsen.'
+              : 'Zoek het adres om naar het juiste gebied te navigeren, klik dan op de kaart om punten te zetten.'}
           </p>
         </div>
+
+        {/* Address search */}
+        <div style={{ marginBottom: 10 }}>
+          <AddressSearch onSelect={handleGeocodePick} />
+        </div>
+
+        {/* Map */}
         <div
           style={{
-            height: 380,
+            height: 400,
             borderRadius: 'var(--radius-lg)',
             overflow: 'hidden',
             border: '1px solid var(--line)',
@@ -328,7 +947,11 @@ export function AddSpotForm() {
         >
           {GOOGLE_MAPS_KEY ? (
             <APIProvider apiKey={GOOGLE_MAPS_KEY}>
-              <PinMap point={point} onChange={setPoint} />
+              {spotType === 'POI' ? (
+                <PinMapInner point={point} onChange={setPoint} panTarget={panTarget} />
+              ) : (
+                <PolygonMap points={polyPoints} onPoints={handlePolyPoints} panTarget={panTarget} />
+              )}
             </APIProvider>
           ) : (
             <div
@@ -344,21 +967,58 @@ export function AddSpotForm() {
             </div>
           )}
         </div>
-        {point ? (
-          <p style={{ ...hintStyle, marginTop: 8 }}>
-            <Ico d={PIN} size={13} />
-            <span style={{ marginLeft: 5 }}>
+
+        {/* Map status / polygon toolbar */}
+        {spotType === 'POI' ? (
+          point ? (
+            <p
+              style={{ ...hintStyle, marginTop: 8, display: 'flex', alignItems: 'center', gap: 5 }}
+            >
+              <Ico d={D_PIN} size={13} />
               {point.lat.toFixed(6)}, {point.lng.toFixed(6)}
-            </span>
-          </p>
+            </p>
+          ) : (
+            <p style={{ ...hintStyle, marginTop: 8, color: 'var(--terra-700)' }}>
+              Nog geen punt gezet.
+            </p>
+          )
         ) : (
-          <p style={{ ...hintStyle, marginTop: 8, color: 'var(--terra-700)' }}>
-            Nog geen punt gezet.
-          </p>
+          <div
+            style={{
+              marginTop: 10,
+              display: 'flex',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 10,
+            }}
+          >
+            <span style={{ fontSize: 14, color: 'var(--ink-2)', fontWeight: 500 }}>
+              Punten: {polyPoints.length}
+            </span>
+            {tooFewPoints ? (
+              <span style={{ fontSize: 13, color: 'var(--rust)' }}>minimaal 3</span>
+            ) : null}
+            <button
+              type="button"
+              className="btn btn-sm btn-soft"
+              onClick={() => setPolyPoints((p) => p.slice(0, -1))}
+              disabled={polyPoints.length === 0}
+            >
+              Ongedaan maken
+            </button>
+            <button
+              type="button"
+              className="btn btn-sm btn-soft"
+              onClick={() => setPolyPoints([])}
+              disabled={polyPoints.length === 0}
+            >
+              Leegmaken
+            </button>
+          </div>
         )}
       </div>
 
-      {/* Spot details */}
+      {/* 3 — Spot details */}
       <div style={{ display: 'grid', gap: 18 }}>
         {/* Category */}
         <div style={fieldStyle}>
@@ -397,7 +1057,11 @@ export function AddSpotForm() {
             maxLength={120}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="bijv. Café Waf, Waterspeelplaats Beatrixpark"
+            placeholder={
+              spotType === 'POI'
+                ? 'bijv. Café Waf, Waterspeelplaats Beatrixpark'
+                : 'bijv. Amsterdamse Bos losloopgebied'
+            }
             style={inputStyle}
           />
         </div>
@@ -415,7 +1079,7 @@ export function AddSpotForm() {
         </div>
       </div>
 
-      {/* Amenities */}
+      {/* 4 — Amenities */}
       {amenities.length > 0 ? (
         <div>
           <div style={{ marginBottom: 12 }}>
@@ -448,7 +1112,10 @@ export function AddSpotForm() {
         </div>
       ) : null}
 
-      {/* Optional contact details */}
+      {/* 5 — Photos */}
+      <PhotoUpload photos={photos} onChange={setPhotos} />
+
+      {/* 6 — Optional contact details */}
       <details style={{ borderTop: '1px solid var(--line)', paddingTop: 20 }}>
         <summary
           style={{
@@ -510,20 +1177,6 @@ export function AddSpotForm() {
         </div>
       </details>
 
-      {/* REGION note */}
-      <div
-        style={{
-          background: 'var(--moss-soft)',
-          borderRadius: 'var(--radius-sm)',
-          padding: '14px 18px',
-          fontSize: 14,
-          color: 'var(--moss-700)',
-        }}
-      >
-        Wil je een <strong>losloopgebied of hondenstrand</strong> (vlakke regio) toevoegen? Gebruik
-        de app: die heeft een kaarteditor om het gebied in te tekenen.
-      </div>
-
       {/* Error */}
       {error ? (
         <p
@@ -546,7 +1199,7 @@ export function AddSpotForm() {
         <button
           type="submit"
           className="btn btn-primary"
-          disabled={submitting}
+          disabled={submitting || tooFewPoints}
           style={{ minWidth: 180 }}
         >
           {submitting ? 'Opslaan…' : 'Plek toevoegen'}
