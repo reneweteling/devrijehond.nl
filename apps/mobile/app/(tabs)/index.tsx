@@ -236,7 +236,9 @@ function PeekSheet({
 }) {
   const insets = useSafeAreaInsets();
   const { data: detail } = useSpotDetail(spot.slug);
-  const translateY = useRef(new Animated.Value(600)).current;
+  // Lazy useState (not useRef().current) so the value is created once without
+  // reading a ref during render (the React Compiler healthcheck forbids that).
+  const [translateY] = useState(() => new Animated.Value(600));
 
   useEffect(() => {
     Animated.spring(translateY, {
@@ -247,7 +249,7 @@ function PeekSheet({
     }).start();
   }, [translateY]);
 
-  const pan = useRef(
+  const [pan] = useState(() =>
     PanResponder.create({
       onMoveShouldSetPanResponder: (_, g) => g.dy > 6 && Math.abs(g.dy) > Math.abs(g.dx),
       onPanResponderMove: (_, g) => {
@@ -263,7 +265,7 @@ function PeekSheet({
         }
       },
     }),
-  ).current;
+  );
 
   const dismiss = () =>
     Animated.timing(translateY, { toValue: 600, duration: 200, useNativeDriver: true }).start(() =>
