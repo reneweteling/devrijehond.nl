@@ -78,6 +78,12 @@
           "androidGoogleMapsApiKey": "TODO_VERIFY_ANDROID_MAPS_KEY"
         }
       ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Kies een foto voor je profiel of je hond."
+        }
+      ],
       "./plugins/with-modular-headers.js"
     ],
     "experiments": {

@@ -4,7 +4,17 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -12,6 +22,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { useCreateDog } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
+import { pickAndUploadImage } from '@/lib/upload';
 import { colors, font, radius, space } from '@/lib/theme';
 import { Button, ListState } from '@/components/ui';
 
@@ -29,12 +40,26 @@ export default function AddDogScreen() {
   const [name, setName] = useState('');
   const [breed, setBreed] = useState('');
   const [birthYear, setBirthYear] = useState('');
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   if (status === 'loading' || !isAuthenticated) return <ListState loading />;
 
   const year = parseInt(birthYear, 10);
   const yearValid = !birthYear || (year >= 1990 && year <= new Date().getFullYear());
   const canSave = name.trim().length >= 1 && yearValid;
+
+  const onPickPhoto = async () => {
+    setUploading(true);
+    try {
+      const url = await pickAndUploadImage();
+      if (url) setPhotoUrl(url);
+    } catch (e) {
+      Alert.alert('Foto', e instanceof Error ? e.message : 'Uploaden mislukt.');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const onSave = () => {
     if (!canSave) return;
@@ -43,6 +68,7 @@ export default function AddDogScreen() {
         name: name.trim(),
         breed: breed.trim() || undefined,
         birthYear: birthYear && yearValid ? year : undefined,
+        photoUrl: photoUrl ?? undefined,
       },
       {
         onSuccess: () => {
@@ -65,9 +91,27 @@ export default function AddDogScreen() {
 
       <ScrollView contentContainerStyle={{ padding: space.lg, gap: space.lg }}>
         <View style={styles.dogHero}>
-          <View style={styles.dogAvatar}>
-            <SymbolView name="pawprint.fill" size={28} tintColor={colors.mossDark} />
-          </View>
+          <Pressable onPress={onPickPhoto} disabled={uploading} style={styles.dogAvatar}>
+            {photoUrl ? (
+              <Image source={{ uri: photoUrl }} style={styles.dogAvatarImg} />
+            ) : (
+              <SymbolView name="pawprint.fill" size={28} tintColor={colors.mossDark} />
+            )}
+            {uploading ? (
+              <View style={styles.dogAvatarOverlay}>
+                <ActivityIndicator color="#fff" />
+              </View>
+            ) : (
+              <View style={styles.dogAvatarBadge}>
+                <SymbolView name="camera.fill" size={12} tintColor="#fff" />
+              </View>
+            )}
+          </Pressable>
+          <Pressable onPress={onPickPhoto} disabled={uploading} hitSlop={8}>
+            <Text style={styles.dogPhotoAction}>
+              {photoUrl ? 'Foto wijzigen' : 'Foto toevoegen'}
+            </Text>
+          </Pressable>
         </View>
 
         <View style={{ gap: space.sm }}>
@@ -129,15 +173,41 @@ const styles = StyleSheet.create({
     marginBottom: space.sm,
   },
   headerTitle: { fontFamily: font.heading, fontSize: 16, lineHeight: 21, color: colors.ink },
-  dogHero: { alignItems: 'center', marginTop: space.sm },
+  dogHero: { alignItems: 'center', marginTop: space.sm, gap: 8 },
   dogAvatar: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 84,
+    height: 84,
+    borderRadius: 42,
     backgroundColor: colors.mossSoft,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
+  dogAvatarImg: { width: 84, height: 84 },
+  dogAvatarOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.35)',
+  },
+  dogAvatarBadge: {
+    position: 'absolute',
+    right: 2,
+    bottom: 2,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: colors.moss,
+    borderWidth: 2,
+    borderColor: colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dogPhotoAction: { fontFamily: font.bodyMedium, fontSize: 13, color: colors.moss },
   label: { fontFamily: font.bodyMedium, fontSize: 12, color: colors.ink2 },
   input: {
     minHeight: 48,

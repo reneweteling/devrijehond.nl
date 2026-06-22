@@ -4,7 +4,17 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -12,6 +22,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { useMe, useUpdateMe } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
+import { pickAndUploadImage } from '@/lib/upload';
 import { colors, font, radius, space } from '@/lib/theme';
 import { Button, ListState } from '@/components/ui';
 
@@ -30,11 +41,34 @@ export default function EditProfileScreen() {
 
   // Derive the form from a local draft, falling back to the loaded profile.
   // (Avoids a prefill effect that would setState synchronously on load.)
-  const [draft, setDraft] = useState<{ name: string; handle: string; bio: string } | null>(null);
+  const [draft, setDraft] = useState<{
+    name: string;
+    handle: string;
+    bio: string;
+    image: string | null;
+  } | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   if (status === 'loading' || !isAuthenticated) return <ListState loading />;
-  const v = draft ?? { name: me?.name ?? '', handle: me?.handle ?? '', bio: me?.bio ?? '' };
+  const v = draft ?? {
+    name: me?.name ?? '',
+    handle: me?.handle ?? '',
+    bio: me?.bio ?? '',
+    image: me?.image ?? null,
+  };
   const setField = (patch: Partial<typeof v>) => setDraft({ ...v, ...patch });
+
+  const onPickAvatar = async () => {
+    setUploading(true);
+    try {
+      const url = await pickAndUploadImage();
+      if (url) setField({ image: url });
+    } catch (e) {
+      Alert.alert('Foto', e instanceof Error ? e.message : 'Uploaden mislukt.');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const onSave = () => {
     update.mutate(
@@ -42,6 +76,7 @@ export default function EditProfileScreen() {
         name: v.name.trim() || null,
         handle: v.handle.trim() ? v.handle.trim().toLowerCase() : null,
         bio: v.bio.trim() || null,
+        image: v.image,
       },
       {
         onSuccess: () => {
@@ -63,6 +98,28 @@ export default function EditProfileScreen() {
       </View>
 
       <ScrollView contentContainerStyle={{ padding: space.lg, gap: space.lg }}>
+        <View style={styles.avatarBlock}>
+          <Pressable onPress={onPickAvatar} disabled={uploading} style={styles.avatarWrap}>
+            {v.image ? (
+              <Image source={{ uri: v.image }} style={styles.avatarImg} />
+            ) : (
+              <SymbolView name="person.fill" size={36} tintColor={colors.mossDark} />
+            )}
+            {uploading ? (
+              <View style={styles.avatarOverlay}>
+                <ActivityIndicator color="#fff" />
+              </View>
+            ) : (
+              <View style={styles.avatarBadge}>
+                <SymbolView name="camera.fill" size={13} tintColor="#fff" />
+              </View>
+            )}
+          </Pressable>
+          <Pressable onPress={onPickAvatar} disabled={uploading} hitSlop={8}>
+            <Text style={styles.avatarAction}>{v.image ? 'Foto wijzigen' : 'Foto toevoegen'}</Text>
+          </Pressable>
+        </View>
+
         <Field label="Naam">
           <TextInput
             style={styles.input}
@@ -128,6 +185,41 @@ const styles = StyleSheet.create({
     marginBottom: space.sm,
   },
   headerTitle: { fontFamily: font.heading, fontSize: 16, lineHeight: 21, color: colors.ink },
+  avatarBlock: { alignItems: 'center', gap: 10 },
+  avatarWrap: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: colors.mossSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  avatarImg: { width: 96, height: 96 },
+  avatarOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.35)',
+  },
+  avatarBadge: {
+    position: 'absolute',
+    right: 4,
+    bottom: 4,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: colors.moss,
+    borderWidth: 2,
+    borderColor: colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarAction: { fontFamily: font.bodyMedium, fontSize: 13, color: colors.moss },
   label: { fontFamily: font.bodyMedium, fontSize: 12, color: colors.ink2 },
   input: {
     minHeight: 48,
