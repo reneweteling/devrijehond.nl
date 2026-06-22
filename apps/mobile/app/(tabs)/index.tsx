@@ -47,6 +47,11 @@ const INITIAL_REGION: Region = {
   longitudeDelta: 0.11,
 };
 
+// Show geofence name labels only when zoomed in enough that they don't pile up
+// on top of each other. Zoomed further out, regions collapse to a compact dot.
+// latitudeDelta is the visible north-south span in degrees (smaller = closer).
+const REGION_LABEL_MAX_DELTA = 0.2;
+
 // Round to ~3 decimals (~100m) so tiny region jitter (the map settling, the
 // user dot updating) doesn't churn the query key and restart the fetch forever.
 const r3 = (n: number) => Math.round(n * 1000) / 1000;
@@ -74,6 +79,26 @@ function regionRings(s: SpotSummary): { latitude: number; longitude: number }[][
   return geom.coordinates.map((ring) =>
     ring.map(([lng, lat]) => ({ latitude: lat, longitude: lng })),
   );
+}
+
+// Ray-casting point-in-polygon. react-native-maps Marker/Polygon onPress is
+// unreliable on Apple Maps + the New Architecture, so geofence taps are handled
+// via MapView.onPress (which always reports the tapped coordinate) + this test.
+type Ring = { latitude: number; longitude: number }[];
+function pointInRing(lat: number, lng: number, ring: Ring): boolean {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const pi = ring[i];
+    const pj = ring[j];
+    if (!pi || !pj) continue;
+    const intersect =
+      pi.latitude > lat !== pj.latitude > lat &&
+      lng <
+        ((pj.longitude - pi.longitude) * (lat - pi.latitude)) / (pj.latitude - pi.latitude) +
+          pi.longitude;
+    if (intersect) inside = !inside;
+  }
+  return inside;
 }
 
 /**
@@ -181,6 +206,10 @@ export default function MapScreen() {
   // category toggles it; tapping "Alles" clears back to everything.
   const [activeCats, setActiveCats] = useState<Set<string>>(() => new Set());
   const [selected, setSelected] = useState<SpotSummary | null>(null);
+  // Whether the current zoom is close enough to show geofence name labels.
+  const [showRegionNames, setShowRegionNames] = useState(
+    INITIAL_REGION.latitudeDelta < REGION_LABEL_MAX_DELTA,
+  );
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Becomes true once the native map is laid out, so fly-to / centre calls
   // aren't issued before the map can honour them (they'd be no-ops).
@@ -273,6 +302,29 @@ export default function MapScreen() {
   const onRegionChange = (r: Region) => {
     if (debounce.current) clearTimeout(debounce.current);
     debounce.current = setTimeout(() => setBbox(regionToBbox(r)), 350);
+    // Toggle name labels vs dots at the zoom threshold. Only setState on an
+    // actual change so we don't re-render (and rebuild the markers) every pan.
+    const next = r.latitudeDelta < REGION_LABEL_MAX_DELTA;
+    setShowRegionNames((prev) => (prev === next ? prev : next));
+  };
+
+  // Tapping the map: if the point falls inside a geofence (and not in a hole),
+  // select that region; otherwise deselect. This makes the whole area tappable
+  // and works where Polygon/Marker onPress doesn't (Apple Maps + New Arch).
+  const onMapPress = (e: {
+    nativeEvent: { coordinate?: { latitude: number; longitude: number } };
+  }) => {
+    const c = e.nativeEvent.coordinate;
+    if (!c) {
+      setSelected(null);
+      return;
+    }
+    const hit = regionPolygons.find(
+      (p) =>
+        pointInRing(c.latitude, c.longitude, p.coordinates) &&
+        !p.holes.some((h) => pointInRing(c.latitude, c.longitude, h)),
+    );
+    setSelected(hit ? hit.spot : null);
   };
 
   // Stable geofence polygons: recompute only when spots/categories change, not
@@ -323,15 +375,27 @@ export default function MapScreen() {
   );
   const regionLabelEls = useMemo(
     () =>
-      regionPolygons.map((p) => (
-        <RegionLabel
-          key={`label-${p.id}`}
-          spot={p.spot}
-          color={p.color}
-          onPress={() => setSelected(p.spot)}
-        />
-      )),
-    [regionPolygons],
+      regionPolygons.map((p) =>
+        showRegionNames ? (
+          <RegionLabel
+            key={`region-${p.id}`}
+            spot={p.spot}
+            color={p.color}
+            onPress={() => setSelected(p.spot)}
+          />
+        ) : (
+          // Zoomed out: a compact tappable dot instead of the full name pill, so
+          // dense areas don't turn into a wall of overlapping labels.
+          <SpotMarker
+            key={`region-${p.id}`}
+            spot={p.spot}
+            color={p.color}
+            isRegion
+            onPress={() => setSelected(p.spot)}
+          />
+        ),
+      ),
+    [regionPolygons, showRegionNames],
   );
   const markerEls = useMemo(
     () =>
@@ -371,7 +435,7 @@ export default function MapScreen() {
         onMapReady={() => setMapReady(true)}
         onRegionChangeComplete={onRegionChange}
         showsUserLocation
-        onPress={() => setSelected(null)}
+        onPress={onMapPress}
       >
         {/*
           REGION geofences: a verification-styled outline (solid when verified,
