@@ -32,6 +32,11 @@ export const runtime = 'nodejs';
 // returned, so a dense city reads as a handful of count bubbles, not a wall.
 const GRID_N = 7;
 
+// Only collapse a grid cell into a count bubble once it holds at least this many
+// spots — clustering is for when pins would genuinely pile up, not for 2-3 spots
+// that fit fine as individual pins. Cells below this return every spot as a pin.
+const MIN_CLUSTER_COUNT = 6;
+
 // Safety cap for the non-clustered read (the web map, which fetches every spot
 // in the viewport). The clustered read needs no such cap, it's bounded by GRID_N².
 const MAP_MARKER_LIMIT = 2000;
@@ -185,13 +190,13 @@ export async function GET(request: NextRequest) {
       count(*)::int AS c,
       avg(lat)::float8 AS clat,
       avg(lng)::float8 AS clng,
-      (array_agg("id" ORDER BY updated_at DESC))[1] AS one_id
+      array_agg("id" ORDER BY updated_at DESC) AS ids
     FROM visible
     GROUP BY gx, gy
     LIMIT 1000
   `;
 
-  type CellRow = { c: number; clat: number; clng: number; one_id: string };
+  type CellRow = { c: number; clat: number; clng: number; ids: string[] };
   let cells: CellRow[];
   try {
     cells = await pgQuery<CellRow>(cellSql, args);
@@ -202,12 +207,17 @@ export async function GET(request: NextRequest) {
     });
   }
 
+  // Cells dense enough to collapse become count bubbles; everything below the
+  // threshold is returned as individual pins (all of the cell's spots).
   const clusters = cells
-    .filter((c) => c.c > 1)
+    .filter((c) => c.c >= MIN_CLUSTER_COUNT)
     .map((c) => ({ lat: c.clat, lng: c.clng, count: c.c }));
-  const singleIds = cells.filter((c) => c.c === 1).map((c) => c.one_id);
+  const singleIds = cells
+    .filter((c) => c.c < MIN_CLUSTER_COUNT)
+    .flatMap((c) => c.ids)
+    .slice(0, MAP_MARKER_LIMIT);
 
-  // Phase 2: full detail for the lone spots (bounded by the grid).
+  // Phase 2: full detail for the non-clustered spots.
   let items: MapItem[] = [];
   if (singleIds.length > 0) {
     const dargs: unknown[] = [];
