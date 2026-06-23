@@ -75,13 +75,16 @@ jq -n --arg kid "$ASC_KEY_ID" --arg iss "$ASC_ISSUER_ID" --arg key "$(cat "$KEYF
 # "local network" prompt and stalls DNS, even though release only talks to https.
 export DEVRIJEHOND_RELEASE=1
 
-# The committed apps/mobile/.env carries these EXPO_PUBLIC_* values, so the Xcode
-# "Bundle React Native" phase inlines them deterministically (it loads .env even
-# without NODE_ENV, and never the gitignored .env.development.local localhost
-# URL). The exports below are a belt-and-suspenders default. NOTE: do NOT set
-# NODE_ENV=production here, it breaks `expo prebuild`'s Info.plist mods.
-export EXPO_PUBLIC_API_URL="${EXPO_PUBLIC_API_URL:-https://api.devrijehond.nl}"
-export EXPO_PUBLIC_AUTH_URL="${EXPO_PUBLIC_AUTH_URL:-https://api.devrijehond.nl}"
+# CRITICAL: we sourced "$ROOT/.env.local" above (for the ASC keys) with `set -a`,
+# and that file carries DEV EXPO_PUBLIC_* values (e.g. https://app.devrijehond.local).
+# Those are now exported in our env, so a `${VAR:-default}` would NOT override them
+# and the release bundle would inline the .local host. The app then talks to a
+# Bonjour/mDNS host, triggering the iOS "local network" prompt + a ~12s DNS stall
+# so the map + profile never load. So FORCE the prod origins unconditionally.
+# (config.ts has a matching safety net that rejects *.local in release builds.)
+# NOTE: do NOT set NODE_ENV=production here, it breaks `expo prebuild`'s Info.plist mods.
+export EXPO_PUBLIC_API_URL="https://api.devrijehond.nl"
+export EXPO_PUBLIC_AUTH_URL="https://api.devrijehond.nl"
 # Google web OAuth client id (public, not a secret) for native Google Sign-In.
 export EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID="${EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID:-762592672284-cr47iv5jq6d0p2ghvmrcrf1lar90vpiq.apps.googleusercontent.com}"
 export EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID="${EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID:-762592672284-8atreoupa0ic702gnrg61bds9h88qrmp.apps.googleusercontent.com}"

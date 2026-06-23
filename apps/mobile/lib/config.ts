@@ -23,9 +23,18 @@
  */
 const DEFAULT_API_URL = 'https://api.devrijehond.nl';
 
-/** A localhost / private-LAN origin must never ship in a release build. */
+/**
+ * A localhost / private-LAN / *.local origin must never ship in a release build.
+ * The `.local` check matters: our dev host is `app.devrijehond.local`, and if it
+ * leaks into the bundle the app talks to a Bonjour/mDNS host, which triggers the
+ * iOS "find devices on your local network" prompt and stalls DNS (~12s) so the
+ * map + profile never load. This is the last-line safety net; the build scripts
+ * also force the prod EXPO_PUBLIC_* values.
+ */
 function isLocalUrl(url: string): boolean {
-  return /localhost|127\.0\.0\.1|\b10\.|\b192\.168\.|\b172\.(1[6-9]|2\d|3[01])\./.test(url);
+  return /localhost|127\.0\.0\.1|\b10\.|\b192\.168\.|\b172\.(1[6-9]|2\d|3[01])\.|\.local\b/.test(
+    url,
+  );
 }
 
 function resolveApiUrl(): string {
