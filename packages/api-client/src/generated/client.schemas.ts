@@ -337,10 +337,34 @@ export interface SpotsResponse {
 }
 
 /**
- * Spots whose geometry intersects the requested viewport.
+ * Individual spots plus clustered groups within the requested viewport.
  */
 export interface SpotsMapResponse {
   items: SpotSummary[];
+  clusters?: MapCluster[];
+}
+
+/**
+ * A clustered group of nearby spots on the map.
+ */
+export interface MapCluster {
+  /**
+   * Latitude in decimal degrees (WGS84 / EPSG:4326).
+   * @minimum -90
+   * @maximum 90
+   */
+  lat: number;
+  /**
+   * Longitude in decimal degrees (WGS84 / EPSG:4326).
+   * @minimum -180
+   * @maximum 180
+   */
+  lng: number;
+  /**
+   * Number of spots in this cluster.
+   * @minimum 2
+   */
+  count: number;
 }
 
 export type SpotDetailDescription = string | null;
@@ -1060,6 +1084,10 @@ export type GetApiV1SpotsMapParams = {
    * RFC 4122 UUID (v4).
    */
   categoryId?: string;
+  /**
+   * When true, collapse dense viewport grid cells into `clusters` (count bubbles) and return only lone spots in `items`, keeping the payload bounded. When false/omitted, every spot is returned in `items`.
+   */
+  cluster?: boolean;
 };
 
 export type GetApiV1SpotsSlugReviewsParams = {

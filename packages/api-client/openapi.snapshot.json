@@ -346,10 +346,41 @@
       "SpotsMapResponse": {
         "type": "object",
         "properties": {
-          "items": { "type": "array", "items": { "$ref": "#/components/schemas/SpotSummary" } }
+          "items": { "type": "array", "items": { "$ref": "#/components/schemas/SpotSummary" } },
+          "clusters": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/MapCluster" },
+            "default": []
+          }
         },
         "required": ["items"],
-        "description": "Spots whose geometry intersects the requested viewport."
+        "description": "Individual spots plus clustered groups within the requested viewport."
+      },
+      "MapCluster": {
+        "type": "object",
+        "properties": {
+          "lat": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90,
+            "description": "Latitude in decimal degrees (WGS84 / EPSG:4326).",
+            "example": 52.3006
+          },
+          "lng": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180,
+            "description": "Longitude in decimal degrees (WGS84 / EPSG:4326).",
+            "example": 4.8368
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 2,
+            "description": "Number of spots in this cluster."
+          }
+        },
+        "required": ["lat", "lng", "count"],
+        "description": "A clustered group of nearby spots on the map."
       },
       "SpotDetail": {
         "type": "object",
@@ -1258,6 +1289,16 @@
             "required": false,
             "description": "RFC 4122 UUID (v4).",
             "name": "categoryId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "boolean",
+              "description": "When true, collapse dense viewport grid cells into `clusters` (count bubbles) and return only lone spots in `items`, keeping the payload bounded. When false/omitted, every spot is returned in `items`."
+            },
+            "required": false,
+            "description": "When true, collapse dense viewport grid cells into `clusters` (count bubbles) and return only lone spots in `items`, keeping the payload bounded. When false/omitted, every spot is returned in `items`.",
+            "name": "cluster",
             "in": "query"
           }
         ],

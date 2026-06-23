@@ -137,14 +137,45 @@ export type SpotsQueryDto = z.infer<typeof SpotsQuerySchema>;
 export const SpotsMapQuerySchema = MapBboxQuerySchema.extend({
   type: SpotTypeSchema.optional(),
   categoryId: UuidSchema.optional(),
+  cluster: z
+    .boolean()
+    .optional()
+    .openapi({
+      description:
+        'When true, collapse dense viewport grid cells into `clusters` (count ' +
+        'bubbles) and return only lone spots in `items`, keeping the payload ' +
+        'bounded. When false/omitted, every spot is returned in `items`.',
+    }),
 }).openapi({ description: 'Viewport query for `GET /api/v1/spots/map`.' });
 export type SpotsMapQueryDto = z.infer<typeof SpotsMapQuerySchema>;
 
-/** GET /api/v1/spots/map, response. Markers within the viewport. */
+/**
+ * A clustered group of spots, returned by the map endpoint when several spots
+ * fall in the same viewport grid cell. The client draws one count bubble at
+ * (lat,lng); tapping it zooms in until the cell resolves into individual spots.
+ */
+export const MapClusterSchema = z
+  .object({
+    lat: LatSchema,
+    lng: LngSchema,
+    count: z.number().int().min(2).openapi({ description: 'Number of spots in this cluster.' }),
+  })
+  .openapi('MapCluster', { description: 'A clustered group of nearby spots on the map.' });
+export type MapClusterDto = z.infer<typeof MapClusterSchema>;
+
+/**
+ * GET /api/v1/spots/map, response. The viewport is split into a grid: cells with
+ * a single spot are returned in full as `items` (with geometry for regions);
+ * cells with several spots collapse into `clusters` (count bubbles). This keeps
+ * the payload bounded by the grid size no matter how far out you zoom.
+ */
 export const SpotsMapResponseSchema = z
-  .object({ items: z.array(SpotSummarySchema) })
+  .object({
+    items: z.array(SpotSummarySchema),
+    clusters: z.array(MapClusterSchema).default([]),
+  })
   .openapi('SpotsMapResponse', {
-    description: 'Spots whose geometry intersects the requested viewport.',
+    description: 'Individual spots plus clustered groups within the requested viewport.',
   });
 export type SpotsMapResponseDto = z.infer<typeof SpotsMapResponseSchema>;
 
