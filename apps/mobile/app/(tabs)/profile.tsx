@@ -13,6 +13,7 @@ import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { useRouter } from 'expo-router';
 import { SymbolView, type SymbolViewProps } from 'expo-symbols';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as Sentry from '@sentry/react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import { setAuthToken } from '@devrijehond/api-client';
 
@@ -110,6 +111,12 @@ export default function ProfileScreen() {
             icon="info.circle"
             onPress={() => router.push('/about')}
           />
+          <Button
+            label="Feedback sturen"
+            variant="secondary"
+            icon="bubble.left.and.bubble.right"
+            onPress={() => Sentry.showFeedbackWidget()}
+          />
         </View>
       </View>
     );
@@ -188,9 +195,16 @@ export default function ProfileScreen() {
           me.dogs.map((d: Dog, i: number) => (
             <Fragment key={d.id}>
               {i > 0 ? <View style={styles.separator} /> : null}
-              <View style={styles.dogRow}>
+              <Pressable
+                onPress={() => router.push(`/add-dog?id=${d.id}`)}
+                style={({ pressed }) => [styles.dogRow, pressed && { opacity: 0.6 }]}
+              >
                 <View style={styles.dogAvatar}>
-                  <SymbolView name="pawprint.fill" size={18} tintColor={colors.mossDark} />
+                  {d.photoUrl ? (
+                    <Image source={{ uri: d.photoUrl }} style={styles.dogAvatarImg} />
+                  ) : (
+                    <SymbolView name="pawprint.fill" size={18} tintColor={colors.mossDark} />
+                  )}
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.rowTitle}>{d.name}</Text>
@@ -198,7 +212,8 @@ export default function ProfileScreen() {
                     {[d.breed, dogAge(d)].filter(Boolean).join(' · ') || 'Hond'}
                   </Text>
                 </View>
-              </View>
+                <SymbolView name="chevron.right" size={15} tintColor={colors.ink3} />
+              </Pressable>
             </Fragment>
           ))
         ) : (
@@ -278,6 +293,14 @@ export default function ProfileScreen() {
         >
           <SymbolView name="info.circle" size={18} tintColor={colors.ink2} />
           <Text style={styles.footerText}>Over De Vrije Hond</Text>
+          <SymbolView name="chevron.right" size={14} tintColor={colors.ink3} />
+        </Pressable>
+        <Pressable
+          onPress={() => Sentry.showFeedbackWidget()}
+          style={({ pressed }) => [styles.footerRow, pressed && { opacity: 0.6 }]}
+        >
+          <SymbolView name="bubble.left.and.bubble.right" size={18} tintColor={colors.ink2} />
+          <Text style={styles.footerText}>Feedback sturen</Text>
           <SymbolView name="chevron.right" size={14} tintColor={colors.ink3} />
         </Pressable>
         <Pressable
@@ -454,7 +477,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.mossSoft,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
+  dogAvatarImg: { width: 44, height: 44 },
   spotRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 12 },
   rowTitle: { fontFamily: font.bodyMedium, fontSize: 14.5, color: colors.ink },
   rowMeta: { fontFamily: font.body, fontSize: 12, color: colors.ink2, marginTop: 2 },

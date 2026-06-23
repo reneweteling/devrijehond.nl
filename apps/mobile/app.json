@@ -15,21 +15,13 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "bundleIdentifier": "nl.devrijehond.app",
-      "buildNumber": "25",
+      "buildNumber": "26",
       "supportsTablet": false,
       "config": {
         "usesNonExemptEncryption": false
       },
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Je locatie laat de kaart zien welke hondenplekken bij jou in de buurt zijn, en bepaalt of je een plek kunt bevestigen.",
-        "NSLocalNetworkUsageDescription": "De Vrije Hond gebruikt netwerktoegang om de kaart, hondenplekken en je profiel te laden.",
-        "NSAppTransportSecurity": {
-          "NSExceptionDomains": {
-            "localhost": {
-              "NSExceptionAllowsInsecureHTTPLoads": true
-            }
-          }
-        }
+        "NSLocationWhenInUseUsageDescription": "Je locatie laat de kaart zien welke hondenplekken bij jou in de buurt zijn, en bepaalt of je een plek kunt bevestigen."
       }
     },
     "android": {
@@ -86,6 +78,7 @@
         }
       ],
       "./plugins/with-modular-headers.js",
+      "./plugins/with-dev-ats.js",
       [
         "@sentry/react-native/expo",
         {

@@ -69,6 +69,12 @@ cp "$ROOT/secrets/AuthKey_${ASC_KEY_ID}.p8" "$KEYFILE"
 jq -n --arg kid "$ASC_KEY_ID" --arg iss "$ASC_ISSUER_ID" --arg key "$(cat "$KEYFILE")" \
   '{key_id:$kid, issuer_id:$iss, key:$key, in_house:false}' >/tmp/asc_api_key.json
 
+# Marks this as the shipping build so the with-dev-ats config plugin strips the
+# localhost ATS exception (and NSLocalNetworkUsageDescription) from Info.plist.
+# Without this the app declares ATSAllowsLocalNetworking, which triggers the iOS
+# "local network" prompt and stalls DNS, even though release only talks to https.
+export DEVRIJEHOND_RELEASE=1
+
 # The committed apps/mobile/.env carries these EXPO_PUBLIC_* values, so the Xcode
 # "Bundle React Native" phase inlines them deterministically (it loads .env even
 # without NODE_ENV, and never the gitignored .env.development.local localhost

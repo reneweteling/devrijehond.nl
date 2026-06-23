@@ -1,9 +1,11 @@
 /**
- * S14c — Add a dog. Name, breed and birth year. Auth required. Creates via
- * POST /api/v1/me/dogs, refreshes the profile and pops back.
+ * S14c — Add or edit a dog. Name, breed, birth date and photo. Auth required.
+ * Add creates via POST /api/v1/me/dogs; passing `?id=` switches to edit mode,
+ * prefilled from the profile, saving via PATCH and offering delete. Refreshes
+ * the profile and pops back.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -15,13 +17,13 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { DatePicker, Host } from '@expo/ui/swift-ui';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { useCreateDog } from '@/lib/api';
+import { useCreateDog, useUpdateDog, useDeleteDog, useMe, type Dog } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 import { pickAndUploadImage } from '@/lib/upload';
 import { colors, font, radius, space } from '@/lib/theme';
@@ -37,16 +39,40 @@ export default function AddDogScreen() {
     if (status !== 'loading' && !isAuthenticated) router.replace('/(auth)/sign-in');
   }, [status, isAuthenticated, router]);
 
+  // `?id=` switches the screen to edit mode for that dog.
+  const { id } = useLocalSearchParams<{ id?: string }>();
+  const isEdit = !!id;
+
   const create = useCreateDog();
+  const update = useUpdateDog();
+  const del = useDeleteDog();
+  const { data: me } = useMe(isAuthenticated);
+  const existing: Dog | undefined = isEdit ? me?.dogs?.find((d) => d.id === id) : undefined;
+
   const [name, setName] = useState('');
   const [breed, setBreed] = useState('');
   const [birthDate, setBirthDate] = useState<Date | null>(null);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
+  // Prefill once, when editing and the dog has loaded from the profile.
+  const prefilled = useRef(false);
+  useEffect(() => {
+    if (!isEdit || prefilled.current || !existing) return;
+    prefilled.current = true;
+    setName(existing.name ?? '');
+    setBreed(existing.breed ?? '');
+    setPhotoUrl(existing.photoUrl ?? null);
+    if (existing.birthDate) {
+      const d = new Date(existing.birthDate);
+      if (!Number.isNaN(d.getTime())) setBirthDate(d);
+    }
+  }, [isEdit, existing]);
+
   if (status === 'loading' || !isAuthenticated) return <ListState loading />;
 
   const canSave = name.trim().length >= 1;
+  const saving = create.isPending || update.isPending;
 
   const onPickPhoto = async () => {
     setUploading(true);
@@ -62,22 +88,42 @@ export default function AddDogScreen() {
 
   const onSave = () => {
     if (!canSave) return;
-    create.mutate(
-      {
-        name: name.trim(),
-        breed: breed.trim() || undefined,
-        // Date-only ISO (YYYY-MM-DD) from the picker's local date.
-        birthDate: birthDate
-          ? `${birthDate.getFullYear()}-${String(birthDate.getMonth() + 1).padStart(2, '0')}-${String(birthDate.getDate()).padStart(2, '0')}`
-          : undefined,
-        photoUrl: photoUrl ?? undefined,
-      },
-      {
-        onSuccess: () => {
-          qc.invalidateQueries({ queryKey: ['me'] });
-          router.back();
+    const payload = {
+      name: name.trim(),
+      breed: breed.trim() || undefined,
+      // Date-only ISO (YYYY-MM-DD) from the picker's local date.
+      birthDate: birthDate
+        ? `${birthDate.getFullYear()}-${String(birthDate.getMonth() + 1).padStart(2, '0')}-${String(birthDate.getDate()).padStart(2, '0')}`
+        : undefined,
+      photoUrl: photoUrl ?? undefined,
+    };
+    const onSuccess = () => {
+      qc.invalidateQueries({ queryKey: ['me'] });
+      router.back();
+    };
+    if (isEdit && id) update.mutate({ id, dog: payload }, { onSuccess });
+    else create.mutate(payload, { onSuccess });
+  };
+
+  const onDelete = () => {
+    if (!id) return;
+    Alert.alert(
+      'Hond verwijderen',
+      `Weet je zeker dat je ${name.trim() || 'deze hond'} wilt verwijderen?`,
+      [
+        { text: 'Annuleren', style: 'cancel' },
+        {
+          text: 'Verwijderen',
+          style: 'destructive',
+          onPress: () =>
+            del.mutate(id, {
+              onSuccess: () => {
+                qc.invalidateQueries({ queryKey: ['me'] });
+                router.back();
+              },
+            }),
         },
-      },
+      ],
     );
   };
 
@@ -87,23 +133,28 @@ export default function AddDogScreen() {
         <Pressable onPress={() => router.back()} hitSlop={10}>
           <SymbolView name="chevron.left" size={20} tintColor={colors.ink} />
         </Pressable>
-        <Text style={styles.headerTitle}>Hond toevoegen</Text>
+        <Text style={styles.headerTitle}>{isEdit ? 'Hond bewerken' : 'Hond toevoegen'}</Text>
         <View style={{ width: 20 }} />
       </View>
 
       <ScrollView contentContainerStyle={{ padding: space.lg, gap: space.lg }}>
         <View style={styles.dogHero}>
-          <Pressable onPress={onPickPhoto} disabled={uploading} style={styles.dogAvatar}>
-            {photoUrl ? (
-              <Image source={{ uri: photoUrl }} style={styles.dogAvatarImg} />
-            ) : (
-              <SymbolView name="pawprint.fill" size={28} tintColor={colors.mossDark} />
-            )}
-            {uploading ? (
-              <View style={styles.dogAvatarOverlay}>
-                <ActivityIndicator color="#fff" />
-              </View>
-            ) : (
+          <Pressable onPress={onPickPhoto} disabled={uploading} style={styles.dogAvatarWrap}>
+            <View style={styles.dogAvatar}>
+              {photoUrl ? (
+                <Image source={{ uri: photoUrl }} style={styles.dogAvatarImg} />
+              ) : (
+                <SymbolView name="pawprint.fill" size={28} tintColor={colors.mossDark} />
+              )}
+              {uploading ? (
+                <View style={styles.dogAvatarOverlay}>
+                  <ActivityIndicator color="#fff" />
+                </View>
+              ) : null}
+            </View>
+            {/* Camera badge sits on the (non-clipping) wrap so it isn't cut off
+                by the avatar's circular clip. */}
+            {!uploading && (
               <View style={styles.dogAvatarBadge}>
                 <SymbolView name="camera.fill" size={12} tintColor="#fff" />
               </View>
@@ -152,13 +203,24 @@ export default function AddDogScreen() {
         </View>
 
         <Button
-          label="Hond toevoegen"
+          label={isEdit ? 'Wijzigingen opslaan' : 'Hond toevoegen'}
           onPress={onSave}
-          loading={create.isPending}
+          loading={saving}
           disabled={!canSave}
         />
-        {create.isError ? (
-          <Text style={styles.error}>Toevoegen mislukt. Probeer opnieuw.</Text>
+        {create.isError || update.isError ? (
+          <Text style={styles.error}>Opslaan mislukt. Probeer opnieuw.</Text>
+        ) : null}
+
+        {isEdit ? (
+          <Pressable
+            onPress={onDelete}
+            disabled={del.isPending}
+            style={({ pressed }) => [styles.deleteBtn, pressed && { opacity: 0.6 }]}
+          >
+            <SymbolView name="trash" size={16} tintColor={colors.rust} />
+            <Text style={styles.deleteBtnText}>Hond verwijderen</Text>
+          </Pressable>
         ) : null}
       </ScrollView>
     </View>
@@ -176,6 +238,9 @@ const styles = StyleSheet.create({
   },
   headerTitle: { fontFamily: font.heading, fontSize: 16, lineHeight: 21, color: colors.ink },
   dogHero: { alignItems: 'center', marginTop: space.sm, gap: 8 },
+  // Non-clipping wrapper so the camera badge can sit on the avatar's edge
+  // without being cut off by the avatar's circular clip.
+  dogAvatarWrap: { width: 84, height: 84, alignItems: 'center', justifyContent: 'center' },
   dogAvatar: {
     width: 84,
     height: 84,
@@ -225,4 +290,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   error: { fontFamily: font.body, fontSize: 12, color: colors.rust, textAlign: 'center' },
+  deleteBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+  },
+  deleteBtnText: { fontFamily: font.bodyMedium, fontSize: 14, color: colors.rust },
 });

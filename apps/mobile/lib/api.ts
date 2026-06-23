@@ -32,6 +32,7 @@ import {
   postApiV1MeFeatureRequestsIdVote,
   patchApiV1Me,
   postApiV1MeDogs,
+  patchApiV1MeDogsId,
   deleteApiV1MeDogsId,
   type Category,
   type Amenity,
@@ -56,7 +57,9 @@ import {
   type FeatureRequest,
   type FeatureStatus,
   type CreateDogRequest,
+  type UpdateDogRequest,
   type MeProfilePatch,
+  type MapCluster,
 } from '@devrijehond/api-client';
 
 // Re-export the contract types under the names the screens import. These are
@@ -82,6 +85,7 @@ export type {
   VoteValue,
   FeatureRequest,
   FeatureStatus,
+  MapCluster,
 };
 
 /** Body for `useSubmitSpot`, the generated submit-spot request shape. */
@@ -121,7 +125,7 @@ export function useSpotsInViewport(
     placeholderData: keepPreviousData,
     queryFn: ({ signal }) =>
       getApiV1SpotsMap(
-        { ...(bbox as Bbox), type: opts?.type, categoryId: opts?.categoryId },
+        { ...(bbox as Bbox), type: opts?.type, categoryId: opts?.categoryId, cluster: true },
         signal,
       ),
   });
@@ -250,6 +254,13 @@ export function useUpdateMe() {
 export function useCreateDog() {
   return useMutation({
     mutationFn: (dog: CreateDogRequest) => postApiV1MeDogs(dog),
+  });
+}
+
+/** PATCH /api/v1/me/dogs/:id, update an existing dog. */
+export function useUpdateDog() {
+  return useMutation({
+    mutationFn: ({ id, dog }: { id: string; dog: UpdateDogRequest }) => patchApiV1MeDogsId(id, dog),
   });
 }
 

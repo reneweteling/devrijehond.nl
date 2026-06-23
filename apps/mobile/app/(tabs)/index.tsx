@@ -24,6 +24,7 @@ import {
   View,
 } from 'react-native';
 import MapView, { Marker, Polygon, type Region } from 'react-native-maps';
+import { BlurView } from 'expo-blur';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -35,12 +36,17 @@ import {
   type Amenity,
   type Bbox,
   type Category,
+  type MapCluster,
   type SpotSummary,
 } from '@/lib/api';
 import { useUserLocation, haversineMeters, type LatLng } from '@/lib/location';
 import { amenitySymbol } from '@/lib/icons';
 import { categoryColors, colors, font, radius, space } from '@/lib/theme';
 import { Button, Chip, VerifiedBadge, Stars } from '@/components/ui';
+
+// Horizontal inset that lines the floating chrome (search pill, chip row, bottom
+// control strip) up with the native tab bar's width, so they share one edge.
+const TAB_BAR_INSET = 20;
 
 // Amsterdam-centre default region (covers the seeded spots from the Bos in the
 // south to the NDSM in the north). The map recentres on the user when location
@@ -51,11 +57,6 @@ const INITIAL_REGION: Region = {
   latitudeDelta: 0.11,
   longitudeDelta: 0.11,
 };
-
-// Show geofence name labels only when zoomed in enough that they don't pile up
-// on top of each other. Zoomed further out, regions collapse to a compact dot.
-// latitudeDelta is the visible north-south span in degrees (smaller = closer).
-const REGION_LABEL_MAX_DELTA = 0.2;
 
 // Round to ~3 decimals (~100m) so tiny region jitter (the map settling, the
 // user dot updating) doesn't churn the query key and restart the fetch forever.
@@ -153,48 +154,62 @@ function SpotMarker({
 }
 
 /**
- * Tappable label at a geofence centroid. react-native-maps Polygon `onPress`
- * doesn't fire on Apple Maps (iOS), so the outline alone isn't tappable and a
- * bare dot didn't say what the area is. This pill shows the name (so you can
- * read what it is straight away) and is a real Marker, which IS tappable on
- * iOS, so it opens the spot. Rasterised once then tracking off, like SpotMarker.
+ * A cluster bubble: a moss circle with the number of spots it stands for. Like
+ * SpotMarker it rasterises once then turns tracking off so it doesn't flicker on
+ * pan/zoom. Tapping it (resolved via the MapView hit-test) zooms in to split it.
  */
-function RegionLabel({
-  spot,
-  color,
+function ClusterMarker({
+  lat,
+  lng,
+  count,
   onPress,
 }: {
-  spot: SpotSummary;
-  color: string;
+  lat: number;
+  lng: number;
+  count: number;
   onPress: () => void;
 }) {
   const [tracks, setTracks] = useState(true);
   useEffect(() => {
     const t = setTimeout(() => setTracks(false), 600);
     return () => clearTimeout(t);
-  }, []);
+  }, [count]);
 
-  if (spot.lat == null || spot.lng == null) return null;
-  const verified = spot.status === 'VERIFIED';
+  const size = count >= 100 ? 52 : count >= 25 ? 46 : count >= 10 ? 42 : 38;
   return (
     <Marker
-      coordinate={{ latitude: spot.lat, longitude: spot.lng }}
+      coordinate={{ latitude: lat, longitude: lng }}
       onPress={onPress}
       tracksViewChanges={tracks}
       anchor={{ x: 0.5, y: 0.5 }}
     >
-      <View style={styles.regionLabel}>
-        <View
-          style={[
-            styles.regionLabelDot,
-            verified
-              ? { backgroundColor: color, borderColor: color }
-              : { backgroundColor: '#fff', borderColor: colors.terra, borderStyle: 'dashed' },
-          ]}
-        />
-        <Text style={styles.regionLabelText} numberOfLines={1}>
-          {spot.name}
-        </Text>
+      <View style={[styles.cluster, { width: size, height: size, borderRadius: size / 2 }]}>
+        <Text style={styles.clusterText}>{count}</Text>
+      </View>
+    </Marker>
+  );
+}
+
+/**
+ * The user's current location as the conventional iOS blue dot (white ring +
+ * system-blue core), so it reads as "you are here" and never as a spot marker.
+ * Rasterised once then tracking off, like the other custom markers.
+ */
+function UserDot({ lat, lng }: { lat: number; lng: number }) {
+  const [tracks, setTracks] = useState(true);
+  useEffect(() => {
+    const t = setTimeout(() => setTracks(false), 600);
+    return () => clearTimeout(t);
+  }, []);
+
+  return (
+    <Marker
+      coordinate={{ latitude: lat, longitude: lng }}
+      tracksViewChanges={tracks}
+      anchor={{ x: 0.5, y: 0.5 }}
+    >
+      <View style={styles.userDotRing}>
+        <View style={styles.userDotCore} />
       </View>
     </Marker>
   );
@@ -373,10 +388,6 @@ export default function MapScreen() {
   const [activeCats, setActiveCats] = useState<Set<string>>(() => new Set());
   const [selected, setSelected] = useState<SpotSummary | null>(null);
   const [satellite, setSatellite] = useState(false);
-  // Whether the current zoom is close enough to show geofence name labels.
-  const [showRegionNames, setShowRegionNames] = useState(
-    INITIAL_REGION.latitudeDelta < REGION_LABEL_MAX_DELTA,
-  );
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Current visible latitude span, used to scale the tap hit-test radius.
   const regionDeltaRef = useRef(INITIAL_REGION.latitudeDelta);
@@ -447,6 +458,15 @@ export default function MapScreen() {
     return activeCats.size === 0 ? all : all.filter((s) => activeCats.has(s.categoryId));
   }, [spotsData, activeCats]);
 
+  // The map endpoint already clusters server-side: lone spots come back in
+  // `items` (the `spots` above, filtered here by the active categories) and dense
+  // areas as `clusters` (count bubbles). So the payload stays bounded no matter
+  // how far out you zoom, instead of streaming every spot. Category filters
+  // refine the lone spots; clusters show overall density and resolve into the
+  // filtered spots once you tap/zoom into them.
+  const singles = spots;
+  const clusters: MapCluster[] = useMemo(() => spotsData?.clusters ?? [], [spotsData]);
+
   const toggleCat = (id: string) =>
     setActiveCats((prev) => {
       const next = new Set(prev);
@@ -472,10 +492,6 @@ export default function MapScreen() {
     if (debounce.current) clearTimeout(debounce.current);
     debounce.current = setTimeout(() => setBbox(regionToBbox(r)), 350);
     regionDeltaRef.current = r.latitudeDelta;
-    // Toggle name labels vs dots at the zoom threshold. Only setState on an
-    // actual change so we don't re-render (and rebuild the markers) every pan.
-    const next = r.latitudeDelta < REGION_LABEL_MAX_DELTA;
-    setShowRegionNames((prev) => (prev === next ? prev : next));
   };
 
   // Tapping the map. Marker/Polygon onPress is unreliable on Apple Maps + the
@@ -501,20 +517,38 @@ export default function MapScreen() {
       setSelected(region.spot);
       return;
     }
-    // Nearest pin within ~a marker's reach. lng is compressed by cos(lat).
+    // Nearest marker within ~a marker's reach. lng is compressed by cos(lat).
     const cosLat = Math.cos((c.latitude * Math.PI) / 180);
     const reach = regionDeltaRef.current * 0.05;
+    const distTo = (lat: number, lng: number) => {
+      const dLat = lat - c.latitude;
+      const dLng = (lng - c.longitude) * cosLat;
+      return Math.sqrt(dLat * dLat + dLng * dLng);
+    };
+    // Nearest cluster bubble (tapping one zooms in to split it).
+    let bestCluster: { lat: number; lng: number } | null = null;
+    let bestClusterDist = Infinity;
+    for (const cl of clusters) {
+      const d = distTo(cl.lat, cl.lng);
+      if (d < bestClusterDist) {
+        bestClusterDist = d;
+        bestCluster = cl;
+      }
+    }
+    // Nearest non-clustered spot (tapping one selects it).
     let best: SpotSummary | null = null;
     let bestDist = Infinity;
-    for (const s of spots) {
+    for (const s of singles) {
       if (s.lat == null || s.lng == null) continue;
-      const dLat = s.lat - c.latitude;
-      const dLng = (s.lng - c.longitude) * cosLat;
-      const dist = Math.sqrt(dLat * dLat + dLng * dLng);
-      if (dist < bestDist) {
-        bestDist = dist;
+      const d = distTo(s.lat, s.lng);
+      if (d < bestDist) {
+        bestDist = d;
         best = s;
       }
+    }
+    if (bestCluster && bestClusterDist <= reach && bestClusterDist <= bestDist) {
+      zoomIntoCluster(bestCluster.lat, bestCluster.lng);
+      return;
     }
     setSelected(best && bestDist <= reach ? best : null);
   };
@@ -527,7 +561,7 @@ export default function MapScreen() {
   // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const regionPolygons = useMemo(
     () =>
-      spots.flatMap((s) => {
+      singles.flatMap((s) => {
         const rings = regionRings(s);
         if (!rings || !rings[0]) return [];
         return [
@@ -541,7 +575,7 @@ export default function MapScreen() {
           },
         ];
       }),
-    [spots, catById],
+    [singles, catById],
   );
   // Region spots that already render as an outlined polygon, so we don't also
   // drop a redundant centre dot on top of them.
@@ -574,30 +608,21 @@ export default function MapScreen() {
   // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const regionMarkerEls = useMemo(
     () =>
-      regionPolygons.map((p) =>
-        showRegionNames ? (
-          <RegionLabel
-            key={`region-${p.id}`}
-            spot={p.spot}
-            color={p.color}
-            onPress={() => setSelected(p.spot)}
-          />
-        ) : (
-          <SpotMarker
-            key={`region-${p.id}`}
-            spot={p.spot}
-            color={p.color}
-            isRegion
-            onPress={() => setSelected(p.spot)}
-          />
-        ),
-      ),
-    [regionPolygons, showRegionNames],
+      regionPolygons.map((p) => (
+        <SpotMarker
+          key={`region-${p.id}`}
+          spot={p.spot}
+          color={p.color}
+          isRegion
+          onPress={() => setSelected(p.spot)}
+        />
+      )),
+    [regionPolygons],
   );
   // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const pinEls = useMemo(
     () =>
-      spots
+      singles
         .filter((s) => !(s.type === 'REGION' && polygonIds.has(s.id)))
         .map((s) => (
           <SpotMarker
@@ -608,7 +633,36 @@ export default function MapScreen() {
             onPress={() => setSelected(s)}
           />
         )),
-    [spots, polygonIds, catById],
+    [singles, polygonIds, catById],
+  );
+
+  // Zoom in on a cluster so it breaks apart into its members (or smaller
+  // clusters). Tighten the viewport around the cluster centroid.
+  const zoomIntoCluster = useCallback((lat: number, lng: number) => {
+    const delta = Math.max(regionDeltaRef.current / 2.5, 0.01);
+    const region: Region = {
+      latitude: lat,
+      longitude: lng,
+      latitudeDelta: delta,
+      longitudeDelta: delta,
+    };
+    mapRef.current?.animateToRegion(region, 350);
+    setBbox(regionToBbox(region));
+  }, []);
+
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
+  const clusterEls = useMemo(
+    () =>
+      clusters.map((c) => (
+        <ClusterMarker
+          key={`cluster-${c.lat.toFixed(4)}-${c.lng.toFixed(4)}`}
+          lat={c.lat}
+          lng={c.lng}
+          count={c.count}
+          onPress={() => zoomIntoCluster(c.lat, c.lng)}
+        />
+      )),
+    [clusters, zoomIntoCluster],
   );
 
   const recenterOnUser = () => {
@@ -633,19 +687,22 @@ export default function MapScreen() {
         mapType={satellite ? 'hybrid' : 'standard'}
         onMapReady={() => setMapReady(true)}
         onRegionChangeComplete={onRegionChange}
-        showsUserLocation
         onPress={onMapPress}
       >
         {/*
           REGION geofences: a verification-styled outline (solid when verified,
           dashed terracotta when not). Tapping inside the area selects it via the
-          MapView.onPress hit-test above. Zoomed in, a RegionLabel names it;
-          zoomed out it collapses to a dot. POIs render as a teardrop pin; pins
-          don't redraw thanks to each marker's tracksViewChanges=false.
+          MapView.onPress hit-test above; the region also drops a compact dot.
+          POIs render as a teardrop pin; pins don't redraw thanks to each
+          marker's tracksViewChanges=false. Dense areas collapse into clusters.
         */}
         {polygonEls}
         {regionMarkerEls}
         {pinEls}
+        {clusterEls}
+        {/* Own location as the conventional blue dot (custom, so it's never
+            mistaken for a spot marker). */}
+        {userLocation && <UserDot lat={userLocation.lat} lng={userLocation.lng} />}
       </MapView>
 
       {/* (A) Floating status pill: subtle spinner on first load, tappable error on failure */}
@@ -703,9 +760,14 @@ export default function MapScreen() {
         </ScrollView>
       </View>
 
-      {/* (D) Legend — hidden while a spot is selected */}
+      {/* (D) Bottom control strip: legend + satellite/locate toggles on one
+          glass line just above the tab bar. Hidden while a spot is selected. */}
       {!selected && (
-        <View style={[styles.legend, { bottom: insets.bottom + 64 }]} pointerEvents="none">
+        <BlurView
+          intensity={60}
+          tint="systemChromeMaterialLight"
+          style={[styles.controlBar, { bottom: insets.bottom + 10 }]}
+        >
           <View style={styles.legendRow}>
             <View style={[styles.legendDot, { backgroundColor: colors.moss }]} />
             <Text style={styles.legendText}>Geverifieerd</Text>
@@ -719,40 +781,34 @@ export default function MapScreen() {
             />
             <Text style={styles.legendText}>Niet geverifieerd</Text>
           </View>
-        </View>
-      )}
 
-      {/* Satellite / map toggle */}
-      {!selected && (
-        <Pressable
-          style={({ pressed }) => [
-            styles.recenterBtn,
-            satellite && styles.recenterBtnActive,
-            { bottom: insets.bottom + (userLocation ? 116 : 64), opacity: pressed ? 0.7 : 1 },
-          ]}
-          onPress={() => setSatellite((v) => !v)}
-          hitSlop={8}
-        >
-          <SymbolView
-            name="globe.europe.africa.fill"
-            size={20}
-            tintColor={satellite ? '#fff' : colors.mossDark}
-          />
-        </Pressable>
-      )}
+          <View style={{ flex: 1 }} />
 
-      {/* Recenter on the user's location (iOS has no built-in button) */}
-      {userLocation && !selected && (
-        <Pressable
-          style={({ pressed }) => [
-            styles.recenterBtn,
-            { bottom: insets.bottom + 64, opacity: pressed ? 0.7 : 1 },
-          ]}
-          onPress={recenterOnUser}
-          hitSlop={8}
-        >
-          <SymbolView name="location.fill" size={20} tintColor={colors.mossDark} />
-        </Pressable>
+          <Pressable
+            onPress={() => setSatellite((v) => !v)}
+            hitSlop={8}
+            style={({ pressed }) => [
+              styles.ctrlBtn,
+              satellite && styles.ctrlBtnActive,
+              { opacity: pressed ? 0.6 : 1 },
+            ]}
+          >
+            <SymbolView
+              name="globe.europe.africa.fill"
+              size={20}
+              tintColor={satellite ? '#fff' : colors.mossDark}
+            />
+          </Pressable>
+          {userLocation && (
+            <Pressable
+              onPress={recenterOnUser}
+              hitSlop={8}
+              style={({ pressed }) => [styles.ctrlBtn, { opacity: pressed ? 0.6 : 1 }]}
+            >
+              <SymbolView name="location.fill" size={20} tintColor={colors.mossDark} />
+            </Pressable>
+          )}
+        </BlurView>
       )}
 
       {/* Bottom peek sheet: slides up on select, flick down to dismiss, "Bekijk
@@ -773,12 +829,24 @@ export default function MapScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.sand },
+  cluster: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.moss,
+    borderWidth: 3,
+    borderColor: '#fff',
+    shadowColor: colors.mossDark,
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  clusterText: { fontFamily: font.bodyMedium, fontSize: 15, color: '#fff' },
   chrome: { position: 'absolute', left: 0, right: 0, top: 0, gap: space.sm },
   searchPill: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 9,
-    marginHorizontal: space.lg,
+    marginHorizontal: TAB_BAR_INSET,
     backgroundColor: '#fff',
     borderRadius: radius.pill,
     paddingVertical: 10,
@@ -799,7 +867,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  chipRow: { gap: 8, paddingHorizontal: space.lg, paddingVertical: 4 },
+  chipRow: { gap: 8, paddingHorizontal: TAB_BAR_INSET, paddingVertical: 4 },
   pinWrap: { alignItems: 'center', justifyContent: 'center' },
   pin: {
     width: 22,
@@ -815,52 +883,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 3,
   },
-  regionLabel: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    maxWidth: 170,
-    backgroundColor: '#fff',
-    borderRadius: radius.pill,
-    paddingVertical: 5,
-    paddingHorizontal: 9,
-    shadowColor: colors.ink,
-    shadowOpacity: 0.18,
-    shadowRadius: 5,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 4,
-  },
-  regionLabelDot: { width: 11, height: 11, borderRadius: 6, borderWidth: 2 },
-  regionLabelText: { fontFamily: font.bodyMedium, fontSize: 11.5, color: colors.ink },
-  legend: {
-    position: 'absolute',
-    left: space.lg,
-    backgroundColor: '#fff',
-    borderRadius: radius.card,
-    padding: 10,
-    gap: 6,
-    shadowColor: colors.ink,
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  legendRow: { flexDirection: 'row', alignItems: 'center', gap: 7 },
-  recenterBtn: {
-    position: 'absolute',
-    right: space.lg,
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: colors.ink,
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 4,
-  },
-  recenterBtnActive: { backgroundColor: colors.moss },
+  legendRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   legendDot: {
     width: 12,
     height: 12,
@@ -869,6 +892,48 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   legendText: { fontFamily: font.body, fontSize: 11, color: colors.ink2 },
+  // Bottom control strip (glass): legend + satellite/locate on one line, just
+  // above the tab bar.
+  controlBar: {
+    position: 'absolute',
+    left: TAB_BAR_INSET,
+    right: TAB_BAR_INSET,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    height: 52,
+    paddingHorizontal: 12,
+    borderRadius: 26,
+    overflow: 'hidden',
+    // A faint white wash over the blur to brighten it toward the tab bar's
+    // light Liquid-Glass look, plus a hairline highlight on the edge.
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(255,255,255,0.6)',
+  },
+  ctrlBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ctrlBtnActive: { backgroundColor: colors.moss },
+  // Own-location blue dot: white ring + system-blue core.
+  userDotRing: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 4,
+  },
+  userDotCore: { width: 14, height: 14, borderRadius: 7, backgroundColor: '#0A84FF' },
   sheet: {
     position: 'absolute',
     left: 0,

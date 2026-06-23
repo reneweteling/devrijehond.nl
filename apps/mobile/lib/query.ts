@@ -32,14 +32,12 @@ export function getQueryClient(): QueryClient {
         queries: {
           // Mobile + poor connectivity: be patient and lean on cache.
           staleTime: 30_000,
-          // A few retries with backoff so requests that fail during the iOS
-          // Local Network permission prompt (which blocks DNS while pending)
-          // recover on their own once the user grants it.
-          retry: 3,
+          // A couple of retries with backoff to ride out transient mobile
+          // network blips. (No longer covering the iOS Local Network prompt:
+          // the app no longer declares local networking, so DNS isn't gated.)
+          retry: 2,
           retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8000),
-          // Refetch when the app returns to the foreground (e.g. right after the
-          // user answers the Local Network prompt), so a failed first load heals.
-          refetchOnWindowFocus: true,
+          refetchOnWindowFocus: false,
           refetchOnReconnect: true,
         },
       },
