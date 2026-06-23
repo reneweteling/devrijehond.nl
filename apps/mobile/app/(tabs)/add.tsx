@@ -58,9 +58,15 @@ export default function AddScreen() {
   const userLocation = useUserLocation();
   const [search, setSearch] = useState('');
   const [geo, setGeo] = useState<GeoResult[]>([]);
-  // Index of the vertex currently being dragged (for live polygon + lifted dot).
-  const [dragIdx, setDragIdx] = useState<number | null>(null);
-  const [dragCoord, setDragCoord] = useState<LatLng | null>(null);
+  // Crosshair editing: the map is moved under a fixed centre target instead of
+  // finger-dragging tiny pins (which fights map panning on iOS). `center` tracks
+  // the live map centre; `selectedIdx` is the vertex being repositioned, if any.
+  const [center, setCenter] = useState<LatLng>(
+    userLocation
+      ? { latitude: userLocation.lat, longitude: userLocation.lng }
+      : { latitude: INITIAL_REGION.latitude, longitude: INITIAL_REGION.longitude },
+  );
+  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
 
   // Debounced location search inside the editor.
   useEffect(() => {
@@ -91,21 +97,29 @@ export default function AddScreen() {
     setGeo([]);
     flyTo(g.lat, g.lng);
   };
-  const onMapPress = (e: MapPressEvent) => {
-    const c = e.nativeEvent.coordinate;
-    if (type === 'REGION') setPolygon((prev) => [...prev, c]);
-    else setPoint(c);
+  // The map centre is the cursor. Keep it in sync; for a POI the point simply IS
+  // the centre, so it's always "placed" wherever the map is.
+  const onRegionChangeComplete = (r: Region) => {
+    const c = { latitude: r.latitude, longitude: r.longitude };
+    setCenter(c);
+    if (type === 'POI') setPoint(c);
   };
-  const moveVertex = (i: number, c: LatLng) =>
-    setPolygon((prev) => prev.map((v, idx) => (idx === i ? c : v)));
-  // Tap a vertex to remove it (the mobile equivalent of the web right-click).
-  const removeVertex = (i: number) => setPolygon((prev) => prev.filter((_, idx) => idx !== i));
-
-  // Polygon outline that follows the finger live while a vertex is dragged.
-  const livePolygon =
-    dragIdx != null && dragCoord
-      ? polygon.map((v, idx) => (idx === dragIdx ? dragCoord : v))
-      : polygon;
+  // Tapping empty map just clears the current vertex selection.
+  const onMapPress = (_e: MapPressEvent) => setSelectedIdx(null);
+  // Drop a new vertex at the centre target.
+  const addVertex = () => {
+    setPolygon((prev) => [...prev, center]);
+    setSelectedIdx(null);
+  };
+  // Move the selected vertex to the centre target.
+  const moveSelectedToCenter = () => {
+    if (selectedIdx == null) return;
+    setPolygon((prev) => prev.map((v, idx) => (idx === selectedIdx ? center : v)));
+  };
+  const removeVertex = (i: number) => {
+    setPolygon((prev) => prev.filter((_, idx) => idx !== i));
+    setSelectedIdx(null);
+  };
 
   const qc = useQueryClient();
 
@@ -134,13 +148,19 @@ export default function AddScreen() {
           longitude: polygon.reduce((s, p) => s + p.longitude, 0) / polygon.length,
         }
       : null;
-  const placeReady = type === 'REGION' ? polygon.length >= 3 : !!point;
+  // A POI is always "placed" — its point is wherever the map centre is.
+  const placeReady = type === 'REGION' ? polygon.length >= 3 : true;
+  const finishPlace = () => {
+    if (type === 'POI') setPoint(center);
+    setStep('details');
+  };
 
   const reset = () => {
     setStep('type');
     setType(null);
     setPoint(null);
     setPolygon([]);
+    setSelectedIdx(null);
     setName('');
     setDescription('');
     setCategoryId(null);
@@ -400,18 +420,11 @@ export default function AddScreen() {
             }
             showsUserLocation
             onPress={onMapPress}
+            onRegionChangeComplete={onRegionChangeComplete}
           >
-            {type === 'POI' && point ? (
-              <Marker
-                coordinate={point}
-                draggable
-                onDrag={(e) => setPoint(e.nativeEvent.coordinate)}
-                onDragEnd={(e) => setPoint(e.nativeEvent.coordinate)}
-              />
-            ) : null}
-            {type === 'REGION' && livePolygon.length >= 2 ? (
+            {type === 'REGION' && polygon.length >= 2 ? (
               <Polygon
-                coordinates={livePolygon}
+                coordinates={polygon}
                 strokeColor={colors.mossDark}
                 strokeWidth={2.5}
                 fillColor={`${colors.moss}55`}
@@ -424,23 +437,13 @@ export default function AddScreen() {
                     identifier={`v${i}`}
                     coordinate={v}
                     anchor={{ x: 0.5, y: 0.5 }}
-                    draggable
-                    tracksViewChanges={dragIdx === i}
-                    onPress={() => removeVertex(i)}
-                    onDragStart={() => {
-                      setDragIdx(i);
-                      setDragCoord(v);
-                    }}
-                    onDrag={(e) => setDragCoord(e.nativeEvent.coordinate)}
-                    onDragEnd={(e) => {
-                      moveVertex(i, e.nativeEvent.coordinate);
-                      setDragIdx(null);
-                      setDragCoord(null);
-                    }}
+                    tracksViewChanges={selectedIdx === i}
+                    onPress={() => setSelectedIdx((cur) => (cur === i ? null : i))}
                   >
-                    {/* Big transparent hit area; the numbered dot lifts while dragged. */}
+                    {/* Tap to select; selected vertex is highlighted and can be
+                        moved to the centre target or deleted from the toolbar. */}
                     <View style={styles.vertexHit}>
-                      <View style={[styles.vertex, dragIdx === i && styles.vertexActive]}>
+                      <View style={[styles.vertex, selectedIdx === i && styles.vertexActive]}>
                         <Text style={styles.vertexNum}>{i + 1}</Text>
                       </View>
                     </View>
@@ -448,6 +451,14 @@ export default function AddScreen() {
                 ))
               : null}
           </MapView>
+
+          {/* Fixed centre target: the map moves under it, so placing/adjusting a
+              point is just panning (no finger-dragging tiny pins). */}
+          <View style={styles.crosshairWrap} pointerEvents="none">
+            <View style={styles.crosshairRing}>
+              <View style={styles.crosshairDot} />
+            </View>
+          </View>
 
           {/* Top: back + location search */}
           <View style={[styles.editorTop, { paddingTop: insets.top + 8 }]} pointerEvents="box-none">
@@ -509,29 +520,52 @@ export default function AddScreen() {
           <View style={[styles.editorBottom, { paddingBottom: insets.bottom + 12 }]}>
             <Text style={styles.editorHint}>
               {type === 'REGION'
-                ? polygon.length < 3
-                  ? `Tik op de kaart om punten te zetten (min. 3). Sleep een punt om het te verplaatsen, tik erop om het te verwijderen. Punten: ${polygon.length}`
-                  : `Punten: ${polygon.length}. Sleep een punt om bij te stellen, tik erop om het te verwijderen.`
-                : point
-                  ? 'Houd de pin ingedrukt en sleep om de plek precies te zetten.'
-                  : 'Tik op de kaart om de pin neer te zetten.'}
+                ? selectedIdx != null
+                  ? `Punt ${selectedIdx + 1} geselecteerd. Beweeg de kaart en tik "Verplaats hierheen", of verwijder 'm.`
+                  : `Beweeg de kaart en tik "Punt toevoegen" om de rand te tekenen (min. 3). Tik een punt om het bij te stellen. Punten: ${polygon.length}`
+                : 'Beweeg de kaart zodat het kruis op de plek staat en tik "Klaar".'}
             </Text>
-            {type === 'REGION' && polygon.length > 0 ? (
-              <View style={{ flexDirection: 'row', gap: space.sm, marginBottom: space.sm }}>
-                <Pressable
-                  style={styles.editBtn}
-                  onPress={() => setPolygon((prev) => prev.slice(0, -1))}
-                >
-                  <SymbolView name="arrow.uturn.backward" size={14} tintColor={colors.ink2} />
-                  <Text style={styles.editBtnText}>Wis laatste</Text>
-                </Pressable>
-                <Pressable style={styles.editBtn} onPress={() => setPolygon([])}>
-                  <SymbolView name="trash" size={14} tintColor={colors.ink2} />
-                  <Text style={styles.editBtnText}>Wis alles</Text>
-                </Pressable>
-              </View>
+
+            {type === 'REGION' ? (
+              selectedIdx != null ? (
+                <View style={styles.editRow}>
+                  <Pressable style={styles.editBtnPrimary} onPress={moveSelectedToCenter}>
+                    <SymbolView name="arrow.up.to.line" size={15} tintColor="#fff" />
+                    <Text style={styles.editBtnPrimaryText}>Verplaats hierheen</Text>
+                  </Pressable>
+                  <Pressable style={styles.editBtn} onPress={() => removeVertex(selectedIdx)}>
+                    <SymbolView name="trash" size={14} tintColor={colors.rust} />
+                    <Text style={[styles.editBtnText, { color: colors.rust }]}>Verwijder</Text>
+                  </Pressable>
+                </View>
+              ) : (
+                <>
+                  <Pressable style={styles.editBtnPrimary} onPress={addVertex}>
+                    <SymbolView name="plus" size={16} tintColor="#fff" />
+                    <Text style={styles.editBtnPrimaryText}>Punt toevoegen</Text>
+                  </Pressable>
+                  {polygon.length > 0 ? (
+                    <View style={[styles.editRow, { marginTop: space.sm }]}>
+                      <Pressable
+                        style={styles.editBtn}
+                        onPress={() => setPolygon((prev) => prev.slice(0, -1))}
+                      >
+                        <SymbolView name="arrow.uturn.backward" size={14} tintColor={colors.ink2} />
+                        <Text style={styles.editBtnText}>Wis laatste</Text>
+                      </Pressable>
+                      <Pressable style={styles.editBtn} onPress={() => setPolygon([])}>
+                        <SymbolView name="trash" size={14} tintColor={colors.ink2} />
+                        <Text style={styles.editBtnText}>Wis alles</Text>
+                      </Pressable>
+                    </View>
+                  ) : null}
+                </>
+              )
             ) : null}
-            <Button label="Klaar" onPress={() => setStep('details')} disabled={!placeReady} />
+
+            <View style={{ marginTop: space.sm }}>
+              <Button label="Klaar" onPress={finishPlace} disabled={!placeReady} />
+            </View>
           </View>
         </View>
       </Modal>
@@ -638,6 +672,39 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   editBtnText: { fontFamily: font.bodyMedium, fontSize: 12.5, color: colors.ink2 },
+  editRow: { flexDirection: 'row', gap: space.sm },
+  editBtnPrimary: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 7,
+    paddingVertical: 12,
+    borderRadius: radius.pill,
+    backgroundColor: colors.moss,
+  },
+  editBtnPrimaryText: { fontFamily: font.bodyMedium, fontSize: 14, color: '#fff' },
+  // Fixed centre target (the "cursor"): a moss ring with a precise centre dot.
+  crosshairWrap: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  crosshairRing: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 2.5,
+    borderColor: colors.mossDark,
+    backgroundColor: 'rgba(255,255,255,0.35)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  crosshairDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.mossDark },
   placeHint: {
     flexDirection: 'row',
     alignItems: 'center',
