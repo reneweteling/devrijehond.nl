@@ -15,13 +15,15 @@
 //      name ...". See the dekmantel metro.config.js scar for the full story.
 //      Add any new context-providing dep to PIN_FROM_PROJECT.
 
-const { getDefaultConfig } = require('expo/metro-config');
+const { getSentryExpoConfig } = require('@sentry/react-native/metro');
 const path = require('path');
 
 const projectRoot = __dirname;
 const workspaceRoot = path.resolve(projectRoot, '../..');
 
-const config = getDefaultConfig(projectRoot);
+// getSentryExpoConfig wraps getDefaultConfig and adds the source-map serializer
+// Sentry needs to correlate minified frames with original source.
+const config = getSentryExpoConfig(projectRoot);
 
 config.watchFolders = [workspaceRoot];
 

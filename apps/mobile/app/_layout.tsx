@@ -1,7 +1,12 @@
+// Import Sentry before anything else so it can instrument module loads.
+// The named export also covers the side-effect (module is evaluated once).
+import { navigationIntegration } from '@/lib/sentry';
+
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
+import * as Sentry from '@sentry/react-native';
 import * as Linking from 'expo-linking';
-import { Stack } from 'expo-router';
+import { Stack, useNavigationContainerRef } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
@@ -9,7 +14,6 @@ import { useFonts } from 'expo-font';
 import { Poppins_500Medium, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
 import { Inter_400Regular, Inter_500Medium } from '@expo-google-fonts/inter';
 import { setUnauthorizedHandler, setAuthToken } from '@devrijehond/api-client';
-
 import { AppProviders } from '@/lib/providers';
 import { bootApiClient } from '@/lib/query';
 import { clearSession } from '@/lib/session';
@@ -29,7 +33,7 @@ SplashScreen.preventAutoHideAsync().catch(() => {
   /* a reload can race the splash; ignore */
 });
 
-export default function RootLayout() {
+function RootLayout() {
   // Per the scar: useFonts can NEVER resolve under the new architecture, so we
   // never gate render on its booleans. Fonts hydrate in the background and Text
   // falls back to the system face until they swap.
@@ -40,6 +44,15 @@ export default function RootLayout() {
     Inter_500Medium,
   });
 
+  // Register the navigation container with Sentry so it can attach navigation
+  // breadcrumbs and measure time-to-initial-display.
+  const ref = useNavigationContainerRef();
+  useEffect(() => {
+    if (ref) {
+      navigationIntegration.registerNavigationContainer(ref);
+    }
+  }, [ref]);
+
   return (
     <AppProviders>
       <SafeAreaProvider initialMetrics={initialWindowMetrics}>
@@ -49,6 +62,8 @@ export default function RootLayout() {
     </AppProviders>
   );
 }
+
+export default Sentry.wrap(RootLayout);
 
 /**
  * Lives inside the providers so it can drive the shared auth state. Boots the

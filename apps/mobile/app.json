@@ -84,7 +84,14 @@
           "photosPermission": "Kies een foto voor je profiel of je hond."
         }
       ],
-      "./plugins/with-modular-headers.js"
+      "./plugins/with-modular-headers.js",
+      [
+        "@sentry/react-native/expo",
+        {
+          "organization": "devrijehond",
+          "project": "mobile"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
