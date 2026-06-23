@@ -80,6 +80,12 @@ export EXPO_PUBLIC_AUTH_URL="${EXPO_PUBLIC_AUTH_URL:-https://api.devrijehond.nl}
 export EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID="${EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID:-762592672284-cr47iv5jq6d0p2ghvmrcrf1lar90vpiq.apps.googleusercontent.com}"
 export EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID="${EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID:-762592672284-8atreoupa0ic702gnrg61bds9h88qrmp.apps.googleusercontent.com}"
 
+# Sentry source-map upload only runs when a SENTRY_AUTH_TOKEN (and matching
+# org/project in app.json) is configured; otherwise skip it. Errors still report
+# via the DSN, just with minified stack traces. Never fail the build on upload.
+[ -z "${SENTRY_AUTH_TOKEN:-}" ] && export SENTRY_DISABLE_AUTO_UPLOAD=true
+export SENTRY_ALLOW_FAILURE=true
+
 # Wipe the Metro transform cache so a stale dev transform (e.g. config.ts with
 # EXPO_PUBLIC_API_URL=localhost from a prior `expo run:ios`) can NEVER leak its
 # inlined local URL into the release bundle.
