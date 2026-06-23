@@ -68,6 +68,13 @@ export async function GET(request: NextRequest) {
   }
   const q = parsed.data;
 
+  // Geometry simplification scaled to zoom: at a wide viewport the polygons are
+  // a few pixels across, so a coarse tolerance (relative to the bbox width)
+  // strips most vertices with no visible loss; zoomed in the tolerance shrinks
+  // toward full detail. This is what keeps the wide-view payload small enough
+  // for a phone on cellular (a NL-wide read drops from ~2.6 MB to a fraction).
+  const simplifyTol = Math.max(0, (q.maxLng - q.minLng) / 900);
+
   const where: string[] = [];
   const args: unknown[] = [];
   const param = (v: unknown) => {
@@ -93,8 +100,11 @@ export async function GET(request: NextRequest) {
       s."ratingAvg" AS rating_avg, s."ratingCount" AS rating_count,
       s."updatedAt" AS updated_at,
       -- REGION outline as GeoJSON (the geofence); POIs need only the centroid.
+      -- Simplified to the current zoom and emitted at 5-decimal (~1 m) precision
+      -- to keep the payload small. ST_SimplifyPreserveTopology avoids self-
+      -- intersections; tolerance 0 (fully zoomed in) is a no-op.
       CASE WHEN s."type" = 'REGION'
-        THEN ST_AsGeoJSON(s."geom")
+        THEN ST_AsGeoJSON(ST_SimplifyPreserveTopology(s."geom", ${param(simplifyTol)}), 5)
         ELSE NULL END AS geojson,
       (
         SELECT p."url" FROM "SpotPhoto" p
