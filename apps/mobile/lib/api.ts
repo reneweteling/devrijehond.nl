@@ -131,13 +131,38 @@ export function useSpotsInViewport(
   });
 }
 
-/** GET /api/v1/spots, paginated list (the Nearby tab). */
-export function useSpots(opts?: { type?: SpotType; categoryId?: string; limit?: number }) {
+/**
+ * GET /api/v1/spots, paginated list (the Nearby tab). When `near` is given the
+ * server orders nearest-first (PostGIS distance), so the list reflects the
+ * user's location instead of recency.
+ *
+ * The point is snapped to a coarse ~1km grid (2 decimals) for the request, so
+ * everyone in the same neighbourhood hits the SAME URL and the CDN can actually
+ * cache it. The screen still sorts the returned spots by the user's EXACT
+ * location client-side (haversine), so the order stays precise — the coarse grid
+ * only decides which ~200 spots come back, not their on-screen ordering.
+ */
+const NEAR_GRID = 100; // 1/0.01° ≈ ~1km cells
+
+export function useSpots(opts?: {
+  type?: SpotType;
+  categoryId?: string;
+  limit?: number;
+  near?: { lat: number; lng: number };
+}) {
+  const nearLat = opts?.near ? Math.round(opts.near.lat * NEAR_GRID) / NEAR_GRID : undefined;
+  const nearLng = opts?.near ? Math.round(opts.near.lng * NEAR_GRID) / NEAR_GRID : undefined;
   return useQuery({
-    queryKey: ['spots', opts?.type, opts?.categoryId, opts?.limit],
+    queryKey: ['spots', opts?.type, opts?.categoryId, opts?.limit, nearLat, nearLng],
     queryFn: ({ signal }) =>
       getApiV1Spots(
-        { type: opts?.type, categoryId: opts?.categoryId, limit: opts?.limit ?? 50 },
+        {
+          type: opts?.type,
+          categoryId: opts?.categoryId,
+          limit: opts?.limit ?? 50,
+          nearLat,
+          nearLng,
+        },
         signal,
       ),
   });

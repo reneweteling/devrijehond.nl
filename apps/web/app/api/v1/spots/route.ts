@@ -127,8 +127,17 @@ export async function GET(request: NextRequest) {
     ) = ${param(amenityIds.length)}`);
   }
 
-  // Keyset pagination on (updatedAt DESC, id DESC).
-  if (q.cursor) {
+  // Nearest-first mode: when a point is given, order by PostGIS distance (KNN
+  // via the GiST `<->` operator) instead of recency. This is what makes the
+  // "Nabij" tab show genuinely close spots rather than the newest ones.
+  const hasNear = q.nearLat !== undefined && q.nearLng !== undefined;
+  const orderBy = hasNear
+    ? `s."geom" <-> ST_SetSRID(ST_MakePoint(${param(q.nearLng)}, ${param(q.nearLat)}), 4326) ASC`
+    : `s."updatedAt" DESC, s."id" DESC`;
+
+  // Keyset pagination on (updatedAt DESC, id DESC). Only in recency mode; the
+  // nearest-first list returns the closest `limit` without a cursor for now.
+  if (!hasNear && q.cursor) {
     const cur = decodeCursor(q.cursor);
     if (cur) {
       where.push(`(s."updatedAt", s."id") < (${param(new Date(cur.updatedAt))}, ${param(cur.id)})`);
@@ -151,7 +160,7 @@ export async function GET(request: NextRequest) {
       ) AS photo_url
     FROM "Spot" s
     WHERE ${where.join(' AND ')}
-    ORDER BY s."updatedAt" DESC, s."id" DESC
+    ORDER BY ${orderBy}
     LIMIT ${param(limit + 1)}
   `;
 
@@ -168,7 +177,8 @@ export async function GET(request: NextRequest) {
   const hasMore = rows.length > limit;
   const page = hasMore ? rows.slice(0, limit) : rows;
   const last = page[page.length - 1];
-  const nextCursor = hasMore && last ? encodeCursor(last.updated_at, last.id) : null;
+  // Keyset cursor only applies to recency mode; nearest-first has no cursor yet.
+  const nextCursor = !hasNear && hasMore && last ? encodeCursor(last.updated_at, last.id) : null;
 
   const items: SpotSummaryDto[] = page.map((r) => ({
     id: r.id,

@@ -1041,6 +1041,16 @@ export type GetApiV1SpotsParams = {
    */
   since?: string | null;
   /**
+   * @minimum -90
+   * @maximum 90
+   */
+  nearLat?: number | null;
+  /**
+   * @minimum -180
+   * @maximum 180
+   */
+  nearLng?: number | null;
+  /**
    * @minimum 1
    * @maximum 200
    */

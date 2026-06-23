@@ -1187,6 +1187,18 @@
             "in": "query"
           },
           {
+            "schema": { "type": ["number", "null"], "minimum": -90, "maximum": 90 },
+            "required": false,
+            "name": "nearLat",
+            "in": "query"
+          },
+          {
+            "schema": { "type": ["number", "null"], "minimum": -180, "maximum": 180 },
+            "required": false,
+            "name": "nearLng",
+            "in": "query"
+          },
+          {
             "schema": { "type": "integer", "minimum": 1, "maximum": 200, "default": 50 },
             "required": false,
             "name": "limit",

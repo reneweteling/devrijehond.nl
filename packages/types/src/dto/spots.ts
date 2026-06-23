@@ -125,6 +125,10 @@ export const SpotsQuerySchema = z
     since: IsoDateTimeSchema.nullish().openapi({
       description: 'Delta-sync cursor, return only spots changed at/after this timestamp.',
     }),
+    // When both are present, the list is ordered nearest-first from this point
+    // (PostGIS distance) instead of newest-first. Drives the "Nabij" tab.
+    nearLat: z.coerce.number().min(-90).max(90).optional(),
+    nearLng: z.coerce.number().min(-180).max(180).optional(),
     limit: z.coerce.number().int().min(1).max(200).default(50),
   })
   .openapi({ description: 'Query parameters for `GET /api/v1/spots`.' });

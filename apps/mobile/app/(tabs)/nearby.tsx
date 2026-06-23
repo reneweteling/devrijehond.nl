@@ -41,10 +41,13 @@ export default function NearbyScreen() {
   const categories = categoriesData?.items ?? [];
   const catById = useMemo(() => new Map(categories.map((c) => [c.id, c] as const)), [categories]);
 
-  // Pull a generous page so search reaches beyond the immediate area.
+  // Pull a generous page so search reaches beyond the immediate area. With a
+  // location we ask the server for the nearest spots (coarse-gridded for CDN
+  // caching); the list below re-sorts by exact distance client-side.
   const { data, isLoading, refetch, isRefetching } = useSpots({
     categoryId: activeCat,
     limit: 200,
+    near: loc ? { lat: loc.lat, lng: loc.lng } : undefined,
   });
 
   const query = q.trim().toLowerCase();
