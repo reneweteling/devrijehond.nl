@@ -224,6 +224,134 @@ async function photoUrlForSpot(category: string, spotIndex: number): Promise<str
   }
 }
 
+const MAPS_KEY = process.env.GOOGLE_STATIC_MAPS_API_KEY;
+let warnedNoStreetviewKey = false;
+
+/** Initial compass bearing from one coordinate to another, in degrees. */
+function bearing(from: { lat: number; lng: number }, to: { lat: number; lng: number }): number {
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const toDeg = (r: number) => (r * 180) / Math.PI;
+  const phi1 = toRad(from.lat);
+  const phi2 = toRad(to.lat);
+  const dLng = toRad(to.lng - from.lng);
+  const y = Math.sin(dLng) * Math.cos(phi2);
+  const x = Math.cos(phi1) * Math.sin(phi2) - Math.sin(phi1) * Math.cos(phi2) * Math.cos(dLng);
+  return (toDeg(Math.atan2(y, x)) + 360) % 360;
+}
+
+/**
+ * Fallback photo for a spot that has no real photo: a Google Street View ground
+ * photo at its coordinates, uploaded to our own S3 bucket so the spot ends up
+ * with a normal `photoUrl` we host. We first hit the (free) Street View metadata
+ * endpoint to check there's actually a panorama nearby; if not, we return null
+ * (no blank tile, no map). The camera is aimed from the nearest panorama toward
+ * the spot. Google is only called here at seed time, never at runtime.
+ */
+async function streetViewPhotoForSpot(
+  spotId: string,
+  lat: number,
+  lng: number,
+): Promise<string | null> {
+  if (!MAPS_KEY) {
+    if (!warnedNoStreetviewKey) {
+      console.warn('[seed] GOOGLE_STATIC_MAPS_API_KEY not set — skipping Street View fallbacks');
+      warnedNoStreetviewKey = true;
+    }
+    return null;
+  }
+  try {
+    // 1. Coverage check (free, doesn't count against quota).
+    const metaUrl = new URL('https://maps.googleapis.com/maps/api/streetview/metadata');
+    metaUrl.searchParams.set('location', `${lat},${lng}`);
+    metaUrl.searchParams.set('key', MAPS_KEY);
+    const metaRes = await fetch(metaUrl.toString(), { signal: AbortSignal.timeout(30_000) });
+    const meta = (await metaRes.json()) as {
+      status: string;
+      location?: { lat: number; lng: number };
+    };
+    if (meta.status !== 'OK' || !meta.location) return null; // no panorama here
+
+    // 2. Aim the camera from the panorama toward the spot, then fetch the image.
+    const heading = bearing(meta.location, { lat, lng });
+    const imgUrl = new URL('https://maps.googleapis.com/maps/api/streetview');
+    imgUrl.searchParams.set('size', '640x400');
+    imgUrl.searchParams.set('location', `${lat},${lng}`);
+    imgUrl.searchParams.set('heading', heading.toFixed(0));
+    imgUrl.searchParams.set('fov', '80');
+    imgUrl.searchParams.set('pitch', '0');
+    imgUrl.searchParams.set('return_error_code', 'true');
+    imgUrl.searchParams.set('key', MAPS_KEY);
+    const res = await fetch(imgUrl.toString(), { signal: AbortSignal.timeout(30_000) });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const raw = Buffer.from(await res.arrayBuffer());
+    const processed = await sharp(raw).jpeg({ quality: 82, mozjpeg: true }).toBuffer();
+    const key = `spots/seed/streetview-${spotId}.jpg`;
+    const { publicUrl } = await uploadObject(key, processed, 'image/jpeg');
+    return publicUrl;
+  } catch (err) {
+    console.warn(`[seed] Street View fallback skipped for ${spotId}: ${String(err)}`);
+    return null;
+  }
+}
+
+/**
+ * Second-choice fallback when a spot has no Street View coverage: a Google
+ * Static Maps image at its coordinates, uploaded to our bucket. Satellite/hybrid
+ * map types are blocked for EEA accounts, so this is a roadmap view, a moss
+ * marker for POIs and the geofence outline for REGIONs.
+ */
+async function staticMapForSpot(
+  spotId: string,
+  lat: number,
+  lng: number,
+  type: 'POI' | 'REGION',
+  geometry?: number[][],
+): Promise<string | null> {
+  if (!MAPS_KEY) return null;
+  const center = `${lat.toFixed(6)},${lng.toFixed(6)}`;
+  const u = new URL('https://maps.googleapis.com/maps/api/staticmap');
+  u.searchParams.set('center', center);
+  u.searchParams.set('zoom', String(type === 'REGION' ? 15 : 16));
+  u.searchParams.set('size', '640x400');
+  u.searchParams.set('scale', '2');
+  if (type === 'REGION' && geometry && geometry.length >= 4) {
+    // geometry is GeoJSON [lng,lat]; Google's path wants lat,lng.
+    const path = geometry
+      .map((c) => `${(c[1] as number).toFixed(6)},${(c[0] as number).toFixed(6)}`)
+      .join('|');
+    u.searchParams.set('path', `color:0x6E7B33ff|weight:3|fillcolor:0x6E7B3333|${path}`);
+  } else {
+    u.searchParams.set('markers', `color:0x6E7B33|${center}`);
+  }
+  u.searchParams.set('key', MAPS_KEY);
+  try {
+    const res = await fetch(u.toString(), { signal: AbortSignal.timeout(30_000) });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const raw = Buffer.from(await res.arrayBuffer());
+    const processed = await sharp(raw).jpeg({ quality: 82, mozjpeg: true }).toBuffer();
+    const key = `spots/seed/staticmap-${spotId}.jpg`;
+    const { publicUrl } = await uploadObject(key, processed, 'image/jpeg');
+    return publicUrl;
+  } catch (err) {
+    console.warn(`[seed] static map fallback skipped for ${spotId}: ${String(err)}`);
+    return null;
+  }
+}
+
+// Coordinate fallbacks (Street View / static map) are an API cost, so we only
+// generate them for up to FALLBACK_IMAGE_LIMIT spots inside the Amsterdam area.
+const AMS_BBOX = { minLat: 52.25, maxLat: 52.45, minLng: 4.7, maxLng: 5.05 };
+const FALLBACK_IMAGE_LIMIT = 100;
+function inAmsterdam(lat: number, lng: number): boolean {
+  return (
+    lat >= AMS_BBOX.minLat &&
+    lat <= AMS_BBOX.maxLat &&
+    lng >= AMS_BBOX.minLng &&
+    lng <= AMS_BBOX.maxLng
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Users
 // ---------------------------------------------------------------------------
@@ -475,6 +603,9 @@ async function main() {
   const categoryPhotoIndex: Record<string, number> = {};
   const regionGeoms: { id: string; coords: number[][] }[] = [];
   let totalPhotos = 0;
+  // Coordinate-fallback bookkeeping (capped to FALLBACK_IMAGE_LIMIT around Ams).
+  let fallbackImageCount = 0;
+  const fallbackImageLog: { name: string; type: string; source: string }[] = [];
 
   for (const s of SPOTS) {
     const cat = CATEGORIES.find((c) => c.slug === s.category)!;
@@ -527,6 +658,7 @@ async function main() {
 
     // Photos: upload to S3, one at a time, cycling through category sources.
     const photoN = s.photos ?? 0;
+    let photosCreated = 0;
     if (photoN > 0) {
       const baseIdx = categoryPhotoIndex[s.category] ?? 0;
       categoryPhotoIndex[s.category] = baseIdx + photoN;
@@ -544,6 +676,40 @@ async function main() {
           },
         });
         totalPhotos++;
+        photosCreated++;
+      }
+    }
+
+    // No real photo for this spot: try a Street View ground photo at its
+    // coordinates: Street View where there's panorama coverage, else a static
+    // map. Capped to FALLBACK_IMAGE_LIMIT spots around Amsterdam to bound the
+    // Google API spend while we evaluate it.
+    if (
+      photosCreated === 0 &&
+      s.lat != null &&
+      s.lng != null &&
+      inAmsterdam(s.lat, s.lng) &&
+      fallbackImageCount < FALLBACK_IMAGE_LIMIT
+    ) {
+      let url = await streetViewPhotoForSpot(spot.id, s.lat, s.lng);
+      let source = 'streetview';
+      if (!url) {
+        url = await staticMapForSpot(spot.id, s.lat, s.lng, cat.type, s.geometry);
+        source = 'static-map';
+      }
+      if (url) {
+        await db.spotPhoto.create({
+          data: {
+            spotId: spot.id,
+            url,
+            uploadedById: submitterOf(s),
+            status: 'ACTIVE',
+            sortOrder: 0,
+          },
+        });
+        totalPhotos++;
+        fallbackImageCount++;
+        fallbackImageLog.push({ name: s.name, type: cat.type, source });
       }
     }
 
@@ -684,6 +850,19 @@ async function main() {
       `votes=${SPOTS.reduce((n, s) => n + (s.votes?.length ?? 0), 0)}, ` +
       `featureRequests=${FEATURE_REQUESTS.length}`,
   );
+
+  // Coordinate-fallback breakdown: which Amsterdam spots got which image source.
+  if (fallbackImageLog.length > 0) {
+    const sv = fallbackImageLog.filter((f) => f.source === 'streetview').length;
+    const sm = fallbackImageLog.length - sv;
+    console.log(
+      `\nCoordinate fallbacks (Amsterdam, cap ${FALLBACK_IMAGE_LIMIT}): ` +
+        `${fallbackImageLog.length} total — ${sv} Street View, ${sm} static-map:`,
+    );
+    for (const f of fallbackImageLog) {
+      console.log(`  ${f.source.padEnd(11)} ${f.type.padEnd(6)} ${f.name}`);
+    }
+  }
 
   // Print a sample of S3 URLs for verification.
   if (uploadedCache.size > 0) {
