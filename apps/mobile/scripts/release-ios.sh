@@ -69,6 +69,12 @@ cp "$ROOT/secrets/AuthKey_${ASC_KEY_ID}.p8" "$KEYFILE"
 jq -n --arg kid "$ASC_KEY_ID" --arg iss "$ASC_ISSUER_ID" --arg key "$(cat "$KEYFILE")" \
   '{key_id:$kid, issuer_id:$iss, key:$key, in_house:false}' >/tmp/asc_api_key.json
 
+# Production build: Expo then loads .env + .env.production (never the gitignored
+# .env.development.local that holds the localhost dev URL). The committed
+# apps/mobile/.env already carries these EXPO_PUBLIC_* values, so the Xcode
+# "Bundle React Native" phase inlines them even if it doesn't inherit this shell
+# env; the exports below are a belt-and-suspenders default.
+export NODE_ENV=production
 export EXPO_PUBLIC_API_URL="${EXPO_PUBLIC_API_URL:-https://api.devrijehond.nl}"
 export EXPO_PUBLIC_AUTH_URL="${EXPO_PUBLIC_AUTH_URL:-https://api.devrijehond.nl}"
 # Google web OAuth client id (public, not a secret) for native Google Sign-In.
