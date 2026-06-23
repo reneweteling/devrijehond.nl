@@ -15,7 +15,7 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "bundleIdentifier": "nl.devrijehond.app",
-      "buildNumber": "21",
+      "buildNumber": "22",
       "supportsTablet": false,
       "config": {
         "usesNonExemptEncryption": false
@@ -54,7 +54,7 @@
         "expo-splash-screen",
         {
           "image": "./assets/splash.png",
-          "imageWidth": 200,
+          "imageWidth": 240,
           "backgroundColor": "#F3EFE3"
         }
       ],

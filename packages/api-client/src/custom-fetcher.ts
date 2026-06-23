@@ -122,18 +122,53 @@ function buildUrl(path: string, params: Record<string, unknown> | undefined): st
 
 const RETRYABLE_STATUS = new Set([500, 502, 503, 504]);
 
+// Hard cap per attempt so a stalled connection (e.g. a phone on weak cellular)
+// fails fast and surfaces a retry instead of spinning forever. Combined with
+// the caller's own abort signal.
+const REQUEST_TIMEOUT_MS = 12_000;
+
 function isMeRoute(path: string): boolean {
   return path.includes('/me/') || path.startsWith('me/');
 }
 
+/** A signal that aborts on the caller's signal OR after REQUEST_TIMEOUT_MS. */
+function timeoutSignal(base: AbortSignal | null | undefined): {
+  signal: AbortSignal;
+  clear: () => void;
+} {
+  const ctrl = new AbortController();
+  const onAbort = () => ctrl.abort();
+  if (base) {
+    if (base.aborted) ctrl.abort();
+    else base.addEventListener('abort', onAbort, { once: true });
+  }
+  const timer = setTimeout(() => ctrl.abort(), REQUEST_TIMEOUT_MS);
+  return {
+    signal: ctrl.signal,
+    clear: () => {
+      clearTimeout(timer);
+      base?.removeEventListener('abort', onAbort);
+    },
+  };
+}
+
+async function fetchWithTimeout(input: string, init: RequestInit): Promise<Response> {
+  const t = timeoutSignal(init.signal);
+  try {
+    return await fetch(input, { ...init, signal: t.signal });
+  } finally {
+    t.clear();
+  }
+}
+
 async function executeFetch(input: string, init: RequestInit): Promise<Response> {
-  const first = await fetch(input, init);
+  const first = await fetchWithTimeout(input, init);
   if (!RETRYABLE_STATUS.has(first.status)) return first;
 
   // One retry on 5xx with a 500ms backoff. Keep it simple, mobile carries its
   // own offline/queue semantics; this is just a short-hop smoother.
   await new Promise((r) => setTimeout(r, 500));
-  return fetch(input, init);
+  return fetchWithTimeout(input, init);
 }
 
 export async function customFetcher<T>(config: ResolvedConfig): Promise<T> {
