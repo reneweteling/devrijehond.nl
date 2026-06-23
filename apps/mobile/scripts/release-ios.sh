@@ -90,7 +90,9 @@ echo "▸ Prebuild (regenerate ios/)"
 pnpm exec expo prebuild -p ios --no-install
 
 echo "▸ Pods"
-(cd ios && pod install)
+# Fall back to --repo-update when a newly added pod (e.g. a Sentry bump) isn't in
+# the cached spec repo yet; the plain install is fast in the common case.
+(cd ios && pod install) || (cd ios && pod install --repo-update)
 
 # Archive WITHOUT signing (no cert needed, no keychain prompt, no dev-cert
 # requirement). All signing happens at export with the distribution cert + App
