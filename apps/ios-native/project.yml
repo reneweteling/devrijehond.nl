@@ -26,4 +26,5 @@ targets:
         INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
         INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: 'Je locatie laat de kaart zien welke hondenplekken bij jou in de buurt zijn, en bepaalt of je een plek kunt bevestigen.'
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: 'NO'
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         CODE_SIGN_STYLE: Manual

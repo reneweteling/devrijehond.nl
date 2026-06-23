@@ -147,7 +147,8 @@ struct FeatureRequest: Decodable, Identifiable {
     let body: String?
     let component: String?
     let status: String
-    let voteCount: Int?
+    let upvoteCount: Int?
+    let viewerHasVoted: Bool?
 }
 
 struct FeatureRequestsResponse: Decodable {

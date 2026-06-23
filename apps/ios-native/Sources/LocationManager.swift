@@ -11,6 +11,7 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
         super.init()
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyHundredMeters
+        manager.distanceFilter = 50  // metres — don't churn on every tiny fix
     }
 
     func request() {

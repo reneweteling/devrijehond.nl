@@ -139,20 +139,25 @@ struct AddMapView: UIViewRepresentable {
 
         @objc func handleTap(_ g: UITapGestureRecognizer) {
             guard let map = mapView else { return }
-            let pt = g.location(in: map)
-            let coord = map.convert(pt, toCoordinateFrom: map)
-            DispatchQueue.main.async {
-                if self.parent.isRegion {
-                    self.parent.vertices.append(coord)
-                } else {
-                    self.parent.poi = coord
-                }
+            let coord = map.convert(g.location(in: map), toCoordinateFrom: map)
+            // Synchronous (the gesture fires on the main thread, outside SwiftUI's
+            // render pass), so it can't race a delete that recreates annotations.
+            if parent.isRegion {
+                parent.vertices.append(coord)
+            } else {
+                parent.poi = coord
             }
         }
 
-        // Don't add a point when the tap lands on a draggable pin (that's a select/drag).
+        // Don't add a point when the tap lands on a draggable pin (that's a
+        // select/drag). Walk the full view chain — annotation views nest.
         func gestureRecognizer(_ g: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
-            !(touch.view is MKAnnotationView || touch.view?.superview is MKAnnotationView)
+            var v = touch.view
+            while let cur = v {
+                if cur is MKAnnotationView { return false }
+                v = cur.superview
+            }
+            return true
         }
 
         func mapView(_ map: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
@@ -163,6 +168,10 @@ struct AddMapView: UIViewRepresentable {
             view.annotation = annotation
             view.isDraggable = true
             view.markerTintColor = UIColor(hex: 0x6E7B33)
+            // Clear both glyph slots first so a reused view can't keep the other
+            // mode's glyph (mappin showing on a numbered vertex, or vice-versa).
+            view.glyphText = nil
+            view.glyphImage = nil
             if let v = annotation as? EditableAnnotation, parent.isRegion {
                 view.glyphText = "\(v.index + 1)"
             } else {
@@ -177,12 +186,12 @@ struct AddMapView: UIViewRepresentable {
         ) {
             guard newState == .ending, let ann = view.annotation as? EditableAnnotation else { return }
             let c = ann.coordinate
-            DispatchQueue.main.async {
-                if self.parent.isRegion {
-                    if ann.index < self.parent.vertices.count { self.parent.vertices[ann.index] = c }
-                } else {
-                    self.parent.poi = c
-                }
+            // Synchronous write on the main thread — no async hop that could land
+            // after a delete renumbered the vertices.
+            if parent.isRegion {
+                if ann.index < parent.vertices.count { parent.vertices[ann.index] = c }
+            } else {
+                parent.poi = c
             }
         }
 

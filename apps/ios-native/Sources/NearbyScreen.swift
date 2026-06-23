@@ -32,6 +32,8 @@ struct NearbyScreen: View {
             Group {
                 if loading && spots.isEmpty {
                     ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if spots.isEmpty {
+                    emptyState
                 } else {
                     List(filtered) { spot in
                         Button { selected = spot } label: {
@@ -50,8 +52,10 @@ struct NearbyScreen: View {
             loc.request()
             if categories.isEmpty { categories = (try? await APIClient.categories()) ?? [] }
         }
-        .onChange(of: locKey) { _, key in
-            if !key.isEmpty { Task { await loadSpots() } }
+        // .task(id:) auto-cancels the previous fetch when the coarse cell changes,
+        // so a moving GPS fix can't trigger a refetch storm or out-of-order writes.
+        .task(id: locKey) {
+            if !locKey.isEmpty { await loadSpots() }
         }
         .sheet(item: $selected) { spot in
             SpotDetailView(spot: spot, category: categoriesById[spot.categoryId])
@@ -59,11 +63,28 @@ struct NearbyScreen: View {
         }
     }
 
+    private var emptyState: some View {
+        VStack(spacing: 12) {
+            Image(systemName: loc.coordinate == nil ? "location.slash" : "magnifyingglass")
+                .font(.system(size: 44)).foregroundStyle(Brand.moss)
+            Text(loc.coordinate == nil ? "Locatie nodig" : "Geen plekken gevonden")
+                .font(.headline).foregroundStyle(Brand.ink)
+            Text(loc.coordinate == nil
+                ? "Zet locatie aan om hondenplekken bij jou in de buurt te zien."
+                : "Probeer een andere zoekterm of beweeg over de kaart.")
+                .font(.subheadline).foregroundStyle(Brand.ink2)
+                .multilineTextAlignment(.center).padding(.horizontal, 40)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
     private func loadSpots() async {
         guard let c = loc.coordinate else { return }
         loading = true
         defer { loading = false }
-        spots = (try? await APIClient.spotsNear(lat: c.latitude, lng: c.longitude, limit: 100))?.items ?? []
+        let result = try? await APIClient.spotsNear(lat: c.latitude, lng: c.longitude, limit: 100)
+        guard !Task.isCancelled else { return }  // a newer cell superseded this
+        spots = result?.items ?? []
     }
 
     private func distance(to spot: SpotSummary) -> CLLocationDistance? {

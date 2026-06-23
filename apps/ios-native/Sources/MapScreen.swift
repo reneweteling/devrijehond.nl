@@ -119,6 +119,8 @@ struct MapKitView: UIViewRepresentable {
 
         init(onSelectSpot: @escaping (SpotSummary) -> Void) { self.onSelectSpot = onSelectSpot }
 
+        deinit { fetchTask?.cancel() }
+
         func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
             scheduleFetch(mapView)
         }
@@ -142,6 +144,9 @@ struct MapKitView: UIViewRepresentable {
             guard let resp = try? await APIClient.spotsMap(
                 minLng: minLng, minLat: minLat, maxLng: maxLng, maxLat: maxLat, cluster: true)
             else { return }
+            // A newer pan may have superseded this fetch while it was in flight;
+            // don't clobber the map with stale results.
+            guard !Task.isCancelled else { return }
 
             map.removeAnnotations(map.annotations.filter { !($0 is MKUserLocation) })
             map.removeOverlays(map.overlays)
