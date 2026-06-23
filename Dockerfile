@@ -31,6 +31,10 @@ ARG NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 ENV NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=$NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 
+# WEB_SENTRY_DSN is a publishable (non-secret) key inlined at build time.
+ARG WEB_SENTRY_DSN
+ENV WEB_SENTRY_DSN=$WEB_SENTRY_DSN
+
 # Persist Next's build cache (.next/cache) across rebuilds via a BuildKit cache
 # mount, so rebuilds aren't cold ("No build cache found"). Needs BuildKit, which
 # Dokku uses for Dockerfile builds by default.

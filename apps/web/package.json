@@ -16,6 +16,8 @@
     "@devrijehond/s3": "workspace:*",
     "@devrijehond/server": "workspace:*",
     "@devrijehond/types": "workspace:*",
+    "@sentry/nextjs": "^10.59.0",
+    "@tanstack/react-table": "^8.21.3",
     "@tiptap/extension-link": "^2.22.0",
     "@tiptap/pm": "^2.22.0",
     "@tiptap/react": "^2.22.0",
@@ -26,17 +28,16 @@
     "next": "^16.2.9",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "zod": "^4.4.3",
-    "@tanstack/react-table": "^8.21.3",
+    "sanitize-html": "^2.14.0",
     "sharp": "^0.34.5",
-    "sanitize-html": "^2.14.0"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/google.maps": "^3.65.1",
     "@types/node": "^22.10.5",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "typescript": "^5.7.2",
-    "@types/sanitize-html": "^2.13.0"
+    "@types/sanitize-html": "^2.13.0",
+    "typescript": "^5.7.2"
   }
 }

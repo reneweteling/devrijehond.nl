@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import { withSentryConfig } from '@sentry/nextjs';
 
 /**
  * Next.js config for apps/web — the De Vrije Hond public website + API + the
@@ -9,6 +10,11 @@ const nextConfig: NextConfig = {
 
   env: {
     NEXT_TELEMETRY_DISABLED: '1',
+    // WEB_SENTRY_DSN is publishable (non-secret). Listing it here causes Next
+    // to statically inline it so the browser bundle can read it via
+    // process.env.WEB_SENTRY_DSN — same pattern as NEXT_PUBLIC_* but without
+    // the automatic client exposure that prefix implies.
+    WEB_SENTRY_DSN: process.env.WEB_SENTRY_DSN,
   },
 
   // Workspace packages are published as source `.ts` — Next must transpile
@@ -35,4 +41,13 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  widenClientFileUpload: true,
+  tunnelRoute: '/monitoring',
+  silent: !process.env.CI,
+  // Skip source-map upload when creds are absent so the build never fails.
+  sourcemaps: { disable: !process.env.SENTRY_AUTH_TOKEN },
+});

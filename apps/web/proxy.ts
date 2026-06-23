@@ -69,5 +69,8 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 export default proxy;
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon\\.ico|robots\\.txt|sitemap\\.xml).*)'],
+  // Exclude static assets and the Sentry tunnel route from middleware processing.
+  matcher: [
+    '/((?!_next/static|_next/image|favicon\\.ico|robots\\.txt|sitemap\\.xml|monitoring).*)',
+  ],
 };
