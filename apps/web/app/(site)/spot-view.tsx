@@ -305,8 +305,9 @@ export function SpotView({
           ) : null}
         </div>
 
-        {/* Sidebar */}
-        <aside style={{ display: 'grid', gap: 16, position: 'sticky', top: 84 }}>
+        {/* Sidebar — sticky lives in CSS so single-column/sparse layouts can
+            override it to static (inline styles would win and overlap content). */}
+        <aside style={{ display: 'grid', gap: 16 }}>
           <SpotRegionMap geometry={spot.geometry} lat={spot.lat} lng={spot.lng} />
           {spot.lat != null && spot.lng != null ? (
             <a

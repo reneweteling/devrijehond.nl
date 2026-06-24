@@ -733,6 +733,10 @@ img {
   grid-template-columns: minmax(0, 1.6fr) minmax(260px, 1fr);
   align-items: start;
 }
+.spot-body > aside {
+  position: sticky;
+  top: 84px;
+}
 
 /* When the main column has little content (no photos, no reviews) the sidebar
    is far taller and the left column becomes a sea of white. Collapse to a
