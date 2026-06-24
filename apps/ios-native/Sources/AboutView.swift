@@ -10,77 +10,11 @@ struct AboutView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: DVH.s5) {
-                // Hero
-                HStack(spacing: DVH.s4) {
-                    ZStack {
-                        Circle()
-                            .fill(LinearGradient(
-                                colors: [Brand.moss, Brand.mossDark],
-                                startPoint: .topLeading, endPoint: .bottomTrailing))
-                            .frame(width: 64, height: 64)
-                        Image(systemName: "pawprint.fill")
-                            .font(.system(size: 28, weight: .bold))
-                            .foregroundStyle(.white)
-                    }
-                    VStack(alignment: .leading, spacing: DVH.s1) {
-                        Text("De Vrije Hond")
-                            .font(.dvhTitle).foregroundStyle(Brand.ink)
-                        Text("Versie \(appVersion)")
-                            .font(.dvhCaption).foregroundStyle(Brand.ink2)
-                    }
-                    Spacer()
-                }
-                .dvhCard()
-
-                // Intro
-                VStack(alignment: .leading, spacing: DVH.s3) {
-                    Text("Wat is De Vrije Hond?")
-                        .font(.dvhHeadline).foregroundStyle(Brand.ink)
-                    Text(
-                        "De Vrije Hond is een community-kaart van hondvriendelijke plekken in Nederland. " +
-                        "Iedereen kan een plek toevoegen. De community bevestigt of verwerpt inzendingen via stemmen, " +
-                        "zodat de kaart accuraat en actueel blijft. Geen moderators, gewoon hondeneigenaren die elkaar helpen."
-                    )
-                    .font(.dvhBody).foregroundStyle(Brand.ink2)
-                    .lineSpacing(4)
-                }
-                .dvhCard()
-
-                // Links
-                VStack(spacing: 0) {
-                    AboutLinkRow(
-                        icon: "globe",
-                        label: "Website",
-                        detail: "devrijehond.nl",
-                        url: URL(string: "https://devrijehond.nl")
-                    )
-                    Divider().padding(.leading, DVH.s4 + 28)
-                    AboutLinkRow(
-                        icon: "envelope",
-                        label: "Contact",
-                        detail: "hallo@devrijehond.nl",
-                        url: URL(string: "mailto:hallo@devrijehond.nl")
-                    )
-                }
-                .dvhCard(padding: 0)
-
-                // Legal
-                VStack(alignment: .leading, spacing: DVH.s3) {
-                    AboutLinkRow(
-                        icon: "doc.text",
-                        label: "Gebruiksvoorwaarden",
-                        detail: nil,
-                        url: URL(string: "https://devrijehond.nl/voorwaarden")
-                    )
-                    Divider().padding(.leading, DVH.s4 + 28)
-                    AboutLinkRow(
-                        icon: "hand.raised",
-                        label: "Privacybeleid",
-                        detail: nil,
-                        url: URL(string: "https://devrijehond.nl/privacy")
-                    )
-                }
-                .dvhCard(padding: 0)
+                hero
+                intro
+                makerCard
+                contactLinks
+                legalLinks
 
                 Text("Gebouwd met liefde voor honden en hun baasjes.")
                     .font(.dvhCaption).foregroundStyle(Brand.ink2.opacity(0.6))
@@ -93,6 +27,92 @@ struct AboutView: View {
         .background(Brand.sand.ignoresSafeArea())
         .navigationTitle("Over De Vrije Hond")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var hero: some View {
+        HStack(spacing: DVH.s4) {
+            Image("Logo").resizable().scaledToFit().frame(width: 64, height: 64)
+            VStack(alignment: .leading, spacing: DVH.s1) {
+                Text("De Vrije Hond").font(.dvhTitle).foregroundStyle(Brand.ink)
+                Text("Versie \(appVersion)").font(.dvhCaption).foregroundStyle(Brand.ink2)
+            }
+            Spacer()
+        }
+        .dvhCard()
+    }
+
+    private var intro: some View {
+        VStack(alignment: .leading, spacing: DVH.s3) {
+            Text("Wat is De Vrije Hond?").font(.dvhHeadline).foregroundStyle(Brand.ink)
+            Text(
+                "Een community-kaart van hondvriendelijke plekken in Nederland: losloopgebieden, "
+                + "hondenstranden, hondvriendelijke horeca, waterpunten en meer. Toegevoegd en "
+                + "geverifieerd door hondenbazen zelf. Geen moderators, gewoon mensen die elkaar helpen."
+            )
+            .font(.dvhBody).foregroundStyle(Brand.ink2).lineSpacing(4)
+        }
+        .dvhCard()
+    }
+
+    // The "maker" section: a tasteful funnel to René's work.
+    private var makerCard: some View {
+        VStack(alignment: .leading, spacing: DVH.s3) {
+            Text("Gemaakt door").font(.dvhHeadline).foregroundStyle(Brand.ink)
+            HStack(spacing: DVH.s3) {
+                Avatar(url: nil, name: "René Weteling", size: 46)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("René Weteling").font(.dvhBody.weight(.semibold)).foregroundStyle(Brand.ink)
+                    Text("Felobo B.V.").font(.dvhCaption).foregroundStyle(Brand.ink2)
+                }
+                Spacer()
+            }
+            Text(
+                "Van idee tot productie: web, mobiel en AI. Deze app is van begin tot eind door mij "
+                + "gebouwd. Zelf een app, platform of AI-oplossing nodig? Ik help je graag."
+            )
+            .font(.dvhCallout).foregroundStyle(Brand.ink2).lineSpacing(3)
+
+            Link(destination: URL(string: "https://www.weteling.com")!) {
+                HStack(spacing: DVH.s2) {
+                    Image(systemName: "arrow.up.right.square.fill")
+                    Text("Bekijk weteling.com")
+                }
+            }
+            .buttonStyle(.dvhPrimary)
+
+            Link(destination: URL(string: "mailto:rene@weteling.com")!) {
+                Text("Of mail rene@weteling.com")
+                    .font(.dvhCallout.weight(.semibold)).foregroundStyle(Brand.moss)
+                    .frame(maxWidth: .infinity)
+            }
+        }
+        .dvhCard()
+    }
+
+    private var contactLinks: some View {
+        VStack(spacing: 0) {
+            AboutLinkRow(icon: "globe", label: "Website", detail: "devrijehond.nl",
+                         url: URL(string: "https://devrijehond.nl"))
+            Divider().padding(.leading, DVH.s4 + 28)
+            AboutLinkRow(icon: "chevron.left.forwardslash.chevron.right", label: "Open source",
+                         detail: "github.com/reneweteling/devrijehond.nl",
+                         url: URL(string: "https://github.com/reneweteling/devrijehond.nl"))
+            Divider().padding(.leading, DVH.s4 + 28)
+            AboutLinkRow(icon: "envelope", label: "Contact", detail: "info@devrijehond.nl",
+                         url: URL(string: "mailto:info@devrijehond.nl"))
+        }
+        .dvhCard(padding: 0)
+    }
+
+    private var legalLinks: some View {
+        VStack(spacing: 0) {
+            AboutLinkRow(icon: "doc.text", label: "Gebruiksvoorwaarden", detail: nil,
+                         url: URL(string: "https://devrijehond.nl/terms"))
+            Divider().padding(.leading, DVH.s4 + 28)
+            AboutLinkRow(icon: "hand.raised", label: "Privacybeleid", detail: nil,
+                         url: URL(string: "https://devrijehond.nl/privacy"))
+        }
+        .dvhCard(padding: 0)
     }
 }
 

@@ -43,17 +43,17 @@ struct NearbyScreen: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                if !categories.isEmpty {
-                    categoryChips
-                        .padding(.top, DVH.s2)
-                }
+            ZStack(alignment: .top) {
+                // Ground color fills the entire screen including behind the header.
+                Brand.sand.ignoresSafeArea()
 
                 Group {
                     if loading && spots.isEmpty {
                         loadingView
+                            .padding(.top, headerHeight)
                     } else if spots.isEmpty || loadFailed {
                         noLocationState
+                            .padding(.top, headerHeight)
                     } else if filtered.isEmpty {
                         EmptyStateView(
                             icon: "magnifyingglass",
@@ -64,12 +64,32 @@ struct NearbyScreen: View {
                             query = ""
                             selectedCategoryId = nil
                         }
+                        .padding(.top, headerHeight)
                     } else {
                         spotList
+                            // Top inset so the first row starts below the sticky header.
+                            .safeAreaInset(edge: .top, spacing: 0) {
+                                Color.clear.frame(height: chipsHeight)
+                            }
                     }
+                }
+
+                // Sticky glass header: category chips on a frosted surface.
+                // Sits right below the navigation bar; scrolling content passes under it.
+                if !categories.isEmpty {
+                    VStack(spacing: 0) {
+                        categoryChips
+                            .padding(.vertical, DVH.s2)
+                        Divider().opacity(0.35)
+                    }
+                    .background(.ultraThinMaterial)
+                    .frame(maxWidth: .infinity)
                 }
             }
             .navigationTitle("Nabij")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(Brand.sand, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .searchable(text: $query, prompt: "Zoek op naam of categorie")
         }
         .task {
@@ -86,6 +106,10 @@ struct NearbyScreen: View {
                 .presentationDetents([.medium, .large])
         }
     }
+
+    // Approximate heights used for padding non-scrollable states below the header.
+    private var chipsHeight: CGFloat { categories.isEmpty ? 0 : 48 }
+    private var headerHeight: CGFloat { chipsHeight }
 
     // MARK: Category chip row (single-select)
 
@@ -112,7 +136,6 @@ struct NearbyScreen: View {
                 }
             }
             .padding(.horizontal, DVH.s4)
-            .padding(.vertical, DVH.s1)
         }
     }
 
@@ -129,9 +152,12 @@ struct NearbyScreen: View {
             }
             .buttonStyle(.plain)
             .listRowBackground(Brand.cream)
+            .listRowInsets(EdgeInsets(top: 0, leading: DVH.s4, bottom: 0, trailing: DVH.s4))
         }
         .listStyle(.plain)
+        .scrollContentBackground(.hidden)
         .background(Brand.sand)
+        .refreshable { await loadSpots() }
     }
 
     // MARK: Empty / loading states

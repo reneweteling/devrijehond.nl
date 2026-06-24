@@ -13,9 +13,10 @@ final class EditableAnnotation: NSObject, MKAnnotation {
 
 struct AddScreen: View {
     @EnvironmentObject var session: Session
+    @StateObject private var loc = LocationManager()
 
     private enum Sheet: Identifiable {
-        case form, signIn
+        case form, signIn, search
         var id: Int { hashValue }
     }
 
@@ -26,6 +27,9 @@ struct AddScreen: View {
     @State private var createdName: String?
     @State private var pendingCreatedName: String?
     @State private var resumeAddAfterSignIn = false
+
+    // Coordinate the map should jump to (search result or first user fix).
+    @State private var jumpTo: CLLocationCoordinate2D?
 
     private var canFinish: Bool { isRegion ? vertices.count >= 3 : poi != nil }
 
@@ -40,24 +44,27 @@ struct AddScreen: View {
     var body: some View {
         NavigationStack {
             ZStack(alignment: .bottom) {
-                AddMapView(isRegion: isRegion, vertices: $vertices, poi: $poi)
-                    .ignoresSafeArea(edges: .bottom)
+                AddMapView(
+                    isRegion: isRegion,
+                    vertices: $vertices,
+                    poi: $poi,
+                    jumpTo: $jumpTo,
+                    userCoordinate: loc.coordinate
+                )
+                .ignoresSafeArea(edges: .bottom)
 
                 controls
             }
-            .navigationTitle("Toevoegen")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Picker("", selection: $isRegion) {
-                        Text("Gebied").tag(true)
-                        Text("Plek").tag(false)
-                    }
-                    .pickerStyle(.segmented)
-                    .frame(width: 200)
-                    .onChange(of: isRegion) { _, _ in vertices = []; poi = nil }
+            // Floating top controls: type toggle + search pill
+            .overlay(alignment: .top) {
+                VStack(spacing: DVH.s2) {
+                    typeToggle
+                    searchPill
                 }
+                .padding(.top, DVH.s2)
             }
+            .navigationTitle("")
+            .toolbar(.hidden, for: .navigationBar)
             .sheet(item: $activeSheet, onDismiss: handleSheetDismiss) { sheet in
                 switch sheet {
                 case .form:
@@ -71,6 +78,18 @@ struct AddScreen: View {
                     SignInView(
                         reason: "Log in om je plek te plaatsen. Anderen kunnen hem daarna bevestigen.",
                         dismissable: true)
+                case .search:
+                    SearchView(
+                        onSelectPlace: { hit in
+                            jumpTo = CLLocationCoordinate2D(latitude: hit.lat, longitude: hit.lng)
+                        },
+                        onSelectSpot: { spot in
+                            if let c = spot.coordinate { jumpTo = c }
+                        },
+                        knownSpots: [],
+                        categoriesById: [:]
+                    )
+                    .presentationDetents([.large])
                 }
             }
             .alert("Plek geplaatst", isPresented: Binding(
@@ -81,6 +100,7 @@ struct AddScreen: View {
                 Text("\"\(createdName ?? "")\" staat nu op de kaart als nog niet geverifieerd. Bedankt!")
             }
         }
+        .task { loc.request() }
     }
 
     /// Runs after a sheet fully dismisses, so the success alert (or the resumed
@@ -98,23 +118,94 @@ struct AddScreen: View {
         }
     }
 
+    // MARK: - Floating type toggle
+
+    private var typeToggle: some View {
+        HStack(spacing: 0) {
+            toggleSegment(label: "Gebied", selected: isRegion) {
+                if !isRegion { isRegion = true; vertices = []; poi = nil }
+            }
+            toggleSegment(label: "Plek", selected: !isRegion) {
+                if isRegion { isRegion = false; vertices = []; poi = nil }
+            }
+        }
+        .padding(3)
+        .background(Brand.cream, in: Capsule())
+        .overlay(Capsule().strokeBorder(Brand.ink.opacity(0.08)))
+        .shadow(color: Brand.ink.opacity(0.10), radius: 8, y: 2)
+        .padding(.horizontal, DVH.s4)
+    }
+
+    private func toggleSegment(label: String, selected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(label)
+                .font(.dvhCallout.weight(.semibold))
+                .foregroundStyle(selected ? .white : Brand.ink2)
+                .frame(width: 88, height: 34)
+                .background(selected ? Brand.moss : Color.clear, in: Capsule())
+        }
+        .buttonStyle(.plain)
+        .animation(.easeInOut(duration: 0.18), value: selected)
+    }
+
+    // MARK: - Floating search pill
+
+    private var searchPill: some View {
+        Button { activeSheet = .search } label: {
+            HStack(spacing: DVH.s2) {
+                Image(systemName: "magnifyingglass")
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(Brand.moss)
+                Text("Zoek een locatie")
+                    .font(.dvhBody)
+                    .foregroundStyle(Brand.ink2)
+                Spacer()
+            }
+            .padding(.horizontal, DVH.s4)
+            .frame(height: 44)
+            .background(.ultraThinMaterial, in: Capsule())
+            .overlay(Capsule().strokeBorder(Brand.ink.opacity(0.08)))
+            .shadow(color: Brand.ink.opacity(0.08), radius: 8, y: 2)
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, DVH.s4)
+    }
+
+    // MARK: - Bottom controls card
+
     private var controls: some View {
-        VStack(spacing: 10) {
-            Text(hint).font(.footnote).foregroundStyle(Brand.ink2)
+        VStack(spacing: DVH.s3) {
+            Text(hint)
+                .font(.dvhCaption)
+                .foregroundStyle(Brand.ink2)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 14).padding(.vertical, 8)
-                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
 
             if isRegion && !vertices.isEmpty {
-                HStack(spacing: 10) {
-                    Button { if !vertices.isEmpty { vertices.removeLast() } } label: {
-                        Label("Wis laatste", systemImage: "arrow.uturn.backward")
-                    }.buttonStyle(.bordered)
-                    Button(role: .destructive) { vertices = [] } label: {
+                HStack(spacing: DVH.s2) {
+                    Button {
+                        if !vertices.isEmpty { vertices.removeLast() }
+                    } label: {
+                        Label("Ongedaan", systemImage: "arrow.uturn.backward")
+                            .font(.dvhCaption.weight(.semibold))
+                            .foregroundStyle(Brand.ink2)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 40)
+                            .background(Brand.sand, in: RoundedRectangle(cornerRadius: DVH.rSm))
+                    }
+                    .buttonStyle(.plain)
+
+                    Button(role: .destructive) {
+                        vertices = []
+                    } label: {
                         Label("Wis alles", systemImage: "trash")
-                    }.buttonStyle(.bordered)
+                            .font(.dvhCaption.weight(.semibold))
+                            .foregroundStyle(Brand.terra)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 40)
+                            .background(Brand.terra.opacity(0.10), in: RoundedRectangle(cornerRadius: DVH.rSm))
+                    }
+                    .buttonStyle(.plain)
                 }
-                .font(.subheadline)
             }
 
             Button {
@@ -125,28 +216,47 @@ struct AddScreen: View {
                     activeSheet = .signIn
                 }
             } label: {
-                Text(canFinish ? "Klaar (\(isRegion ? vertices.count : 1))" : "Klaar")
-                    .frame(maxWidth: .infinity)
+                HStack(spacing: DVH.s2) {
+                    Text(canFinish
+                         ? "Klaar — \(isRegion ? "\(vertices.count) punten" : "1 plek")"
+                         : "Klaar")
+                    if canFinish {
+                        Image(systemName: "checkmark")
+                            .font(.body.weight(.bold))
+                    }
+                }
             }
-            .buttonStyle(.borderedProminent)
-            .tint(Brand.moss)
+            .buttonStyle(.dvhPrimary)
             .disabled(!canFinish)
         }
-        .padding(16)
+        .padding(DVH.s4)
+        .dvhCard()
+        .padding(.horizontal, DVH.s4)
+        .padding(.bottom, DVH.s5)
     }
 
     private var hint: String {
         if isRegion {
-            return "Tik op de kaart om punten te zetten. Sleep een punt om het te verplaatsen (min. 3)."
+            return vertices.isEmpty
+                ? "Tik op de kaart om de omtrek te tekenen. Sleep een punt om te verplaatsen."
+                : vertices.count < 3
+                    ? "Nog \(3 - vertices.count) punt\(3 - vertices.count == 1 ? "" : "en") nodig voor een geldig gebied."
+                    : "Gebied klaar. Voeg meer punten toe of ga verder."
         }
-        return poi == nil ? "Tik op de kaart om de plek neer te zetten." : "Sleep de pin om de plek precies te zetten."
+        return poi == nil
+            ? "Tik op de kaart om de plek neer te zetten."
+            : "Sleep de pin om de plek precies te plaatsen."
     }
 }
+
+// MARK: - AddMapView
 
 struct AddMapView: UIViewRepresentable {
     let isRegion: Bool
     @Binding var vertices: [CLLocationCoordinate2D]
     @Binding var poi: CLLocationCoordinate2D?
+    @Binding var jumpTo: CLLocationCoordinate2D?
+    let userCoordinate: CLLocationCoordinate2D?
 
     func makeCoordinator() -> Coordinator { Coordinator(self) }
 
@@ -155,6 +265,7 @@ struct AddMapView: UIViewRepresentable {
         map.delegate = context.coordinator
         map.showsUserLocation = true
         map.pointOfInterestFilter = .excludingAll
+        // Fallback: centre of the Netherlands until a location fix arrives.
         map.region = MKCoordinateRegion(
             center: CLLocationCoordinate2D(latitude: 52.365, longitude: 4.89),
             span: MKCoordinateSpan(latitudeDelta: 0.06, longitudeDelta: 0.06))
@@ -168,12 +279,39 @@ struct AddMapView: UIViewRepresentable {
     func updateUIView(_ map: MKMapView, context: Context) {
         context.coordinator.parent = self
         context.coordinator.sync(map)
+
+        // Centre on the user the first time a fix arrives (mirrors MapKitView).
+        if let c = userCoordinate, !context.coordinator.didCenterOnUser {
+            context.coordinator.didCenterOnUser = true
+            map.setRegion(
+                MKCoordinateRegion(
+                    center: c,
+                    span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)),
+                animated: true)
+        }
+
+        // Jump to a geocoded / searched location (deduped by lat+lng pair).
+        if let c = jumpTo,
+           c.latitude != context.coordinator.lastJumpLat
+            || c.longitude != context.coordinator.lastJumpLng {
+            context.coordinator.lastJumpLat = c.latitude
+            context.coordinator.lastJumpLng = c.longitude
+            map.setRegion(
+                MKCoordinateRegion(
+                    center: c,
+                    span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)),
+                animated: true)
+        }
     }
 
     final class Coordinator: NSObject, MKMapViewDelegate, UIGestureRecognizerDelegate {
         var parent: AddMapView
         private weak var mapView: MKMapView?
         private var polygonOverlay: MKPolygon?
+
+        var didCenterOnUser = false
+        var lastJumpLat: Double = 0
+        var lastJumpLng: Double = 0
 
         init(_ parent: AddMapView) { self.parent = parent }
 

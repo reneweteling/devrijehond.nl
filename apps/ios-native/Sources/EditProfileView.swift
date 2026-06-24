@@ -197,10 +197,13 @@ struct EditProfileView: View {
             let jpeg = squareJPEG(img)
             uploadedImageUrl = try await APIClient.uploadPhoto(jpeg: jpeg, token: token)
         } catch let e as APIError {
-            _ = session.signOutIfUnauthorized(e)
-            error = "Foto uploaden mislukt."
+            if session.signOutIfUnauthorized(e) {
+                error = "Je sessie is verlopen. Log opnieuw in."
+            } else {
+                error = "Foto uploaden mislukt: \(e.errorDescription ?? "onbekende fout")."
+            }
         } catch {
-            self.error = "Foto uploaden mislukt."
+            self.error = "Foto uploaden mislukt. Probeer het opnieuw."
         }
         uploading = false
     }

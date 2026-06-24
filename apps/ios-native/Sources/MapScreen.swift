@@ -7,6 +7,8 @@ final class SpotAnnotation: NSObject, MKAnnotation {
     let spot: SpotSummary
     let coordinate: CLLocationCoordinate2D
     var title: String? { spot.name }
+    /// Stable identity: the spot's server-assigned id.
+    var spotId: String { spot.id }
     init?(_ spot: SpotSummary) {
         guard let c = spot.coordinate else { return nil }
         self.spot = spot
@@ -17,9 +19,13 @@ final class SpotAnnotation: NSObject, MKAnnotation {
 final class ClusterCountAnnotation: NSObject, MKAnnotation {
     let count: Int
     let coordinate: CLLocationCoordinate2D
+    /// Stable key combining position + count; clusters at the same position
+    /// with the same count are considered identical across fetches.
+    let clusterKey: String
     init(_ cluster: MapCluster) {
         self.count = cluster.count
         self.coordinate = cluster.coordinate
+        self.clusterKey = "\(cluster.coordinate.latitude)_\(cluster.coordinate.longitude)_\(cluster.count)"
     }
 }
 
@@ -309,6 +315,11 @@ struct MapKitView: UIViewRepresentable {
         private var allClusters: [MapCluster] = []
         private var fetchTask: Task<Void, Never>?
 
+        // Stable annotation/overlay tracking for flicker-free diffs.
+        private var liveSpots: [String: SpotAnnotation] = [:]          // keyed by spot.id
+        private var liveClusters: [String: ClusterCountAnnotation] = [:] // keyed by clusterKey
+        private var livePolygons: [String: MKPolygon] = [:]            // keyed by spot.id
+
         // Dedup guards for recenter/jump triggers (stored as lat/lng pairs so
         // Equatable isn't needed on CLLocationCoordinate2D).
         var lastRecenterLatitude: Double = 0
@@ -359,21 +370,55 @@ struct MapKitView: UIViewRepresentable {
             renderFilteredAnnotations(on: map)
         }
 
-        /// Renders annotations from the current cached item set. Filtering is
-        /// done server-side (categoryId is passed to spotsMap), so allItems and
-        /// allClusters already reflect the active filter. Safe to call from any
-        /// main-thread context (updateUIView or @MainActor fetch).
+        /// Diff-based render: keeps existing annotations/overlays whose identity
+        /// is still present in the new result set, adds genuinely new ones, and
+        /// removes only the ones that have gone. MKUserLocation is never touched.
+        /// Filtering is done server-side, so allItems/allClusters already reflect
+        /// the active category. Safe to call from any main-thread context.
         func renderFilteredAnnotations(on map: MKMapView) {
-            map.removeAnnotations(map.annotations.filter { !($0 is MKUserLocation) })
-            map.removeOverlays(map.overlays)
+            // --- Spot annotations ---
+            var desiredSpots: [String: SpotAnnotation] = [:]
+            for spot in allItems {
+                if let ann = SpotAnnotation(spot) {
+                    desiredSpots[ann.spotId] = ann
+                }
+            }
+            let spotsToRemove = liveSpots.filter { desiredSpots[$0.key] == nil }.map(\.value)
+            let spotsToAdd   = desiredSpots.filter { liveSpots[$0.key] == nil }.map(\.value)
+            if !spotsToRemove.isEmpty { map.removeAnnotations(spotsToRemove) }
+            if !spotsToAdd.isEmpty    { map.addAnnotations(spotsToAdd) }
+            // Update live set: keep survivors, add newcomers.
+            for ann in spotsToRemove { liveSpots.removeValue(forKey: ann.spotId) }
+            for ann in spotsToAdd    { liveSpots[ann.spotId] = ann }
 
-            map.addAnnotations(allItems.compactMap { SpotAnnotation($0) })
-            // Always render clusters — they now reflect the server-filtered set.
-            map.addAnnotations(allClusters.map { ClusterCountAnnotation($0) })
+            // --- Cluster annotations ---
+            var desiredClusters: [String: ClusterCountAnnotation] = [:]
+            for cluster in allClusters {
+                let ann = ClusterCountAnnotation(cluster)
+                desiredClusters[ann.clusterKey] = ann
+            }
+            let clustersToRemove = liveClusters.filter { desiredClusters[$0.key] == nil }.map(\.value)
+            let clustersToAdd   = desiredClusters.filter { liveClusters[$0.key] == nil }.map(\.value)
+            if !clustersToRemove.isEmpty { map.removeAnnotations(clustersToRemove) }
+            if !clustersToAdd.isEmpty    { map.addAnnotations(clustersToAdd) }
+            for ann in clustersToRemove { liveClusters.removeValue(forKey: ann.clusterKey) }
+            for ann in clustersToAdd    { liveClusters[ann.clusterKey] = ann }
+
+            // --- Region polygon overlays ---
+            var desiredPolygons: [String: (ring: [CLLocationCoordinate2D], count: Int)] = [:]
             for s in allItems where s.isRegion {
                 if let ring = s.geometry?.outerRing, ring.count >= 3 {
-                    map.addOverlay(MKPolygon(coordinates: ring, count: ring.count))
+                    desiredPolygons[s.id] = (ring, ring.count)
                 }
+            }
+            let polygonsToRemove = livePolygons.filter { desiredPolygons[$0.key] == nil }
+            let polygonsToAdd    = desiredPolygons.filter { livePolygons[$0.key] == nil }
+            if !polygonsToRemove.isEmpty { map.removeOverlays(polygonsToRemove.map(\.value)) }
+            for (spotId, _)  in polygonsToRemove { livePolygons.removeValue(forKey: spotId) }
+            for (spotId, p) in polygonsToAdd {
+                let poly = MKPolygon(coordinates: p.ring, count: p.count)
+                livePolygons[spotId] = poly
+                map.addOverlay(poly)
             }
         }
 

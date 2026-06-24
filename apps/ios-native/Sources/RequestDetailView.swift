@@ -93,13 +93,27 @@ struct RequestDetailView: View {
 
     // MARK: - Author
 
+    private var hasAuthorIdentity: Bool {
+        (request.author?.handle?.isEmpty == false) || (request.author?.image?.isEmpty == false)
+    }
+
+    @ViewBuilder private var authorAvatar: some View {
+        if hasAuthorIdentity {
+            Avatar(url: request.author?.image, name: request.author?.handle, size: 40)
+        } else {
+            // Anonymous submitter: a calm, neutral mark instead of the bold paw.
+            ZStack {
+                Circle().fill(Brand.mossSoft)
+                Image(systemName: "person.fill")
+                    .font(.system(size: 18)).foregroundStyle(Brand.mossDark.opacity(0.6))
+            }
+            .frame(width: 40, height: 40)
+        }
+    }
+
     private var authorRow: some View {
         HStack(spacing: DVH.s3) {
-            Avatar(
-                url: request.author?.image,
-                name: request.author?.handle,
-                size: 40
-            )
+            authorAvatar
             VStack(alignment: .leading, spacing: 2) {
                 Text("Ingediend door")
                     .font(.dvhCaption)
