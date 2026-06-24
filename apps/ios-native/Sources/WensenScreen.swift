@@ -31,7 +31,7 @@ struct WensenScreen: View {
                         .padding(.top, DVH.s3)
                 }
             }
-            .background(Brand.sand)
+            .dvhScreenBackground()
             .refreshable { await loadRequests() }
             .navigationTitle("Wensen")
             .navigationBarTitleDisplayMode(.inline)

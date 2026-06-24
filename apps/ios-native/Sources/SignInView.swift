@@ -25,6 +25,10 @@ struct SignInView: View {
     var body: some View {
         ZStack(alignment: .topTrailing) {
             Brand.sand.ignoresSafeArea()
+            Image("Logo")
+                .resizable().scaledToFit().frame(width: 360)
+                .opacity(0.05).offset(x: 70, y: 20)
+                .ignoresSafeArea().accessibilityHidden(true)
 
             ScrollView {
                 VStack(spacing: DVH.s5) {

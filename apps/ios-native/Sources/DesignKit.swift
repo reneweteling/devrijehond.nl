@@ -80,13 +80,42 @@ struct CardModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .padding(padding)
-            .background(Brand.cream, in: RoundedRectangle(cornerRadius: DVH.rLg))
-            .overlay(RoundedRectangle(cornerRadius: DVH.rLg).strokeBorder(Brand.ink.opacity(0.06)))
-            .shadow(color: Brand.ink.opacity(0.05), radius: 12, y: 4)
+            .background {
+                ZStack {
+                    RoundedRectangle(cornerRadius: DVH.rLg).fill(.ultraThinMaterial)
+                    RoundedRectangle(cornerRadius: DVH.rLg).fill(Brand.cream.opacity(0.5))
+                }
+            }
+            .overlay(RoundedRectangle(cornerRadius: DVH.rLg).strokeBorder(.white.opacity(0.45)))
+            .shadow(color: Brand.ink.opacity(0.06), radius: 14, y: 5)
     }
 }
 extension View {
     func dvhCard(padding: CGFloat = DVH.s4) -> some View { modifier(CardModifier(padding: padding)) }
+}
+
+// MARK: - Screen background (subtle brand watermark, for non-map screens)
+
+struct ScreenBackground: ViewModifier {
+    func body(content: Content) -> some View {
+        content.background(
+            ZStack(alignment: .topTrailing) {
+                Brand.sand
+                Image("Logo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 360)
+                    .opacity(0.05)
+                    .offset(x: 80, y: 24)
+                    .accessibilityHidden(true)
+            }
+            .ignoresSafeArea()
+        )
+    }
+}
+extension View {
+    /// Sand ground + a faint dog-logo watermark. Use on screens without a map.
+    func dvhScreenBackground() -> some View { modifier(ScreenBackground()) }
 }
 
 // MARK: - Text field

@@ -58,7 +58,7 @@ struct NearbyScreen: View {
                         .padding(.top, DVH.s2)
                 }
             }
-            .background(Brand.sand)
+            .dvhScreenBackground()
             .scrollDismissesKeyboard(.immediately)
             .refreshable { await loadSpots() }
             .navigationTitle("Nabij")

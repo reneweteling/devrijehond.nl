@@ -45,7 +45,7 @@ struct ModeratorApplyView: View {
             .padding(.horizontal, DVH.s4)
             .padding(.vertical, DVH.s5)
         }
-        .background(Brand.sand.ignoresSafeArea())
+        .dvhScreenBackground()
         .navigationTitle("Word moderator")
         .navigationBarTitleDisplayMode(.inline)
         .task { await load() }

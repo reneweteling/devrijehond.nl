@@ -38,7 +38,7 @@ struct DogEditView: View {
             .padding(.horizontal, DVH.s4)
             .padding(.vertical, DVH.s5)
         }
-        .background(Brand.sand.ignoresSafeArea())
+        .dvhScreenBackground()
         .navigationTitle(isEditing ? "Hond bewerken" : "Hond toevoegen")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
