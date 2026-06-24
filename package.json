@@ -17,7 +17,6 @@
     "db:up": "docker compose up -d db",
     "db:down": "docker compose down",
     "generate": "turbo run generate",
-    "ios:release": "pnpm --filter mobile ios:release",
     "prepare": "husky"
   },
   "devDependencies": {
