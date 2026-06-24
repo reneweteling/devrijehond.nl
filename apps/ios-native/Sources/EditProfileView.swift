@@ -222,8 +222,10 @@ struct EditProfileView: View {
             image: uploadedImageUrl
         )
         do {
-            _ = try await APIClient.updateProfile(patch, token: token)
-            await session.hydrate()
+            // Use the returned, authoritative profile so the new avatar shows
+            // immediately (no waiting on a separate re-fetch round-trip).
+            let updated = try await APIClient.updateProfile(patch, token: token)
+            session.setProfile(updated)
             dismiss()
         } catch let e as APIError {
             _ = session.signOutIfUnauthorized(e)

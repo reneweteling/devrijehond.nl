@@ -77,6 +77,12 @@ final class Session: ObservableObject {
     /// Fetch the profile for the current token. A 401 means the token is dead
     /// server-side (e.g. expired, or a DB reseed), so drop to anonymous. Other
     /// failures (offline) keep the session so the user stays logged in.
+    /// Apply a freshly-fetched/updated profile to the cache immediately, so the
+    /// UI reflects a just-saved avatar/dog without waiting for a re-fetch.
+    func setProfile(_ p: MeProfile) {
+        profile = p
+    }
+
     func hydrate() async {
         if mockMode { return }
         guard let token else { return }

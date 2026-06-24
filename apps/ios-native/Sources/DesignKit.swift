@@ -200,6 +200,10 @@ struct Avatar: View {
                 } placeholder: {
                     placeholder
                 }
+                // Re-init when the URL changes (nil -> url after an upload), so a
+                // freshly-saved avatar actually loads instead of keeping the old
+                // placeholder state.
+                .id(url)
             } else {
                 placeholder
             }

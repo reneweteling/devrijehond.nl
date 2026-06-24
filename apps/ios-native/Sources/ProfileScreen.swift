@@ -276,12 +276,13 @@ struct ProfileDogRow: View {
 
     @ViewBuilder
     private var dogThumb: some View {
-        if let url = dog.photoUrl.flatMap(URL.init) {
+        if let photo = dog.photoUrl, let url = URL(string: photo) {
             AsyncImage(url: url) { img in
                 img.resizable().scaledToFill()
             } placeholder: {
                 Circle().fill(Brand.mossSoft)
             }
+            .id(photo) // reload when a freshly-uploaded photo URL arrives
             .frame(width: 44, height: 44).clipShape(Circle())
             .overlay(Circle().strokeBorder(Brand.ink.opacity(0.07)))
         } else {
