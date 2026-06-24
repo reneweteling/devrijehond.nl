@@ -424,18 +424,12 @@ async function staticMapForSpot(
   }
 }
 
-// Coordinate fallbacks (Street View / static map) are an API cost, so we only
-// generate them for up to FALLBACK_IMAGE_LIMIT spots inside the Amsterdam area.
-const AMS_BBOX = { minLat: 52.25, maxLat: 52.45, minLng: 4.7, maxLng: 5.05 };
-const FALLBACK_IMAGE_LIMIT = 100;
-function inAmsterdam(lat: number, lng: number): boolean {
-  return (
-    lat >= AMS_BBOX.minLat &&
-    lat <= AMS_BBOX.maxLat &&
-    lng >= AMS_BBOX.minLng &&
-    lng <= AMS_BBOX.maxLng
-  );
-}
+// Coordinate fallbacks (Street View / static map) cost Google API calls, so we
+// cap how many spots get one per seed. Nationwide (no longer Amsterdam-only).
+// Google's free tier is ~10k Street View Static calls/month; at this cap a
+// re-seed uses up to ~1500, so a handful of deploys/month stays free. The
+// panorama-existence check that precedes each image fetch is itself free.
+const FALLBACK_IMAGE_LIMIT = 1500;
 
 // ---------------------------------------------------------------------------
 // Users
@@ -791,7 +785,6 @@ async function main() {
       photosCreated === 0 &&
       s.lat != null &&
       s.lng != null &&
-      inAmsterdam(s.lat, s.lng) &&
       fallbackImageCount < FALLBACK_IMAGE_LIMIT
     ) {
       let url = await streetViewPhotoForSpot(spot.id, s.lat, s.lng);
@@ -959,7 +952,7 @@ async function main() {
     const sv = fallbackImageLog.filter((f) => f.source === 'streetview').length;
     const sm = fallbackImageLog.length - sv;
     console.log(
-      `\nCoordinate fallbacks (Amsterdam, cap ${FALLBACK_IMAGE_LIMIT}): ` +
+      `\nCoordinate fallbacks (nationwide, cap ${FALLBACK_IMAGE_LIMIT}): ` +
         `${fallbackImageLog.length} total — ${sv} Street View, ${sm} static-map:`,
     );
     for (const f of fallbackImageLog) {
