@@ -89,22 +89,32 @@ struct CategoriesResponse: Decodable {
     let items: [Category]
 }
 
-// MARK: - Profile (filled in when the profile screen is built)
+// MARK: - Profile
 
 struct Dog: Decodable, Identifiable, Hashable {
     let id: String
     let name: String
     let breed: String?
+    let birthYear: Int?
+    let birthDate: String?
     let photoUrl: String?
+    let note: String?
 }
 
+/// GET /api/v1/me. The wire shape is the bare profile object (no envelope).
 struct MeProfile: Decodable {
     let id: String
+    let email: String?
     let name: String?
     let handle: String?
+    let bio: String?
     let image: String?
+    let role: String?
     let reputation: Int?
     let dogs: [Dog]?
+
+    var isAdmin: Bool { role == "ADMIN" }
+    var isModerator: Bool { role == "MODERATOR" || role == "ADMIN" }
 }
 
 // MARK: - Spot detail
@@ -114,6 +124,13 @@ struct Amenity: Decodable, Identifiable, Hashable {
     let slug: String
     let label: String
     let icon: String?
+}
+
+struct SpotAuthor: Decodable, Hashable {
+    let id: String
+    let handle: String?
+    let name: String?
+    let image: String?
 }
 
 struct SpotDetail: Decodable {
@@ -131,12 +148,53 @@ struct SpotDetail: Decodable {
     let amenities: [Amenity]
     let photos: [PhotoURL]
     let rating: Rating
+    let submittedBy: SpotAuthor?
+
+    var isVerified: Bool { status == "VERIFIED" }
 }
 
 /// A photo as exposed on the detail DTO (just the URL is needed here).
 struct PhotoURL: Decodable, Identifiable {
     let url: String
     var id: String { url }
+}
+
+struct AmenitiesResponse: Decodable {
+    let items: [Amenity]
+}
+
+// MARK: - Auth + mutations
+
+/// Response of the native sign-in bridge (apple-native / google-native) and the
+/// magic-link verify: a signed BetterAuth bearer + ISO expiry.
+struct AuthToken: Decodable {
+    let token: String
+    let expiresAt: String?
+}
+
+/// The spot returned by POST /api/v1/me/spots (a full SpotDetail; we only need a
+/// few fields to confirm + navigate).
+struct CreatedSpot: Decodable {
+    let id: String
+    let slug: String
+    let name: String
+    let status: String
+}
+
+struct Vote: Decodable {
+    let id: String
+    let spotId: String
+    let value: String
+    let proximityVerified: Bool
+    let createdAt: String
+}
+
+struct VoteResponse: Decodable {
+    let vote: Vote
+    let netScore: Double
+    let confirmCount: Int
+    let denyCount: Int
+    let status: String
 }
 
 // MARK: - Feature requests (Wensen)

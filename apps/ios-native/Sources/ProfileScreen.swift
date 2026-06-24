@@ -6,52 +6,114 @@ struct ProfileScreen: View {
     var body: some View {
         NavigationStack {
             Group {
-                if let me = session.profile {
-                    signedIn(me)
+                if session.isAuthenticated {
+                    if let me = session.profile {
+                        signedIn(me)
+                    } else {
+                        ProgressView("Profiel laden…")
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .background(Brand.sand)
+                    }
                 } else {
-                    signedOut
+                    SignInView()
                 }
             }
             .navigationTitle("Profiel")
         }
-    }
-
-    private var signedOut: some View {
-        VStack(spacing: 14) {
-            Image(systemName: "person.crop.circle.fill")
-                .font(.system(size: 64)).foregroundStyle(Brand.moss)
-            Text("Niet ingelogd").font(.title3.bold()).foregroundStyle(Brand.ink)
-            Text("Inloggen (Apple, Google, magic-link) komt in de native app nog. "
-                + "Plekken bekijken en de kaart werken zonder account.")
-                .font(.subheadline).foregroundStyle(Brand.ink2)
-                .multilineTextAlignment(.center).padding(.horizontal, 32)
+        .task {
+            if session.isAuthenticated && session.profile == nil { await session.hydrate() }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Brand.sand)
     }
 
     private func signedIn(_ me: MeProfile) -> some View {
         List {
             Section {
                 HStack(spacing: 14) {
-                    Image(systemName: "person.crop.circle.fill")
-                        .font(.system(size: 44)).foregroundStyle(Brand.mossDark)
-                    VStack(alignment: .leading) {
-                        Text(me.name ?? me.handle ?? "Hondenbaas").font(.headline)
-                        if let h = me.handle { Text("@\(h)").font(.caption).foregroundStyle(.secondary) }
+                    avatar(me)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(me.name ?? me.handle ?? "Hondenbaas")
+                            .font(.headline).foregroundStyle(Brand.ink)
+                        if let h = me.handle {
+                            Text("@\(h)").font(.caption).foregroundStyle(.secondary)
+                        }
+                        if let email = me.email {
+                            Text(email).font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
+                    Spacer()
+                }
+                .padding(.vertical, 4)
+            }
+
+            Section("Reputatie") {
+                HStack {
+                    Label("\(me.reputation ?? 0) punten", systemImage: "rosette")
+                        .foregroundStyle(Brand.mossDark)
+                    Spacer()
+                    if me.isModerator {
+                        Text(me.isAdmin ? "Beheerder" : "Moderator")
+                            .font(.caption.weight(.semibold))
+                            .padding(.horizontal, 8).padding(.vertical, 3)
+                            .background(Brand.mossSoft, in: Capsule())
+                            .foregroundStyle(Brand.mossDark)
                     }
                 }
             }
+
             if let dogs = me.dogs, !dogs.isEmpty {
                 Section("Mijn honden") {
                     ForEach(dogs) { dog in
-                        Text([dog.name, dog.breed].compactMap { $0 }.joined(separator: " · "))
+                        HStack(spacing: 12) {
+                            dogThumb(dog)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(dog.name).font(.body.weight(.medium))
+                                if let sub = dogSubtitle(dog) {
+                                    Text(sub).font(.caption).foregroundStyle(.secondary)
+                                }
+                            }
+                        }
                     }
                 }
             }
+
             Section {
                 Button("Uitloggen", role: .destructive) { session.signOut() }
             }
         }
+        .refreshable { await session.hydrate() }
+    }
+
+    @ViewBuilder private func avatar(_ me: MeProfile) -> some View {
+        if let img = me.image, let url = URL(string: img) {
+            AsyncImage(url: url) { i in i.resizable().scaledToFill() } placeholder: {
+                Circle().fill(Brand.mossSoft)
+            }
+            .frame(width: 52, height: 52).clipShape(Circle())
+        } else {
+            Image(systemName: "person.crop.circle.fill")
+                .font(.system(size: 48)).foregroundStyle(Brand.mossDark)
+        }
+    }
+
+    @ViewBuilder private func dogThumb(_ dog: Dog) -> some View {
+        if let p = dog.photoUrl, let url = URL(string: p) {
+            AsyncImage(url: url) { i in i.resizable().scaledToFill() } placeholder: {
+                Circle().fill(Brand.mossSoft)
+            }
+            .frame(width: 38, height: 38).clipShape(Circle())
+        } else {
+            ZStack {
+                Circle().fill(Brand.mossSoft)
+                Image(systemName: "pawprint.fill").font(.caption).foregroundStyle(Brand.mossDark)
+            }
+            .frame(width: 38, height: 38)
+        }
+    }
+
+    private func dogSubtitle(_ dog: Dog) -> String? {
+        var parts: [String] = []
+        if let breed = dog.breed, !breed.isEmpty { parts.append(breed) }
+        if let year = dog.birthYear { parts.append("sinds \(year)") }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 }

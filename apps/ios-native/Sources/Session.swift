@@ -1,28 +1,73 @@
 import Foundation
 
-/// Holds the signed-in bearer token (persisted in the Keychain) and exposes it
-/// to the API client + screens. Anonymous until a token is set.
+/// Holds the signed-in bearer token (persisted in the Keychain) and the cached
+/// profile, and exposes them to the API client + screens. Anonymous until a
+/// token is set. The token is a signed BetterAuth session token.
 @MainActor
 final class Session: ObservableObject {
     @Published private(set) var token: String?
-    @Published var profile: MeProfile?
+    @Published private(set) var profile: MeProfile?
+    @Published private(set) var hydrating = false
+    /// A transient message to surface to the user (e.g. a failed magic link).
+    @Published var authNotice: String?
 
-    private let keychainKey = "nl.devrijehond.native.token"
+    private let tokenKey = "nl.devrijehond.native.token"
+    private let expiresKey = "nl.devrijehond.native.expiresAt"
 
     init() {
-        token = Keychain.read(keychainKey)
+        token = Keychain.read(tokenKey)
     }
 
     var isAuthenticated: Bool { token != nil }
 
-    func signIn(token: String) {
-        Keychain.set(token, for: keychainKey)
+    var userId: String? { profile?.id }
+
+    func signIn(token: String, expiresAt: String?) {
+        Keychain.set(token, for: tokenKey)
+        if let expiresAt { Keychain.set(expiresAt, for: expiresKey) }
         self.token = token
+        Task { await hydrate() }
     }
 
     func signOut() {
-        Keychain.delete(keychainKey)
+        Keychain.delete(tokenKey)
+        Keychain.delete(expiresKey)
         token = nil
         profile = nil
+    }
+
+    /// Drop to anonymous if an authed request came back 401 (token dead
+    /// server-side). Returns true when it acted, so callers can adjust their UI.
+    @discardableResult
+    func signOutIfUnauthorized(_ error: Error) -> Bool {
+        let is401: Bool
+        switch error {
+        case let APIError.server(_, _, status): is401 = status == 401
+        case APIError.badStatus(401): is401 = true
+        default: is401 = false
+        }
+        if is401 {
+            signOut()
+            authNotice = "Je sessie is verlopen. Log opnieuw in."
+        }
+        return is401
+    }
+
+    /// Fetch the profile for the current token. A 401 means the token is dead
+    /// server-side (e.g. expired, or a DB reseed), so drop to anonymous. Other
+    /// failures (offline) keep the session so the user stays logged in.
+    func hydrate() async {
+        guard let token else { return }
+        hydrating = true
+        defer { hydrating = false }
+        do {
+            profile = try await APIClient.me(token: token)
+        } catch let APIError.server(_, _, status) where status == 401 {
+            signOut()
+        } catch APIError.badStatus(401) {
+            signOut()
+        } catch {
+            // Offline or transient: keep the token, try again next launch.
+        }
     }
 }

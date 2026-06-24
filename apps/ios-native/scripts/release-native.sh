@@ -52,18 +52,9 @@ jq -n --arg kid "$ASC_KEY_ID" --arg iss "$ASC_ISSUER_ID" --arg key "$(cat "$KEYF
 echo "▸ Generate Xcode project"
 xcodegen generate
 
-echo "▸ Archive (unsigned)"
-xcodebuild \
-  -project DeVrijeHondNative.xcodeproj \
-  -scheme DeVrijeHondNative \
-  -configuration Release \
-  -sdk iphoneos \
-  -archivePath build/DeVrijeHondNative.xcarchive \
-  CODE_SIGNING_ALLOWED=NO \
-  CODE_SIGNING_REQUIRED=NO \
-  archive
-
-echo "▸ App Store profile + export (manual signing)"
+echo "▸ App Store profile (before archive, so CODE_SIGN_ENTITLEMENTS — e.g. Sign in"
+echo "  with Apple — get compiled into the signed app; an unsigned archive would"
+echo "  drop them and export only re-applies the profile's base entitlements)"
 fastlane sigh \
   --api_key_path /tmp/asc_api_key.json \
   --app_identifier "$BUNDLE_ID" \
@@ -71,7 +62,30 @@ fastlane sigh \
   --output_path /tmp/profiles_native
 PROFILE_PATH="$(ls /tmp/profiles_native/*.mobileprovision | head -1)"
 PROFILE_NAME="$(security cms -D -i "$PROFILE_PATH" | plutil -extract Name raw -)"
-echo "  profile: $PROFILE_NAME"
+PROFILE_UUID="$(security cms -D -i "$PROFILE_PATH" | plutil -extract UUID raw -)"
+echo "  profile: $PROFILE_NAME ($PROFILE_UUID)"
+# Install it where xcodebuild looks it up by name during the signed archive.
+PROFILE_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
+mkdir -p "$PROFILE_DIR"
+cp "$PROFILE_PATH" "$PROFILE_DIR/$PROFILE_UUID.mobileprovision"
+# project.yml hardcodes PROVISIONING_PROFILE_SPECIFIER to sigh's default name; fail
+# loudly if sigh ever names it differently rather than archiving with the wrong one.
+EXPECTED_PROFILE="$BUNDLE_ID AppStore"
+if [ "$PROFILE_NAME" != "$EXPECTED_PROFILE" ]; then
+  echo "✗ Profile name '$PROFILE_NAME' != expected '$EXPECTED_PROFILE'." >&2
+  echo "  Update PROVISIONING_PROFILE_SPECIFIER in project.yml to match." >&2
+  exit 1
+fi
+
+echo "▸ Archive (signed, manual — signing scoped to the app target via project.yml)"
+xcodebuild \
+  -project DeVrijeHondNative.xcodeproj \
+  -scheme DeVrijeHondNative \
+  -configuration Release \
+  -sdk iphoneos \
+  -archivePath build/DeVrijeHondNative.xcarchive \
+  OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN" \
+  archive
 
 cat >ExportOptions.plist <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>

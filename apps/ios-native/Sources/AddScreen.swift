@@ -12,11 +12,30 @@ final class EditableAnnotation: NSObject, MKAnnotation {
 }
 
 struct AddScreen: View {
+    @EnvironmentObject var session: Session
+
+    private enum Sheet: Identifiable {
+        case form, signIn
+        var id: Int { hashValue }
+    }
+
     @State private var isRegion = true
     @State private var vertices: [CLLocationCoordinate2D] = []
     @State private var poi: CLLocationCoordinate2D?
+    @State private var activeSheet: Sheet?
+    @State private var createdName: String?
+    @State private var pendingCreatedName: String?
+    @State private var resumeAddAfterSignIn = false
 
     private var canFinish: Bool { isRegion ? vertices.count >= 3 : poi != nil }
+
+    private var geoPoint: GeoPoint? {
+        guard let poi else { return nil }
+        return GeoPoint(lat: poi.latitude, lng: poi.longitude)
+    }
+    private var geoPolygon: [GeoPoint] {
+        vertices.map { GeoPoint(lat: $0.latitude, lng: $0.longitude) }
+    }
 
     var body: some View {
         NavigationStack {
@@ -39,6 +58,43 @@ struct AddScreen: View {
                     .onChange(of: isRegion) { _, _ in vertices = []; poi = nil }
                 }
             }
+            .sheet(item: $activeSheet, onDismiss: handleSheetDismiss) { sheet in
+                switch sheet {
+                case .form:
+                    SpotFormView(
+                        isRegion: isRegion, point: geoPoint, polygon: geoPolygon,
+                        onCreated: { created in
+                            vertices = []; poi = nil
+                            pendingCreatedName = created.name
+                        })
+                case .signIn:
+                    SignInView(
+                        reason: "Log in om je plek te plaatsen. Anderen kunnen hem daarna bevestigen.",
+                        dismissable: true)
+                }
+            }
+            .alert("Plek geplaatst", isPresented: Binding(
+                get: { createdName != nil }, set: { if !$0 { createdName = nil } })
+            ) {
+                Button("Top") { createdName = nil }
+            } message: {
+                Text("\"\(createdName ?? "")\" staat nu op de kaart als nog niet geverifieerd. Bedankt!")
+            }
+        }
+    }
+
+    /// Runs after a sheet fully dismisses, so the success alert (or the resumed
+    /// form) presents cleanly instead of racing the dismissing sheet.
+    private func handleSheetDismiss() {
+        if let n = pendingCreatedName {
+            pendingCreatedName = nil
+            resumeAddAfterSignIn = false
+            createdName = n
+            return
+        }
+        if resumeAddAfterSignIn {
+            resumeAddAfterSignIn = false
+            if session.isAuthenticated && canFinish { activeSheet = .form }
         }
     }
 
@@ -62,8 +118,12 @@ struct AddScreen: View {
             }
 
             Button {
-                // Submit needs auth (not yet wired in the native app); for now this
-                // confirms the geometry the native editor produced.
+                if session.isAuthenticated {
+                    activeSheet = .form
+                } else {
+                    resumeAddAfterSignIn = true
+                    activeSheet = .signIn
+                }
             } label: {
                 Text(canFinish ? "Klaar (\(isRegion ? vertices.count : 1))" : "Klaar")
                     .frame(maxWidth: .infinity)
