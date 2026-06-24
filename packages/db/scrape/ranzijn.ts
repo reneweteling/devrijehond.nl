@@ -73,6 +73,12 @@ async function main() {
   const dierenartsen = vets
     .map((r) => toPoi(r, 'dierenarts'))
     .filter((r): r is RawPoi => r !== null);
+  // Every Ranzijn location with a vet also has a dog wash, so the wash POIs are
+  // the same locations under the wash category.
+  const wasstraten = vets
+    .map((r) => toPoi(r, 'dierenarts'))
+    .filter((r): r is RawPoi => r !== null)
+    .map((p) => ({ ...p, description: 'Hondenwasstraat bij Ranzijn.' }));
 
   writeFileSync(
     new URL('../data/ranzijn-winkels.json', import.meta.url),
@@ -82,8 +88,13 @@ async function main() {
     new URL('../data/ranzijn-dierenartsen.json', import.meta.url),
     JSON.stringify(dierenartsen, null, 2),
   );
+  writeFileSync(
+    new URL('../data/ranzijn-wasstraat.json', import.meta.url),
+    JSON.stringify(wasstraten, null, 2),
+  );
   console.log(`✓ ranzijn: ${shops.length} winkels -> ranzijn-winkels.json`);
   console.log(`✓ ranzijn: ${dierenartsen.length} dierenartsen -> ranzijn-dierenartsen.json`);
+  console.log(`✓ ranzijn: ${wasstraten.length} wasstraten -> ranzijn-wasstraat.json`);
 }
 
 main().catch((e) => {

@@ -141,6 +141,11 @@ const POI_SOURCES: { category: string; file: string; descFallback: string }[] = 
     file: 'ranzijn-dierenartsen.json',
     descFallback: 'Dierenarts bij Ranzijn.',
   },
+  {
+    category: 'wash',
+    file: 'ranzijn-wasstraat.json',
+    descFallback: 'Hondenwasstraat bij Ranzijn.',
+  },
 ];
 
 // ---------------------------------------------------------------------------
