@@ -5,43 +5,39 @@ struct WensenScreen: View {
 
     @State private var requests: [FeatureRequest] = []
     @State private var selectedStatus: String? = nil   // nil = "Populair"
+    @State private var mineOnly = false                // "Mijn wensen"
     @State private var loading = false
     @State private var errorMessage: String? = nil
     @State private var showNew = false
     @State private var showSignIn = false
 
-    private struct StatusFilter: Identifiable {
-        let id: String           // unique key used in ForEach
-        let status: String?      // nil = no filter (popular)
-        let label: String
-        var isSelected: Bool
+    /// "Mijn wensen": requests I submitted myself, or upvoted.
+    private func isMine(_ req: FeatureRequest) -> Bool {
+        if let h = req.author?.handle, let me = session.profile?.handle, h == me { return true }
+        return req.viewerHasVoted == true
     }
 
-    private var filters: [StatusFilter] {
-        [
-            StatusFilter(id: "all",         status: nil,           label: "Populair",      isSelected: selectedStatus == nil),
-            StatusFilter(id: "CONSIDERING", status: "CONSIDERING", label: "In overweging", isSelected: selectedStatus == "CONSIDERING"),
-            StatusFilter(id: "PLANNED",     status: "PLANNED",     label: "Gepland",       isSelected: selectedStatus == "PLANNED"),
-            StatusFilter(id: "DONE",        status: "DONE",        label: "Klaar",         isSelected: selectedStatus == "DONE"),
-            StatusFilter(id: "DECLINED",    status: "DECLINED",    label: "Afgewezen",     isSelected: selectedStatus == "DECLINED"),
-        ]
+    private var displayed: [FeatureRequest] {
+        mineOnly ? requests.filter(isMine) : requests
     }
 
     var body: some View {
         NavigationStack {
-            ZStack(alignment: .bottomTrailing) {
-                Brand.sand.ignoresSafeArea()
-
-                VStack(spacing: 0) {
+            ScrollView {
+                LazyVStack(spacing: 0) {
                     filterRow
-                    contentArea
+                        .padding(.top, DVH.s2)
+                    resultsSection
+                        .padding(.top, DVH.s3)
                 }
-
-                fab
-                    .padding([.bottom, .trailing], DVH.s5)
             }
+            .background(Brand.sand)
+            .refreshable { await loadRequests() }
             .navigationTitle("Wensen")
             .navigationBarTitleDisplayMode(.inline)
+            .overlay(alignment: .bottomTrailing) {
+                fab.padding([.bottom, .trailing], DVH.s5)
+            }
         }
         .sheet(isPresented: $showNew) {
             RequestNewView { newRequest in
@@ -58,70 +54,80 @@ struct WensenScreen: View {
         .task { await loadRequests() }
     }
 
-    // MARK: - Filter chips
+    // MARK: - Filter chips (scroll with the content)
 
     private var filterRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: DVH.s2) {
-                ForEach(filters) { filter in
-                    DVHChip(
-                        label: filter.label,
-                        selected: filter.isSelected
-                    ) {
-                        if selectedStatus != filter.status {
-                            selectedStatus = filter.status
-                            Task { await loadRequests() }
-                        }
+                if session.isAuthenticated {
+                    DVHChip(label: "Mijn wensen", icon: "person.fill", selected: mineOnly) {
+                        mineOnly = true
+                        selectedStatus = nil
+                    }
+                }
+                DVHChip(label: "Populair", selected: !mineOnly && selectedStatus == nil) {
+                    selectIf(status: nil)
+                }
+                ForEach(statusFilters, id: \.0) { status, label in
+                    DVHChip(label: label, selected: !mineOnly && selectedStatus == status) {
+                        selectIf(status: status)
                     }
                 }
             }
-            .padding(.horizontal, DVH.s5)
-            .padding(.vertical, DVH.s2)
+            .padding(.horizontal, DVH.s4)
         }
     }
 
-    // MARK: - Content
+    private var statusFilters: [(String, String)] {
+        [
+            ("CONSIDERING", "In overweging"),
+            ("PLANNED", "Gepland"),
+            ("DONE", "Klaar"),
+            ("DECLINED", "Afgewezen"),
+        ]
+    }
 
-    @ViewBuilder
-    private var contentArea: some View {
+    private func selectIf(status: String?) {
+        guard mineOnly || selectedStatus != status else { return }
+        mineOnly = false
+        selectedStatus = status
+        Task { await loadRequests() }
+    }
+
+    // MARK: - Results
+
+    @ViewBuilder private var resultsSection: some View {
         if loading && requests.isEmpty {
-            Spacer()
-            ProgressView()
-                .frame(maxWidth: .infinity)
-            Spacer()
+            ProgressView().tint(Brand.moss).frame(maxWidth: .infinity, minHeight: 360)
         } else if let msg = errorMessage {
             EmptyStateView(
                 icon: "exclamationmark.circle",
                 title: "Kon wensen niet laden",
                 message: msg,
                 actionLabel: "Opnieuw proberen"
-            ) {
-                Task { await loadRequests() }
-            }
-        } else if requests.isEmpty {
+            ) { Task { await loadRequests() } }
+            .frame(minHeight: 360)
+        } else if displayed.isEmpty {
             EmptyStateView(
-                icon: "lightbulb",
-                title: "Nog geen wensen",
-                message: "Wees de eerste die een idee indient.",
+                icon: mineOnly ? "person" : "lightbulb",
+                title: mineOnly ? "Nog geen eigen wensen" : "Nog geen wensen",
+                message: mineOnly
+                    ? "Wensen die je zelf indient of waarop je stemt verschijnen hier."
+                    : "Wees de eerste die een idee indient.",
                 actionLabel: "Idee indienen"
-            ) {
-                handleFABTap()
-            }
+            ) { handleFABTap() }
+            .frame(minHeight: 360)
         } else {
-            ScrollView {
-                LazyVStack(spacing: DVH.s3) {
-                    ForEach(requests) { req in
-                        NavigationLink(destination: RequestDetailView(request: req)) {
-                            WishCard(request: req)
-                        }
-                        .buttonStyle(.plain)
+            LazyVStack(spacing: DVH.s3) {
+                ForEach(displayed) { req in
+                    NavigationLink(destination: RequestDetailView(request: req)) {
+                        WishCard(request: req)
                     }
+                    .buttonStyle(.plain)
                 }
-                .padding(.horizontal, DVH.s5)
-                .padding(.top, DVH.s3)
-                .padding(.bottom, 100)   // clear FAB
             }
-            .refreshable { await loadRequests() }
+            .padding(.horizontal, DVH.s4)
+            .padding(.bottom, 100) // clear the FAB
         }
     }
 
@@ -141,18 +147,15 @@ struct WensenScreen: View {
     // MARK: - Actions
 
     private func handleFABTap() {
-        if session.isAuthenticated {
-            showNew = true
-        } else {
-            showSignIn = true
-        }
+        if session.isAuthenticated { showNew = true } else { showSignIn = true }
     }
 
     private func loadRequests() async {
         loading = true
         errorMessage = nil
         do {
-            requests = try await APIClient.featureRequests(status: selectedStatus)
+            // "Mijn wensen" cuts across statuses, so fetch everything and filter.
+            requests = try await APIClient.featureRequests(status: mineOnly ? nil : selectedStatus)
         } catch {
             errorMessage = "Er is iets misgegaan. Probeer het opnieuw."
         }
@@ -194,7 +197,7 @@ private struct WishCard: View {
 
     private var upvoteColumn: some View {
         VStack(spacing: DVH.s1) {
-            Image(systemName: "chevron.up.circle")
+            Image(systemName: request.viewerHasVoted == true ? "chevron.up.circle.fill" : "chevron.up.circle")
                 .font(.system(size: 22, weight: .medium))
                 .foregroundStyle(request.viewerHasVoted == true ? Brand.moss : Brand.ink2)
             Text("\(request.upvoteCount ?? 0)")

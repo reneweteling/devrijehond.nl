@@ -43,22 +43,26 @@ struct NearbyScreen: View {
 
     var body: some View {
         NavigationStack {
-            content
-                .background(Brand.sand)
-                .navigationTitle("Nabij")
-                .navigationBarTitleDisplayMode(.inline)
-                .searchable(text: $query, prompt: "Zoek op naam of categorie")
-                // Sticky frosted chip bar pinned right below the (large) title;
-                // the list scrolls under both.
-                .safeAreaInset(edge: .top, spacing: 0) {
+            ScrollView {
+                LazyVStack(spacing: 0) {
+                    // Search + filters live inside the scroll, so they scroll
+                    // up with the list instead of staying pinned.
+                    searchField
+                        .padding(.horizontal, DVH.s4)
+                        .padding(.top, DVH.s2)
                     if !categories.isEmpty {
-                        VStack(spacing: 0) {
-                            categoryChips.padding(.vertical, DVH.s2)
-                            Divider().opacity(0.35)
-                        }
-                        .background(.ultraThinMaterial)
+                        categoryChips
+                            .padding(.top, DVH.s3)
                     }
+                    resultsSection
+                        .padding(.top, DVH.s2)
                 }
+            }
+            .background(Brand.sand)
+            .scrollDismissesKeyboard(.immediately)
+            .refreshable { await loadSpots() }
+            .navigationTitle("Nabij")
+            .navigationBarTitleDisplayMode(.inline)
         }
         .task {
             loc.request()
@@ -75,11 +79,34 @@ struct NearbyScreen: View {
         }
     }
 
-    @ViewBuilder private var content: some View {
+    // MARK: Search field (scrolls with the content)
+
+    private var searchField: some View {
+        HStack(spacing: DVH.s2) {
+            Image(systemName: "magnifyingglass").foregroundStyle(Brand.ink2)
+            TextField("Zoek op naam of categorie", text: $query)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .foregroundStyle(Brand.ink)
+            if !query.isEmpty {
+                Button { query = "" } label: {
+                    Image(systemName: "xmark.circle.fill").foregroundStyle(Brand.ink2.opacity(0.5))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .font(.dvhBody)
+        .padding(.horizontal, DVH.s4)
+        .frame(height: 46)
+        .background(Brand.cream, in: Capsule())
+        .overlay(Capsule().strokeBorder(Brand.ink.opacity(0.1)))
+    }
+
+    @ViewBuilder private var resultsSection: some View {
         if loading && spots.isEmpty {
-            loadingView
+            loadingView.frame(minHeight: 360)
         } else if spots.isEmpty || loadFailed {
-            noLocationState
+            noLocationState.frame(minHeight: 420)
         } else if filtered.isEmpty {
             EmptyStateView(
                 icon: "magnifyingglass",
@@ -90,8 +117,29 @@ struct NearbyScreen: View {
                 query = ""
                 selectedCategoryId = nil
             }
+            .frame(minHeight: 420)
         } else {
-            spotList
+            LazyVStack(spacing: 0) {
+                ForEach(Array(filtered.enumerated()), id: \.element.id) { index, spot in
+                    Button { selected = spot } label: {
+                        SpotRow(
+                            spot: spot,
+                            category: categoriesById[spot.categoryId],
+                            distance: distance(to: spot)
+                        )
+                        .padding(.horizontal, DVH.s4)
+                    }
+                    .buttonStyle(.plain)
+                    if index < filtered.count - 1 {
+                        Divider().padding(.leading, 56 + DVH.s3 + DVH.s4)
+                    }
+                }
+            }
+            .background(Brand.cream)
+            .clipShape(RoundedRectangle(cornerRadius: DVH.rLg))
+            .overlay(RoundedRectangle(cornerRadius: DVH.rLg).strokeBorder(Brand.ink.opacity(0.06)))
+            .padding(.horizontal, DVH.s4)
+            .padding(.bottom, DVH.s5)
         }
     }
 
@@ -121,27 +169,6 @@ struct NearbyScreen: View {
             }
             .padding(.horizontal, DVH.s4)
         }
-    }
-
-    // MARK: Spot list
-
-    private var spotList: some View {
-        List(filtered) { spot in
-            Button { selected = spot } label: {
-                SpotRow(
-                    spot: spot,
-                    category: categoriesById[spot.categoryId],
-                    distance: distance(to: spot)
-                )
-            }
-            .buttonStyle(.plain)
-            .listRowBackground(Brand.cream)
-            .listRowInsets(EdgeInsets(top: 0, leading: DVH.s4, bottom: 0, trailing: DVH.s4))
-        }
-        .listStyle(.plain)
-        .scrollContentBackground(.hidden)
-        .background(Brand.sand)
-        .refreshable { await loadSpots() }
     }
 
     // MARK: Empty / loading states
