@@ -529,18 +529,8 @@ function DogsSection({ dogs: initialDogs }: { dogs: DogDto[] }) {
             const age = dogAge(d);
             const subtitle = [d.breed, age].filter(Boolean).join(' · ');
             return (
-              <div
-                key={d.id}
-                className="card"
-                style={{
-                  padding: '12px 18px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: 12,
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+              <div key={d.id} className="card dog-row" style={{ padding: '12px 18px' }}>
+                <div className="dog-info">
                   {d.photoUrl ? (
                     <img
                       src={d.photoUrl}
@@ -572,16 +562,16 @@ function DogsSection({ dogs: initialDogs }: { dogs: DogDto[] }) {
                       🐾
                     </div>
                   )}
-                  <div style={{ minWidth: 0 }}>
+                  <div className="dog-meta">
                     <span style={{ fontWeight: 600, fontSize: 16 }}>{d.name}</span>
                     {subtitle && (
-                      <span className="muted" style={{ fontSize: 13.5, marginLeft: 8 }}>
+                      <span className="muted dog-sub" style={{ fontSize: 13.5, marginLeft: 8 }}>
                         {subtitle}
                       </span>
                     )}
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                <div className="dog-actions">
                   <button
                     type="button"
                     className="btn btn-ghost btn-sm"
