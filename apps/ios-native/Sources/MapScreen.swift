@@ -63,9 +63,13 @@ struct MapScreen: View {
                 onFetchedSpots: { allFetchedSpots = $0 }
             )
             .ignoresSafeArea()
-
-            // Bottom legend
+        }
+        // Legend, right-aligned and lifted clear of the Apple Maps attribution
+        // (logo + legal link) at the very bottom — covering those risks rejection.
+        .overlay(alignment: .bottomTrailing) {
             legend
+                .padding(.trailing, DVH.s4)
+                .padding(.bottom, DVH.s3)
         }
         // Floating controls layered above the map
         .overlay(alignment: .top) {
@@ -196,7 +200,6 @@ struct MapScreen: View {
         .padding(.horizontal, 14)
         .padding(.vertical, 9)
         .background(.bar, in: Capsule())
-        .padding(.bottom, 6)
     }
 
     private func legendLabel(color: Color, text: String, dashed: Bool = false) -> some View {

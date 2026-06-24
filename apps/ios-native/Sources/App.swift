@@ -9,14 +9,29 @@ import GoogleSignIn
 import Sentry
 #endif
 
+#if canImport(FirebaseCore)
+import FirebaseCore
+#endif
+
 @main
 struct DeVrijeHondNativeApp: App {
     @StateObject private var session = Session()
     @State private var booted = false
 
     init() {
+        Self.startFirebase()
         Self.startSentry()
         Self.configureNavigationBar()
+    }
+
+    /// Google Analytics for iOS via Firebase. Only configures when the
+    /// GoogleService-Info.plist is bundled, so the app still runs without it.
+    private static func startFirebase() {
+        #if canImport(FirebaseCore)
+        if Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist") != nil {
+            FirebaseApp.configure()
+        }
+        #endif
     }
 
     private static func startSentry() {
@@ -81,9 +96,10 @@ struct DeVrijeHondNativeApp: App {
 
     private func boot() async {
         await session.hydrate()
-        // Keep the brand splash up briefly even when boot is instant (anonymous).
-        try? await Task.sleep(nanoseconds: 650_000_000)
-        withAnimation(.easeOut(duration: 0.35)) { booted = true }
+        // Keep the brand splash up long enough to actually see the logo animation
+        // settle (the spring runs ~0.6s) before fading out.
+        try? await Task.sleep(nanoseconds: 1_600_000_000)
+        withAnimation(.easeOut(duration: 0.4)) { booted = true }
     }
 
     @MainActor

@@ -1,6 +1,9 @@
 import SwiftUI
 
 struct AboutView: View {
+    @EnvironmentObject private var session: Session
+    @State private var showModerator = false
+
     private var appVersion: String {
         let short = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
         let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
@@ -12,6 +15,7 @@ struct AboutView: View {
             VStack(alignment: .leading, spacing: DVH.s5) {
                 hero
                 intro
+                moderatorCard
                 makerCard
                 contactLinks
                 legalLinks
@@ -27,6 +31,9 @@ struct AboutView: View {
         .dvhScreenBackground()
         .navigationTitle("Over De Vrije Hond")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showModerator) {
+            ModeratorApplyView().environmentObject(session)
+        }
     }
 
     private var hero: some View {
@@ -47,9 +54,34 @@ struct AboutView: View {
             Text(
                 "Een community-kaart van hondvriendelijke plekken in Nederland: losloopgebieden, "
                 + "hondenstranden, hondvriendelijke horeca, waterpunten en meer. Toegevoegd en "
-                + "geverifieerd door hondenbazen zelf. Geen moderators, gewoon mensen die elkaar helpen."
+                + "geverifieerd door hondenbazen zelf. De community houdt zichzelf op orde: je stemt "
+                + "plekken naar geverifieerd, en moderators uit de community springen bij waar nodig."
             )
             .font(.dvhBody).foregroundStyle(Brand.ink2).lineSpacing(4)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .dvhCard()
+    }
+
+    // Community self-moderation: explain it and let people apply.
+    private var moderatorCard: some View {
+        VStack(alignment: .leading, spacing: DVH.s3) {
+            Text("Help mee modereren").font(.dvhHeadline).foregroundStyle(Brand.ink)
+            Text(
+                "Het idee: de community controleert zichzelf. Als moderator beoordeel je gemelde of "
+                + "betwiste plekken en houd je de kaart betrouwbaar voor iedereen."
+            )
+            .font(.dvhBody).foregroundStyle(Brand.ink2).lineSpacing(4)
+
+            if session.profile?.isModerator == true {
+                Label("Je bent al moderator", systemImage: "checkmark.seal.fill")
+                    .font(.dvhCallout.weight(.semibold)).foregroundStyle(Brand.mossDark)
+            } else {
+                Button { showModerator = true } label: {
+                    Text("Meld je aan als moderator")
+                }
+                .buttonStyle(.dvhPrimary)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .dvhCard()
@@ -60,7 +92,7 @@ struct AboutView: View {
         VStack(alignment: .leading, spacing: DVH.s3) {
             Text("Gemaakt door").font(.dvhHeadline).foregroundStyle(Brand.ink)
             HStack(spacing: DVH.s3) {
-                Image("Logo").resizable().scaledToFit().frame(width: 46, height: 46)
+                Image("WetelingLogo").resizable().scaledToFit().frame(height: 34)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("René Weteling").font(.dvhBody.weight(.semibold)).foregroundStyle(Brand.ink)
                     Text("Felobo B.V.").font(.dvhCaption).foregroundStyle(Brand.ink2)

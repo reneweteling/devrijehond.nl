@@ -144,6 +144,7 @@ struct SpotDetail: Decodable {
     let lat: Double?
     let lng: Double?
     let address: String?
+    let phone: String?
     let website: String?
     let amenities: [Amenity]
     let photos: [PhotoURL]

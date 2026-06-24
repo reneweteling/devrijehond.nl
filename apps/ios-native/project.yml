@@ -11,6 +11,9 @@ packages:
   Sentry:
     url: https://github.com/getsentry/sentry-cocoa
     from: 8.40.0
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk
+    from: 11.0.0
 settings:
   base:
     SWIFT_VERSION: '5.0'
@@ -28,6 +31,8 @@ targets:
         product: GoogleSignIn
       - package: Sentry
         product: Sentry
+      - package: Firebase
+        product: FirebaseAnalytics
     info:
       path: Info.plist
       properties:

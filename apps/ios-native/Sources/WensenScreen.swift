@@ -152,12 +152,18 @@ struct WensenScreen: View {
 
     private func loadRequests() async {
         loading = true
-        errorMessage = nil
         do {
             // "Mijn wensen" cuts across statuses, so fetch everything and filter.
-            requests = try await APIClient.featureRequests(status: mineOnly ? nil : selectedStatus)
+            let result = try await APIClient.featureRequests(status: mineOnly ? nil : selectedStatus)
+            requests = result
+            errorMessage = nil
+        } catch is CancellationError {
+            // A quick pull-to-refresh can cancel an in-flight load; another load is
+            // taking over, so don't flash an error.
         } catch {
-            errorMessage = "Er is iets misgegaan. Probeer het opnieuw."
+            // Only surface an error if we have nothing to show; a concurrent load
+            // that succeeded shouldn't be masked by a stale failure.
+            if requests.isEmpty { errorMessage = "Er is iets misgegaan. Probeer het opnieuw." }
         }
         loading = false
     }

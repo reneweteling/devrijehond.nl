@@ -1,7 +1,21 @@
 import SwiftUI
 
+#if canImport(FirebaseAnalytics)
+import FirebaseAnalytics
+#endif
+
 struct RootView: View {
     @EnvironmentObject var session: Session
+
+    private static let tabNames = ["Kaart", "Nabij", "Toevoegen", "Wensen", "Profiel"]
+
+    private func logScreen(_ tab: Int) {
+        #if canImport(FirebaseAnalytics)
+        let name = tab >= 0 && tab < Self.tabNames.count ? Self.tabNames[tab] : "tab\(tab)"
+        Analytics.logEvent(
+            AnalyticsEventScreenView, parameters: [AnalyticsParameterScreenName: name])
+        #endif
+    }
 
     var body: some View {
         // Tab selection lives in Session so e.g. "Bekijk op kaart" can switch tabs.

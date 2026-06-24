@@ -300,9 +300,10 @@ struct SpotDetailView: View {
 
     @ViewBuilder private var poiInfo: some View {
         let hasAddress = !(detail?.address ?? "").isEmpty
+        let hasPhone = !(detail?.phone ?? "").isEmpty
         let hasSite = detail?.website != nil
 
-        if hasAddress || hasSite {
+        if hasAddress || hasPhone || hasSite {
             VStack(alignment: .leading, spacing: DVH.s3) {
                 if let addr = detail?.address, !addr.isEmpty {
                     Button {
@@ -317,6 +318,15 @@ struct SpotDetailView: View {
                     }
                     .buttonStyle(.plain)
                 }
+                if let phone = detail?.phone, !phone.isEmpty,
+                   let url = telURL(for: phone) {
+                    Link(destination: url) {
+                        Label(phone, systemImage: "phone")
+                            .font(.dvhCallout)
+                            .foregroundStyle(Brand.moss)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
                 if let site = detail?.website, let url = URL(string: site) {
                     Link(destination: url) {
                         Label("Website", systemImage: "safari")
@@ -327,6 +337,18 @@ struct SpotDetailView: View {
             }
             .dvhCard()
         }
+    }
+
+    /// Build a `tel:` URL from a free-form phone string, keeping only digits and
+    /// a leading +. Returns nil when nothing dialable remains.
+    private func telURL(for phone: String) -> URL? {
+        var digits = phone.filter { $0.isNumber || $0 == "+" }
+        // Keep a + only if it's the first character.
+        if let plus = digits.firstIndex(of: "+"), plus != digits.startIndex {
+            digits.removeAll { $0 == "+" }
+        }
+        guard !digits.isEmpty else { return nil }
+        return URL(string: "tel:\(digits)")
     }
 
     private func openInMaps(address: String) {
