@@ -69,7 +69,7 @@ struct MapScreen: View {
         .overlay(alignment: .bottomTrailing) {
             legend
                 .padding(.trailing, DVH.s4)
-                .padding(.bottom, DVH.s3)
+                .padding(.bottom, 34) // clear the Apple Maps attribution at the very bottom
         }
         // Floating controls layered above the map
         .overlay(alignment: .top) {
@@ -84,7 +84,7 @@ struct MapScreen: View {
         .overlay(alignment: .bottomTrailing) {
             mapControls
                 .padding(.trailing, DVH.s4)
-                .padding(.bottom, 70) // clear the legend
+                .padding(.bottom, 96) // sit above the legend (which clears the attribution)
         }
         .task {
             loc.request()
