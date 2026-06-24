@@ -14,7 +14,20 @@ final class Session: ObservableObject {
     private let tokenKey = "nl.devrijehond.native.token"
     private let expiresKey = "nl.devrijehond.native.expiresAt"
 
+    /// DEBUG-only: inject a fake signed-in profile via the `-mockAuth` launch
+    /// argument so the authenticated screens can be driven in the simulator
+    /// without a real Apple/Google/magic-link round trip. Never set in release.
+    private(set) var mockMode = false
+
     init() {
+        #if DEBUG
+        if CommandLine.arguments.contains("-mockAuth") {
+            mockMode = true
+            token = "mock-token"
+            profile = MeProfile.mock
+            return
+        }
+        #endif
         token = Keychain.read(tokenKey)
     }
 
@@ -40,6 +53,7 @@ final class Session: ObservableObject {
     /// server-side). Returns true when it acted, so callers can adjust their UI.
     @discardableResult
     func signOutIfUnauthorized(_ error: Error) -> Bool {
+        if mockMode { return false }
         let is401: Bool
         switch error {
         case let APIError.server(_, _, status): is401 = status == 401
@@ -57,6 +71,7 @@ final class Session: ObservableObject {
     /// server-side (e.g. expired, or a DB reseed), so drop to anonymous. Other
     /// failures (offline) keep the session so the user stays logged in.
     func hydrate() async {
+        if mockMode { return }
         guard let token else { return }
         hydrating = true
         defer { hydrating = false }

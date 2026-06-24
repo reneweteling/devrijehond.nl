@@ -199,6 +199,11 @@ struct VoteResponse: Decodable {
 
 // MARK: - Feature requests (Wensen)
 
+struct FeatureAuthor: Decodable, Hashable {
+    let handle: String?
+    let image: String?
+}
+
 struct FeatureRequest: Decodable, Identifiable {
     let id: String
     let title: String
@@ -207,8 +212,90 @@ struct FeatureRequest: Decodable, Identifiable {
     let status: String
     let upvoteCount: Int?
     let viewerHasVoted: Bool?
+    let author: FeatureAuthor?
+    let createdAt: String?
 }
 
 struct FeatureRequestsResponse: Decodable {
     let items: [FeatureRequest]
+    let nextCursor: String?
+}
+
+struct FeatureVoteResponse: Decodable {
+    let requestId: String
+    let upvoteCount: Int
+    let viewerHasVoted: Bool
+}
+
+// MARK: - Reviews
+
+struct Review: Decodable, Identifiable {
+    let id: String
+    let spotId: String
+    let stars: Int
+    let body: String?
+    let helpfulCount: Int
+    let author: SpotAuthor?
+    let createdAt: String
+}
+
+struct ReviewsResponse: Decodable {
+    let items: [Review]
+    let nextCursor: String?
+}
+
+// MARK: - Reports
+
+enum ReportReason: String, CaseIterable, Identifiable {
+    case duplicate = "DUPLICATE"
+    case wrongInfo = "WRONG_INFO"
+    case spam = "SPAM"
+    case inappropriate = "INAPPROPRIATE"
+    case other = "OTHER"
+
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .duplicate: return "Dubbele plek"
+        case .wrongInfo: return "Verkeerde informatie"
+        case .spam: return "Spam"
+        case .inappropriate: return "Ongepast"
+        case .other: return "Anders"
+        }
+    }
+    var icon: String {
+        switch self {
+        case .duplicate: return "doc.on.doc"
+        case .wrongInfo: return "exclamationmark.triangle"
+        case .spam: return "envelope.badge"
+        case .inappropriate: return "hand.raised"
+        case .other: return "ellipsis.circle"
+        }
+    }
+}
+
+// MARK: - Moderator application
+
+struct ModeratorApplication: Decodable {
+    let id: String
+    let status: String  // PENDING | APPROVED | REJECTED
+    let motivation: String
+    let createdAt: String
+}
+
+struct ModeratorApplicationResponse: Decodable {
+    let application: ModeratorApplication?
+}
+
+// MARK: - Geocode
+
+struct GeocodeHit: Decodable, Identifiable {
+    let label: String
+    let lat: Double
+    let lng: Double
+    var id: String { "\(label)-\(lat)-\(lng)" }
+}
+
+struct GeocodeResponse: Decodable {
+    let items: [GeocodeHit]
 }

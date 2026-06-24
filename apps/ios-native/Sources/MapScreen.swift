@@ -29,21 +29,51 @@ struct MapScreen: View {
     @StateObject private var loc = LocationManager()
     @State private var categories: [Category] = []
     @State private var selected: SpotSummary?
+    @State private var showSearch = false
+    @State private var selectedCategoryId: String? = nil
+    @State private var isSatellite = false
+    @State private var recenterTrigger: CLLocationCoordinate2D?
+    @State private var jumpToCoordinate: CLLocationCoordinate2D?
 
     private var categoriesById: [String: Category] {
         Dictionary(uniqueKeysWithValues: categories.map { ($0.id, $0) })
     }
+
+    // Spots held in MapKitView coordinator; we expose a binding so chip
+    // filtering can be applied client-side without a new fetch.
+    @State private var allFetchedSpots: [SpotSummary] = []
 
     var body: some View {
         ZStack(alignment: .bottom) {
             MapKitView(
                 categoriesById: categoriesById,
                 userCoordinate: loc.coordinate,
-                onSelectSpot: { selected = $0 }
+                selectedCategoryId: selectedCategoryId,
+                isSatellite: isSatellite,
+                recenterTrigger: recenterTrigger,
+                jumpToCoordinate: jumpToCoordinate,
+                onSelectSpot: { selected = $0 },
+                onFetchedSpots: { allFetchedSpots = $0 }
             )
             .ignoresSafeArea()
 
+            // Bottom legend
             legend
+        }
+        // Floating controls layered above the map
+        .overlay(alignment: .top) {
+            VStack(spacing: DVH.s2) {
+                searchPill
+                if !categories.isEmpty {
+                    categoryChips
+                }
+            }
+            .padding(.top, DVH.s2)
+        }
+        .overlay(alignment: .bottomTrailing) {
+            mapControls
+                .padding(.trailing, DVH.s4)
+                .padding(.bottom, 70) // clear the legend
         }
         .task {
             loc.request()
@@ -53,12 +83,102 @@ struct MapScreen: View {
             SpotDetailView(spot: spot, category: categoriesById[spot.categoryId])
                 .presentationDetents([.medium, .large])
         }
+        .sheet(isPresented: $showSearch) {
+            SearchView(
+                onSelectPlace: { hit in
+                    jumpToCoordinate = CLLocationCoordinate2D(latitude: hit.lat, longitude: hit.lng)
+                },
+                onSelectSpot: { spot in
+                    selected = spot
+                },
+                knownSpots: allFetchedSpots,
+                categoriesById: categoriesById
+            )
+            .presentationDetents([.large])
+        }
     }
+
+    // MARK: Floating search pill
+
+    private var searchPill: some View {
+        Button {
+            showSearch = true
+        } label: {
+            HStack(spacing: DVH.s2) {
+                Image(systemName: "magnifyingglass")
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(Brand.moss)
+                Text("Zoek een plek, gebied of adres")
+                    .font(.dvhBody)
+                    .foregroundStyle(Brand.ink2)
+                Spacer()
+            }
+            .padding(.horizontal, DVH.s4)
+            .frame(height: 46)
+            .background(.ultraThinMaterial, in: Capsule())
+            .overlay(Capsule().strokeBorder(Brand.ink.opacity(0.08)))
+            .shadow(color: Brand.ink.opacity(0.08), radius: 8, y: 2)
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, DVH.s4)
+    }
+
+    // MARK: Category chip row
+
+    private var categoryChips: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: DVH.s2) {
+                DVHChip(
+                    label: "Alles",
+                    selected: selectedCategoryId == nil,
+                    tint: Brand.moss
+                ) {
+                    selectedCategoryId = nil
+                }
+
+                ForEach(categories) { cat in
+                    DVHChip(
+                        label: cat.label,
+                        icon: cat.icon,
+                        selected: selectedCategoryId == cat.id,
+                        tint: Brand.categoryColor(cat.slug)
+                    ) {
+                        // Tapping the active chip again clears it ("Alles")
+                        selectedCategoryId = selectedCategoryId == cat.id ? nil : cat.id
+                    }
+                }
+            }
+            .padding(.horizontal, DVH.s4)
+            .padding(.vertical, DVH.s1)
+        }
+    }
+
+    // MARK: Bottom-right map controls
+
+    private var mapControls: some View {
+        VStack(spacing: DVH.s2) {
+            // Satellite toggle
+            MapControlButton(icon: isSatellite ? "map.fill" : "globe") {
+                isSatellite.toggle()
+            }
+
+            // Locate me
+            MapControlButton(icon: "location.fill") {
+                if let c = loc.coordinate {
+                    recenterTrigger = c
+                } else {
+                    loc.request()
+                }
+            }
+        }
+    }
+
+    // MARK: Legend
 
     private var legend: some View {
         HStack(spacing: 14) {
-            label(color: Brand.moss, text: "Geverifieerd")
-            label(color: .white, text: "Niet geverifieerd", dashed: true)
+            legendLabel(color: Brand.moss, text: "Geverifieerd")
+            legendLabel(color: .white, text: "Niet geverifieerd", dashed: true)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 9)
@@ -66,7 +186,7 @@ struct MapScreen: View {
         .padding(.bottom, 6)
     }
 
-    private func label(color: Color, text: String, dashed: Bool = false) -> some View {
+    private func legendLabel(color: Color, text: String, dashed: Bool = false) -> some View {
         HStack(spacing: 6) {
             Circle()
                 .fill(color)
@@ -77,14 +197,42 @@ struct MapScreen: View {
     }
 }
 
+// MARK: - Floating map control button
+
+private struct MapControlButton: View {
+    let icon: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: icon)
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundStyle(Brand.mossDark)
+                .frame(width: 44, height: 44)
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: DVH.rSm))
+                .overlay(RoundedRectangle(cornerRadius: DVH.rSm)
+                    .strokeBorder(Brand.ink.opacity(0.10)))
+                .shadow(color: Brand.ink.opacity(0.10), radius: 6, y: 2)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
 // MARK: - MKMapView bridge
 
 struct MapKitView: UIViewRepresentable {
     var categoriesById: [String: Category]
     var userCoordinate: CLLocationCoordinate2D?
+    var selectedCategoryId: String?
+    var isSatellite: Bool
+    var recenterTrigger: CLLocationCoordinate2D?
+    var jumpToCoordinate: CLLocationCoordinate2D?
     var onSelectSpot: (SpotSummary) -> Void
+    var onFetchedSpots: ([SpotSummary]) -> Void
 
-    func makeCoordinator() -> Coordinator { Coordinator(onSelectSpot: onSelectSpot) }
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onSelectSpot: onSelectSpot, onFetchedSpots: onFetchedSpots)
+    }
 
     func makeUIView(context: Context) -> MKMapView {
         let map = MKMapView()
@@ -101,6 +249,13 @@ struct MapKitView: UIViewRepresentable {
 
     func updateUIView(_ map: MKMapView, context: Context) {
         context.coordinator.categoriesById = categoriesById
+        context.coordinator.onFetchedSpots = onFetchedSpots
+        context.coordinator.onSelectSpot = onSelectSpot
+
+        // Map type
+        let targetType: MKMapType = isSatellite ? .hybrid : .standard
+        if map.mapType != targetType { map.mapType = targetType }
+
         // Recentre on the user once, the first time a fix arrives.
         if let c = userCoordinate, !context.coordinator.didCenterOnUser {
             context.coordinator.didCenterOnUser = true
@@ -109,15 +264,63 @@ struct MapKitView: UIViewRepresentable {
                     center: c, span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)),
                 animated: true)
         }
+
+        // Explicit "locate me" tap
+        if let c = recenterTrigger, c.latitude != context.coordinator.lastRecenterLatitude
+            || c.longitude != context.coordinator.lastRecenterLongitude {
+            context.coordinator.lastRecenterLatitude = c.latitude
+            context.coordinator.lastRecenterLongitude = c.longitude
+            map.setRegion(
+                MKCoordinateRegion(
+                    center: c, span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)),
+                animated: true)
+        }
+
+        // Jump to geocoded place
+        if let c = jumpToCoordinate, c.latitude != context.coordinator.lastJumpLatitude
+            || c.longitude != context.coordinator.lastJumpLongitude {
+            context.coordinator.lastJumpLatitude = c.latitude
+            context.coordinator.lastJumpLongitude = c.longitude
+            map.setRegion(
+                MKCoordinateRegion(
+                    center: c, span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)),
+                animated: true)
+        }
+
+        // Category filter: when the selection changes, refetch from the server
+        // so clustering reflects only the filtered set, then re-render.
+        if selectedCategoryId != context.coordinator.appliedCategoryId {
+            context.coordinator.appliedCategoryId = selectedCategoryId
+            context.coordinator.scheduleFetch(map)
+        }
     }
 
+    // MARK: - Coordinator
+
     final class Coordinator: NSObject, MKMapViewDelegate {
-        let onSelectSpot: (SpotSummary) -> Void
+        var onSelectSpot: (SpotSummary) -> Void
+        var onFetchedSpots: ([SpotSummary]) -> Void
         var categoriesById: [String: Category] = [:]
         var didCenterOnUser = false
+        /// The currently applied single-select category filter (nil = all).
+        var appliedCategoryId: String? = nil
+        /// All spot items from the last successful fetch.
+        private var allItems: [SpotSummary] = []
+        private var allClusters: [MapCluster] = []
         private var fetchTask: Task<Void, Never>?
 
-        init(onSelectSpot: @escaping (SpotSummary) -> Void) { self.onSelectSpot = onSelectSpot }
+        // Dedup guards for recenter/jump triggers (stored as lat/lng pairs so
+        // Equatable isn't needed on CLLocationCoordinate2D).
+        var lastRecenterLatitude: Double = 0
+        var lastRecenterLongitude: Double = 0
+        var lastJumpLatitude: Double = 0
+        var lastJumpLongitude: Double = 0
+
+        init(onSelectSpot: @escaping (SpotSummary) -> Void,
+             onFetchedSpots: @escaping ([SpotSummary]) -> Void) {
+            self.onSelectSpot = onSelectSpot
+            self.onFetchedSpots = onFetchedSpots
+        }
 
         deinit { fetchTask?.cancel() }
 
@@ -142,18 +345,32 @@ struct MapKitView: UIViewRepresentable {
             let minLng = r.center.longitude - r.span.longitudeDelta / 2
             let maxLng = r.center.longitude + r.span.longitudeDelta / 2
             guard let resp = try? await APIClient.spotsMap(
-                minLng: minLng, minLat: minLat, maxLng: maxLng, maxLat: maxLat, cluster: true)
+                minLng: minLng, minLat: minLat, maxLng: maxLng, maxLat: maxLat,
+                cluster: true, categoryId: appliedCategoryId)
             else { return }
             // A newer pan may have superseded this fetch while it was in flight;
             // don't clobber the map with stale results.
             guard !Task.isCancelled else { return }
 
+            allItems = resp.items
+            allClusters = resp.clusters
+            onFetchedSpots(allItems)
+            // renderFilteredAnnotations is safe to call here: fetch is @MainActor.
+            renderFilteredAnnotations(on: map)
+        }
+
+        /// Renders annotations from the current cached item set. Filtering is
+        /// done server-side (categoryId is passed to spotsMap), so allItems and
+        /// allClusters already reflect the active filter. Safe to call from any
+        /// main-thread context (updateUIView or @MainActor fetch).
+        func renderFilteredAnnotations(on map: MKMapView) {
             map.removeAnnotations(map.annotations.filter { !($0 is MKUserLocation) })
             map.removeOverlays(map.overlays)
 
-            map.addAnnotations(resp.items.compactMap { SpotAnnotation($0) })
-            map.addAnnotations(resp.clusters.map { ClusterCountAnnotation($0) })
-            for s in resp.items where s.isRegion {
+            map.addAnnotations(allItems.compactMap { SpotAnnotation($0) })
+            // Always render clusters — they now reflect the server-filtered set.
+            map.addAnnotations(allClusters.map { ClusterCountAnnotation($0) })
+            for s in allItems where s.isRegion {
                 if let ring = s.geometry?.outerRing, ring.count >= 3 {
                     map.addOverlay(MKPolygon(coordinates: ring, count: ring.count))
                 }

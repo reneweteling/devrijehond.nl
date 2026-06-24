@@ -1,13 +1,16 @@
 import SwiftUI
 import CoreLocation
+import UIKit
 
 struct NearbyScreen: View {
     @StateObject private var loc = LocationManager()
     @State private var categories: [Category] = []
     @State private var spots: [SpotSummary] = []
     @State private var query = ""
+    @State private var selectedCategoryId: String? = nil
     @State private var selected: SpotSummary?
     @State private var loading = false
+    @State private var loadFailed = false
 
     private var categoriesById: [String: Category] {
         Dictionary(uniqueKeysWithValues: categories.map { ($0.id, $0) })
@@ -19,30 +22,51 @@ struct NearbyScreen: View {
     }
 
     private var filtered: [SpotSummary] {
-        let q = query.trimmingCharacters(in: .whitespaces).lowercased()
-        guard !q.isEmpty else { return spots }
-        return spots.filter {
-            $0.name.lowercased().contains(q)
-                || (categoriesById[$0.categoryId]?.label.lowercased().contains(q) ?? false)
+        var result = spots
+
+        // Category single-select filter
+        if let catId = selectedCategoryId {
+            result = result.filter { $0.categoryId == catId }
         }
+
+        // Text search
+        let q = query.trimmingCharacters(in: .whitespaces).lowercased()
+        if !q.isEmpty {
+            result = result.filter {
+                $0.name.lowercased().contains(q)
+                    || (categoriesById[$0.categoryId]?.label.lowercased().contains(q) ?? false)
+            }
+        }
+
+        return result
     }
 
     var body: some View {
         NavigationStack {
-            Group {
-                if loading && spots.isEmpty {
-                    ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else if spots.isEmpty {
-                    emptyState
-                } else {
-                    List(filtered) { spot in
-                        Button { selected = spot } label: {
-                            SpotRow(spot: spot, category: categoriesById[spot.categoryId],
-                                    distance: distance(to: spot))
+            VStack(spacing: 0) {
+                if !categories.isEmpty {
+                    categoryChips
+                        .padding(.top, DVH.s2)
+                }
+
+                Group {
+                    if loading && spots.isEmpty {
+                        loadingView
+                    } else if spots.isEmpty || loadFailed {
+                        noLocationState
+                    } else if filtered.isEmpty {
+                        EmptyStateView(
+                            icon: "magnifyingglass",
+                            title: "Geen resultaten",
+                            message: "Niets gevonden met deze filters. Pas de categorie of zoekterm aan.",
+                            actionLabel: "Filters wissen"
+                        ) {
+                            query = ""
+                            selectedCategoryId = nil
                         }
-                        .buttonStyle(.plain)
+                    } else {
+                        spotList
                     }
-                    .listStyle(.plain)
                 }
             }
             .navigationTitle("Nabij")
@@ -63,28 +87,114 @@ struct NearbyScreen: View {
         }
     }
 
-    private var emptyState: some View {
-        VStack(spacing: 12) {
-            Image(systemName: loc.coordinate == nil ? "location.slash" : "magnifyingglass")
-                .font(.system(size: 44)).foregroundStyle(Brand.moss)
-            Text(loc.coordinate == nil ? "Locatie nodig" : "Geen plekken gevonden")
-                .font(.headline).foregroundStyle(Brand.ink)
-            Text(loc.coordinate == nil
-                ? "Zet locatie aan om hondenplekken bij jou in de buurt te zien."
-                : "Probeer een andere zoekterm of beweeg over de kaart.")
-                .font(.subheadline).foregroundStyle(Brand.ink2)
-                .multilineTextAlignment(.center).padding(.horizontal, 40)
+    // MARK: Category chip row (single-select)
+
+    private var categoryChips: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: DVH.s2) {
+                DVHChip(
+                    label: "Alles",
+                    selected: selectedCategoryId == nil,
+                    tint: Brand.moss
+                ) {
+                    selectedCategoryId = nil
+                }
+
+                ForEach(categories) { cat in
+                    DVHChip(
+                        label: cat.label,
+                        icon: cat.icon,
+                        selected: selectedCategoryId == cat.id,
+                        tint: Brand.categoryColor(cat.slug)
+                    ) {
+                        selectedCategoryId = selectedCategoryId == cat.id ? nil : cat.id
+                    }
+                }
+            }
+            .padding(.horizontal, DVH.s4)
+            .padding(.vertical, DVH.s1)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
+
+    // MARK: Spot list
+
+    private var spotList: some View {
+        List(filtered) { spot in
+            Button { selected = spot } label: {
+                SpotRow(
+                    spot: spot,
+                    category: categoriesById[spot.categoryId],
+                    distance: distance(to: spot)
+                )
+            }
+            .buttonStyle(.plain)
+            .listRowBackground(Brand.cream)
+        }
+        .listStyle(.plain)
+        .background(Brand.sand)
+    }
+
+    // MARK: Empty / loading states
+
+    private var loadingView: some View {
+        VStack(spacing: DVH.s3) {
+            Spacer()
+            ProgressView()
+                .scaleEffect(1.3)
+                .tint(Brand.moss)
+            Text("Zoeken naar plekken bij jou in de buurt...")
+                .font(.dvhCallout)
+                .foregroundStyle(Brand.ink2)
+            Spacer()
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    @ViewBuilder
+    private var noLocationState: some View {
+        if loadFailed {
+            EmptyStateView(
+                icon: "wifi.slash",
+                title: "Verbinding mislukt",
+                message: "We konden de plekken niet laden. Probeer het opnieuw.",
+                actionLabel: "Opnieuw proberen"
+            ) {
+                Task { await loadSpots() }
+            }
+        } else if loc.coordinate == nil {
+            EmptyStateView(
+                icon: "location.slash.fill",
+                title: "Locatie nodig",
+                message: "Zet locatie aan om hondenplekken bij jou in de buurt te zien.",
+                actionLabel: "Open Instellingen"
+            ) {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
+                }
+            }
+        } else {
+            EmptyStateView(
+                icon: "pawprint.fill",
+                title: "Geen plekken gevonden",
+                message: "Probeer een andere zoekterm of beweeg over de kaart."
+            )
+        }
+    }
+
+    // MARK: Data loading
 
     private func loadSpots() async {
         guard let c = loc.coordinate else { return }
         loading = true
+        loadFailed = false
         defer { loading = false }
-        let result = try? await APIClient.spotsNear(lat: c.latitude, lng: c.longitude, limit: 100)
+        guard let result = try? await APIClient.spotsNear(lat: c.latitude, lng: c.longitude, limit: 100) else {
+            guard !Task.isCancelled else { return }
+            loadFailed = true
+            return
+        }
         guard !Task.isCancelled else { return }  // a newer cell superseded this
-        spots = result?.items ?? []
+        spots = result.items
     }
 
     private func distance(to spot: SpotSummary) -> CLLocationDistance? {
@@ -94,40 +204,57 @@ struct NearbyScreen: View {
     }
 }
 
+// MARK: - Spot row
+
 struct SpotRow: View {
     let spot: SpotSummary
     let category: Category?
     let distance: CLLocationDistance?
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: DVH.s3) {
             thumb
-            VStack(alignment: .leading, spacing: 4) {
-                Text(spot.name).font(.body.weight(.medium)).foregroundStyle(Brand.ink).lineLimit(1)
+            VStack(alignment: .leading, spacing: DVH.s1) {
+                Text(spot.name)
+                    .font(.dvhBody.weight(.medium))
+                    .foregroundStyle(Brand.ink)
+                    .lineLimit(1)
                 HStack(spacing: 6) {
-                    if let category { Text(category.label) }
-                    if let distance { Text("· \(formatted(distance))") }
+                    if let category {
+                        Text(category.label).foregroundStyle(Brand.ink2)
+                    }
+                    if let distance {
+                        Text("· \(formatted(distance))").foregroundStyle(Brand.ink2)
+                    }
                 }
-                .font(.caption).foregroundStyle(Brand.ink2)
+                .font(.dvhCaption)
                 VerifiedBadge(verified: spot.isVerified)
             }
             Spacer()
-            Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)
+            Image(systemName: "chevron.right")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, DVH.s1 + 2)
+        .contentShape(Rectangle())
     }
 
     @ViewBuilder private var thumb: some View {
         let size: CGFloat = 56
         if let u = spot.photoUrl, let url = URL(string: u) {
-            AsyncImage(url: url) { img in img.resizable().scaledToFill() } placeholder: {
+            AsyncImage(url: url) { img in
+                img.resizable().scaledToFill()
+            } placeholder: {
                 Rectangle().fill(Brand.mossSoft)
             }
-            .frame(width: size, height: size).clipShape(RoundedRectangle(cornerRadius: 12))
+            .frame(width: size, height: size)
+            .clipShape(RoundedRectangle(cornerRadius: DVH.rSm + 2))
         } else {
             ZStack {
-                RoundedRectangle(cornerRadius: 12).fill(Brand.mossSoft)
-                Image(systemName: category?.icon ?? "pawprint.fill").foregroundStyle(Brand.mossDark)
+                RoundedRectangle(cornerRadius: DVH.rSm + 2).fill(Brand.mossSoft)
+                Image(systemName: category?.icon ?? "pawprint.fill")
+                    .font(.system(size: 22))
+                    .foregroundStyle(Brand.mossDark)
             }
             .frame(width: size, height: size)
         }

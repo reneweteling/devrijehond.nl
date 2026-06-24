@@ -130,7 +130,8 @@ struct APIClient {
     // MARK: - Public read endpoints
 
     static func spotsMap(
-        minLng: Double, minLat: Double, maxLng: Double, maxLat: Double, cluster: Bool
+        minLng: Double, minLat: Double, maxLng: Double, maxLat: Double,
+        cluster: Bool, categoryId: String? = nil
     ) async throws -> SpotsMapResponse {
         var q: [URLQueryItem] = [
             .init(name: "minLng", value: String(minLng)),
@@ -139,6 +140,7 @@ struct APIClient {
             .init(name: "maxLat", value: String(maxLat)),
         ]
         if cluster { q.append(.init(name: "cluster", value: "true")) }
+        if let categoryId { q.append(.init(name: "categoryId", value: categoryId)) }
         return try await get("/api/v1/spots/map", query: q, as: SpotsMapResponse.self)
     }
 
@@ -167,14 +169,112 @@ struct APIClient {
         try await get("/api/v1/spots/\(slug)", as: SpotDetail.self)
     }
 
-    static func featureRequests() async throws -> [FeatureRequest] {
-        try await get("/api/v1/feature-requests", as: FeatureRequestsResponse.self).items
+    static func featureRequests(status: String? = nil) async throws -> [FeatureRequest] {
+        var q: [URLQueryItem] = []
+        if let status { q.append(.init(name: "status", value: status)) }
+        return try await get("/api/v1/feature-requests", query: q, as: FeatureRequestsResponse.self).items
+    }
+
+    static func spotReviews(slug: String) async throws -> [Review] {
+        try await get("/api/v1/spots/\(slug)/reviews", as: ReviewsResponse.self).items
+    }
+
+    static func geocode(_ query: String) async throws -> [GeocodeHit] {
+        try await get("/api/v1/geocode", query: [.init(name: "q", value: query)],
+                      as: GeocodeResponse.self).items
+    }
+
+    // MARK: - PATCH helper
+
+    static func patch<T: Decodable, B: Encodable>(
+        _ path: String, body: B, token: String, as type: T.Type
+    ) async throws -> T {
+        let payload = try JSONEncoder().encode(body)
+        let data = try await send(makeRequest("PATCH", path: path, token: token, jsonBody: payload))
+        return try decode(data, as: T.self)
+    }
+
+    @discardableResult
+    static func delete(_ path: String, token: String) async throws -> Bool {
+        _ = try await send(makeRequest("DELETE", path: path, token: token))
+        return true
     }
 
     // MARK: - Authenticated endpoints (/me/*)
 
     static func me(token: String) async throws -> MeProfile {
         try await get("/api/v1/me", token: token, as: MeProfile.self)
+    }
+
+    static func updateProfile(_ patch: MeProfilePatchBody, token: String) async throws -> MeProfile {
+        try await self.patch("/api/v1/me", body: patch, token: token, as: MeProfile.self)
+    }
+
+    static func mySpots(token: String) async throws -> [SpotSummary] {
+        try await get("/api/v1/me/spots", token: token, as: SpotsListResponse.self).items
+    }
+
+    // Dogs
+    static func createDog(_ body: DogBody, token: String) async throws -> Dog {
+        try await post("/api/v1/me/dogs", body: body, token: token, as: Dog.self)
+    }
+    static func updateDog(id: String, body: DogBody, token: String) async throws -> Dog {
+        try await patch("/api/v1/me/dogs/\(id)", body: body, token: token, as: Dog.self)
+    }
+    static func deleteDog(id: String, token: String) async throws {
+        try await delete("/api/v1/me/dogs/\(id)", token: token)
+    }
+
+    // Reviews
+    static func submitReview(spotId: String, stars: Int, body: String?, token: String) async throws -> Review {
+        try await post("/api/v1/me/spots/\(spotId)/reviews",
+                       body: SubmitReviewBody(stars: stars, body: body), token: token, as: Review.self)
+    }
+
+    // Reports
+    static func reportSpot(spotId: String, reason: String, note: String?, token: String) async throws {
+        try await postNoContent("/api/v1/me/reports",
+                                body: SubmitReportBody(targetType: "SPOT", targetId: spotId,
+                                                       reason: reason, note: note), token: token)
+    }
+
+    // Moderation (staff)
+    static func moderateSpot(spotId: String, status: String, token: String) async throws {
+        try await postNoContentPatch("/api/v1/me/spots/\(spotId)/moderate",
+                                     body: ModerateBody(status: status), token: token)
+    }
+
+    // Moderator application
+    static func moderatorApplication(token: String) async throws -> ModeratorApplication? {
+        try await get("/api/v1/me/moderator-application", token: token,
+                      as: ModeratorApplicationResponse.self).application
+    }
+    static func applyModerator(motivation: String, token: String) async throws -> ModeratorApplication {
+        try await post("/api/v1/me/moderator-application",
+                       body: MotivationBody(motivation: motivation), token: token,
+                       as: ModeratorApplication.self)
+    }
+
+    // Feature requests
+    static func createFeatureRequest(
+        title: String, body: String?, component: String?, token: String
+    ) async throws -> FeatureRequest {
+        try await post("/api/v1/me/feature-requests",
+                       body: CreateFeatureRequestBody(title: title, body: body, component: component),
+                       token: token, as: FeatureRequest.self)
+    }
+    static func toggleFeatureVote(id: String, token: String) async throws -> FeatureVoteResponse {
+        try await post("/api/v1/me/feature-requests/\(id)/vote",
+                       body: EmptyBody(), token: token, as: FeatureVoteResponse.self)
+    }
+
+    @discardableResult
+    private static func postNoContentPatch<B: Encodable>(
+        _ path: String, body: B, token: String
+    ) async throws -> Bool {
+        let payload = try JSONEncoder().encode(body)
+        _ = try await send(makeRequest("PATCH", path: path, token: token, jsonBody: payload))
+        return true
     }
 
     static func submitSpot(_ body: SubmitSpotBody, token: String) async throws -> CreatedSpot {
@@ -276,6 +376,16 @@ struct APIClient {
     private struct IdTokenBody: Encodable { let idToken: String }
     private struct MagicLinkBody: Encodable { let email: String; let callbackURL: String }
     private struct VoteBody: Encodable { let value: String; let proof: GeoPoint? }
+    private struct SubmitReviewBody: Encodable { let stars: Int; let body: String? }
+    private struct SubmitReportBody: Encodable {
+        let targetType: String; let targetId: String; let reason: String; let note: String?
+    }
+    private struct ModerateBody: Encodable { let status: String }
+    private struct MotivationBody: Encodable { let motivation: String }
+    private struct CreateFeatureRequestBody: Encodable {
+        let title: String; let body: String?; let component: String?
+    }
+    private struct EmptyBody: Encodable {}
     private struct UploadResponse: Decodable { let publicUrl: String }
     private struct VerifyBody: Decodable {
         struct S: Decodable { let token: String?; let expiresAt: String? }
@@ -289,6 +399,24 @@ struct APIClient {
 struct GeoPoint: Encodable {
     let lat: Double
     let lng: Double
+}
+
+/// PATCH /api/v1/me. Nil fields are omitted by the encoder (leave unchanged).
+struct MeProfilePatchBody: Encodable {
+    var name: String?
+    var handle: String?
+    var bio: String?
+    var image: String?
+}
+
+/// Body for POST/PATCH /api/v1/me/dogs. Nil optionals are omitted.
+struct DogBody: Encodable {
+    let name: String
+    var breed: String?
+    var birthDate: String?  // YYYY-MM-DD
+    var birthYear: Int?
+    var photoUrl: String?
+    var note: String?
 }
 
 /// Body for POST /api/v1/me/spots. We use the friendly `point` / `polygon`

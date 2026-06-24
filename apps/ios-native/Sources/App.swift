@@ -7,16 +7,30 @@ import GoogleSignIn
 @main
 struct DeVrijeHondNativeApp: App {
     @StateObject private var session = Session()
+    @State private var booted = false
 
     var body: some Scene {
         WindowGroup {
-            RootView()
-                .environmentObject(session)
-                .tint(Brand.moss)
-                .preferredColorScheme(.light)
-                .task { await session.hydrate() }
-                .onOpenURL { handle($0) }
+            ZStack {
+                RootView()
+                    .environmentObject(session)
+                    .tint(Brand.moss)
+
+                if !booted {
+                    SplashView().transition(.opacity)
+                }
+            }
+            .preferredColorScheme(.light)
+            .task { await boot() }
+            .onOpenURL { handle($0) }
         }
+    }
+
+    private func boot() async {
+        await session.hydrate()
+        // Keep the brand splash up briefly even when boot is instant (anonymous).
+        try? await Task.sleep(nanoseconds: 650_000_000)
+        withAnimation(.easeOut(duration: 0.35)) { booted = true }
     }
 
     @MainActor

@@ -9,7 +9,7 @@ struct SignInView: View {
 
     /// Optional copy explaining why sign-in is being asked for right now.
     var reason: String?
-    /// Whether to show a "later" button (when presented as a gating sheet).
+    /// Whether to show a "later" affordance (when presented as a gating sheet).
     var dismissable = false
 
     @State private var email = ""
@@ -23,120 +23,152 @@ struct SignInView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 18) {
-                header
+        ZStack(alignment: .topTrailing) {
+            Brand.sand.ignoresSafeArea()
 
-                if magicSent {
-                    magicSentCard
-                } else {
-                    providerButtons
-                    orDivider
-                    magicLinkForm
-                }
+            ScrollView {
+                VStack(spacing: DVH.s5) {
+                    hero
+                    if magicSent {
+                        magicSentCard
+                    } else {
+                        VStack(spacing: DVH.s4) {
+                            providerButtons
+                            orDivider
+                            magicLinkForm
+                        }
+                        .dvhCard(padding: DVH.s5)
+                    }
 
-                if let error {
-                    Text(error).font(.footnote).foregroundStyle(Brand.terra)
+                    if let error {
+                        Text(error).font(.dvhCaption).foregroundStyle(Brand.rust)
+                            .multilineTextAlignment(.center)
+                    }
+
+                    Text("Door in te loggen ga je akkoord met onze voorwaarden en privacybeleid.")
+                        .font(.system(size: 11, design: .rounded))
+                        .foregroundStyle(Brand.ink2.opacity(0.8))
                         .multilineTextAlignment(.center)
+                        .padding(.horizontal, DVH.s6)
+                        .padding(.top, DVH.s1)
                 }
-
-                if dismissable {
-                    Button("Later") { dismiss() }
-                        .font(.subheadline).foregroundStyle(Brand.ink2).padding(.top, 4)
-                }
+                .padding(.horizontal, DVH.s5)
+                .padding(.top, dismissable ? DVH.s8 : DVH.s6)
+                .padding(.bottom, DVH.s8)
             }
-            .padding(24)
-            .frame(maxWidth: .infinity)
+
+            if dismissable {
+                Button { dismiss() } label: {
+                    Image(systemName: "xmark")
+                        .font(.headline)
+                        .foregroundStyle(Brand.ink2)
+                        .padding(10)
+                        .background(Brand.cream, in: Circle())
+                        .overlay(Circle().strokeBorder(Brand.ink.opacity(0.08)))
+                }
+                .padding(DVH.s4)
+            }
         }
-        .background(Brand.sand)
         .onChange(of: session.isAuthenticated) { _, authed in
             if authed { dismiss() }
         }
     }
 
-    private var header: some View {
-        VStack(spacing: 10) {
-            Image(systemName: "pawprint.circle.fill")
-                .font(.system(size: 60)).foregroundStyle(Brand.moss)
-            Text("Inloggen").font(.title2.bold()).foregroundStyle(Brand.ink)
-            Text(reason ?? "Log in om hondenplekken toe te voegen, te bevestigen en je honden te beheren.")
-                .font(.subheadline).foregroundStyle(Brand.ink2)
-                .multilineTextAlignment(.center)
+    // MARK: - Hero
+
+    private var hero: some View {
+        VStack(spacing: DVH.s4) {
+            ZStack {
+                Circle().fill(
+                    LinearGradient(colors: [Brand.moss, Brand.mossDark],
+                                   startPoint: .topLeading, endPoint: .bottomTrailing))
+                    .frame(width: 92, height: 92)
+                    .shadow(color: Brand.moss.opacity(0.35), radius: 14, y: 6)
+                Image(systemName: "pawprint.fill")
+                    .font(.system(size: 40, weight: .bold))
+                    .foregroundStyle(.white)
+            }
+            VStack(spacing: DVH.s2) {
+                Text("Welkom")
+                    .font(.dvhDisplay(30)).foregroundStyle(Brand.ink)
+                Text(reason ?? "Log in om plekken toe te voegen, te bevestigen en je honden te beheren.")
+                    .font(.dvhCallout).foregroundStyle(Brand.ink2)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, DVH.s4)
+            }
         }
-        .padding(.top, 8)
     }
 
+    // MARK: - Providers
+
     private var providerButtons: some View {
-        VStack(spacing: 12) {
-            SignInWithAppleButton(.signIn) { request in
+        VStack(spacing: DVH.s3) {
+            SignInWithAppleButton(.continue) { request in
                 request.requestedScopes = [.fullName, .email]
             } onCompletion: { result in
                 handleApple(result)
             }
             .signInWithAppleButtonStyle(.black)
-            .frame(height: 50)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .frame(height: DVH.controlHeight)
+            .clipShape(RoundedRectangle(cornerRadius: DVH.rMd))
             .disabled(working)
 
             if AuthService.googleAvailable {
                 Button { handleGoogle() } label: {
-                    HStack(spacing: 10) {
-                        Image(systemName: "globe").font(.headline)
-                        Text("Verder met Google").font(.headline)
+                    HStack(spacing: DVH.s2) {
+                        GoogleGlyph(size: 18)
+                        Text("Verder met Google").font(.dvhHeadline)
                     }
-                    .frame(maxWidth: .infinity).frame(height: 50)
-                    .background(.white, in: RoundedRectangle(cornerRadius: 12))
-                    .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Brand.ink2.opacity(0.25)))
-                    .foregroundStyle(Brand.ink)
                 }
+                .buttonStyle(.dvhSecondary)
                 .disabled(working)
             }
         }
     }
 
     private var orDivider: some View {
-        HStack {
-            line; Text("of").font(.caption).foregroundStyle(Brand.ink2); line
+        HStack(spacing: DVH.s3) {
+            line; Text("of met e-mail").font(.dvhCaption).foregroundStyle(Brand.ink2); line
         }
     }
-    private var line: some View { Rectangle().fill(Brand.ink2.opacity(0.2)).frame(height: 1) }
+    private var line: some View { Rectangle().fill(Brand.ink.opacity(0.1)).frame(height: 1) }
 
     private var magicLinkForm: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: DVH.s3) {
             TextField("jij@email.nl", text: $email)
+                .textFieldStyle(.dvh)
                 .textContentType(.emailAddress)
                 .keyboardType(.emailAddress)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
-                .padding(14)
-                .background(.white, in: RoundedRectangle(cornerRadius: 12))
-                .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Brand.ink2.opacity(0.2)))
 
             Button { sendMagicLink() } label: {
-                HStack {
+                HStack(spacing: DVH.s2) {
                     if working { ProgressView().tint(.white) }
-                    Text("Stuur inloglink").font(.headline)
+                    Text("Stuur inloglink")
                 }
-                .frame(maxWidth: .infinity).frame(height: 50)
             }
-            .buttonStyle(.borderedProminent)
-            .tint(Brand.moss)
+            .buttonStyle(.dvhPrimary)
             .disabled(!emailValid || working)
+            .opacity(emailValid ? 1 : 0.55)
         }
     }
 
     private var magicSentCard: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "envelope.badge.fill")
-                .font(.system(size: 44)).foregroundStyle(Brand.moss)
-            Text("Check je inbox").font(.headline).foregroundStyle(Brand.ink)
-            Text("We hebben een inloglink gestuurd naar \(email). Open de link op deze telefoon, dan ben je ingelogd.")
-                .font(.subheadline).foregroundStyle(Brand.ink2)
+        VStack(spacing: DVH.s3) {
+            ZStack {
+                Circle().fill(Brand.mossSoft).frame(width: 76, height: 76)
+                Image(systemName: "envelope.badge.fill")
+                    .font(.system(size: 32)).foregroundStyle(Brand.moss)
+            }
+            Text("Check je inbox").font(.dvhTitle).foregroundStyle(Brand.ink)
+            Text("We hebben een inloglink gestuurd naar \(email). Open hem op deze telefoon, dan ben je ingelogd.")
+                .font(.dvhCallout).foregroundStyle(Brand.ink2)
                 .multilineTextAlignment(.center)
             Button("Ander e-mailadres") { magicSent = false; error = nil }
-                .font(.subheadline).foregroundStyle(Brand.moss).padding(.top, 4)
+                .font(.dvhCallout.weight(.semibold)).foregroundStyle(Brand.moss).padding(.top, DVH.s1)
         }
-        .padding(.vertical, 12)
+        .dvhCard(padding: DVH.s6)
     }
 
     // MARK: - Actions
@@ -192,5 +224,27 @@ struct SignInView: View {
             }
             working = false
         }
+    }
+}
+
+/// A small, recognizable four-color Google "G" built from SwiftUI shapes (no
+/// asset / SVG dependency), matching the Expo app's hand-built mark.
+struct GoogleGlyph: View {
+    var size: CGFloat = 18
+    var body: some View {
+        ZStack {
+            Circle().trim(from: 0.0, to: 0.25).stroke(Color(hex: 0xEA4335), lineWidth: size * 0.28)
+                .rotationEffect(.degrees(-45 - 90))
+            Circle().trim(from: 0.0, to: 0.25).stroke(Color(hex: 0xFBBC05), lineWidth: size * 0.28)
+                .rotationEffect(.degrees(-45 + 0))
+            Circle().trim(from: 0.0, to: 0.25).stroke(Color(hex: 0x34A853), lineWidth: size * 0.28)
+                .rotationEffect(.degrees(-45 + 90))
+            Circle().trim(from: 0.0, to: 0.30).stroke(Color(hex: 0x4285F4), lineWidth: size * 0.28)
+                .rotationEffect(.degrees(-45 + 175))
+            Rectangle().fill(Color(hex: 0x4285F4))
+                .frame(width: size * 0.5, height: size * 0.28)
+                .offset(x: size * 0.25, y: 0)
+        }
+        .frame(width: size, height: size)
     }
 }
