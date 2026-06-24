@@ -28,7 +28,7 @@ if (process.env.S3_REGION) {
 }
 
 import { randomUUID } from 'crypto';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { Pool } from 'pg';
 import sharp from 'sharp';
 import { uploadObject } from '@devrijehond/s3';
@@ -63,6 +63,41 @@ type RawLosloop = {
 const LOSLOOP: RawLosloop[] = JSON.parse(
   readFileSync(new URL('./data/losloopgebieden.json', import.meta.url), 'utf8'),
 );
+
+// ---------------------------------------------------------------------------
+// Scraped POI categories (OSM via scrape/osm.ts). Each file is optional; a
+// missing one just means that category isn't seeded yet. Shape mirrors RawPoi
+// in scrape/osm.ts.
+// ---------------------------------------------------------------------------
+type RawPoi = {
+  source: string;
+  sourceUrl: string;
+  name: string;
+  town: string | null;
+  province: string | null;
+  address: string | null;
+  lat: number;
+  lng: number;
+  description: string | null;
+  osmId?: string;
+  osmTags?: Record<string, string>;
+  geometry?: number[][]; // POIs have none; present for union compatibility
+};
+
+function loadPoiFile(file: string): RawPoi[] {
+  const url = new URL(`./data/${file}`, import.meta.url);
+  if (!existsSync(url)) return [];
+  return JSON.parse(readFileSync(url, 'utf8')) as RawPoi[];
+}
+
+// category slug -> scraped data file. Add entries as scrapers land.
+const POI_SOURCES: { category: string; file: string; descFallback: string }[] = [
+  {
+    category: 'drinking-point',
+    file: 'drinkpunten.json',
+    descFallback: 'Drinkwaterpunt waar je hond kan drinken.',
+  },
+];
 
 // ---------------------------------------------------------------------------
 // Taxonomy
@@ -447,23 +482,38 @@ const RESEARCH: {
   description: string;
   radiusM?: number;
   amenities?: string[];
-  raw: RawLosloop;
-}[] = LOSLOOP.map((r) => {
-  const amenities: string[] = ['free'];
-  if (r.fenced) amenities.push('fenced');
-  if (r.parking) amenities.push('parking');
-  return {
-    name: r.name,
-    category: 'off-leash',
-    city: r.town ?? r.province ?? 'Nederland',
-    lat: r.lat,
-    lng: r.lng,
-    description: r.description ?? 'Hondenlosloopgebied.',
-    radiusM: r.source === 'osm' ? 130 : 400,
-    amenities,
-    raw: r,
-  };
-});
+  raw: RawLosloop | RawPoi;
+}[] = [
+  ...LOSLOOP.map((r) => {
+    const amenities: string[] = ['free'];
+    if (r.fenced) amenities.push('fenced');
+    if (r.parking) amenities.push('parking');
+    return {
+      name: r.name,
+      category: 'off-leash',
+      city: r.town ?? r.province ?? 'Nederland',
+      lat: r.lat,
+      lng: r.lng,
+      description: r.description ?? 'Hondenlosloopgebied.',
+      radiusM: r.source === 'osm' ? 130 : 400,
+      amenities,
+      raw: r,
+    };
+  }),
+  // Scraped POIs (drinking points, etc.) -> POI spots, no geometry.
+  ...POI_SOURCES.flatMap(({ category, file, descFallback }) =>
+    loadPoiFile(file).map((r) => ({
+      name: r.name,
+      category,
+      city: r.town ?? r.province ?? 'Nederland',
+      lat: r.lat,
+      lng: r.lng,
+      description: r.description ?? descFallback,
+      amenities: AMENITIES_BY_CATEGORY[category],
+      raw: r,
+    })),
+  ),
+];
 
 function slugify(s: string): string {
   return s
