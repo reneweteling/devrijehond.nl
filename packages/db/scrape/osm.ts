@@ -83,6 +83,14 @@ const CONFIGS: Record<string, CategoryConfig> = {
       node["leisure"="beach_resort"]["dog"~"^(yes|leashed)$"](area.nl);
     `,
   },
+  vet: {
+    file: 'dierenartsen.json',
+    defaultName: 'Dierenarts',
+    selector: `
+      node["amenity"="veterinary"](area.nl);
+      way["amenity"="veterinary"](area.nl);
+    `,
+  },
 };
 
 type OverpassElement = {

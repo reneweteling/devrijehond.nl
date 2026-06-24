@@ -1,0 +1,222 @@
+[
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/winkels/alkmaar",
+    "name": "Ranzijn Alkmaar",
+    "town": "Alkmaar",
+    "province": null,
+    "address": "Omval 55",
+    "lat": 52.622148,
+    "lng": 4.774686,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/winkels/aalsmeer",
+    "name": "Ranzijn Aalsmeer",
+    "town": "Aalsmeer",
+    "province": null,
+    "address": "Aalsmeerderweg 436",
+    "lat": 52.287661,
+    "lng": 4.819252,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/winkels/almere",
+    "name": "Ranzijn Almere",
+    "town": "Almere",
+    "province": null,
+    "address": "Bostonweg 70",
+    "lat": 52.394016,
+    "lng": 5.272969,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/winkels/amersfoort",
+    "name": "Ranzijn Amersfoort",
+    "town": "Amersfoort",
+    "province": null,
+    "address": "De Zonnecel 15",
+    "lat": 52.168696,
+    "lng": 5.426137,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/winkels/amsterdam",
+    "name": "Ranzijn Amsterdam",
+    "town": "Amsterdam",
+    "province": null,
+    "address": "Spaklerweg 44c",
+    "lat": 52.336987,
+    "lng": 4.92168,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/winkels/bovenkarspel",
+    "name": "Ranzijn Bovenkarspel",
+    "town": "Bovenkarspel",
+    "province": null,
+    "address": "Veilingweg 5",
+    "lat": 52.706141,
+    "lng": 5.251829,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/winkels/de-bilt",
+    "name": "Ranzijn De Bilt",
+    "town": "De Bilt",
+    "province": null,
+    "address": "Universiteitsweg 2",
+    "lat": 52.101929,
+    "lng": 5.18414,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/winkels/delft",
+    "name": "Ranzijn Delft",
+    "town": "Delft",
+    "province": null,
+    "address": "Rijksstraatweg 11",
+    "lat": 52.005259,
+    "lng": 4.386877,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/winkels/huizen",
+    "name": "Ranzijn Huizen",
+    "town": "Huizen",
+    "province": null,
+    "address": "Dr. Lelylaan 2",
+    "lat": 52.288493,
+    "lng": 5.240989,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/winkels/leiderdorp",
+    "name": "Ranzijn Leiderdorp",
+    "town": "Leiderdorp",
+    "province": null,
+    "address": "Willem-Alexanderlaan 15",
+    "lat": 52.151949,
+    "lng": 4.532494,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/winkels/nieuw-vennep",
+    "name": "Ranzijn Nieuw-Vennep",
+    "town": "Nieuw-Vennep",
+    "province": null,
+    "address": "IJweg 1336",
+    "lat": 52.294505,
+    "lng": 4.6395,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/winkels/rotterdam",
+    "name": "Ranzijn Rotterdam",
+    "town": "Rotterdam",
+    "province": null,
+    "address": "Vierhavensstraat 91",
+    "lat": 51.90797,
+    "lng": 4.438779,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/winkels/sneek",
+    "name": "Ranzijn Sneek",
+    "town": "Sneek",
+    "province": null,
+    "address": "Zonnedauw 1",
+    "lat": 53.021075,
+    "lng": 5.665314,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/winkels/spijk",
+    "name": "Ranzijn Spijk",
+    "town": "Spijk",
+    "province": null,
+    "address": "Haarweg 2c",
+    "lat": 51.847546,
+    "lng": 5.014531,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/winkels/velserbroek",
+    "name": "Ranzijn Velserbroek",
+    "town": "Velserbroek",
+    "province": null,
+    "address": "Rijksweg 287",
+    "lat": 52.441048,
+    "lng": 4.653904,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/winkels/zaandam",
+    "name": "Ranzijn Zaandam",
+    "town": "Zaandam",
+    "province": null,
+    "address": "Kleine Tocht 19",
+    "lat": 52.431427,
+    "lng": 4.810522,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/winkels/assen",
+    "name": "Tuinland Assen",
+    "town": "Assen",
+    "province": null,
+    "address": "Borgstee 70",
+    "lat": 53.012148,
+    "lng": 6.572623,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/winkels/zwolle",
+    "name": "Tuinland Zwolle",
+    "town": "Zwolle",
+    "province": null,
+    "address": "Charles Storkstraat 2",
+    "lat": 52.496994,
+    "lng": 6.116932,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/winkels/groningen",
+    "name": "Tuinland Groningen",
+    "town": "Groningen",
+    "province": null,
+    "address": "Peizerweg 91",
+    "lat": 53.209295,
+    "lng": 6.540286,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/winkels/wilp",
+    "name": "Tuinland Wilp",
+    "town": "Wilp",
+    "province": null,
+    "address": "Wilpsedijk 14",
+    "lat": 52.237446,
+    "lng": 6.136435,
+    "description": null
+  }
+]

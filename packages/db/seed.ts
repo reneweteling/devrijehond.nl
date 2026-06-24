@@ -90,6 +90,20 @@ function loadPoiFile(file: string): RawPoi[] {
   return JSON.parse(readFileSync(url, 'utf8')) as RawPoi[];
 }
 
+// Drop near-duplicate POIs across sources (e.g. an OSM vet and the same Ranzijn
+// vet). Keyed by category + ~100m coordinate bucket; first one in wins.
+function dedupePois<T extends { category: string; lat: number; lng: number }>(items: T[]): T[] {
+  const seen = new Set<string>();
+  const out: T[] = [];
+  for (const it of items) {
+    const key = `${it.category}:${it.lat.toFixed(3)}:${it.lng.toFixed(3)}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(it);
+  }
+  return out;
+}
+
 // category slug -> scraped data file. Add entries as scrapers land.
 const POI_SOURCES: { category: string; file: string; descFallback: string }[] = [
   {
@@ -111,6 +125,21 @@ const POI_SOURCES: { category: string; file: string; descFallback: string }[] = 
     category: 'swim-beach',
     file: 'zwemstranden.json',
     descFallback: 'Hondenstrand om te zwemmen.',
+  },
+  {
+    category: 'vet',
+    file: 'dierenartsen.json',
+    descFallback: 'Dierenarts.',
+  },
+  {
+    category: 'shop',
+    file: 'ranzijn-winkels.json',
+    descFallback: 'Ranzijn-winkel met spullen voor je hond.',
+  },
+  {
+    category: 'vet',
+    file: 'ranzijn-dierenartsen.json',
+    descFallback: 'Dierenarts bij Ranzijn.',
   },
 ];
 
@@ -142,6 +171,7 @@ const CATEGORIES = [
   },
   { slug: 'wash', label: 'Was- / spoelplek', type: 'POI', icon: 'drop.fill', color: '#4F7A86' },
   { slug: 'shop', label: 'Winkel', type: 'POI', icon: 'bag.fill', color: '#8A6BA0' },
+  { slug: 'vet', label: 'Dierenarts', type: 'POI', icon: 'cross.case.fill', color: '#B5524A' },
   {
     slug: 'drinking-point',
     label: 'Drinkpunt',
@@ -515,18 +545,21 @@ const RESEARCH: {
       raw: r,
     };
   }),
-  // Scraped POIs (drinking points, etc.) -> POI spots, no geometry.
-  ...POI_SOURCES.flatMap(({ category, file, descFallback }) =>
-    loadPoiFile(file).map((r) => ({
-      name: r.name,
-      category,
-      city: r.town ?? r.province ?? 'Nederland',
-      lat: r.lat,
-      lng: r.lng,
-      description: r.description ?? descFallback,
-      amenities: AMENITIES_BY_CATEGORY[category],
-      raw: r,
-    })),
+  // Scraped POIs (drinking points, vets, shops, etc.) -> POI spots, no geometry.
+  // Deduped across sources so OSM + Ranzijn don't double up at the same address.
+  ...dedupePois(
+    POI_SOURCES.flatMap(({ category, file, descFallback }) =>
+      loadPoiFile(file).map((r) => ({
+        name: r.name,
+        category,
+        city: r.town ?? r.province ?? 'Nederland',
+        lat: r.lat,
+        lng: r.lng,
+        description: r.description ?? descFallback,
+        amenities: AMENITIES_BY_CATEGORY[category],
+        raw: r,
+      })),
+    ),
   ),
 ];
 

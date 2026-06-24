@@ -1,0 +1,156 @@
+[
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/dierenarts/alkmaar",
+    "name": "Ranzijn Alkmaar",
+    "town": "Alkmaar",
+    "province": null,
+    "address": "Omval 55",
+    "lat": 52.622148,
+    "lng": 4.774686,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/dierenarts/aalsmeer",
+    "name": "Ranzijn Aalsmeer",
+    "town": "Aalsmeer",
+    "province": null,
+    "address": "Aalsmeerderweg 436",
+    "lat": 52.287661,
+    "lng": 4.819252,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/dierenarts/almere",
+    "name": "Ranzijn Almere",
+    "town": "Almere",
+    "province": null,
+    "address": "Bostonweg 70",
+    "lat": 52.394016,
+    "lng": 5.272969,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/dierenarts/amersfoort",
+    "name": "Ranzijn Amersfoort",
+    "town": "Amersfoort",
+    "province": null,
+    "address": "De Zonnecel 15",
+    "lat": 52.168696,
+    "lng": 5.426137,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/dierenarts/amsterdam",
+    "name": "Ranzijn Amsterdam",
+    "town": "Amsterdam",
+    "province": null,
+    "address": "Spaklerweg 44c",
+    "lat": 52.336987,
+    "lng": 4.92168,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/dierenarts/de-bilt",
+    "name": "Ranzijn De Bilt",
+    "town": "De Bilt",
+    "province": null,
+    "address": "Universiteitsweg 2",
+    "lat": 52.101929,
+    "lng": 5.18414,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/dierenarts/delft",
+    "name": "Ranzijn Delft",
+    "town": "Delft",
+    "province": null,
+    "address": "Rijksstraatweg 11",
+    "lat": 52.005259,
+    "lng": 4.386877,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/dierenarts/huizen",
+    "name": "Ranzijn Huizen",
+    "town": "Huizen",
+    "province": null,
+    "address": "Dr. Lelylaan 2",
+    "lat": 52.28849,
+    "lng": 5.24099,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/dierenarts/leiderdorp",
+    "name": "Ranzijn Leiderdorp",
+    "town": "Leiderdorp",
+    "province": null,
+    "address": "Willem-Alexanderlaan 15",
+    "lat": 52.151949,
+    "lng": 4.532494,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/dierenarts/nieuw-vennep",
+    "name": "Ranzijn Nieuw-Vennep",
+    "town": "Nieuw-Vennep",
+    "province": null,
+    "address": "IJweg 1336",
+    "lat": 52.294505,
+    "lng": 4.6395,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/dierenarts/sneek",
+    "name": "Ranzijn Sneek",
+    "town": "Sneek",
+    "province": null,
+    "address": "Zonnedauw 1",
+    "lat": 53.021075,
+    "lng": 5.665314,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/dierenarts/spijk",
+    "name": "Ranzijn Spijk",
+    "town": "Spijk",
+    "province": null,
+    "address": "Haarweg 2c",
+    "lat": 51.847546,
+    "lng": 5.014531,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/dierenarts/velserbroek",
+    "name": "Ranzijn Velserbroek",
+    "town": "Velserbroek",
+    "province": null,
+    "address": "Rijksweg 287",
+    "lat": 52.441048,
+    "lng": 4.653904,
+    "description": null
+  },
+  {
+    "source": "ranzijn",
+    "sourceUrl": "https://www.ranzijn.nl/dierenarts/zaandam",
+    "name": "Ranzijn Zaandam",
+    "town": "Zaandam",
+    "province": null,
+    "address": "Kleine Tocht 19",
+    "lat": 52.431427,
+    "lng": 4.810522,
+    "description": null
+  }
+]

@@ -34,6 +34,7 @@
     "db:deploy": "node ensure-postgis.mjs && zen migrate deploy",
     "db:seed": "tsx --env-file-if-exists=../../.env.local seed.ts",
     "scrape:osm": "tsx scrape/osm.ts",
+    "scrape:ranzijn": "tsx scrape/ranzijn.ts",
     "db:release": "node ensure-postgis.mjs && zen migrate deploy && tsx --env-file-if-exists=../../.env.local seed.ts",
     "build": "zen generate",
     "check-types": "tsc --noEmit",

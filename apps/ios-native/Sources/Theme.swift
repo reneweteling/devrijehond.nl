@@ -21,6 +21,7 @@ enum Brand {
         case "wash": return Color(hex: 0x4F7A86)
         case "shop": return Color(hex: 0x8A6BA0)
         case "drinking-point": return Color(hex: 0x6E7A82)
+        case "vet": return Color(hex: 0xB5524A)
         default: return moss
         }
     }
