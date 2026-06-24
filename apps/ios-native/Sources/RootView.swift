@@ -2,11 +2,11 @@ import SwiftUI
 
 struct RootView: View {
     @EnvironmentObject var session: Session
-    // Launch with `-startTab N` (0…4) to open a specific tab — handy for testing.
-    @State private var selection = UserDefaults.standard.integer(forKey: "startTab")
 
     var body: some View {
-        TabView(selection: $selection) {
+        // Tab selection lives in Session so e.g. "Bekijk op kaart" can switch tabs.
+        // Launch with `-startTab N` (0…4) seeds the initial tab (handy for testing).
+        TabView(selection: $session.selectedTab) {
             MapScreen().tabItem { Label("Kaart", systemImage: "map.circle") }.tag(0)
             NearbyScreen().tabItem { Label("Nabij", systemImage: "mappin.and.ellipse.circle") }.tag(1)
             AddScreen().tabItem { Label("Toevoegen", systemImage: "plus.circle") }.tag(2)

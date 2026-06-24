@@ -5,13 +5,34 @@ import UIKit
 import GoogleSignIn
 #endif
 
+#if canImport(Sentry)
+import Sentry
+#endif
+
 @main
 struct DeVrijeHondNativeApp: App {
     @StateObject private var session = Session()
     @State private var booted = false
 
     init() {
+        Self.startSentry()
         Self.configureNavigationBar()
+    }
+
+    private static func startSentry() {
+        #if canImport(Sentry)
+        SentrySDK.start { options in
+            options.dsn =
+                "https://c14ccbeda0b8c5f43c9a352f2c730ec7@o157871.ingest.us.sentry.io/4511620103602176"
+            #if DEBUG
+            options.environment = "debug"
+            #else
+            options.environment = "production"
+            #endif
+            options.tracesSampleRate = 0.2
+            options.enableMetricKit = true
+        }
+        #endif
     }
 
     /// Uniform nav titles app-wide: the brand rounded font, sized close to the

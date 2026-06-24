@@ -8,6 +8,7 @@ struct SpotDetailView: View {
 
     @EnvironmentObject var session: Session
     @StateObject private var loc = LocationManager()
+    @Environment(\.dismiss) private var dismiss
 
     @State private var detail: SpotDetail?
     @State private var reviews: [Review] = []
@@ -61,6 +62,18 @@ struct SpotDetailView: View {
                 VStack(alignment: .leading, spacing: DVH.s5) {
                     // Title block
                     titleBlock
+
+                    // Jump to this spot on the map (hidden when already on the map tab)
+                    if session.selectedTab != 0, spot.lat != nil, spot.lng != nil {
+                        Button {
+                            session.mapFocus = spot
+                            session.selectedTab = 0
+                            dismiss()
+                        } label: {
+                            Label("Bekijk op kaart", systemImage: "map")
+                        }
+                        .buttonStyle(.dvhSecondary)
+                    }
 
                     // Description
                     if let desc = detail?.description, !desc.isEmpty {

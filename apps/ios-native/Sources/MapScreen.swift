@@ -32,6 +32,7 @@ final class ClusterCountAnnotation: NSObject, MKAnnotation {
 // MARK: - Map screen
 
 struct MapScreen: View {
+    @EnvironmentObject private var session: Session
     @StateObject private var loc = LocationManager()
     @State private var categories: [Category] = []
     @State private var selected: SpotSummary?
@@ -84,6 +85,12 @@ struct MapScreen: View {
         .task {
             loc.request()
             if categories.isEmpty { categories = (try? await APIClient.categories()) ?? [] }
+        }
+        // "Bekijk op kaart" from a list/detail: center on the requested spot.
+        .onReceive(session.$mapFocus) { spot in
+            guard let spot, let lat = spot.lat, let lng = spot.lng else { return }
+            jumpToCoordinate = CLLocationCoordinate2D(latitude: lat, longitude: lng)
+            DispatchQueue.main.async { session.mapFocus = nil }
         }
         .sheet(item: $selected) { spot in
             SpotDetailView(spot: spot, category: categoriesById[spot.categoryId])

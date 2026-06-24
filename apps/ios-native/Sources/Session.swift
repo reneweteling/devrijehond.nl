@@ -11,6 +11,13 @@ final class Session: ObservableObject {
     /// A transient message to surface to the user (e.g. a failed magic link).
     @Published var authNotice: String?
 
+    /// Currently-selected tab (0 = Kaart). Bound by RootView so other screens can
+    /// switch tabs, e.g. "Bekijk op kaart" from a spot detail.
+    @Published var selectedTab: Int = UserDefaults.standard.integer(forKey: "startTab")
+    /// When set, the map centers on this spot then clears it. Used to jump from a
+    /// list/detail to the map.
+    @Published var mapFocus: SpotSummary?
+
     private let tokenKey = "nl.devrijehond.native.token"
     private let expiresKey = "nl.devrijehond.native.expiresAt"
 
