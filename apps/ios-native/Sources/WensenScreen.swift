@@ -33,7 +33,6 @@ struct WensenScreen: View {
                 Brand.sand.ignoresSafeArea()
 
                 VStack(spacing: 0) {
-                    headerSection
                     filterRow
                     contentArea
                 }
@@ -41,7 +40,8 @@ struct WensenScreen: View {
                 fab
                     .padding([.bottom, .trailing], DVH.s5)
             }
-            .navigationBarHidden(true)
+            .navigationTitle("Wensen")
+            .navigationBarTitleDisplayMode(.inline)
         }
         .sheet(isPresented: $showNew) {
             RequestNewView { newRequest in
@@ -56,23 +56,6 @@ struct WensenScreen: View {
             .environmentObject(session)
         }
         .task { await loadRequests() }
-    }
-
-    // MARK: - Header
-
-    private var headerSection: some View {
-        VStack(alignment: .leading, spacing: DVH.s2) {
-            Text("Wensen")
-                .font(.dvhDisplay(28))
-                .foregroundStyle(Brand.ink)
-            Text("Wat wil je dat we bouwen? Stem op ideeën of dien er een in.")
-                .font(.dvhCallout)
-                .foregroundStyle(Brand.ink2)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, DVH.s5)
-        .padding(.top, DVH.s5)
-        .padding(.bottom, DVH.s3)
     }
 
     // MARK: - Filter chips

@@ -231,21 +231,11 @@ struct SpotFormView: View {
         if !images.isEmpty, uploadedURLs.count == min(images.count, 10) { return uploadedURLs }
         var urls: [String] = []
         for img in images.prefix(10) {
-            guard let jpeg = downscaledJPEG(img) else { continue }
+            let jpeg = ImageUtil.jpeg(img)
             let url = try await APIClient.uploadPhoto(jpeg: jpeg, token: token)
             urls.append(url)
         }
         uploadedURLs = urls
         return urls
-    }
-
-    private func downscaledJPEG(_ image: UIImage, maxEdge: CGFloat = 2000) -> Data? {
-        let size = image.size
-        let scale = min(1, maxEdge / max(size.width, size.height))
-        if scale >= 1 { return image.jpegData(compressionQuality: 0.8) }
-        let newSize = CGSize(width: size.width * scale, height: size.height * scale)
-        let renderer = UIGraphicsImageRenderer(size: newSize)
-        let resized = renderer.image { _ in image.draw(in: CGRect(origin: .zero, size: newSize)) }
-        return resized.jpegData(compressionQuality: 0.8)
     }
 }

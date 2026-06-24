@@ -194,7 +194,7 @@ struct EditProfileView: View {
         uploading = true
         error = nil
         do {
-            let jpeg = squareJPEG(img)
+            let jpeg = ImageUtil.squareJPEG(img)
             uploadedImageUrl = try await APIClient.uploadPhoto(jpeg: jpeg, token: token)
         } catch let e as APIError {
             if session.signOutIfUnauthorized(e) {
@@ -234,19 +234,4 @@ struct EditProfileView: View {
         saving = false
     }
 
-    private func squareJPEG(_ image: UIImage, maxEdge: CGFloat = 1200) -> Data {
-        let side = min(image.size.width, image.size.height)
-        let scale = min(1, maxEdge / side)
-        let targetSide = side * scale
-        let targetSize = CGSize(width: targetSide, height: targetSide)
-        let offsetX = (image.size.width - side) / 2
-        let offsetY = (image.size.height - side) / 2
-        let renderer = UIGraphicsImageRenderer(size: targetSize)
-        let cropped = renderer.image { _ in
-            image.draw(in: CGRect(
-                x: -offsetX * scale, y: -offsetY * scale,
-                width: image.size.width * scale, height: image.size.height * scale))
-        }
-        return cropped.jpegData(compressionQuality: 0.8) ?? Data()
-    }
 }

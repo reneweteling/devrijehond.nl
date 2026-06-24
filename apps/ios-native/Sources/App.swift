@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 #if canImport(GoogleSignIn)
 import GoogleSignIn
@@ -8,6 +9,37 @@ import GoogleSignIn
 struct DeVrijeHondNativeApp: App {
     @StateObject private var session = Session()
     @State private var booted = false
+
+    init() {
+        Self.configureNavigationBar()
+    }
+
+    /// Uniform nav titles app-wide: the brand rounded font, sized close to the
+    /// in-content titles (the user name), and the system material that frosts the
+    /// content scrolling under it. Transparent at the top, frosted once scrolled.
+    private static func configureNavigationBar() {
+        func rounded(_ size: CGFloat, _ weight: UIFont.Weight) -> UIFont {
+            let base = UIFont.systemFont(ofSize: size, weight: weight)
+            guard let d = base.fontDescriptor.withDesign(.rounded) else { return base }
+            return UIFont(descriptor: d, size: size)
+        }
+        let green = UIColor(Brand.mossDark)
+        let large = rounded(24, .bold)
+        let inline = rounded(20, .bold)
+
+        let standard = UINavigationBarAppearance()
+        standard.configureWithDefaultBackground() // material -> frosts on scroll
+        let scrollEdge = UINavigationBarAppearance()
+        scrollEdge.configureWithTransparentBackground() // clear over the sand at rest
+        for a in [standard, scrollEdge] {
+            a.largeTitleTextAttributes = [.font: large, .foregroundColor: green]
+            a.titleTextAttributes = [.font: inline, .foregroundColor: green]
+        }
+        let bar = UINavigationBar.appearance()
+        bar.standardAppearance = standard
+        bar.compactAppearance = standard
+        bar.scrollEdgeAppearance = scrollEdge
+    }
 
     var body: some Scene {
         WindowGroup {

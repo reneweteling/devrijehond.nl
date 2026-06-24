@@ -43,54 +43,22 @@ struct NearbyScreen: View {
 
     var body: some View {
         NavigationStack {
-            ZStack(alignment: .top) {
-                // Ground color fills the entire screen including behind the header.
-                Brand.sand.ignoresSafeArea()
-
-                Group {
-                    if loading && spots.isEmpty {
-                        loadingView
-                            .padding(.top, headerHeight)
-                    } else if spots.isEmpty || loadFailed {
-                        noLocationState
-                            .padding(.top, headerHeight)
-                    } else if filtered.isEmpty {
-                        EmptyStateView(
-                            icon: "magnifyingglass",
-                            title: "Geen resultaten",
-                            message: "Niets gevonden met deze filters. Pas de categorie of zoekterm aan.",
-                            actionLabel: "Filters wissen"
-                        ) {
-                            query = ""
-                            selectedCategoryId = nil
+            content
+                .background(Brand.sand)
+                .navigationTitle("Nabij")
+                .navigationBarTitleDisplayMode(.inline)
+                .searchable(text: $query, prompt: "Zoek op naam of categorie")
+                // Sticky frosted chip bar pinned right below the (large) title;
+                // the list scrolls under both.
+                .safeAreaInset(edge: .top, spacing: 0) {
+                    if !categories.isEmpty {
+                        VStack(spacing: 0) {
+                            categoryChips.padding(.vertical, DVH.s2)
+                            Divider().opacity(0.35)
                         }
-                        .padding(.top, headerHeight)
-                    } else {
-                        spotList
-                            // Top inset so the first row starts below the sticky header.
-                            .safeAreaInset(edge: .top, spacing: 0) {
-                                Color.clear.frame(height: chipsHeight)
-                            }
+                        .background(.ultraThinMaterial)
                     }
                 }
-
-                // Sticky glass header: category chips on a frosted surface.
-                // Sits right below the navigation bar; scrolling content passes under it.
-                if !categories.isEmpty {
-                    VStack(spacing: 0) {
-                        categoryChips
-                            .padding(.vertical, DVH.s2)
-                        Divider().opacity(0.35)
-                    }
-                    .background(.ultraThinMaterial)
-                    .frame(maxWidth: .infinity)
-                }
-            }
-            .navigationTitle("Nabij")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Brand.sand, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
-            .searchable(text: $query, prompt: "Zoek op naam of categorie")
         }
         .task {
             loc.request()
@@ -107,9 +75,25 @@ struct NearbyScreen: View {
         }
     }
 
-    // Approximate heights used for padding non-scrollable states below the header.
-    private var chipsHeight: CGFloat { categories.isEmpty ? 0 : 48 }
-    private var headerHeight: CGFloat { chipsHeight }
+    @ViewBuilder private var content: some View {
+        if loading && spots.isEmpty {
+            loadingView
+        } else if spots.isEmpty || loadFailed {
+            noLocationState
+        } else if filtered.isEmpty {
+            EmptyStateView(
+                icon: "magnifyingglass",
+                title: "Geen resultaten",
+                message: "Niets gevonden met deze filters. Pas de categorie of zoekterm aan.",
+                actionLabel: "Filters wissen"
+            ) {
+                query = ""
+                selectedCategoryId = nil
+            }
+        } else {
+            spotList
+        }
+    }
 
     // MARK: Category chip row (single-select)
 

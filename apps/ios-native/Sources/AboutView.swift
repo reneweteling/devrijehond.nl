@@ -51,6 +51,7 @@ struct AboutView: View {
             )
             .font(.dvhBody).foregroundStyle(Brand.ink2).lineSpacing(4)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .dvhCard()
     }
 
@@ -59,7 +60,7 @@ struct AboutView: View {
         VStack(alignment: .leading, spacing: DVH.s3) {
             Text("Gemaakt door").font(.dvhHeadline).foregroundStyle(Brand.ink)
             HStack(spacing: DVH.s3) {
-                Avatar(url: nil, name: "René Weteling", size: 46)
+                Image("Logo").resizable().scaledToFit().frame(width: 46, height: 46)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("René Weteling").font(.dvhBody.weight(.semibold)).foregroundStyle(Brand.ink)
                     Text("Felobo B.V.").font(.dvhCaption).foregroundStyle(Brand.ink2)
@@ -94,7 +95,7 @@ struct AboutView: View {
             AboutLinkRow(icon: "globe", label: "Website", detail: "devrijehond.nl",
                          url: URL(string: "https://devrijehond.nl"))
             Divider().padding(.leading, DVH.s4 + 28)
-            AboutLinkRow(icon: "chevron.left.forwardslash.chevron.right", label: "Open source",
+            AboutLinkRow(icon: "chevron.left.forwardslash.chevron.right", label: "Open source, bouw mee",
                          detail: "github.com/reneweteling/devrijehond.nl",
                          url: URL(string: "https://github.com/reneweteling/devrijehond.nl"))
             Divider().padding(.leading, DVH.s4 + 28)
