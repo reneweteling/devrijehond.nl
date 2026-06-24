@@ -1,0 +1,128 @@
+[
+  {
+    "source": "osm",
+    "sourceUrl": "https://www.openstreetmap.org/node/3854615585",
+    "name": "Naaktstrand Engelgaarde",
+    "town": null,
+    "province": null,
+    "address": null,
+    "lat": 52.7029375,
+    "lng": 6.2316901,
+    "description": null,
+    "osmId": "node/3854615585",
+    "osmTags": {
+      "access": "yes",
+      "dog": "leashed",
+      "landuse": "recreation_ground",
+      "leisure": "swimming_area",
+      "lifeguard": "no",
+      "lit": "no",
+      "location": "outdoor",
+      "name": "Naaktstrand Engelgaarde",
+      "natural": "beach",
+      "nudism": "yes",
+      "operator": "Stichting Engelgaarde",
+      "operator:website": "https://stichtingengelgaarde.nl",
+      "sport": "swimming",
+      "supervised": "no",
+      "surface": "grass",
+      "tourism": "picnic_site",
+      "water": "lake",
+      "website": "https://blootkompas.nl/locaties/naaktstrand-engelgaarde/"
+    }
+  },
+  {
+    "source": "osm",
+    "sourceUrl": "https://www.openstreetmap.org/way/141582474",
+    "name": "Hondenstrand",
+    "town": null,
+    "province": null,
+    "address": null,
+    "lat": 51.665673,
+    "lng": 3.7160443,
+    "description": null,
+    "osmId": "way/141582474",
+    "osmTags": {
+      "dog": "yes",
+      "natural": "beach"
+    }
+  },
+  {
+    "source": "osm",
+    "sourceUrl": "https://www.openstreetmap.org/way/457979789",
+    "name": "Hondenstrand",
+    "town": null,
+    "province": null,
+    "address": null,
+    "lat": 51.9681765,
+    "lng": 4.5115158,
+    "description": "Hondenstrand",
+    "osmId": "way/457979789",
+    "osmTags": {
+      "animal": "swimming",
+      "description": "Hondenstrand",
+      "dog": "yes",
+      "leisure": "dog_park",
+      "natural": "beach",
+      "surface": "sand"
+    }
+  },
+  {
+    "source": "osm",
+    "sourceUrl": "https://www.openstreetmap.org/way/621241908",
+    "name": "Hondenstrand",
+    "town": null,
+    "province": null,
+    "address": null,
+    "lat": 52.0068167,
+    "lng": 4.193952,
+    "description": null,
+    "osmId": "way/621241908",
+    "osmTags": {
+      "dog": "yes",
+      "natural": "beach"
+    }
+  },
+  {
+    "source": "osm",
+    "sourceUrl": "https://www.openstreetmap.org/way/872993385",
+    "name": "Naturistenstrand Westduinpark",
+    "town": null,
+    "province": null,
+    "address": null,
+    "lat": 52.0810523,
+    "lng": 4.2345776,
+    "description": "Strandslag 8, Den Haag. 100 m links van golfbreker 34 tot golfbreker 35.",
+    "osmId": "way/872993385",
+    "osmTags": {
+      "description": "Strandslag 8, Den Haag. 100 m links van golfbreker 34 tot golfbreker 35.",
+      "dog": "yes",
+      "dog:conditional": "no @ (May 15 - Sep 30 from 21:00 - 07:00)",
+      "name": "Naturistenstrand Westduinpark",
+      "name:en": "Naturist Beach Westduinpark",
+      "natural": "beach",
+      "nudism": "yes",
+      "source": "3dShapes",
+      "surface": "sand"
+    }
+  },
+  {
+    "source": "osm",
+    "sourceUrl": "https://www.openstreetmap.org/way/1410172412",
+    "name": "Hondenstrand",
+    "town": null,
+    "province": null,
+    "address": null,
+    "lat": 51.8580717,
+    "lng": 4.6065575,
+    "description": "Er staat hier een bord hondenstrand.",
+    "osmId": "way/1410172412",
+    "osmTags": {
+      "description": "Er staat hier een bord hondenstrand.",
+      "destination:en": "There is a dog beach sign here.",
+      "dog": "yes",
+      "natural": "beach",
+      "source": "survey;note #4414495"
+    }
+  }
+]

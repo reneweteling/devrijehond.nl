@@ -10,7 +10,7 @@
 
 import { S3Client } from '@aws-sdk/client-s3';
 
-export const S3_REGION = process.env.AWS_REGION ?? 'eu-west-1';
+export const S3_REGION = process.env.S3_REGION ?? process.env.AWS_REGION ?? 'eu-west-1';
 
 /** The bucket holding public user media. */
 export function bucketName(): string {
@@ -37,7 +37,15 @@ let cached: S3Client | undefined;
 /** Lazily-constructed singleton S3 client. */
 export function getS3(): S3Client {
   if (!cached) {
-    cached = new S3Client({ region: S3_REGION });
+    // Prefer explicit S3_* credentials (local dev + Dokku env). Falling back to
+    // the default chain would otherwise pick up an unrelated ~/.aws profile.
+    // With no S3_* env (e.g. ECS task role) the default chain still applies.
+    const accessKeyId = process.env.S3_ACCESS_KEY_ID;
+    const secretAccessKey = process.env.S3_SECRET_ACCESS_KEY;
+    cached = new S3Client({
+      region: S3_REGION,
+      ...(accessKeyId && secretAccessKey ? { credentials: { accessKeyId, secretAccessKey } } : {}),
+    });
   }
   return cached;
 }

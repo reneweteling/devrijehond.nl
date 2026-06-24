@@ -97,6 +97,21 @@ const POI_SOURCES: { category: string; file: string; descFallback: string }[] = 
     file: 'drinkpunten.json',
     descFallback: 'Drinkwaterpunt waar je hond kan drinken.',
   },
+  {
+    category: 'shop',
+    file: 'winkels.json',
+    descFallback: 'Dierenwinkel met spullen voor je hond.',
+  },
+  {
+    category: 'horeca',
+    file: 'horeca.json',
+    descFallback: 'Hondvriendelijke horeca.',
+  },
+  {
+    category: 'swim-beach',
+    file: 'zwemstranden.json',
+    descFallback: 'Hondenstrand om te zwemmen.',
+  },
 ];
 
 // ---------------------------------------------------------------------------
