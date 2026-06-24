@@ -3,6 +3,7 @@ import type { SpotDetailDto, ReviewDto } from '@devrijehond/types';
 import type { NearbySpot } from '@/lib/spot-detail';
 import { StoreButton } from './site-chrome';
 import { SpotParticipation } from './spot-participation';
+import { SpotEditButton } from './spot-edit-button';
 import { SpotRegionMap } from './spot-region-map';
 
 function detailHref(type: 'REGION' | 'POI', slug: string) {
@@ -136,6 +137,9 @@ export function SpotView({
               {spot.rating.count === 1 ? 'beoordeling' : 'beoordelingen'}
             </span>
           ) : null}
+          <span style={{ marginLeft: 'auto' }}>
+            <SpotEditButton spotId={spot.id} />
+          </span>
         </div>
       </div>
 
