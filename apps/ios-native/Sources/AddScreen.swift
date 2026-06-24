@@ -132,7 +132,7 @@ struct AddScreen: View {
             }
         }
         .padding(3)
-        .background(Brand.cream, in: Capsule())
+        .background(.bar, in: Capsule())
         .overlay(Capsule().strokeBorder(Brand.ink.opacity(0.08)))
         .shadow(color: Brand.ink.opacity(0.10), radius: 8, y: 2)
     }
@@ -166,7 +166,7 @@ struct AddScreen: View {
             .padding(.horizontal, DVH.s4)
             .frame(maxWidth: .infinity)
             .frame(height: 44)
-            .background(.ultraThinMaterial, in: Capsule())
+            .background(.bar, in: Capsule())
             .overlay(Capsule().strokeBorder(Brand.ink.opacity(0.08)))
             .shadow(color: Brand.ink.opacity(0.08), radius: 8, y: 2)
         }
