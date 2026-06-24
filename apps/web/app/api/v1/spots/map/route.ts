@@ -30,12 +30,13 @@ export const runtime = 'nodejs';
 
 // Viewport grid resolution. ≤ GRID_N² markers (clusters + singles) are ever
 // returned, so a dense city reads as a handful of count bubbles, not a wall.
-const GRID_N = 7;
+const GRID_N = 8;
 
 // Only collapse a grid cell into a count bubble once it holds at least this many
-// spots — clustering is for when pins would genuinely pile up, not for 2-3 spots
-// that fit fine as individual pins. Cells below this return every spot as a pin.
-const MIN_CLUSTER_COUNT = 6;
+// spots — clustering is for when pins would genuinely pile up, not a handful that
+// fit fine as individual pins. Cells below this return every spot as a pin. Kept
+// fairly high so clustering stays gentle (more pins, fewer count bubbles).
+const MIN_CLUSTER_COUNT = 10;
 
 // Safety cap for the non-clustered read (the web map, which fetches every spot
 // in the viewport). The clustered read needs no such cap, it's bounded by GRID_N².

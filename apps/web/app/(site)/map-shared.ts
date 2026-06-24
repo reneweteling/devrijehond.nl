@@ -3,8 +3,18 @@ import type { SpotSummaryDto } from '@devrijehond/types';
 /** Viewport bounding box (WGS84 degrees) shared by both map backends. */
 export type Bbox = { minLng: number; minLat: number; maxLng: number; maxLat: number };
 
+/** A server-side cluster: a count bubble at a cell centroid. */
+export type ClusterItem = { lat: number; lng: number; count: number };
+
+/** A map marker spot. The map endpoint adds a REGION's polygon outline. */
+export type MapItem = SpotSummaryDto & {
+  geometry?: { type: string; coordinates: unknown } | null;
+};
+
 export interface MapViewProps {
   spots: SpotSummaryDto[];
+  /** Server-side clusters (count bubbles) for dense cells. */
+  clusters?: ClusterItem[];
   /** Called when the viewport settles; the island fetches spots for it. */
   onBoundsChange: (bbox: Bbox) => void;
 }

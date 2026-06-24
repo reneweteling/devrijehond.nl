@@ -14,8 +14,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { APIProvider, InfoWindow, Map, Marker, useMap } from '@vis.gl/react-google-maps';
 import type { CategoryDto } from '@devrijehond/types';
-import type { Bbox } from './map-shared';
+import type { Bbox, MapItem } from './map-shared';
 import { DEFAULT_CENTER, DEFAULT_ZOOM, spotHref } from './map-shared';
+import { useViewportSpots } from './use-viewport-spots';
 
 const GOOGLE_MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '';
 
@@ -29,21 +30,6 @@ const SEARCH_DEBOUNCE = 350;
 const POLYGON_CAP = 1200;
 
 // ---- types ------------------------------------------------------------------
-
-type MapItem = {
-  id: string;
-  slug: string;
-  type: 'REGION' | 'POI';
-  name: string;
-  categoryId: string;
-  status: 'UNVERIFIED' | 'VERIFIED' | 'HIDDEN' | 'REMOVED';
-  lat: number | null;
-  lng: number | null;
-  rating: { average: number; count: number };
-  photoUrl: string | null;
-  updatedAt: string;
-  geometry: { type: string; coordinates: unknown } | null;
-};
 
 type GeocodeHit = { label: string; lat: number; lng: number };
 
@@ -60,8 +46,6 @@ function clusterIcon(): string {
   const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><circle cx='20' cy='20' r='17' fill='#41481f' stroke='white' stroke-width='2.5'/></svg>`;
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 }
-
-type ClusterItem = { lat: number; lng: number; count: number };
 
 // ---- Region polygon overlay (runs inside the Map context) -------------------
 
@@ -187,19 +171,22 @@ function useNarrow() {
 }
 
 export function FullMap() {
-  // Fetched spots for current viewport.
-  const [spots, setSpots] = useState<MapItem[]>([]);
-  const [clusters, setClusters] = useState<ClusterItem[]>([]);
-  const [loadingSpots, setLoadingSpots] = useState(false);
-  const lastBboxKey = useRef('');
-  const lastBbox = useRef<Bbox | null>(null);
-
   const narrow = useNarrow();
 
   // Categories for filter chips.
   const [categories, setCategories] = useState<CategoryDto[]>([]);
   // Selected category ids; empty = "Alles".
   const [activeCats, setActiveCats] = useState<Set<string>>(new Set());
+
+  // Shared viewport fetch with server-side clustering (same hook the homepage
+  // uses). A single active category is pushed to the server; multi-select stays
+  // a client-side filter over the returned singles.
+  const {
+    spots,
+    clusters,
+    loading: loadingSpots,
+    handleBounds,
+  } = useViewportSpots(activeCats.size === 1 ? [...activeCats][0] : undefined);
 
   // Selected spot for the peek card.
   const [selected, setSelected] = useState<MapItem | null>(null);
@@ -245,59 +232,6 @@ export function FullMap() {
       })
       .catch(() => {});
   }, []);
-
-  // ---- Fetch spots on bounds change ----------------------------------------
-
-  // Fetch the viewport via the server-clustered endpoint: dense cells come back
-  // as count bubbles, sparse cells as individual pins, so a NL-wide read returns
-  // a few dozen markers instead of thousands. When exactly one category is
-  // selected we push that filter to the server so the cluster counts respect it
-  // (multi-select still falls back to client-side filtering of the singles).
-  const loadSpots = useCallback(
-    (bbox: Bbox) => {
-      lastBbox.current = bbox;
-      const params = new URLSearchParams({
-        minLng: String(bbox.minLng),
-        minLat: String(bbox.minLat),
-        maxLng: String(bbox.maxLng),
-        maxLat: String(bbox.maxLat),
-        cluster: 'true',
-      });
-      if (activeCats.size === 1) params.set('categoryId', [...activeCats][0]!);
-
-      setLoadingSpots(true);
-      fetch(`/api/v1/spots/map?${params.toString()}`)
-        .then((r) => (r.ok ? r.json() : { items: [], clusters: [] }))
-        .then((data: { items?: MapItem[]; clusters?: ClusterItem[] }) => {
-          setSpots(data.items ?? []);
-          setClusters(data.clusters ?? []);
-        })
-        .catch(() => {
-          setSpots([]);
-          setClusters([]);
-        })
-        .finally(() => setLoadingSpots(false));
-    },
-    [activeCats],
-  );
-
-  const handleBoundsChange = useCallback(
-    (bbox: Bbox) => {
-      const key = [bbox.minLng, bbox.minLat, bbox.maxLng, bbox.maxLat]
-        .map((n) => n.toFixed(3))
-        .join(',');
-      if (key === lastBboxKey.current) return;
-      lastBboxKey.current = key;
-      loadSpots(bbox);
-    },
-    [loadSpots],
-  );
-
-  // Re-fetch the current viewport when the category filter changes, so the
-  // server-side clustering/filtering reflects the new selection.
-  useEffect(() => {
-    if (lastBbox.current) loadSpots(lastBbox.current);
-  }, [loadSpots]);
 
   // Timer ref used inside the Map's onIdle to debounce bounds changes.
   const boundsTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -423,7 +357,7 @@ export function FullMap() {
               maxLat: ne.lat(),
             };
             if (boundsTimer.current) clearTimeout(boundsTimer.current);
-            boundsTimer.current = setTimeout(() => handleBoundsChange(bbox), BOUNDS_DEBOUNCE);
+            boundsTimer.current = setTimeout(() => handleBounds(bbox), BOUNDS_DEBOUNCE);
           }}
         >
           <RecenterTrigger trigger={recenterTrigger} />

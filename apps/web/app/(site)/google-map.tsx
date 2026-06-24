@@ -13,6 +13,7 @@ import { APIProvider, InfoWindow, Map, Marker, useMap } from '@vis.gl/react-goog
 import type { SpotSummaryDto } from '@devrijehond/types';
 import {
   type Bbox,
+  type ClusterItem,
   type MapViewProps,
   DEFAULT_CENTER,
   DEFAULT_ZOOM,
@@ -50,9 +51,38 @@ function pinIcon(s: SpotSummaryDto): string {
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 }
 
+function clusterIcon(): string {
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><circle cx='20' cy='20' r='17' fill='#41481f' stroke='white' stroke-width='2.5'/></svg>`;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+}
+
+/** Cluster count bubbles; clicking one zooms in to resolve it. Runs inside the
+ *  Map context so it can drive the live map via useMap(). */
+function ClusterMarkers({ clusters }: { clusters: ClusterItem[] }) {
+  const map = useMap();
+  return (
+    <>
+      {clusters.map((c, i) => (
+        <Marker
+          key={`cluster-${i}-${c.lat.toFixed(4)}-${c.lng.toFixed(4)}`}
+          position={{ lat: c.lat, lng: c.lng }}
+          icon={clusterIcon()}
+          label={{ text: String(c.count), color: '#fff', fontSize: '12px', fontWeight: '700' }}
+          onClick={() => {
+            if (!map) return;
+            map.panTo({ lat: c.lat, lng: c.lng });
+            map.setZoom(Math.min((map.getZoom() ?? DEFAULT_ZOOM) + 3, 16));
+          }}
+        />
+      ))}
+    </>
+  );
+}
+
 export function GoogleMapView({
   apiKey,
   spots,
+  clusters = [],
   onBoundsChange,
 }: MapViewProps & { apiKey: string }) {
   const [selected, setSelected] = useState<SpotSummaryDto | null>(null);
@@ -82,6 +112,7 @@ export function GoogleMapView({
         }}
       >
         <RecenterOnUser />
+        <ClusterMarkers clusters={clusters} />
         {spots
           .filter((s) => s.lat != null && s.lng != null)
           .map((s) => (

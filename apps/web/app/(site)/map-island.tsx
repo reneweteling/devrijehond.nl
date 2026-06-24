@@ -9,40 +9,16 @@
  * markup for SEO and as a no-JS fallback.
  */
 
-import { useCallback, useRef, useState } from 'react';
-import type { SpotSummaryDto } from '@devrijehond/types';
-import { type Bbox, spotHref } from './map-shared';
+import { spotHref } from './map-shared';
 import { GoogleMapView } from './google-map';
+import { useViewportSpots } from './use-viewport-spots';
 
 const GOOGLE_MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '';
 
 export function MapIsland() {
-  const [spots, setSpots] = useState<SpotSummaryDto[]>([]);
-  const [loading, setLoading] = useState(true);
-  // Skip refetching when the viewport settles on the same box (rounded).
-  const lastKey = useRef('');
-
-  const handleBounds = useCallback(async (b: Bbox) => {
-    const key = [b.minLng, b.minLat, b.maxLng, b.maxLat].map((n) => n.toFixed(4)).join(',');
-    if (key === lastKey.current) return;
-    lastKey.current = key;
-
-    const params = new URLSearchParams({
-      minLng: String(b.minLng),
-      minLat: String(b.minLat),
-      maxLng: String(b.maxLng),
-      maxLat: String(b.maxLat),
-    });
-    try {
-      const res = await fetch(`/api/v1/spots/map?${params.toString()}`);
-      const data: { items?: SpotSummaryDto[] } = res.ok ? await res.json() : {};
-      setSpots(data.items ?? []);
-    } catch {
-      setSpots([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  // Shared viewport fetch (server-side clustering), same as the /kaart page.
+  const { spots, clusters, loading, handleBounds } = useViewportSpots();
+  const totalInView = spots.length + clusters.reduce((n, c) => n + c.count, 0);
 
   return (
     <section aria-label="Kaart met hondvriendelijke plekken">
@@ -58,7 +34,12 @@ export function MapIsland() {
           }}
         >
           {GOOGLE_MAPS_KEY ? (
-            <GoogleMapView apiKey={GOOGLE_MAPS_KEY} spots={spots} onBoundsChange={handleBounds} />
+            <GoogleMapView
+              apiKey={GOOGLE_MAPS_KEY}
+              spots={spots}
+              clusters={clusters}
+              onBoundsChange={handleBounds}
+            />
           ) : (
             <div
               style={{
@@ -92,7 +73,7 @@ export function MapIsland() {
           }}
         >
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--moss)' }} />
-          {loading ? 'Kaart laden…' : `${spots.length} plekken in beeld`}
+          {loading ? 'Kaart laden…' : `${totalInView} plekken in beeld`}
         </div>
       </div>
 
@@ -135,9 +116,9 @@ export function MapIsland() {
           ))}
         </div>
       ) : null}
-      {spots.length > 24 ? (
+      {totalInView > Math.min(spots.length, 24) ? (
         <p className="muted" style={{ marginTop: 12, fontSize: 13.5 }}>
-          en {spots.length - 24} meer in beeld.{' '}
+          en {totalInView - Math.min(spots.length, 24)} meer in beeld.{' '}
           <a href="/kaart" style={{ color: 'var(--moss)', fontWeight: 600 }}>
             Open de kaart
           </a>
