@@ -35,6 +35,8 @@ export type RawPoi = {
   lat: number;
   lng: number;
   description: string | null;
+  phone: string | null;
+  website: string | null;
   osmId: string;
   osmTags: Record<string, string>;
 };
@@ -154,6 +156,8 @@ function normalise(el: OverpassElement, cfg: CategoryConfig): RawPoi | null {
     lat,
     lng,
     description: tags.description ?? null,
+    phone: tags.phone ?? tags['contact:phone'] ?? null,
+    website: tags.website ?? tags['contact:website'] ?? null,
     osmId: `${el.type}/${el.id}`,
     osmTags: tags,
   };

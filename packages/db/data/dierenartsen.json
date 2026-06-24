@@ -9,6 +9,8 @@
     "lat": 51.8693528,
     "lng": 5.2877717,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/322782690",
     "osmTags": {
       "addr:city": "Meteren",
@@ -32,6 +34,8 @@
     "lat": 52.0903036,
     "lng": 5.2257496,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/366517730",
     "osmTags": {
       "addr:city": "Zeist",
@@ -55,6 +59,8 @@
     "lat": 52.2409916,
     "lng": 5.1169571,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/402325537",
     "osmTags": {
       "amenity": "veterinary",
@@ -71,6 +77,8 @@
     "lat": 52.154775,
     "lng": 4.4954855,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenartsmoens.nl/",
     "osmId": "node/450205708",
     "osmTags": {
       "addr:city": "Leiden",
@@ -93,6 +101,8 @@
     "lat": 52.0331557,
     "lng": 4.6926443,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/494766250",
     "osmTags": {
       "amenity": "veterinary",
@@ -110,6 +120,8 @@
     "lat": 52.4077721,
     "lng": 6.6291707,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/534650181",
     "osmTags": {
       "amenity": "veterinary",
@@ -126,6 +138,8 @@
     "lat": 52.2158533,
     "lng": 5.2725718,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/559774026",
     "osmTags": {
       "amenity": "veterinary",
@@ -143,6 +157,8 @@
     "lat": 51.912194,
     "lng": 4.9971161,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/564877168",
     "osmTags": {
       "amenity": "veterinary",
@@ -159,6 +175,8 @@
     "lat": 52.1232153,
     "lng": 4.4437854,
     "description": null,
+    "phone": null,
+    "website": "https://dadv.nl",
     "osmId": "node/590831232",
     "osmTags": {
       "addr:city": "Voorschoten",
@@ -183,6 +201,8 @@
     "lat": 52.3827511,
     "lng": 5.7831028,
     "description": null,
+    "phone": "+31 341 252 353",
+    "website": "https://www.dierenklinieknunspeet.nl",
     "osmId": "node/631288737",
     "osmTags": {
       "addr:city": "Nunspeet",
@@ -209,6 +229,8 @@
     "lat": 51.7061645,
     "lng": 5.3055149,
     "description": null,
+    "phone": null,
+    "website": "http://www.dierenkliniekvos.nl/",
     "osmId": "node/664966273",
     "osmTags": {
       "addr:city": "'s-Hertogenbosch",
@@ -232,6 +254,8 @@
     "lat": 51.8427458,
     "lng": 5.8728531,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/671694316",
     "osmTags": {
       "addr:city": "Nijmegen",
@@ -254,6 +278,8 @@
     "lat": 52.3279645,
     "lng": 6.9957154,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/724098952",
     "osmTags": {
       "addr:city": "de Lutte",
@@ -277,6 +303,8 @@
     "lat": 52.3247381,
     "lng": 6.95228,
     "description": null,
+    "phone": "+31 541 352 668",
+    "website": null,
     "osmId": "node/724100237",
     "osmTags": {
       "addr:city": "de Lutte",
@@ -298,6 +326,8 @@
     "lat": 52.3456723,
     "lng": 4.8165769,
     "description": null,
+    "phone": null,
+    "website": "https://dierenziekenhuizen.nl/dierenarts-dierenkliniek-amsterdam",
     "osmId": "node/747367236",
     "osmTags": {
       "addr:city": "Amsterdam",
@@ -321,6 +351,8 @@
     "lat": 51.4743763,
     "lng": 5.5515334,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/767505236",
     "osmTags": {
       "addr:city": "Nuenen",
@@ -344,6 +376,8 @@
     "lat": 52.0665797,
     "lng": 5.120248,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/800447040",
     "osmTags": {
       "addr:city": "Utrecht",
@@ -368,6 +402,8 @@
     "lat": 51.7229415,
     "lng": 5.3141299,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/848469284",
     "osmTags": {
       "amenity": "veterinary",
@@ -384,6 +420,8 @@
     "lat": 52.6253329,
     "lng": 4.9496302,
     "description": null,
+    "phone": "+31 229 507 025",
+    "website": "https://www.vankoptotstaart.nl/kliniek/onze-kliniek-de-goorn",
     "osmId": "node/925413536",
     "osmTags": {
       "addr:city": "De Goorn",
@@ -410,6 +448,8 @@
     "lat": 53.207864,
     "lng": 6.5698029,
     "description": null,
+    "phone": "+31 50 526 3255",
+    "website": null,
     "osmId": "node/1062812073",
     "osmTags": {
       "addr:city": "Groningen",
@@ -433,6 +473,8 @@
     "lat": 51.7872287,
     "lng": 4.6759417,
     "description": null,
+    "phone": "+31 78 617 0708",
+    "website": "https://www.anicura.nl/klinieken/zuid-holland/dordrecht-sterrenburg/",
     "osmId": "node/1063602464",
     "osmTags": {
       "addr:city": "Dordrecht",
@@ -464,6 +506,8 @@
     "lat": 52.1775672,
     "lng": 4.4689184,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/1109622145",
     "osmTags": {
       "addr:city": "Oegstgeest",
@@ -487,6 +531,8 @@
     "lat": 52.3542507,
     "lng": 4.9205593,
     "description": null,
+    "phone": null,
+    "website": "https://www.sterkliniekamsterdam.nl/",
     "osmId": "node/1208560339",
     "osmTags": {
       "addr:city": "Amsterdam",
@@ -512,6 +558,8 @@
     "lat": 51.7664724,
     "lng": 5.5015307,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenkliniekdewolfskooi.nl/",
     "osmId": "node/1240392114",
     "osmTags": {
       "addr:city": "Oss",
@@ -535,6 +583,8 @@
     "lat": 52.9463379,
     "lng": 6.4424492,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/1461646263",
     "osmTags": {
       "amenity": "veterinary"
@@ -550,6 +600,8 @@
     "lat": 52.2183465,
     "lng": 4.9335201,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/1641728235",
     "osmTags": {
       "amenity": "veterinary",
@@ -566,6 +618,8 @@
     "lat": 51.8186048,
     "lng": 4.7739228,
     "description": null,
+    "phone": "+31 184 413 724",
+    "website": "http://www.dierenkliniekmiddeldiep.nl/",
     "osmId": "node/1702794285",
     "osmTags": {
       "addr:city": "Sliedrecht",
@@ -590,6 +644,8 @@
     "lat": 52.9478755,
     "lng": 5.9258825,
     "description": null,
+    "phone": "+31 513 624 232",
+    "website": "https://www.dierenartsenheerenveen.nl/",
     "osmId": "node/1707204687",
     "osmTags": {
       "addr:city": "Heerenveen",
@@ -615,6 +671,8 @@
     "lat": 52.047897,
     "lng": 5.5732711,
     "description": null,
+    "phone": null,
+    "website": "https://www.deklompdierenartsen.nl/",
     "osmId": "node/1745738959",
     "osmTags": {
       "addr:city": "De Klomp",
@@ -638,6 +696,8 @@
     "lat": 52.0206421,
     "lng": 5.1695419,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/1785841431",
     "osmTags": {
       "addr:city": "Houten",
@@ -660,6 +720,8 @@
     "lat": 52.4526343,
     "lng": 5.0398545,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/1790148700",
     "osmTags": {
       "addr:city": "Monnickendam",
@@ -681,6 +743,8 @@
     "lat": 52.3435579,
     "lng": 4.8916863,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenkliniek-europaplein.com",
     "osmId": "node/1794106440",
     "osmTags": {
       "addr:city": "Amsterdam",
@@ -706,6 +770,8 @@
     "lat": 52.2229065,
     "lng": 5.1580182,
     "description": null,
+    "phone": "+31 35 624 8528",
+    "website": "https://www.daploosdrechtseweg.nl",
     "osmId": "node/1801436156",
     "osmTags": {
       "addr:city": "Hilversum",
@@ -730,6 +796,8 @@
     "lat": 52.2234805,
     "lng": 5.1544645,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/1801436235",
     "osmTags": {
       "amenity": "veterinary",
@@ -746,6 +814,8 @@
     "lat": 51.8081367,
     "lng": 5.7208114,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/1805036805",
     "osmTags": {
       "amenity": "veterinary"
@@ -761,6 +831,8 @@
     "lat": 51.7991342,
     "lng": 5.7231932,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/1806167895",
     "osmTags": {
       "amenity": "veterinary"
@@ -776,6 +848,8 @@
     "lat": 51.6622075,
     "lng": 5.6302587,
     "description": null,
+    "phone": "+31 413 251 159",
+    "website": "https://www.dierenartsencentrumdepeelhorst.nl",
     "osmId": "node/1819927232",
     "osmTags": {
       "addr:city": "Uden",
@@ -802,6 +876,8 @@
     "lat": 53.3816198,
     "lng": 5.283349,
     "description": null,
+    "phone": "+31 562 449 363",
+    "website": null,
     "osmId": "node/1846053558",
     "osmTags": {
       "addr:city": "Midsland",
@@ -823,6 +899,8 @@
     "lat": 51.9213623,
     "lng": 4.5085451,
     "description": null,
+    "phone": "+31 10 414 5049",
+    "website": "https://www.anicura.nl/klinieken/rotterdam/rotterdam-kralingen/",
     "osmId": "node/1851897403",
     "osmTags": {
       "addr:city": "Rotterdam",
@@ -855,6 +933,8 @@
     "lat": 51.1011092,
     "lng": 5.8922207,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/1854785446",
     "osmTags": {
       "amenity": "veterinary",
@@ -871,6 +951,8 @@
     "lat": 52.3813333,
     "lng": 5.2279351,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/1857065864",
     "osmTags": {
       "amenity": "veterinary",
@@ -888,6 +970,8 @@
     "lat": 51.9733757,
     "lng": 5.3275552,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenkliniekduurstede.nl",
     "osmId": "node/1857506077",
     "osmTags": {
       "addr:city": "Wijk bij Duurstede",
@@ -913,6 +997,8 @@
     "lat": 52.1954494,
     "lng": 5.4350525,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/1962268257",
     "osmTags": {
       "addr:city": "Amersfoort",
@@ -935,6 +1021,8 @@
     "lat": 52.130052,
     "lng": 5.4261067,
     "description": null,
+    "phone": "+31 33 494 4488",
+    "website": "https://www.dierenkliniekleusden.nl/",
     "osmId": "node/1964646745",
     "osmTags": {
       "addr:city": "Leusden",
@@ -960,6 +1048,8 @@
     "lat": 52.1987346,
     "lng": 5.4169618,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenarts-vathorst.nl/",
     "osmId": "node/1965193557",
     "osmTags": {
       "addr:city": "Amersfoort",
@@ -984,6 +1074,8 @@
     "lat": 51.9739281,
     "lng": 4.2473616,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/1970309862",
     "osmTags": {
       "addr:city": "De Lier",
@@ -1007,6 +1099,8 @@
     "lat": 51.9265593,
     "lng": 4.2738529,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenkliniekdedelta.nl/",
     "osmId": "node/2002487537",
     "osmTags": {
       "addr:city": "Maasland",
@@ -1030,6 +1124,8 @@
     "lat": 51.8024726,
     "lng": 5.240188,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2006398427",
     "osmTags": {
       "amenity": "veterinary",
@@ -1046,6 +1142,8 @@
     "lat": 52.0078549,
     "lng": 6.0323773,
     "description": null,
+    "phone": "+31 26 495 3603",
+    "website": "https://www.dierenkliniekvelpveluwezoom.nl",
     "osmId": "node/2015263739",
     "osmTags": {
       "addr:city": "Rheden",
@@ -1073,6 +1171,8 @@
     "lat": 50.8317336,
     "lng": 5.7060882,
     "description": null,
+    "phone": "+31 43 356 0555",
+    "website": "https://www.anicura.nl/klinieken/limburg/maastricht/",
     "osmId": "node/2092869238",
     "osmTags": {
       "addr:city": "Maastricht",
@@ -1102,6 +1202,8 @@
     "lat": 50.9390023,
     "lng": 5.7905549,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2100125021",
     "osmTags": {
       "amenity": "veterinary",
@@ -1118,6 +1220,8 @@
     "lat": 51.9424179,
     "lng": 4.3465086,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenkliniekvollaers.nl/",
     "osmId": "node/2173411883",
     "osmTags": {
       "addr:city": "Vlaardingen",
@@ -1139,6 +1243,8 @@
     "lat": 52.2350454,
     "lng": 6.5905873,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2309654892",
     "osmTags": {
       "amenity": "veterinary"
@@ -1154,6 +1260,8 @@
     "lat": 52.7089153,
     "lng": 4.6907419,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2374231220",
     "osmTags": {
       "amenity": "veterinary",
@@ -1170,6 +1278,8 @@
     "lat": 51.8605143,
     "lng": 4.3660788,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2387982785",
     "osmTags": {
       "amenity": "veterinary",
@@ -1187,6 +1297,8 @@
     "lat": 51.1996905,
     "lng": 6.0095947,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2410170377",
     "osmTags": {
       "amenity": "veterinary"
@@ -1202,6 +1314,8 @@
     "lat": 51.6916907,
     "lng": 5.3174825,
     "description": null,
+    "phone": "+31 73 614 0614",
+    "website": "https://www.artsenvoordieren.nl/",
     "osmId": "node/2416663721",
     "osmTags": {
       "addr:city": "'s-Hertogenbosch",
@@ -1228,6 +1342,8 @@
     "lat": 51.6992462,
     "lng": 5.338636,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenkliniekhoogveld.nl/",
     "osmId": "node/2435067647",
     "osmTags": {
       "addr:city": "Rosmalen",
@@ -1251,6 +1367,8 @@
     "lat": 52.5027939,
     "lng": 6.1058719,
     "description": null,
+    "phone": null,
+    "website": "https://www.kattenkliniekzwolle.nl/",
     "osmId": "node/2497579580",
     "osmTags": {
       "addr:city": "Zwolle",
@@ -1274,6 +1392,8 @@
     "lat": 52.5266666,
     "lng": 6.13177,
     "description": "verwijscentrum",
+    "phone": "+31 38 303 53 33",
+    "website": "https://www.anicura.nl/klinieken/overijssel/zwolle/",
     "osmId": "node/2500684389",
     "osmTags": {
       "addr:city": "Zwolle",
@@ -1304,6 +1424,8 @@
     "lat": 52.4352942,
     "lng": 6.233901,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2502746526",
     "osmTags": {
       "addr:city": "Heino",
@@ -1325,6 +1447,8 @@
     "lat": 52.4814675,
     "lng": 6.0596577,
     "description": null,
+    "phone": "+31 38 444 2512",
+    "website": "https://www.dierenkliniekhattem.nl/",
     "osmId": "node/2503201153",
     "osmTags": {
       "addr:city": "Hattem",
@@ -1351,6 +1475,8 @@
     "lat": 52.3878909,
     "lng": 6.2612438,
     "description": null,
+    "phone": "+31 572 353 334",
+    "website": "https://www.middensalland.nl/",
     "osmId": "node/2504156394",
     "osmTags": {
       "addr:city": "Raalte",
@@ -1379,6 +1505,8 @@
     "lat": 51.8809827,
     "lng": 5.5231427,
     "description": null,
+    "phone": "+31 487 592233",
+    "website": "https://dierenkliniekbenedenleeuwen.nl",
     "osmId": "node/2512676781",
     "osmTags": {
       "addr:city": "Beneden-Leeuwen",
@@ -1403,6 +1531,8 @@
     "lat": 52.5213676,
     "lng": 6.1080748,
     "description": null,
+    "phone": null,
+    "website": "https://www.stadsdierenartszwolle.nl/",
     "osmId": "node/2526797988",
     "osmTags": {
       "addr:city": "Zwolle",
@@ -1427,6 +1557,8 @@
     "lat": 51.6178103,
     "lng": 5.4276597,
     "description": null,
+    "phone": "+31 73 5493566",
+    "website": "https://dapdemeierij.nl",
     "osmId": "node/2550470191",
     "osmTags": {
       "addr:city": "Schijndel",
@@ -1453,6 +1585,8 @@
     "lat": 51.9873208,
     "lng": 5.838134,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2575060553",
     "osmTags": {
       "amenity": "veterinary",
@@ -1469,6 +1603,8 @@
     "lat": 52.3377869,
     "lng": 5.2188645,
     "description": null,
+    "phone": "+31 36 531 0408",
+    "website": "https://www.dierenkliniekalmerehaven.nl/home/",
     "osmId": "node/2590973431",
     "osmTags": {
       "addr:city": "Almere",
@@ -1493,6 +1629,8 @@
     "lat": 51.9906837,
     "lng": 4.4729378,
     "description": null,
+    "phone": "+31 10 511 4546",
+    "website": "https://www.dkberkelenrodenrijs.nl",
     "osmId": "node/2592764241",
     "osmTags": {
       "addr:city": "Berkel en Rodenrijs",
@@ -1521,6 +1659,8 @@
     "lat": 51.9991485,
     "lng": 4.3303121,
     "description": null,
+    "phone": "+31 15 256 6319",
+    "website": "https://www.dkdelfland.nl/",
     "osmId": "node/2595368462",
     "osmTags": {
       "addr:city": "Den Hoorn",
@@ -1547,6 +1687,8 @@
     "lat": 51.9847854,
     "lng": 4.3355782,
     "description": null,
+    "phone": "+31 15 261 9199",
+    "website": "https://www.dierenkliniekthorbeckelaan.nl",
     "osmId": "node/2595409119",
     "osmTags": {
       "addr:city": "Delft",
@@ -1574,6 +1716,8 @@
     "lat": 52.0037749,
     "lng": 4.3596296,
     "description": null,
+    "phone": "+31 15 285 0230",
+    "website": "https://www.anicura.nl/klinieken/zuid-holland/delft/",
     "osmId": "node/2596107060",
     "osmTags": {
       "addr:city": "Delft",
@@ -1607,6 +1751,8 @@
     "lat": 52.0203059,
     "lng": 4.3578326,
     "description": null,
+    "phone": "+31 15 212 5543",
+    "website": "https://kalverbos.nl/",
     "osmId": "node/2596742674",
     "osmTags": {
       "addr:city": "Delft",
@@ -1631,6 +1777,8 @@
     "lat": 52.0075424,
     "lng": 4.3216203,
     "description": null,
+    "phone": "+31 157370135",
+    "website": "https://dierenkliniekanimalis.nl",
     "osmId": "node/2597991656",
     "osmTags": {
       "addr:city": "Delft",
@@ -1657,6 +1805,8 @@
     "lat": 52.0625451,
     "lng": 4.5316898,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2605315123",
     "osmTags": {
       "addr:city": "Zoetermeer",
@@ -1679,6 +1829,8 @@
     "lat": 52.0576891,
     "lng": 4.4769153,
     "description": null,
+    "phone": "+31 79 360 5470",
+    "website": "https://www.anicura.nl/klinieken/zuid-holland/bossenbuurt/",
     "osmId": "node/2606688042",
     "osmTags": {
       "addr:city": "Zoetermeer",
@@ -1709,6 +1861,8 @@
     "lat": 52.0689417,
     "lng": 4.4983264,
     "description": null,
+    "phone": "+31 79 346 0214",
+    "website": "https://www.anicura.nl/klinieken/zuid-holland/zoetermeer/",
     "osmId": "node/2607128048",
     "osmTags": {
       "addr:city": "Zoetermeer",
@@ -1738,6 +1892,8 @@
     "lat": 52.052147,
     "lng": 4.4962294,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2607512690",
     "osmTags": {
       "addr:city": "Zoetermeer",
@@ -1760,6 +1916,8 @@
     "lat": 52.236437,
     "lng": 5.1915651,
     "description": null,
+    "phone": null,
+    "website": "https://www.sterkliniekdierenartsen-hilversum.nl",
     "osmId": "node/2609887142",
     "osmTags": {
       "addr:city": "Hilversum",
@@ -1783,6 +1941,8 @@
     "lat": 51.9204015,
     "lng": 4.4713074,
     "description": null,
+    "phone": "+31 10 477 5570",
+    "website": "https://www.anicura.nl/klinieken/rotterdam/rotterdam-centrum/",
     "osmId": "node/2610274343",
     "osmTags": {
       "addr:city": "Rotterdam",
@@ -1815,6 +1975,8 @@
     "lat": 52.3627688,
     "lng": 5.1836888,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2610980062",
     "osmTags": {
       "addr:city": "Almere",
@@ -1837,6 +1999,8 @@
     "lat": 52.4675001,
     "lng": 6.0040744,
     "description": null,
+    "phone": "+31 38 376 3728",
+    "website": "https://dierenartswolff.nl/",
     "osmId": "node/2628126026",
     "osmTags": {
       "addr:city": "Wezep",
@@ -1861,6 +2025,8 @@
     "lat": 52.7760374,
     "lng": 6.8950767,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2632704419",
     "osmTags": {
       "addr:city": "Emmen",
@@ -1884,6 +2050,8 @@
     "lat": 51.8509194,
     "lng": 4.5007152,
     "description": null,
+    "phone": "+31 180 556 062",
+    "website": "https://www.anicura.nl/klinieken/barendrecht/barendrecht-carnisselande/",
     "osmId": "node/2632763188",
     "osmTags": {
       "addr:city": "Barendrecht",
@@ -1914,6 +2082,8 @@
     "lat": 52.0471393,
     "lng": 6.3107614,
     "description": null,
+    "phone": "+31 575 587 880",
+    "website": "https://www.degraafschapdierenartsen.nl/",
     "osmId": "node/2633553658",
     "osmTags": {
       "addr:city": "Hengelo (Gld)",
@@ -1939,6 +2109,8 @@
     "lat": 52.1005506,
     "lng": 5.1083903,
     "description": null,
+    "phone": null,
+    "website": "https://www.evidierenartsen.nl/nl-nl/locaties/evi-dierenartsen-oudenoord",
     "osmId": "node/2634057034",
     "osmTags": {
       "addr:city": "Utrecht",
@@ -1962,6 +2134,8 @@
     "lat": 52.0434343,
     "lng": 4.3954793,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenklinieknootdorp.nl/",
     "osmId": "node/2634400687",
     "osmTags": {
       "addr:city": "Nootdorp",
@@ -1985,6 +2159,8 @@
     "lat": 52.5934698,
     "lng": 6.096603,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenartsencombinatie-vvtv.nl/klinieken/dierenartsenpraktijk-zwolle-zwartewaterland-2",
     "osmId": "node/2636871966",
     "osmTags": {
       "addr:city": "Hasselt",
@@ -2009,6 +2185,8 @@
     "lat": 52.1416321,
     "lng": 5.3792559,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2638632791",
     "osmTags": {
       "addr:city": "Amersfoort",
@@ -2031,6 +2209,8 @@
     "lat": 52.151251,
     "lng": 5.3916125,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2638638199",
     "osmTags": {
       "addr:city": "Amersfoort",
@@ -2051,6 +2231,8 @@
     "lat": 52.1766343,
     "lng": 6.2769583,
     "description": null,
+    "phone": "+31 575 432 300",
+    "website": "https://www.dapoostnederland.nl",
     "osmId": "node/2652880391",
     "osmTags": {
       "addr:city": "Almen",
@@ -2075,6 +2257,8 @@
     "lat": 52.1259152,
     "lng": 6.2432379,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2654558062",
     "osmTags": {
       "addr:city": "Zutphen",
@@ -2097,6 +2281,8 @@
     "lat": 52.1414281,
     "lng": 6.2021454,
     "description": null,
+    "phone": "+31 575 513 151",
+    "website": "https://dierenkliniekcoenen.nl/",
     "osmId": "node/2655954592",
     "osmTags": {
       "addr:city": "Zutphen",
@@ -2122,6 +2308,8 @@
     "lat": 52.0822687,
     "lng": 5.1409252,
     "description": null,
+    "phone": "+31 30 225 0707",
+    "website": "https://www.evidierenartsen.nl/contact",
     "osmId": "node/2667657929",
     "osmTags": {
       "addr:city": "Utrecht",
@@ -2149,6 +2337,8 @@
     "lat": 51.9691911,
     "lng": 6.2823513,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2669415388",
     "osmTags": {
       "addr:city": "Doetinchem",
@@ -2171,6 +2361,8 @@
     "lat": 51.9549435,
     "lng": 6.2718504,
     "description": null,
+    "phone": null,
+    "website": "https://www.aai-dierenkliniek.nl/",
     "osmId": "node/2669803812",
     "osmTags": {
       "addr:city": "Doetinchem",
@@ -2194,6 +2386,8 @@
     "lat": 52.0908797,
     "lng": 5.1430972,
     "description": null,
+    "phone": "+31 30 210 90 00",
+    "website": "https://www.dierenkliniekwilhelminapark.nl/",
     "osmId": "node/2670762383",
     "osmTags": {
       "addr:city": "Utrecht",
@@ -2219,6 +2413,8 @@
     "lat": 51.9633241,
     "lng": 6.2000068,
     "description": null,
+    "phone": null,
+    "website": "https://www.degraafschapdierenartsen.nl/",
     "osmId": "node/2671257505",
     "osmTags": {
       "addr:city": "Wehl",
@@ -2242,6 +2438,8 @@
     "lat": 52.0926728,
     "lng": 5.1294356,
     "description": null,
+    "phone": "+31 30 231 0986",
+    "website": "https://dierenkliniekdomstad.nl",
     "osmId": "node/2672284871",
     "osmTags": {
       "addr:city": "Utrecht",
@@ -2268,6 +2466,8 @@
     "lat": 52.2541224,
     "lng": 6.2137694,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2675580947",
     "osmTags": {
       "addr:city": "Deventer",
@@ -2290,6 +2490,8 @@
     "lat": 52.2625947,
     "lng": 6.1612825,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2680207713",
     "osmTags": {
       "addr:city": "Deventer",
@@ -2314,6 +2516,8 @@
     "lat": 52.2672415,
     "lng": 6.1415787,
     "description": null,
+    "phone": "+31 570 641 134",
+    "website": "https://www.anicura.nl/klinieken/overijssel/deventer-zandweerd/",
     "osmId": "node/2680434965",
     "osmTags": {
       "addr:city": "Deventer",
@@ -2346,6 +2550,8 @@
     "lat": 52.1909448,
     "lng": 6.0148799,
     "description": null,
+    "phone": "+31 55 541 6869",
+    "website": "https://www.dierenartskruithof.nl/",
     "osmId": "node/2682431809",
     "osmTags": {
       "addr:city": "Apeldoorn",
@@ -2372,6 +2578,8 @@
     "lat": 52.1649469,
     "lng": 5.3987419,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2683943152",
     "osmTags": {
       "addr:city": "Amersfoort",
@@ -2394,6 +2602,8 @@
     "lat": 52.1940381,
     "lng": 5.934828,
     "description": null,
+    "phone": "+31 55 355 0830",
+    "website": "https://www.anicura.nl/klinieken/gelderland/apeldoorn/",
     "osmId": "node/2685234407",
     "osmTags": {
       "addr:city": "Apeldoorn",
@@ -2423,6 +2633,8 @@
     "lat": 52.190888,
     "lng": 5.9662239,
     "description": null,
+    "phone": "+31 55 533 2610",
+    "website": "https://www.groepspraktijkdierenartsenapeldoorn.nl",
     "osmId": "node/2685481818",
     "osmTags": {
       "addr:city": "Apeldoorn",
@@ -2449,6 +2661,8 @@
     "lat": 52.2209846,
     "lng": 5.9819759,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenkliniekmheenpark.nl/",
     "osmId": "node/2686216396",
     "osmTags": {
       "addr:city": "Apeldoorn",
@@ -2474,6 +2688,8 @@
     "lat": 52.1999231,
     "lng": 5.3771011,
     "description": null,
+    "phone": "+31 33 455 9900",
+    "website": "http://www.dierenklinieknieuwland.nl",
     "osmId": "node/2687461797",
     "osmTags": {
       "addr:city": "Amersfoort",
@@ -2499,6 +2715,8 @@
     "lat": 52.0472727,
     "lng": 4.6414329,
     "description": null,
+    "phone": "+31 182 613 112",
+    "website": null,
     "osmId": "node/2697950988",
     "osmTags": {
       "addr:city": "Waddinxveen",
@@ -2524,6 +2742,8 @@
     "lat": 52.0429617,
     "lng": 4.6555391,
     "description": null,
+    "phone": "+31 182 632 051",
+    "website": "https://dierenartspraktijkbaas.nl",
     "osmId": "node/2698051830",
     "osmTags": {
       "addr:city": "Waddinxveen",
@@ -2551,6 +2771,8 @@
     "lat": 52.0468388,
     "lng": 4.6526153,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2698054954",
     "osmTags": {
       "addr:city": "Waddinxveen",
@@ -2573,6 +2795,8 @@
     "lat": 52.0992461,
     "lng": 5.1164169,
     "description": null,
+    "phone": "+31 30 273 0961",
+    "website": "https://dierenkliniekdemolenutrecht.nl",
     "osmId": "node/2701990700",
     "osmTags": {
       "addr:city": "Utrecht",
@@ -2601,6 +2825,8 @@
     "lat": 52.0703825,
     "lng": 4.3533122,
     "description": null,
+    "phone": "+31 70 3833457",
+    "website": "https://www.dierenkliniekvoorburg.nl/",
     "osmId": "node/2703296059",
     "osmTags": {
       "addr:city": "Voorburg",
@@ -2627,6 +2853,8 @@
     "lat": 52.0937006,
     "lng": 4.3285885,
     "description": null,
+    "phone": "+31 70 3248651",
+    "website": null,
     "osmId": "node/2704382223",
     "osmTags": {
       "addr:city": "'s-Gravenhage",
@@ -2654,6 +2882,8 @@
     "lat": 52.0740998,
     "lng": 4.3704786,
     "description": null,
+    "phone": "+31 70 387 08 93",
+    "website": "https://dierenkliniekparkweg.nl/",
     "osmId": "node/2704840333",
     "osmTags": {
       "addr:city": "Voorburg",
@@ -2678,6 +2908,8 @@
     "lat": 52.0709725,
     "lng": 4.3592919,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierendokters.com/dierenarts-dierenkliniek/voorburg",
     "osmId": "node/2704918726",
     "osmTags": {
       "addr:city": "Voorburg",
@@ -2702,6 +2934,8 @@
     "lat": 52.0628028,
     "lng": 4.3292044,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2707886265",
     "osmTags": {
       "addr:city": "'s-Gravenhage",
@@ -2724,6 +2958,8 @@
     "lat": 52.5231774,
     "lng": 6.4209394,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2709421166",
     "osmTags": {
       "addr:city": "Ommen",
@@ -2746,6 +2982,8 @@
     "lat": 52.0987886,
     "lng": 4.3426512,
     "description": null,
+    "phone": null,
+    "website": "https://dierenambulancedenhaag.nl/",
     "osmId": "node/2709829091",
     "osmTags": {
       "addr:city": "Wassenaar",
@@ -2769,6 +3007,8 @@
     "lat": 52.0892592,
     "lng": 4.3434363,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenarts-bezuidenhout.nl/",
     "osmId": "node/2709976070",
     "osmTags": {
       "addr:city": "'s-Gravenhage",
@@ -2794,6 +3034,8 @@
     "lat": 52.0896958,
     "lng": 4.3565372,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenkliniekmariahoeve.nl",
     "osmId": "node/2710056410",
     "osmTags": {
       "addr:city": "'s-Gravenhage",
@@ -2817,6 +3059,8 @@
     "lat": 52.3847309,
     "lng": 4.6255851,
     "description": null,
+    "phone": "+31 23 531 6033",
+    "website": null,
     "osmId": "node/2711036540",
     "osmTags": {
       "addr:city": "Haarlem",
@@ -2841,6 +3085,8 @@
     "lat": 52.387475,
     "lng": 4.6346956,
     "description": null,
+    "phone": "+31 23 531 0880",
+    "website": "https://www.dierenkliniekkenaupark.nl",
     "osmId": "node/2711059458",
     "osmTags": {
       "addr:city": "Haarlem",
@@ -2867,6 +3113,8 @@
     "lat": 52.2478447,
     "lng": 5.3758524,
     "description": null,
+    "phone": null,
+    "website": "https://wellensiek.nl/vestigingen/bunschoten-spakenburg/",
     "osmId": "node/2711238532",
     "osmTags": {
       "addr:city": "Bunschoten-Spakenburg",
@@ -2890,6 +3138,8 @@
     "lat": 52.3714843,
     "lng": 4.6240917,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2711579055",
     "osmTags": {
       "addr:city": "Haarlem",
@@ -2912,6 +3162,8 @@
     "lat": 52.0841084,
     "lng": 4.3938039,
     "description": null,
+    "phone": "+31 70 3271110",
+    "website": "https://www.mijndierenkliniek.nl/nl-nl",
     "osmId": "node/2711670606",
     "osmTags": {
       "addr:city": "Leidschendam",
@@ -2937,6 +3189,8 @@
     "lat": 52.7077751,
     "lng": 5.8629855,
     "description": null,
+    "phone": "+31 527 745866",
+    "website": "https://www.dierenartspraktijkmarknesse.nl/",
     "osmId": "node/2712805753",
     "osmTags": {
       "addr:city": "Marknesse",
@@ -2961,6 +3215,8 @@
     "lat": 52.0387823,
     "lng": 4.3318746,
     "description": null,
+    "phone": "+31 85 483 1300",
+    "website": "https://www.anicura.nl/klinieken/zuid-holland/haaglanden/",
     "osmId": "node/2713193107",
     "osmTags": {
       "addr:city": "Rijswijk",
@@ -2992,6 +3248,8 @@
     "lat": 52.1151357,
     "lng": 4.3876448,
     "description": null,
+    "phone": null,
+    "website": "https://paardenkliniekderaaphorst.nl/",
     "osmId": "node/2713241743",
     "osmTags": {
       "addr:city": "Wassenaar",
@@ -3015,6 +3273,8 @@
     "lat": 52.4359559,
     "lng": 6.0728404,
     "description": null,
+    "phone": "+31 38 4478871",
+    "website": "https://www.paardenkliniekwapenveld.nl/",
     "osmId": "node/2714111578",
     "osmTags": {
       "addr:city": "Wapenveld",
@@ -3041,6 +3301,8 @@
     "lat": 52.7949555,
     "lng": 6.1227297,
     "description": null,
+    "phone": "+31 521 320 212",
+    "website": "https://www.anicura.nl/klinieken/steenwijk/hetravelijn/",
     "osmId": "node/2714961273",
     "osmTags": {
       "addr:city": "Steenwijk",
@@ -3070,6 +3332,8 @@
     "lat": 52.4012636,
     "lng": 4.6379675,
     "description": null,
+    "phone": null,
+    "website": "https://dierenkliniekmarnixstraat.nl/",
     "osmId": "node/2715103620",
     "osmTags": {
       "addr:city": "Haarlem",
@@ -3094,6 +3358,8 @@
     "lat": 52.1476663,
     "lng": 4.3933529,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2716034508",
     "osmTags": {
       "addr:city": "Wassenaar",
@@ -3116,6 +3382,8 @@
     "lat": 52.0777589,
     "lng": 5.1140024,
     "description": null,
+    "phone": "+31 30 304 0505",
+    "website": "https://dierenziekenhuizen.nl/",
     "osmId": "node/2716166132",
     "osmTags": {
       "addr:city": "Utrecht",
@@ -3141,6 +3409,8 @@
     "lat": 52.4025947,
     "lng": 4.6190447,
     "description": null,
+    "phone": "+31 23 525 1555",
+    "website": "https://www.anicura.nl/klinieken/noord-holland/bloemendaal/",
     "osmId": "node/2720743438",
     "osmTags": {
       "addr:city": "Bloemendaal",
@@ -3171,6 +3441,8 @@
     "lat": 52.0885928,
     "lng": 5.0832867,
     "description": null,
+    "phone": null,
+    "website": "https://dierenkliniekooginal.nl",
     "osmId": "node/2721733768",
     "osmTags": {
       "addr:city": "Utrecht",
@@ -3196,6 +3468,8 @@
     "lat": 51.9803369,
     "lng": 5.9534633,
     "description": null,
+    "phone": null,
+    "website": "https://www.mijndierenartsarnhem.nl/contactgegevens/contact#Arnhem",
     "osmId": "node/2722282491",
     "osmTags": {
       "addr:city": "Arnhem",
@@ -3219,6 +3493,8 @@
     "lat": 51.9685538,
     "lng": 5.9068907,
     "description": null,
+    "phone": "+31 26 3218144",
+    "website": "https://www.mijndierenartsarnhem.nl",
     "osmId": "node/2724303352",
     "osmTags": {
       "addr:city": "Arnhem",
@@ -3243,6 +3519,8 @@
     "lat": 52.6826512,
     "lng": 5.9617409,
     "description": null,
+    "phone": "+31 527 241 550",
+    "website": "https://www.anicura.nl/klinieken/overijssel/vollenhove/",
     "osmId": "node/2724868012",
     "osmTags": {
       "addr:city": "Vollenhove",
@@ -3272,6 +3550,8 @@
     "lat": 52.0288795,
     "lng": 4.2886288,
     "description": null,
+    "phone": "+31 70 394 1238",
+    "website": "https://www.dierenkliniekwv.nl/",
     "osmId": "node/2725967493",
     "osmTags": {
       "addr:city": "'s-Gravenhage",
@@ -3296,6 +3576,8 @@
     "lat": 51.4199681,
     "lng": 5.4485013,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2726058453",
     "osmTags": {
       "addr:city": "Eindhoven",
@@ -3318,6 +3600,8 @@
     "lat": 51.9571118,
     "lng": 5.838004,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2726590094",
     "osmTags": {
       "addr:city": "Arnhem",
@@ -3340,6 +3624,8 @@
     "lat": 51.9893077,
     "lng": 5.93714,
     "description": null,
+    "phone": "+31 26 361 3768",
+    "website": "https://dklvelperweg.nl/",
     "osmId": "node/2727093553",
     "osmTags": {
       "addr:city": "Arnhem",
@@ -3366,6 +3652,8 @@
     "lat": 51.5778814,
     "lng": 4.7319391,
     "description": null,
+    "phone": "+31 76 572 2999",
+    "website": "https://www.dierenziekenhuisbreda.nl/",
     "osmId": "node/2727981442",
     "osmTags": {
       "addr:city": "Breda",
@@ -3390,6 +3678,8 @@
     "lat": 51.5781398,
     "lng": 4.7511099,
     "description": null,
+    "phone": "+31 76 521 0434",
+    "website": "https://dkdeheuvel.nl/",
     "osmId": "node/2728037366",
     "osmTags": {
       "addr:city": "Breda",
@@ -3414,6 +3704,8 @@
     "lat": 51.8993389,
     "lng": 4.0927617,
     "description": null,
+    "phone": "+31 181 480 360",
+    "website": "https://www.anicura.nl/klinieken/zuid-holland/het-overbosch-oostvoorne/",
     "osmId": "node/2729107164",
     "osmTags": {
       "addr:city": "Oostvoorne",
@@ -3445,6 +3737,8 @@
     "lat": 51.9116793,
     "lng": 4.114836,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenartsschrage.nl/",
     "osmId": "node/2729109090",
     "osmTags": {
       "addr:city": "Oostvoorne",
@@ -3469,6 +3763,8 @@
     "lat": 52.0817851,
     "lng": 5.0604342,
     "description": null,
+    "phone": null,
+    "website": "https://dierenkliniek-strijkviertel.nl/",
     "osmId": "node/2729313008",
     "osmTags": {
       "addr:city": "Utrecht",
@@ -3492,6 +3788,8 @@
     "lat": 52.399711,
     "lng": 6.0491084,
     "description": null,
+    "phone": "+31 578 215045",
+    "website": "https://dierenkliniekmolenweg.nl/",
     "osmId": "node/2729728890",
     "osmTags": {
       "addr:city": "Heerde",
@@ -3518,6 +3816,8 @@
     "lat": 52.0802674,
     "lng": 4.2971964,
     "description": null,
+    "phone": "+31 70 365 9541",
+    "website": "https://www.dierenkliniekdeeland.nl/",
     "osmId": "node/2730092994",
     "osmTags": {
       "addr:city": "'s-Gravenhage",
@@ -3544,6 +3844,8 @@
     "lat": 51.5690198,
     "lng": 4.7796086,
     "description": null,
+    "phone": "+31 76 565 0960",
+    "website": "http://www.dierenartstimmers.nl/",
     "osmId": "node/2730198853",
     "osmTags": {
       "addr:city": "Breda",
@@ -3568,6 +3870,8 @@
     "lat": 52.0891991,
     "lng": 4.3103722,
     "description": null,
+    "phone": "+31 70 3462207",
+    "website": "https://www.dierendokterdenhaag.nl",
     "osmId": "node/2730254661",
     "osmTags": {
       "addr:city": "'s-Gravenhage",
@@ -3593,6 +3897,8 @@
     "lat": 51.9374264,
     "lng": 4.8478095,
     "description": null,
+    "phone": "+31 184 601 558",
+    "website": "https://www.dierenkliniekhetliesvelt.nl",
     "osmId": "node/2730791936",
     "osmTags": {
       "addr:city": "Groot-Ammers",
@@ -3621,6 +3927,8 @@
     "lat": 52.074506,
     "lng": 4.2837707,
     "description": null,
+    "phone": "+31 70 3602424",
+    "website": "https://dscdenhaag.nl/",
     "osmId": "node/2731045035",
     "osmTags": {
       "addr:city": "'s-Gravenhage",
@@ -3647,6 +3955,8 @@
     "lat": 52.5422991,
     "lng": 5.9196256,
     "description": null,
+    "phone": "+31 38 331 3930",
+    "website": "https://www.dgcdenieuwehanze.nl/",
     "osmId": "node/2731595478",
     "osmTags": {
       "addr:city": "Kampen",
@@ -3671,6 +3981,8 @@
     "lat": 52.0681361,
     "lng": 4.2734313,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2731664108",
     "osmTags": {
       "addr:city": "'s-Gravenhage",
@@ -3693,6 +4005,8 @@
     "lat": 52.0786866,
     "lng": 4.2616583,
     "description": null,
+    "phone": "+31 70 219 2297",
+    "website": "https://www.dierenkliniekgoudenregenstraat.nl/",
     "osmId": "node/2731735046",
     "osmTags": {
       "addr:city": "'s-Gravenhage",
@@ -3721,6 +4035,8 @@
     "lat": 52.0693915,
     "lng": 4.2522091,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2731797329",
     "osmTags": {
       "addr:city": "'s-Gravenhage",
@@ -3743,6 +4059,8 @@
     "lat": 52.0128216,
     "lng": 6.1449305,
     "description": null,
+    "phone": "+31 313 475 162",
+    "website": "https://www.degraafschapdierenartsen.nl/contact-en-locaties/doesburg",
     "osmId": "node/2731927145",
     "osmTags": {
       "addr:city": "Doesburg",
@@ -3768,6 +4086,8 @@
     "lat": 52.0505891,
     "lng": 4.2729878,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2732203310",
     "osmTags": {
       "addr:city": "'s-Gravenhage",
@@ -3790,6 +4110,8 @@
     "lat": 51.6042425,
     "lng": 4.7178274,
     "description": null,
+    "phone": "+31 76 541 5030",
+    "website": "https://www.dierenkliniekdebaronie.nl/",
     "osmId": "node/2732496373",
     "osmTags": {
       "addr:city": "Prinsenbeek",
@@ -3818,6 +4140,8 @@
     "lat": 52.0668934,
     "lng": 4.2465342,
     "description": null,
+    "phone": "+31 70 325 5907",
+    "website": "https://www.dierenkliniekthorbeckelaan.nl/",
     "osmId": "node/2732568726",
     "osmTags": {
       "addr:city": "'s-Gravenhage",
@@ -3843,6 +4167,8 @@
     "lat": 51.4424253,
     "lng": 5.4393693,
     "description": null,
+    "phone": "+31 40 257 1517",
+    "website": "https://www.anicura.nl/klinieken/noord-brabant/t-heike-eindhoven/",
     "osmId": "node/2732783876",
     "osmTags": {
       "addr:city": "Eindhoven",
@@ -3873,6 +4199,8 @@
     "lat": 51.6237668,
     "lng": 4.7437317,
     "description": null,
+    "phone": null,
+    "website": "https://www.anicura.nl/breda-heksenwiel/",
     "osmId": "node/2733061734",
     "osmTags": {
       "addr:city": "Breda",
@@ -3896,6 +4224,8 @@
     "lat": 52.6936942,
     "lng": 6.1905818,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2733464101",
     "osmTags": {
       "addr:city": "Meppel",
@@ -3918,6 +4248,8 @@
     "lat": 52.3071575,
     "lng": 4.6940849,
     "description": null,
+    "phone": "+31 23 564 2626",
+    "website": "https://www.anicura.nl/klinieken/hoofddorp/hoofddorp-hoofdvaart/",
     "osmId": "node/2733966988",
     "osmTags": {
       "addr:city": "Hoofddorp",
@@ -3947,6 +4279,8 @@
     "lat": 51.60761,
     "lng": 4.7250772,
     "description": null,
+    "phone": "+31 76 572 2999",
+    "website": "https://www.anicura.nl/klinieken/breda/breda-taxandria/",
     "osmId": "node/2734029696",
     "osmTags": {
       "addr:city": "Breda",
@@ -3976,6 +4310,8 @@
     "lat": 51.5059968,
     "lng": 5.3611328,
     "description": null,
+    "phone": "+31 499 374 205",
+    "website": "https://www.dierenkliniekdenheuvel.nl/",
     "osmId": "node/2734944678",
     "osmTags": {
       "addr:city": "Best",
@@ -4002,6 +4338,8 @@
     "lat": 51.905846,
     "lng": 4.2494405,
     "description": null,
+    "phone": "+31 181 214 045",
+    "website": "https://www.anicura.nl/klinieken/zuid-holland/het-overbosch-rozenburg/",
     "osmId": "node/2735404084",
     "osmTags": {
       "addr:city": "Rozenburg",
@@ -4033,6 +4371,8 @@
     "lat": 51.8404935,
     "lng": 4.1354831,
     "description": null,
+    "phone": "+31 181 312 575",
+    "website": "https://www.anicura.nl/klinieken/zuid-holland/hellevoetsluis/",
     "osmId": "node/2736650744",
     "osmTags": {
       "addr:city": "Hellevoetsluis",
@@ -4064,6 +4404,8 @@
     "lat": 52.0859281,
     "lng": 5.0573649,
     "description": null,
+    "phone": "+31 30 666 1167",
+    "website": "https://www.dierenkliniekleidscherijn.nl/",
     "osmId": "node/2736939234",
     "osmTags": {
       "addr:city": "Utrecht",
@@ -4090,6 +4432,8 @@
     "lat": 52.1178312,
     "lng": 5.876,
     "description": null,
+    "phone": "+31 55 576 3090",
+    "website": "https://www.dierenkliniekdevijfsprong.nl",
     "osmId": "node/2737233695",
     "osmTags": {
       "addr:city": "Hoenderloo",
@@ -4115,6 +4459,8 @@
     "lat": 52.3600357,
     "lng": 4.8894168,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2737946212",
     "osmTags": {
       "addr:city": "Amsterdam",
@@ -4139,6 +4485,8 @@
     "lat": 53.238654,
     "lng": 6.5633545,
     "description": null,
+    "phone": null,
+    "website": "https://maxidier.nl",
     "osmId": "node/2738068620",
     "osmTags": {
       "addr:city": "Groningen",
@@ -4162,6 +4510,8 @@
     "lat": 52.3945894,
     "lng": 4.8501894,
     "description": null,
+    "phone": "+31 20 740 0600",
+    "website": "https://www.anicura.nl/klinieken/noord-holland/mcd/",
     "osmId": "node/2738247312",
     "osmTags": {
       "addr:city": "Amsterdam",
@@ -4191,6 +4541,8 @@
     "lat": 51.5785813,
     "lng": 4.792171,
     "description": null,
+    "phone": "+31 76 565 8707",
+    "website": "https://dierenkliniekpoolseweg.nl",
     "osmId": "node/2738685697",
     "osmTags": {
       "addr:city": "Breda",
@@ -4216,6 +4568,8 @@
     "lat": 53.2082033,
     "lng": 6.5088741,
     "description": null,
+    "phone": "+31 50 501 5500",
+    "website": "https://www.anicura.nl/klinieken/groningen/groningen/",
     "osmId": "node/2739293269",
     "osmTags": {
       "addr:city": "Groningen",
@@ -4246,6 +4600,8 @@
     "lat": 52.0102533,
     "lng": 4.2519218,
     "description": null,
+    "phone": "+31 174 624 544",
+    "website": "https://www.huisdierenziekenhuis.nl",
     "osmId": "node/2740018554",
     "osmTags": {
       "addr:city": "Honselersdijk",
@@ -4273,6 +4629,8 @@
     "lat": 53.1982807,
     "lng": 6.5676689,
     "description": null,
+    "phone": null,
+    "website": "https://www.kattenkliniekgroningen.nl/",
     "osmId": "node/2740112831",
     "osmTags": {
       "addr:city": "Groningen",
@@ -4297,6 +4655,8 @@
     "lat": 52.0628496,
     "lng": 6.3218859,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2740183223",
     "osmTags": {
       "addr:city": "Hengelo (Gld)",
@@ -4318,6 +4678,8 @@
     "lat": 51.419853,
     "lng": 5.5038895,
     "description": null,
+    "phone": "+31 40 212 6126",
+    "website": "https://www.dierendokters.com/dierenarts-dierenkliniek/eindhoven-kalmoesplein",
     "osmId": "node/2740215077",
     "osmTags": {
       "addr:city": "Eindhoven",
@@ -4346,6 +4708,8 @@
     "lat": 52.2133371,
     "lng": 5.2890253,
     "description": null,
+    "phone": "+31 35 541 5632",
+    "website": "https://www.anicura.nl/klinieken/utrecht/baarn/",
     "osmId": "node/2740257626",
     "osmTags": {
       "addr:city": "Baarn",
@@ -4375,6 +4739,8 @@
     "lat": 52.214212,
     "lng": 5.2821317,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2740354409",
     "osmTags": {
       "addr:city": "Baarn",
@@ -4398,6 +4764,8 @@
     "lat": 51.8082538,
     "lng": 4.632369,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2741815131",
     "osmTags": {
       "addr:city": "Zwijndrecht",
@@ -4420,6 +4788,8 @@
     "lat": 51.6951776,
     "lng": 5.256523,
     "description": null,
+    "phone": "+31 73 621 35 79",
+    "website": "https://www.dierenkliniekdenbosch.nl/",
     "osmId": "node/2741819075",
     "osmTags": {
       "addr:city": "'s-Hertogenbosch",
@@ -4446,6 +4816,8 @@
     "lat": 52.3828758,
     "lng": 4.7334994,
     "description": null,
+    "phone": "+31 20 308 0750",
+    "website": "https://www.edz-amsterdam.nl/",
     "osmId": "node/2742061415",
     "osmTags": {
       "addr:city": "Zwanenburg",
@@ -4470,6 +4842,8 @@
     "lat": 52.2128693,
     "lng": 5.2998244,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2742721516",
     "osmTags": {
       "addr:city": "Baarn",
@@ -4493,6 +4867,8 @@
     "lat": 52.3678923,
     "lng": 4.9252244,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2743194423",
     "osmTags": {
       "addr:city": "Amsterdam",
@@ -4516,6 +4892,8 @@
     "lat": 52.3724042,
     "lng": 4.8750048,
     "description": null,
+    "phone": "+31 20 623 8596",
+    "website": "https://www.dierendokters.com/",
     "osmId": "node/2743658955",
     "osmTags": {
       "addr:city": "Amsterdam",
@@ -4540,6 +4918,8 @@
     "lat": 53.2465952,
     "lng": 6.5905423,
     "description": null,
+    "phone": "+31 50 541 0740",
+    "website": "https://www.dierenartsbeijum.nl/",
     "osmId": "node/2744243178",
     "osmTags": {
       "addr:city": "Groningen",
@@ -4567,6 +4947,8 @@
     "lat": 51.8517925,
     "lng": 4.5488104,
     "description": null,
+    "phone": "+31 180 612 685",
+    "website": "https://www.anicura.nl/klinieken/barendrecht/barendrecht/",
     "osmId": "node/2744944768",
     "osmTags": {
       "addr:city": "Barendrecht",
@@ -4597,6 +4979,8 @@
     "lat": 51.8330085,
     "lng": 4.3219589,
     "description": null,
+    "phone": "+31 181 672 288",
+    "website": "https://www.dierenkliniekspijkenisse.nl",
     "osmId": "node/2745399152",
     "osmTags": {
       "addr:city": "Spijkenisse",
@@ -4624,6 +5008,8 @@
     "lat": 52.2935241,
     "lng": 4.5783614,
     "description": null,
+    "phone": "+31 252 518020",
+    "website": "https://www.anicura.nl/klinieken/zuid-holland/hillegom/",
     "osmId": "node/2746267017",
     "osmTags": {
       "addr:city": "Hillegom",
@@ -4654,6 +5040,8 @@
     "lat": 52.2926716,
     "lng": 4.5836276,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2746267482",
     "osmTags": {
       "addr:city": "Hillegom",
@@ -4676,6 +5064,8 @@
     "lat": 53.2322381,
     "lng": 6.5488849,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2746994009",
     "osmTags": {
       "addr:city": "Groningen",
@@ -4699,6 +5089,8 @@
     "lat": 51.8043484,
     "lng": 4.701646,
     "description": null,
+    "phone": "+31 85 483 1300",
+    "website": "https://www.anicura.nl/klinieken/zuid-holland/verwijscentrum-dordrecht/",
     "osmId": "node/2747091142",
     "osmTags": {
       "addr:city": "Dordrecht",
@@ -4729,6 +5121,8 @@
     "lat": 51.8038162,
     "lng": 4.7038047,
     "description": null,
+    "phone": "+31 78 621 9130",
+    "website": "https://www.anicura.nl/klinieken/zuid-holland/dordrecht-stadspolders/",
     "osmId": "node/2747092774",
     "osmTags": {
       "addr:city": "Dordrecht",
@@ -4759,6 +5153,8 @@
     "lat": 53.2032656,
     "lng": 6.5590842,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2748029163",
     "osmTags": {
       "addr:city": "Groningen",
@@ -4782,6 +5178,8 @@
     "lat": 51.5007342,
     "lng": 4.8611701,
     "description": null,
+    "phone": "+31 161 496 016",
+    "website": "https://www.dierenkliniekhetleijdal.nl",
     "osmId": "node/2748794245",
     "osmTags": {
       "addr:city": "Chaam",
@@ -4806,6 +5204,8 @@
     "lat": 51.8954091,
     "lng": 5.0952574,
     "description": null,
+    "phone": "+31 345 612 270",
+    "website": "https://www.dierenkliniekleerdam.nl/",
     "osmId": "node/2750484343",
     "osmTags": {
       "addr:city": "Leerdam",
@@ -4830,6 +5230,8 @@
     "lat": 52.0042361,
     "lng": 4.1621403,
     "description": null,
+    "phone": "+31 174 41 40 98",
+    "website": null,
     "osmId": "node/2750565830",
     "osmTags": {
       "addr:city": "'s-Gravenzande",
@@ -4854,6 +5256,8 @@
     "lat": 53.2259427,
     "lng": 6.5601836,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2752133775",
     "osmTags": {
       "addr:city": "Groningen",
@@ -4878,6 +5282,8 @@
     "lat": 51.3303838,
     "lng": 3.8607564,
     "description": null,
+    "phone": "+31 115 696 940",
+    "website": "https://www.dierenkliniek-othene.nl",
     "osmId": "node/2752792758",
     "osmTags": {
       "addr:city": "Terneuzen",
@@ -4903,6 +5309,8 @@
     "lat": 51.5873941,
     "lng": 4.6641718,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenkliniekettenleur.nl/",
     "osmId": "node/2752910754",
     "osmTags": {
       "addr:city": "Etten-Leur",
@@ -4926,6 +5334,8 @@
     "lat": 52.7919932,
     "lng": 6.0983557,
     "description": null,
+    "phone": "+31 521 514 848",
+    "website": "https://www.anicura.nl/klinieken/steenwijk/kaasweg/",
     "osmId": "node/2752923684",
     "osmTags": {
       "addr:city": "Tuk",
@@ -4956,6 +5366,8 @@
     "lat": 51.3224692,
     "lng": 3.8539422,
     "description": null,
+    "phone": "+31 115 619 628",
+    "website": "https://www.anicura.nl/klinieken/zeeland/zeeuws-vlaanderen/",
     "osmId": "node/2752970487",
     "osmTags": {
       "addr:city": "Terneuzen",
@@ -4991,6 +5403,8 @@
     "lat": 52.7868982,
     "lng": 6.1098409,
     "description": null,
+    "phone": "+31 521 514 848",
+    "website": "https://www.anicura.nl/klinieken/steenwijk/steenwijkerdiep/",
     "osmId": "node/2753747994",
     "osmTags": {
       "addr:city": "Steenwijk",
@@ -5021,6 +5435,8 @@
     "lat": 51.805113,
     "lng": 4.0288533,
     "description": null,
+    "phone": "+31 187 760 007",
+    "website": "https://www.anicura.nl/klinieken/zuid-holland/het-overbosch-stellendam/",
     "osmId": "node/2754675061",
     "osmTags": {
       "addr:city": "Stellendam",
@@ -5052,6 +5468,8 @@
     "lat": 53.3009055,
     "lng": 6.5987438,
     "description": null,
+    "phone": null,
+    "website": "https://www.vanstadtotwad.nl/over-vstw/bedum",
     "osmId": "node/2754842169",
     "osmTags": {
       "addr:city": "Bedum",
@@ -5075,6 +5493,8 @@
     "lat": 51.8049992,
     "lng": 4.6805533,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2756505013",
     "osmTags": {
       "addr:city": "Dordrecht",
@@ -5097,6 +5517,8 @@
     "lat": 51.724351,
     "lng": 5.3172417,
     "description": null,
+    "phone": "+31 73 641 6578",
+    "website": "https://www.anicura.nl/klinieken/noord-brabant/maaspoort/",
     "osmId": "node/2756769010",
     "osmTags": {
       "addr:city": "'s-Hertogenbosch",
@@ -5127,6 +5549,8 @@
     "lat": 51.9768844,
     "lng": 4.131515,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2756942613",
     "osmTags": {
       "addr:city": "Hoek van Holland",
@@ -5152,6 +5576,8 @@
     "lat": 52.2189866,
     "lng": 6.9221754,
     "description": null,
+    "phone": null,
+    "website": "http://www.dierenkliniekslotzicht.nl/",
     "osmId": "node/2758645095",
     "osmTags": {
       "addr:city": "Enschede",
@@ -5175,6 +5601,8 @@
     "lat": 52.2331398,
     "lng": 6.0930288,
     "description": null,
+    "phone": "+31 571 272 624",
+    "website": "https://www.dierenkliniektwello.nl/",
     "osmId": "node/2758781562",
     "osmTags": {
       "addr:city": "Twello",
@@ -5199,6 +5627,8 @@
     "lat": 51.4312961,
     "lng": 5.4896944,
     "description": null,
+    "phone": "+31 40 211 24 50",
+    "website": "https://www.dier-en-dokter.nl",
     "osmId": "node/2759419718",
     "osmTags": {
       "addr:city": "Eindhoven",
@@ -5226,6 +5656,8 @@
     "lat": 52.1058225,
     "lng": 5.0516934,
     "description": null,
+    "phone": "+31 30 251 3510",
+    "website": "https://www.anicura.nl/klinieken/utrecht/sdu/",
     "osmId": "node/2759518557",
     "osmTags": {
       "addr:city": "Utrecht",
@@ -5255,6 +5687,8 @@
     "lat": 52.1003939,
     "lng": 5.0550582,
     "description": null,
+    "phone": "+31 30 767 0997",
+    "website": "https://dierenziekenhuizen.nl/locaties/caressa-dierenziekenhuis-utrecht/",
     "osmId": "node/2759519090",
     "osmTags": {
       "addr:city": "Utrecht",
@@ -5280,6 +5714,8 @@
     "lat": 52.2037096,
     "lng": 6.7985616,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2760343187",
     "osmTags": {
       "addr:city": "Enschede",
@@ -5302,6 +5738,8 @@
     "lat": 52.0938326,
     "lng": 5.0101867,
     "description": null,
+    "phone": "+31 30 662 0025",
+    "website": "https://www.markdierenarts.nl/",
     "osmId": "node/2761145310",
     "osmTags": {
       "addr:city": "Vleuten",
@@ -5327,6 +5765,8 @@
     "lat": 51.7502377,
     "lng": 4.3666727,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2761206787",
     "osmTags": {
       "addr:city": "Zuid-Beijerland",
@@ -5350,6 +5790,8 @@
     "lat": 51.8114298,
     "lng": 4.3389184,
     "description": null,
+    "phone": "+31 186 769 021",
+    "website": "https://dierenartsenpraktijkanima.nl",
     "osmId": "node/2761245130",
     "osmTags": {
       "addr:city": "Nieuw-Beijerland",
@@ -5375,6 +5817,8 @@
     "lat": 51.7280147,
     "lng": 5.4372973,
     "description": null,
+    "phone": "+31 73 532 5580",
+    "website": "https://dierenkliniekdegrootevriend.nl/",
     "osmId": "node/2762154069",
     "osmTags": {
       "addr:city": "Nuland",
@@ -5401,6 +5845,8 @@
     "lat": 51.9290297,
     "lng": 6.0703497,
     "description": null,
+    "phone": "+31 316 331 076",
+    "website": "https://www.dierenkliniekvandenelzen.nl",
     "osmId": "node/2762298596",
     "osmTags": {
       "addr:city": "Zevenaar",
@@ -5428,6 +5874,8 @@
     "lat": 52.2497197,
     "lng": 6.9137178,
     "description": null,
+    "phone": null,
+    "website": "https://www.bosvoordieren.nl/",
     "osmId": "node/2763743202",
     "osmTags": {
       "addr:city": "Enschede",
@@ -5451,6 +5899,8 @@
     "lat": 52.0332969,
     "lng": 5.654352,
     "description": null,
+    "phone": "+31 318 613 420",
+    "website": "https://www.dierenkliniekkruizinga.nl/",
     "osmId": "node/2764436727",
     "osmTags": {
       "addr:city": "Ede",
@@ -5479,6 +5929,8 @@
     "lat": 52.0249503,
     "lng": 4.695933,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2764679051",
     "osmTags": {
       "addr:city": "Gouda",
@@ -5503,6 +5955,8 @@
     "lat": 51.4665453,
     "lng": 5.4900864,
     "description": null,
+    "phone": "+31 40 751 0522",
+    "website": "https://www.petsfit.nl/",
     "osmId": "node/2764722449",
     "osmTags": {
       "addr:city": "Eindhoven",
@@ -5528,6 +5982,8 @@
     "lat": 52.0466983,
     "lng": 5.6659481,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenartsede.nl/",
     "osmId": "node/2764891122",
     "osmTags": {
       "addr:city": "Ede",
@@ -5551,6 +6007,8 @@
     "lat": 52.0467307,
     "lng": 5.6557777,
     "description": null,
+    "phone": "+31 318 651 641",
+    "website": "https://www.dierendokters.com/dierenarts-dierenkliniek/ede",
     "osmId": "node/2764904791",
     "osmTags": {
       "addr:city": "Ede",
@@ -5576,6 +6034,8 @@
     "lat": 51.5757184,
     "lng": 4.5462634,
     "description": null,
+    "phone": "+31 165 5593 68",
+    "website": "https://www.paardenpraktijk.nl/",
     "osmId": "node/2766974220",
     "osmTags": {
       "addr:city": "Oudenbosch",
@@ -5600,6 +6060,8 @@
     "lat": 52.2639141,
     "lng": 4.7561278,
     "description": null,
+    "phone": null,
+    "website": "https://www.dap-westeinder.nl/",
     "osmId": "node/2767015325",
     "osmTags": {
       "addr:city": "Aalsmeer",
@@ -5623,6 +6085,8 @@
     "lat": 51.7490938,
     "lng": 4.5487871,
     "description": null,
+    "phone": "+31 186 612 066",
+    "website": "https://www.anicura.nl/klinieken/zuid-holland/strijen/",
     "osmId": "node/2767260594",
     "osmTags": {
       "addr:city": "Strijen",
@@ -5653,6 +6117,8 @@
     "lat": 52.087108,
     "lng": 5.6163009,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2767896523",
     "osmTags": {
       "addr:city": "Lunteren",
@@ -5675,6 +6141,8 @@
     "lat": 51.3920298,
     "lng": 3.5523964,
     "description": null,
+    "phone": "+31 117 454 484",
+    "website": "https://www.dacwest.nl/",
     "osmId": "node/2768569415",
     "osmTags": {
       "addr:city": "Breskens",
@@ -5703,6 +6171,8 @@
     "lat": 51.3231037,
     "lng": 3.6153654,
     "description": null,
+    "phone": "+31 117 301 388",
+    "website": "https://www.dierenkliniekijzendijke.nl",
     "osmId": "node/2769428401",
     "osmTags": {
       "addr:city": "IJzendijke",
@@ -5729,6 +6199,8 @@
     "lat": 52.1580924,
     "lng": 4.480029,
     "description": null,
+    "phone": null,
+    "website": "https://www.keerhoeve.nl/",
     "osmId": "node/2769950753",
     "osmTags": {
       "addr:city": "Leiden",
@@ -5752,6 +6224,8 @@
     "lat": 51.4471058,
     "lng": 5.5151532,
     "description": null,
+    "phone": "+31 40 281 1910",
+    "website": null,
     "osmId": "node/2770509452",
     "osmTags": {
       "addr:city": "Eindhoven",
@@ -5776,6 +6250,8 @@
     "lat": 51.2924003,
     "lng": 4.0501793,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenkliniekhulst.nl",
     "osmId": "node/2771010889",
     "osmTags": {
       "addr:city": "Hulst",
@@ -5799,6 +6275,8 @@
     "lat": 52.2824759,
     "lng": 6.4198756,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2772012001",
     "osmTags": {
       "addr:city": "Holten",
@@ -5822,6 +6300,8 @@
     "lat": 52.4335888,
     "lng": 4.6506587,
     "description": null,
+    "phone": "+31 23 538 4444",
+    "website": "https://www.anicura.nl/klinieken/noord-holland/kennemerland-velserbroek/",
     "osmId": "node/2772388129",
     "osmTags": {
       "addr:city": "Velserbroek",
@@ -5852,6 +6332,8 @@
     "lat": 52.9889457,
     "lng": 6.6435943,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2772415787",
     "osmTags": {
       "addr:city": "Rolde",
@@ -5874,6 +6356,8 @@
     "lat": 52.4350016,
     "lng": 4.6435412,
     "description": null,
+    "phone": "+31 23 538 2818",
+    "website": "https://www.anicura.nl/klinieken/noord-holland/santpoort/",
     "osmId": "node/2772672973",
     "osmTags": {
       "addr:city": "Santpoort-Noord",
@@ -5904,6 +6388,8 @@
     "lat": 53.0128963,
     "lng": 6.5759813,
     "description": null,
+    "phone": "+31 592 405 144",
+    "website": "https://www.anicura.nl/klinieken/drenthe/assen/",
     "osmId": "node/2772999251",
     "osmTags": {
       "addr:city": "Assen",
@@ -5933,6 +6419,8 @@
     "lat": 52.1029436,
     "lng": 5.0435307,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenartsrobvanzon.nl",
     "osmId": "node/2773116380",
     "osmTags": {
       "addr:city": "Utrecht",
@@ -5956,6 +6444,8 @@
     "lat": 52.161937,
     "lng": 6.7346395,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2773413365",
     "osmTags": {
       "addr:city": "Haaksbergen",
@@ -5979,6 +6469,8 @@
     "lat": 52.0395201,
     "lng": 5.5514071,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2775186314",
     "osmTags": {
       "addr:city": "Veenendaal",
@@ -6001,6 +6493,8 @@
     "lat": 52.6576002,
     "lng": 5.0626091,
     "description": null,
+    "phone": "+31 229 235 941",
+    "website": "https://www.anicura.nl/klinieken/noord-holland/hoorn-risdam/",
     "osmId": "node/2775591052",
     "osmTags": {
       "addr:city": "Hoorn",
@@ -6032,6 +6526,8 @@
     "lat": 53.3085296,
     "lng": 6.4398849,
     "description": null,
+    "phone": "+31 594 853 635",
+    "website": "http://www.dierenartsenpraktijkezinge.nl/",
     "osmId": "node/2775725981",
     "osmTags": {
       "addr:city": "Ezinge",
@@ -6057,6 +6553,8 @@
     "lat": 52.030181,
     "lng": 5.5428848,
     "description": null,
+    "phone": "+31 318 516 600",
+    "website": "https://www.dierenarts-veenendaal.nl/",
     "osmId": "node/2775856033",
     "osmTags": {
       "addr:city": "Veenendaal",
@@ -6090,6 +6588,8 @@
     "lat": 52.6548496,
     "lng": 5.0827809,
     "description": null,
+    "phone": "+31 229 233 390",
+    "website": "https://www.dierenkliniekhoorn.nl/",
     "osmId": "node/2775982677",
     "osmTags": {
       "addr:city": "Hoorn",
@@ -6118,6 +6618,8 @@
     "lat": 52.3599055,
     "lng": 4.6289501,
     "description": null,
+    "phone": null,
+    "website": "https://de-dierenkliniek.nl/vestigingen/dierenkliniek-spaarne/",
     "osmId": "node/2776607890",
     "osmTags": {
       "addr:city": "Heemstede",
@@ -6141,6 +6643,8 @@
     "lat": 52.3601551,
     "lng": 4.60551,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenkliniek-aerdenhout.nl/",
     "osmId": "node/2777426651",
     "osmTags": {
       "addr:city": "Heemstede",
@@ -6165,6 +6669,8 @@
     "lat": 53.1452879,
     "lng": 6.4315068,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2778090591",
     "osmTags": {
       "addr:city": "Roden",
@@ -6186,6 +6692,8 @@
     "lat": 53.1488099,
     "lng": 6.4404967,
     "description": null,
+    "phone": "+31 50 501 5500",
+    "website": "https://www.anicura.nl/klinieken/drenthe/roden/",
     "osmId": "node/2778797814",
     "osmTags": {
       "addr:city": "Roden",
@@ -6216,6 +6724,8 @@
     "lat": 53.1389351,
     "lng": 6.564269,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2779171957",
     "osmTags": {
       "addr:city": "Eelde",
@@ -6238,6 +6748,8 @@
     "lat": 51.4516141,
     "lng": 5.462843,
     "description": null,
+    "phone": "+31 40 3040054",
+    "website": "https://www.dierenziekenhuiseindhoven.nl/",
     "osmId": "node/2780311753",
     "osmTags": {
       "addr:city": "Eindhoven",
@@ -6266,6 +6778,8 @@
     "lat": 51.4583756,
     "lng": 4.8544792,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2780678326",
     "osmTags": {
       "addr:city": "Ulicoten",
@@ -6288,6 +6802,8 @@
     "lat": 52.285151,
     "lng": 6.8265479,
     "description": null,
+    "phone": "+31 74 277 1097",
+    "website": "https://dierenartsenpraktijkrobertstolzstraat.nl/",
     "osmId": "node/2781225286",
     "osmTags": {
       "addr:city": "Hengelo",
@@ -6312,6 +6828,8 @@
     "lat": 52.2349723,
     "lng": 6.5898927,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2781595694",
     "osmTags": {
       "addr:city": "Goor",
@@ -6334,6 +6852,8 @@
     "lat": 52.272084,
     "lng": 6.812552,
     "description": null,
+    "phone": null,
+    "website": "https://dierenkliniekhengelokleindriene.nl/",
     "osmId": "node/2782215578",
     "osmTags": {
       "addr:city": "Hengelo",
@@ -6357,6 +6877,8 @@
     "lat": 51.9264911,
     "lng": 4.350686,
     "description": null,
+    "phone": "+31 10 333 8333",
+    "website": "https://fysioholland.nl/fysiotherapie-vlaardingen/",
     "osmId": "node/2782286602",
     "osmTags": {
       "addr:city": "Vlaardingen",
@@ -6381,6 +6903,8 @@
     "lat": 52.6387482,
     "lng": 5.0346845,
     "description": null,
+    "phone": "+31 229 265 005",
+    "website": null,
     "osmId": "node/2784043438",
     "osmTags": {
       "addr:city": "Hoorn",
@@ -6405,6 +6929,8 @@
     "lat": 51.9323274,
     "lng": 4.5613693,
     "description": null,
+    "phone": "+31 10 447 3013",
+    "website": null,
     "osmId": "node/2784619550",
     "osmTags": {
       "addr:city": "Rotterdam",
@@ -6428,6 +6954,8 @@
     "lat": 51.8267607,
     "lng": 5.2122308,
     "description": null,
+    "phone": "+31 418 591 302",
+    "website": "https://bata4en.nl/",
     "osmId": "node/2784895138",
     "osmTags": {
       "addr:city": "Haaften",
@@ -6452,6 +6980,8 @@
     "lat": 52.7812386,
     "lng": 4.7975792,
     "description": null,
+    "phone": "+31 224 213 395",
+    "website": "https://www.anicura.nl/klinieken/noord-holland/schagen/",
     "osmId": "node/2785141714",
     "osmTags": {
       "addr:city": "Schagen",
@@ -6481,6 +7011,8 @@
     "lat": 51.9449452,
     "lng": 4.3751704,
     "description": null,
+    "phone": "+31 10 471 0715",
+    "website": "https://www.dierenkliniekspaland.nl/",
     "osmId": "node/2785344527",
     "osmTags": {
       "addr:city": "Schiedam",
@@ -6505,6 +7037,8 @@
     "lat": 51.9314759,
     "lng": 4.3744869,
     "description": null,
+    "phone": "+31 10 2470110",
+    "website": "https://www.dklschiedamnoord.nl",
     "osmId": "node/2785588385",
     "osmTags": {
       "addr:city": "Schiedam",
@@ -6531,6 +7065,8 @@
     "lat": 52.0959814,
     "lng": 5.2394542,
     "description": null,
+    "phone": "+31 30 820 0900",
+    "website": "https://dierenkliniekzeist.nl/",
     "osmId": "node/2785622265",
     "osmTags": {
       "addr:city": "Zeist",
@@ -6555,6 +7091,8 @@
     "lat": 51.8839189,
     "lng": 4.4748448,
     "description": null,
+    "phone": "+31 10 429 0178",
+    "website": "https://www.dierenkliniekrotterdamzuid.nl/",
     "osmId": "node/2787444172",
     "osmTags": {
       "addr:city": "Rotterdam",
@@ -6579,6 +7117,8 @@
     "lat": 52.0097065,
     "lng": 4.7094304,
     "description": null,
+    "phone": null,
+    "website": "https://www.pieter-bas.nl/?y_source=1_MzY4MjU5MC03MTUtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D",
     "osmId": "node/2787982708",
     "osmTags": {
       "addr:city": "Gouda",
@@ -6603,6 +7143,8 @@
     "lat": 52.7402664,
     "lng": 4.7768272,
     "description": null,
+    "phone": null,
+    "website": "https://dapschagen.nl",
     "osmId": "node/2788003497",
     "osmTags": {
       "addr:city": "Dirkshorn",
@@ -6626,6 +7168,8 @@
     "lat": 52.4526516,
     "lng": 6.5176059,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2788512586",
     "osmTags": {
       "addr:city": "Den Ham",
@@ -6648,6 +7192,8 @@
     "lat": 51.8726912,
     "lng": 4.4708313,
     "description": null,
+    "phone": null,
+    "website": "https://dierenkliniekpendrecht.nl/",
     "osmId": "node/2788550096",
     "osmTags": {
       "addr:city": "Rotterdam",
@@ -6672,6 +7218,8 @@
     "lat": 52.3814745,
     "lng": 4.7595743,
     "description": null,
+    "phone": "+31 20 585 4070",
+    "website": "https://www.dierenklinieken.net/site/dierenkliniek-amsterdam",
     "osmId": "node/2788714380",
     "osmTags": {
       "addr:city": "Amsterdam",
@@ -6699,6 +7247,8 @@
     "lat": 51.9381361,
     "lng": 4.4221962,
     "description": "Vrije inloop / spreekuur (ma. t/m vr.) • 10:00 uur tot 11:00 uur • 18:00 uur tot 19:00 uur Op afspraak  • (ma. t/m vr.) 8:00 uur tot 19:30 uur • (zaterdag) 10:00 uur tot 12:00 uur Bij voorkeur een afspraak, u hoeft dan nooit lang te wachten!",
+    "phone": "+31 10 429 1525",
+    "website": "https://www.dierenartsoverschie.nl/",
     "osmId": "node/2789047495",
     "osmTags": {
       "addr:city": "Rotterdam",
@@ -6725,6 +7275,8 @@
     "lat": 51.4805299,
     "lng": 3.8199387,
     "description": null,
+    "phone": "+31 113 568 558",
+    "website": "https://www.anicura.nl/klinieken/zeeland/dierzorg-heinkenszand/",
     "osmId": "node/2789052179",
     "osmTags": {
       "addr:city": "Heinkenszand",
@@ -6761,6 +7313,8 @@
     "lat": 52.3983579,
     "lng": 6.4448818,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2789090298",
     "osmTags": {
       "addr:city": "Hellendoorn",
@@ -6783,6 +7337,8 @@
     "lat": 51.4499719,
     "lng": 6.0461492,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2790530201",
     "osmTags": {
       "addr:city": "Horst",
@@ -6805,6 +7361,8 @@
     "lat": 51.8830747,
     "lng": 4.5522249,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2791283164",
     "osmTags": {
       "addr:city": "Rotterdam",
@@ -6827,6 +7385,8 @@
     "lat": 51.8812357,
     "lng": 4.5436636,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenkliniekridderkerk.nl/",
     "osmId": "node/2791301504",
     "osmTags": {
       "addr:city": "Rotterdam",
@@ -6852,6 +7412,8 @@
     "lat": 52.2162925,
     "lng": 6.7420884,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2792315248",
     "osmTags": {
       "addr:city": "Hengelo",
@@ -6874,6 +7436,8 @@
     "lat": 51.4514759,
     "lng": 6.0551339,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2792444504",
     "osmTags": {
       "addr:city": "Horst",
@@ -6896,6 +7460,8 @@
     "lat": 50.9747557,
     "lng": 5.8634182,
     "description": null,
+    "phone": "+31 6 27421757",
+    "website": "https://www.dierenartsmarcon.nl",
     "osmId": "node/2793008747",
     "osmTags": {
       "addr:city": "Munstergeleen",
@@ -6930,6 +7496,8 @@
     "lat": 52.6652353,
     "lng": 4.7132655,
     "description": null,
+    "phone": "+31 72 589 5667",
+    "website": "https://www.dapkennemerland.nl/",
     "osmId": "node/2793360078",
     "osmTags": {
       "addr:city": "Bergen (NH)",
@@ -6956,6 +7524,8 @@
     "lat": 52.0062379,
     "lng": 4.6984629,
     "description": null,
+    "phone": "+31 182 518 995",
+    "website": null,
     "osmId": "node/2793580721",
     "osmTags": {
       "addr:city": "Gouda",
@@ -6980,6 +7550,8 @@
     "lat": 51.8811651,
     "lng": 5.2612983,
     "description": null,
+    "phone": "+31 345 571 648",
+    "website": "https://dekwaker.nl/",
     "osmId": "node/2794869818",
     "osmTags": {
       "addr:city": "Deil",
@@ -7004,6 +7576,8 @@
     "lat": 52.3549912,
     "lng": 4.8115886,
     "description": null,
+    "phone": "+31 20 619 1613",
+    "website": "https://dierenkliniekosdorp.nl/",
     "osmId": "node/2795480794",
     "osmTags": {
       "addr:city": "Amsterdam",
@@ -7028,6 +7602,8 @@
     "lat": 51.5768962,
     "lng": 5.4605722,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2795901983",
     "osmTags": {
       "addr:city": "Sint-Oedenrode",
@@ -7050,6 +7626,8 @@
     "lat": 51.6433407,
     "lng": 5.4939699,
     "description": null,
+    "phone": "+31 413 292 929",
+    "website": "https://www.aadal.nl",
     "osmId": "node/2796932686",
     "osmTags": {
       "addr:city": "Heeswijk-Dinther",
@@ -7079,6 +7657,8 @@
     "lat": 52.6521106,
     "lng": 5.1198754,
     "description": null,
+    "phone": "+31 229 262 139",
+    "website": "https://www.dierenkliniekdezuiderdracht.nl/",
     "osmId": "node/2796975222",
     "osmTags": {
       "addr:city": "Oosterblokker",
@@ -7106,6 +7686,8 @@
     "lat": 53.1853166,
     "lng": 6.1785256,
     "description": null,
+    "phone": "+31 512 332 650",
+    "website": null,
     "osmId": "node/2798157392",
     "osmTags": {
       "addr:city": "Surhuisterveen",
@@ -7135,6 +7717,8 @@
     "lat": 51.9661451,
     "lng": 4.6068375,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2799987335",
     "osmTags": {
       "addr:city": "Nieuwerkerk aan den IJssel",
@@ -7157,6 +7741,8 @@
     "lat": 51.94911,
     "lng": 5.2063119,
     "description": null,
+    "phone": "+31 345 535 342",
+    "website": "https://www.dierenkliniekparijsch.nl",
     "osmId": "node/2801373199",
     "osmTags": {
       "addr:city": "Culemborg",
@@ -7183,6 +7769,8 @@
     "lat": 51.9444553,
     "lng": 5.2130484,
     "description": null,
+    "phone": "+31 345 517 133",
+    "website": "https://www.dierenkliniekculemborg.nl",
     "osmId": "node/2801439864",
     "osmTags": {
       "addr:city": "Culemborg",
@@ -7209,6 +7797,8 @@
     "lat": 52.7249552,
     "lng": 6.9868961,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2803088753",
     "osmTags": {
       "addr:city": "Klazienaveen",
@@ -7231,6 +7821,8 @@
     "lat": 51.7774476,
     "lng": 5.9314247,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2803649239",
     "osmTags": {
       "addr:city": "Groesbeek",
@@ -7253,6 +7845,8 @@
     "lat": 52.0103862,
     "lng": 4.7435489,
     "description": null,
+    "phone": "+31 182 511 215",
+    "website": "https://www.paltrok.nl/",
     "osmId": "node/2804923706",
     "osmTags": {
       "addr:city": "Gouda",
@@ -7280,6 +7874,8 @@
     "lat": 52.6928761,
     "lng": 5.2288072,
     "description": null,
+    "phone": "+31 228 515 196",
+    "website": "https://www.anicura.nl/klinieken/noord-holland/grootebroek/",
     "osmId": "node/2806284787",
     "osmTags": {
       "addr:city": "Grootebroek",
@@ -7310,6 +7906,8 @@
     "lat": 52.5692622,
     "lng": 6.5863717,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2806395626",
     "osmTags": {
       "addr:city": "Heemserveen",
@@ -7332,6 +7930,8 @@
     "lat": 51.9145555,
     "lng": 4.9981186,
     "description": null,
+    "phone": "+31 183 351 208",
+    "website": "https://www.dierenkliniekmeerkerk.nl/",
     "osmId": "node/2806423883",
     "osmTags": {
       "addr:city": "Meerkerk",
@@ -7357,6 +7957,8 @@
     "lat": 51.6554468,
     "lng": 3.9062803,
     "description": null,
+    "phone": "+31 111 412 180",
+    "website": "https://www.anicura.nl/klinieken/zeeland/zierikzee/",
     "osmId": "node/2806599454",
     "osmTags": {
       "addr:city": "Zierikzee",
@@ -7392,6 +7994,8 @@
     "lat": 52.2956654,
     "lng": 4.8647617,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenklinieken.net/site/dierenarts-amstelveen-maarten-lutherweg",
     "osmId": "node/2808316635",
     "osmTags": {
       "addr:city": "Amstelveen",
@@ -7416,6 +8020,8 @@
     "lat": 52.6153095,
     "lng": 6.399229,
     "description": null,
+    "phone": null,
+    "website": "https://dierenkliniekdenkaat.nl/",
     "osmId": "node/2808880810",
     "osmTags": {
       "addr:city": "Balkbrug",
@@ -7439,6 +8045,8 @@
     "lat": 52.7081702,
     "lng": 5.2623595,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2809166082",
     "osmTags": {
       "addr:city": "Enkhuizen",
@@ -7461,6 +8069,8 @@
     "lat": 52.5500143,
     "lng": 4.6727938,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2811700003",
     "osmTags": {
       "addr:city": "Castricum",
@@ -7483,6 +8093,8 @@
     "lat": 51.9245323,
     "lng": 4.4898984,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenziekenhuizen.nl/",
     "osmId": "node/2812247201",
     "osmTags": {
       "addr:city": "Rotterdam",
@@ -7507,6 +8119,8 @@
     "lat": 51.8602121,
     "lng": 6.4877628,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2812668234",
     "osmTags": {
       "addr:city": "Dinxperlo",
@@ -7530,6 +8144,8 @@
     "lat": 51.6022421,
     "lng": 5.6153036,
     "description": null,
+    "phone": null,
+    "website": "https://www.aadal.nl",
     "osmId": "node/2815045185",
     "osmTags": {
       "addr:city": "Erp",
@@ -7554,6 +8170,8 @@
     "lat": 51.3626163,
     "lng": 5.1685968,
     "description": null,
+    "phone": "+31 497 643 668",
+    "website": "https://dapdendriesprong.nl",
     "osmId": "node/2815735621",
     "osmTags": {
       "addr:city": "Reusel",
@@ -7579,6 +8197,8 @@
     "lat": 51.9406396,
     "lng": 6.1305485,
     "description": null,
+    "phone": "+31 316 223 231",
+    "website": "https://www.degraafschapdierenartsen.nl/contact-en-locaties/didam",
     "osmId": "node/2816217598",
     "osmTags": {
       "addr:city": "Didam",
@@ -7604,6 +8224,8 @@
     "lat": 51.9542022,
     "lng": 4.5239053,
     "description": null,
+    "phone": "+31 10 420 6666",
+    "website": "https://www.anicura.nl/klinieken/rotterdam/rotterdam-ommoord-hillegersberg/",
     "osmId": "node/2816821814",
     "osmTags": {
       "addr:city": "Rotterdam",
@@ -7635,6 +8257,8 @@
     "lat": 52.3551594,
     "lng": 4.901734,
     "description": null,
+    "phone": "+31 20 2619548",
+    "website": "https://dierenkliniekdepijp.nl",
     "osmId": "node/2817534253",
     "osmTags": {
       "addr:city": "Amsterdam",
@@ -7662,6 +8286,8 @@
     "lat": 52.4778872,
     "lng": 6.6451977,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2817704470",
     "osmTags": {
       "addr:city": "Sibculo",
@@ -7683,6 +8309,8 @@
     "lat": 51.5168814,
     "lng": 4.4846069,
     "description": null,
+    "phone": "+31 165 583 750",
+    "website": "https://dierenhospitaal-visdonk.nl/",
     "osmId": "node/2817937939",
     "osmTags": {
       "addr:city": "Roosendaal",
@@ -7711,6 +8339,8 @@
     "lat": 52.341229,
     "lng": 4.9073856,
     "description": null,
+    "phone": null,
+    "website": "https://www.natuurlijkgezondedieren.nl",
     "osmId": "node/2818253102",
     "osmTags": {
       "addr:city": "Amsterdam",
@@ -7735,6 +8365,8 @@
     "lat": 52.3426055,
     "lng": 4.9060917,
     "description": null,
+    "phone": null,
+    "website": "https://www.sterkliniekamsterdam.nl",
     "osmId": "node/2818335056",
     "osmTags": {
       "addr:city": "Amsterdam",
@@ -7759,6 +8391,8 @@
     "lat": 52.3261531,
     "lng": 4.8749808,
     "description": null,
+    "phone": null,
+    "website": "https://www.dkbuitenveldert.nl/",
     "osmId": "node/2818784928",
     "osmTags": {
       "addr:city": "Amsterdam",
@@ -7782,6 +8416,8 @@
     "lat": 50.9398888,
     "lng": 5.97162,
     "description": null,
+    "phone": "+31 45 527 3030",
+    "website": "https://www.dierenartsencentrum-gardeniers.nl/",
     "osmId": "node/2818822406",
     "osmTags": {
       "addr:city": "Brunssum",
@@ -7808,6 +8444,8 @@
     "lat": 53.2143505,
     "lng": 5.933601,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2819081341",
     "osmTags": {
       "addr:city": "Hurdegaryp",
@@ -7831,6 +8469,8 @@
     "lat": 51.9575697,
     "lng": 4.4707481,
     "description": null,
+    "phone": "+31 10 422 3005",
+    "website": "https://www.anicura.nl/klinieken/rotterdam/rotterdam-schiebroek/",
     "osmId": "node/2819291356",
     "osmTags": {
       "addr:city": "Rotterdam",
@@ -7862,6 +8502,8 @@
     "lat": 51.4624655,
     "lng": 3.5538122,
     "description": null,
+    "phone": "+31 118 466 548",
+    "website": "https://dierenkliniekdeark.nl/",
     "osmId": "node/2819534191",
     "osmTags": {
       "addr:city": "Vlissingen",
@@ -7888,6 +8530,8 @@
     "lat": 51.478136,
     "lng": 5.1681709,
     "description": null,
+    "phone": "+31 13 504 2402",
+    "website": "https://www.damb.nl/",
     "osmId": "node/2820370557",
     "osmTags": {
       "addr:city": "Diessen",
@@ -7912,6 +8556,8 @@
     "lat": 50.9465195,
     "lng": 5.7721185,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2821532813",
     "osmTags": {
       "addr:city": "Elsloo",
@@ -7934,6 +8580,8 @@
     "lat": 52.0798199,
     "lng": 4.7656027,
     "description": null,
+    "phone": null,
+    "website": "https://www.dapbodegraven.nl/",
     "osmId": "node/2821795808",
     "osmTags": {
       "addr:city": "Bodegraven",
@@ -7957,6 +8605,8 @@
     "lat": 51.5822542,
     "lng": 5.200896,
     "description": null,
+    "phone": "+31 13 590 2228",
+    "website": "https://www.dierenkliniektspoor.nl",
     "osmId": "node/2823992212",
     "osmTags": {
       "addr:city": "Oisterwijk",
@@ -7981,6 +8631,8 @@
     "lat": 50.8907876,
     "lng": 5.8595506,
     "description": null,
+    "phone": null,
+    "website": "https://dierenarts-hulsberg.nl/",
     "osmId": "node/2824791922",
     "osmTags": {
       "addr:city": "Hulsberg",
@@ -8004,6 +8656,8 @@
     "lat": 52.3103135,
     "lng": 6.9222564,
     "description": null,
+    "phone": "+31 541 530 005",
+    "website": "https://www.dierenkliniekoldenzaal-losser.nl/",
     "osmId": "node/2826182421",
     "osmTags": {
       "addr:city": "Oldenzaal",
@@ -8028,6 +8682,8 @@
     "lat": 53.4084064,
     "lng": 6.6740877,
     "description": null,
+    "phone": "+31 595 434 255",
+    "website": "https://www.vanstadtotwad.nl",
     "osmId": "node/2826714206",
     "osmTags": {
       "addr:city": "Uithuizen",
@@ -8058,6 +8714,8 @@
     "lat": 51.3679865,
     "lng": 5.2230595,
     "description": null,
+    "phone": "+31 497 782 780",
+    "website": "https://www.dierenklinieksniederslaan.nl/",
     "osmId": "node/2827069534",
     "osmTags": {
       "addr:city": "Bladel",
@@ -8084,6 +8742,8 @@
     "lat": 51.3684945,
     "lng": 5.224188,
     "description": null,
+    "phone": "+31 497 361 818",
+    "website": "http://www.dierenkliniekbladel.nl/",
     "osmId": "node/2827070445",
     "osmTags": {
       "addr:city": "Bladel",
@@ -8111,6 +8771,8 @@
     "lat": 50.8791014,
     "lng": 5.9319655,
     "description": null,
+    "phone": "+31 45 575 1999",
+    "website": null,
     "osmId": "node/2827337154",
     "osmTags": {
       "addr:city": "Voerendaal",
@@ -8135,6 +8797,8 @@
     "lat": 50.8749906,
     "lng": 5.9686548,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2827733423",
     "osmTags": {
       "addr:city": "Heerlen",
@@ -8158,6 +8822,8 @@
     "lat": 51.8390743,
     "lng": 5.8605116,
     "description": null,
+    "phone": null,
+    "website": "https://dierenkliniekpijnappel.nl/",
     "osmId": "node/2828267911",
     "osmTags": {
       "addr:city": "Nijmegen",
@@ -8181,6 +8847,8 @@
     "lat": 51.3619334,
     "lng": 5.308154,
     "description": null,
+    "phone": "+31 497 518 000",
+    "website": "https://www.anicura.nl/klinieken/noord-brabant/eersel/",
     "osmId": "node/2828635500",
     "osmTags": {
       "addr:city": "Eersel",
@@ -8211,6 +8879,8 @@
     "lat": 53.3306989,
     "lng": 6.7402485,
     "description": null,
+    "phone": null,
+    "website": "https://www.vanstadtotwad.nl/over-vstw/loppersum",
     "osmId": "node/2829324488",
     "osmTags": {
       "addr:city": "Loppersum",
@@ -8234,6 +8904,8 @@
     "lat": 53.1824851,
     "lng": 6.3793291,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2829611117",
     "osmTags": {
       "addr:city": "Leek",
@@ -8256,6 +8928,8 @@
     "lat": 51.8280047,
     "lng": 4.8006228,
     "description": null,
+    "phone": "+31 184 745 908",
+    "website": null,
     "osmId": "node/2829668215",
     "osmTags": {
       "addr:city": "Sliedrecht",
@@ -8280,6 +8954,8 @@
     "lat": 53.171039,
     "lng": 6.3646072,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2829691344",
     "osmTags": {
       "addr:city": "Tolbert",
@@ -8302,6 +8978,8 @@
     "lat": 53.1646407,
     "lng": 6.3810038,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2829860669",
     "osmTags": {
       "addr:city": "Leek",
@@ -8325,6 +9003,8 @@
     "lat": 52.3653173,
     "lng": 4.9397379,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2830027551",
     "osmTags": {
       "addr:city": "Amsterdam",
@@ -8348,6 +9028,8 @@
     "lat": 51.9203388,
     "lng": 6.5699829,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2830793544",
     "osmTags": {
       "addr:city": "Aalten",
@@ -8371,6 +9053,8 @@
     "lat": 52.3748037,
     "lng": 6.9931048,
     "description": null,
+    "phone": "+31 541 352 268",
+    "website": "https://www.dierenartsenpraktijknoordoosttwente.nl/",
     "osmId": "node/2831094857",
     "osmTags": {
       "addr:city": "Denekamp",
@@ -8396,6 +9080,8 @@
     "lat": 51.4172391,
     "lng": 4.3312938,
     "description": null,
+    "phone": "+31 164 612 262",
+    "website": null,
     "osmId": "node/2831948777",
     "osmTags": {
       "addr:city": "Hoogerheide",
@@ -8419,6 +9105,8 @@
     "lat": 51.4234937,
     "lng": 5.3940126,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenartsveldhoven.nl",
     "osmId": "node/2833420469",
     "osmTags": {
       "addr:city": "Veldhoven",
@@ -8442,6 +9130,8 @@
     "lat": 50.9682725,
     "lng": 5.7611676,
     "description": null,
+    "phone": "+31 46 433 3501",
+    "website": "https://www.opdediek.nl/nl-nl",
     "osmId": "node/2833620876",
     "osmTags": {
       "addr:city": "Stein",
@@ -8470,6 +9160,8 @@
     "lat": 52.3313782,
     "lng": 5.0710386,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2833805580",
     "osmTags": {
       "addr:city": "Muiden",
@@ -8492,6 +9184,8 @@
     "lat": 51.5210893,
     "lng": 5.0755776,
     "description": null,
+    "phone": null,
+    "website": "https://www.damb.nl/dierenkliniek-goirle",
     "osmId": "node/2833834201",
     "osmTags": {
       "addr:city": "Goirle",
@@ -8515,6 +9209,8 @@
     "lat": 52.4978736,
     "lng": 5.4830887,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2834257946",
     "osmTags": {
       "amenity": "veterinary",
@@ -8531,6 +9227,8 @@
     "lat": 52.3464739,
     "lng": 5.1470902,
     "description": null,
+    "phone": "+31 36 536 9600",
+    "website": "https://www.anicura.nl/klinieken/flevoland/almere/",
     "osmId": "node/2834467558",
     "osmTags": {
       "addr:city": "Almere",
@@ -8560,6 +9258,8 @@
     "lat": 53.3194934,
     "lng": 6.8793319,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenkliniekdallenga.nl/",
     "osmId": "node/2835396917",
     "osmTags": {
       "addr:city": "Appingedam",
@@ -8584,6 +9284,8 @@
     "lat": 52.770701,
     "lng": 6.7942794,
     "description": null,
+    "phone": "+31 591 361 368",
+    "website": "https://www.zod.nl/locaties/locatie-sleen/",
     "osmId": "node/2835480886",
     "osmTags": {
       "addr:city": "Sleen",
@@ -8608,6 +9310,8 @@
     "lat": 51.5331096,
     "lng": 5.0121246,
     "description": null,
+    "phone": null,
+    "website": "https://paardgezondheid.nl/",
     "osmId": "node/2837434232",
     "osmTags": {
       "addr:city": "Riel",
@@ -8632,6 +9336,8 @@
     "lat": 52.5446168,
     "lng": 5.7090415,
     "description": null,
+    "phone": "+31 321 205999",
+    "website": "https://diergeneeskundigcentrumwest.nl",
     "osmId": "node/2837888593",
     "osmTags": {
       "addr:city": "Dronten",
@@ -8659,6 +9365,8 @@
     "lat": 51.9081794,
     "lng": 4.5817788,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2838127999",
     "osmTags": {
       "addr:city": "Krimpen aan den IJssel",
@@ -8681,6 +9389,8 @@
     "lat": 51.2578747,
     "lng": 5.6885806,
     "description": null,
+    "phone": "+31 495 525 481",
+    "website": "https://www.dierenkliniekboshoven.nl",
     "osmId": "node/2838616987",
     "osmTags": {
       "addr:city": "Weert",
@@ -8705,6 +9415,8 @@
     "lat": 51.2651053,
     "lng": 5.5874725,
     "description": null,
+    "phone": "+31 495 495023",
+    "website": "https://meemortel.nl",
     "osmId": "node/2839261429",
     "osmTags": {
       "addr:city": "Budel",
@@ -8731,6 +9443,8 @@
     "lat": 52.3659408,
     "lng": 5.2036326,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2839649479",
     "osmTags": {
       "addr:city": "Almere",
@@ -8753,6 +9467,8 @@
     "lat": 52.3348499,
     "lng": 5.2164687,
     "description": null,
+    "phone": "+31 36 531 9009",
+    "website": "https://www.dierenkliniekhof.nl",
     "osmId": "node/2840681071",
     "osmTags": {
       "addr:city": "Almere",
@@ -8779,6 +9495,8 @@
     "lat": 51.5808363,
     "lng": 5.1294189,
     "description": null,
+    "phone": "+31 13 540 0215",
+    "website": "https://www.anicura.nl/klinieken/noord-brabant/tilburg/",
     "osmId": "node/2841723873",
     "osmTags": {
       "addr:city": "Berkel-Enschot",
@@ -8809,6 +9527,8 @@
     "lat": 53.1129669,
     "lng": 6.674252,
     "description": null,
+    "phone": "+31 50 409 5762",
+    "website": "https://www.dierenartsenpraktijkdehondsrug.nl",
     "osmId": "node/2841912350",
     "osmTags": {
       "addr:city": "Midlaren",
@@ -8833,6 +9553,8 @@
     "lat": 52.358454,
     "lng": 4.9912012,
     "description": null,
+    "phone": "+31 20 472 1222",
+    "website": "https://dierenziekenhuizen.nl/locaties/dierenarts-dierenkliniek-amsterdam-ijburg/",
     "osmId": "node/2842363791",
     "osmTags": {
       "addr:city": "Amsterdam",
@@ -8863,6 +9585,8 @@
     "lat": 52.3559486,
     "lng": 4.9944381,
     "description": null,
+    "phone": "+31 20 416 1435",
+    "website": "https://www.dierenkliniekijburglaan.nl/",
     "osmId": "node/2842400586",
     "osmTags": {
       "addr:city": "Amsterdam",
@@ -8892,6 +9616,8 @@
     "lat": 53.0787376,
     "lng": 6.6970714,
     "description": null,
+    "phone": "+31 50 409 4665",
+    "website": "https://www.anicura.nl/klinieken/drenthe/zuidlaren/",
     "osmId": "node/2843038466",
     "osmTags": {
       "addr:city": "Zuidlaren",
@@ -8921,6 +9647,8 @@
     "lat": 53.1033401,
     "lng": 6.8676436,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2844257337",
     "osmTags": {
       "addr:city": "Veendam",
@@ -8943,6 +9671,8 @@
     "lat": 53.1070483,
     "lng": 6.8828231,
     "description": null,
+    "phone": null,
+    "website": "https://parkstaddierenartsen.nl",
     "osmId": "node/2844274308",
     "osmTags": {
       "addr:city": "Veendam",
@@ -8958,6 +9688,35 @@
   },
   {
     "source": "osm",
+    "sourceUrl": "https://www.openstreetmap.org/node/2844353420",
+    "name": "Dierenartsencentrum Heerlen",
+    "town": "Heerlen",
+    "province": null,
+    "address": "Sittarderweg 79B",
+    "lat": 50.8944804,
+    "lng": 5.9729498,
+    "description": null,
+    "phone": "0455721666",
+    "website": "https://www.dierenartsencentrum-heerlen.nl/",
+    "osmId": "node/2844353420",
+    "osmTags": {
+      "addr:city": "Heerlen",
+      "addr:housenumber": "79B",
+      "addr:postcode": "6412CC",
+      "addr:street": "Sittarderweg",
+      "amenity": "veterinary",
+      "email": "info@dierenartsencentrum-heerlen.nl",
+      "level": "0",
+      "name": "Dierenartsencentrum Heerlen",
+      "opening_hours": "Mo-Fr 09:00-12:30, Mo-Fr 13:30-17:30",
+      "phone": "0455721666",
+      "source": "BAG",
+      "source:date": "2014-05-07",
+      "website": "https://www.dierenartsencentrum-heerlen.nl/"
+    }
+  },
+  {
+    "source": "osm",
     "sourceUrl": "https://www.openstreetmap.org/node/2844747366",
     "name": "De Graafschap Dierenartsen",
     "town": "Eerbeek",
@@ -8966,6 +9725,8 @@
     "lat": 52.1006828,
     "lng": 6.0648143,
     "description": null,
+    "phone": null,
+    "website": "https://www.degraafschapdierenartsen.nl/",
     "osmId": "node/2844747366",
     "osmTags": {
       "addr:city": "Eerbeek",
@@ -8991,6 +9752,8 @@
     "lat": 52.3956581,
     "lng": 5.3033418,
     "description": null,
+    "phone": "+31 36 521 48 74",
+    "website": "https://www.dierenkliniekenhartvooralmere.nl/nl-nl/diergeneeskundig-centrum-almere",
     "osmId": "node/2845049402",
     "osmTags": {
       "addr:city": "Almere",
@@ -9018,6 +9781,8 @@
     "lat": 52.3692201,
     "lng": 6.4600193,
     "description": null,
+    "phone": "+31 548 655 065",
+    "website": "https://www.deoosthof.nl/dierenkliniek-hellendoorn-nijverdal/",
     "osmId": "node/2845900868",
     "osmTags": {
       "addr:city": "Nijverdal",
@@ -9043,6 +9808,8 @@
     "lat": 51.8357599,
     "lng": 4.6933201,
     "description": null,
+    "phone": "+31 78 615 2469",
+    "website": "https://www.anicura.nl/klinieken/zuid-holland/papendrecht/",
     "osmId": "node/2846392459",
     "osmTags": {
       "addr:city": "Papendrecht",
@@ -9073,6 +9840,8 @@
     "lat": 52.360985,
     "lng": 6.4703099,
     "description": null,
+    "phone": null,
+    "website": "https://dierenkliniekvandermeiden.nl/",
     "osmId": "node/2846608659",
     "osmTags": {
       "addr:city": "Nijverdal",
@@ -9097,6 +9866,8 @@
     "lat": 52.4133342,
     "lng": 4.8904696,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2846858009",
     "osmTags": {
       "addr:city": "Amsterdam",
@@ -9119,6 +9890,8 @@
     "lat": 51.5506604,
     "lng": 5.0575716,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenkliniekdenherd.nl/",
     "osmId": "node/2847046744",
     "osmTags": {
       "addr:city": "Tilburg",
@@ -9142,6 +9915,8 @@
     "lat": 52.2079609,
     "lng": 4.6412576,
     "description": null,
+    "phone": "+31 71 331 2540",
+    "website": "https://www.anicura.nl/klinieken/zuid-holland/roelofarendsveen/",
     "osmId": "node/2847110264",
     "osmTags": {
       "addr:city": "Roelofarendsveen",
@@ -9172,6 +9947,8 @@
     "lat": 51.8654973,
     "lng": 4.6691851,
     "description": null,
+    "phone": "+31 78 693 0055",
+    "website": "https://www.anicura.nl/klinieken/zuid-holland/de-waard-alblasserdam/",
     "osmId": "node/2847887150",
     "osmTags": {
       "addr:city": "Alblasserdam",
@@ -9202,6 +9979,8 @@
     "lat": 51.5790494,
     "lng": 5.0068615,
     "description": null,
+    "phone": null,
+    "website": "http://dierenkliniekdereeshof.nl",
     "osmId": "node/2848244472",
     "osmTags": {
       "addr:city": "Tilburg",
@@ -9225,6 +10004,8 @@
     "lat": 51.8204655,
     "lng": 5.855374,
     "description": null,
+    "phone": "+31 24 355 0734",
+    "website": "https://sintanna404.nl",
     "osmId": "node/2848280533",
     "osmTags": {
       "addr:city": "Nijmegen",
@@ -9251,6 +10032,8 @@
     "lat": 52.3898734,
     "lng": 4.9473931,
     "description": null,
+    "phone": "+31 20 636 4681",
+    "website": "https://www.dierenkliniekamsterdamnoord.nl",
     "osmId": "node/2848406809",
     "osmTags": {
       "addr:city": "Amsterdam",
@@ -9276,6 +10059,8 @@
     "lat": 51.9510388,
     "lng": 6.0205288,
     "description": null,
+    "phone": "+31 316 285 217",
+    "website": "https://care4animals.com/",
     "osmId": "node/2848740551",
     "osmTags": {
       "addr:city": "Duiven",
@@ -9300,6 +10085,8 @@
     "lat": 52.0899429,
     "lng": 4.8785134,
     "description": null,
+    "phone": "+31 348 420 817",
+    "website": "https://www.dgcdelimes.nl/nl-nl/vestigingen/locatie-woerden",
     "osmId": "node/2849143043",
     "osmTags": {
       "addr:city": "Woerden",
@@ -9326,6 +10113,8 @@
     "lat": 53.0070599,
     "lng": 6.7631977,
     "description": null,
+    "phone": "+31 592 263 300",
+    "website": null,
     "osmId": "node/2850778023",
     "osmTags": {
       "addr:city": "Gieten",
@@ -9349,6 +10138,8 @@
     "lat": 51.5869114,
     "lng": 5.0842575,
     "description": null,
+    "phone": "+31 13 504 2402",
+    "website": null,
     "osmId": "node/2850808307",
     "osmTags": {
       "addr:city": "Tilburg",
@@ -9373,6 +10164,8 @@
     "lat": 51.5676426,
     "lng": 5.087255,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2850939281",
     "osmTags": {
       "addr:city": "Tilburg",
@@ -9395,6 +10188,8 @@
     "lat": 51.5472708,
     "lng": 5.0770927,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenkliniekoerle.nl",
     "osmId": "node/2851558524",
     "osmTags": {
       "addr:city": "Tilburg",
@@ -9418,6 +10213,8 @@
     "lat": 51.8081958,
     "lng": 5.8185649,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2852084931",
     "osmTags": {
       "addr:city": "Nijmegen",
@@ -9440,6 +10237,8 @@
     "lat": 52.2245422,
     "lng": 4.67204,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2852539910",
     "osmTags": {
       "addr:city": "Leimuiden",
@@ -9462,6 +10261,8 @@
     "lat": 51.6660625,
     "lng": 4.8145412,
     "description": null,
+    "phone": "+31 162 45 55 79",
+    "website": null,
     "osmId": "node/2853121185",
     "osmTags": {
       "addr:city": "Den Hout",
@@ -9486,6 +10287,8 @@
     "lat": 52.350922,
     "lng": 5.9836301,
     "description": null,
+    "phone": "+31 578 612273",
+    "website": "https://www.dierenklinieken.nu/",
     "osmId": "node/2853232771",
     "osmTags": {
       "addr:city": "Epe",
@@ -9512,6 +10315,8 @@
     "lat": 51.6461208,
     "lng": 4.8605581,
     "description": null,
+    "phone": "+31 162 427 422",
+    "website": "https://dierenkliniek-oosterhout.nl",
     "osmId": "node/2853348477",
     "osmTags": {
       "addr:city": "Oosterhout",
@@ -9537,6 +10342,8 @@
     "lat": 51.6320598,
     "lng": 4.8716939,
     "description": null,
+    "phone": "+31 162 432 284",
+    "website": "https://dierenkliniekbroekhuizen.nl/",
     "osmId": "node/2853614019",
     "osmTags": {
       "addr:city": "Oosterhout",
@@ -9560,6 +10367,8 @@
     "lat": 52.3369493,
     "lng": 5.63059,
     "description": null,
+    "phone": "+31 341 553 325",
+    "website": "https://www.anicura.nl/klinieken/gelderland/harderwijk/",
     "osmId": "node/2855336564",
     "osmTags": {
       "addr:city": "Harderwijk",
@@ -9589,6 +10398,8 @@
     "lat": 51.5564579,
     "lng": 3.8022932,
     "description": null,
+    "phone": "+31 113 302 145",
+    "website": "https://www.dapvananrooij.nl/",
     "osmId": "node/2856372552",
     "osmTags": {
       "addr:city": "Kortgene",
@@ -9618,6 +10429,8 @@
     "lat": 52.2088893,
     "lng": 4.4112162,
     "description": null,
+    "phone": "+31 71 515 6161",
+    "website": "https://www.anicura.nl/klinieken/zuid-holland/rijngeest-katwijk/",
     "osmId": "node/2856884945",
     "osmTags": {
       "addr:city": "Katwijk",
@@ -9649,6 +10462,8 @@
     "lat": 51.5889908,
     "lng": 4.9189717,
     "description": null,
+    "phone": "+31 161 220600",
+    "website": "https://dierenkliniekrijen.nl",
     "osmId": "node/2857113419",
     "osmTags": {
       "addr:city": "Rijen",
@@ -9674,6 +10489,8 @@
     "lat": 51.9968595,
     "lng": 5.9727224,
     "description": null,
+    "phone": "+31 26 364 7260",
+    "website": "https://www.dierenkliniekvelpveluwezoom.nl",
     "osmId": "node/2859038818",
     "osmTags": {
       "addr:city": "Velp",
@@ -9701,6 +10518,8 @@
     "lat": 51.9959469,
     "lng": 5.9677287,
     "description": null,
+    "phone": "+31 26 363 4067",
+    "website": "https://www.degraafschapdierenartsen.nl",
     "osmId": "node/2859047769",
     "osmTags": {
       "addr:city": "Velp",
@@ -9729,6 +10548,8 @@
     "lat": 51.9879344,
     "lng": 5.9807791,
     "description": null,
+    "phone": "+31 26 303 0436",
+    "website": "https://www.kliniekvelperbroek.nl/",
     "osmId": "node/2859449494",
     "osmTags": {
       "addr:city": "Velp",
@@ -9754,6 +10575,8 @@
     "lat": 52.9457713,
     "lng": 4.7411097,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2859717380",
     "osmTags": {
       "addr:city": "Den Helder",
@@ -9776,6 +10599,8 @@
     "lat": 52.9544868,
     "lng": 4.7580405,
     "description": null,
+    "phone": "+31 223 622 627",
+    "website": "https://www.anicura.nl/klinieken/noord-holland/pasteurstraat/",
     "osmId": "node/2859723957",
     "osmTags": {
       "addr:city": "Den Helder",
@@ -9806,6 +10631,8 @@
     "lat": 52.9546023,
     "lng": 6.3537799,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2859866371",
     "osmTags": {
       "addr:city": "Appelscha",
@@ -9828,6 +10655,8 @@
     "lat": 52.3066825,
     "lng": 5.0423526,
     "description": null,
+    "phone": "+31 294 419 214",
+    "website": "https://dierenartsweesp.nl",
     "osmId": "node/2860108627",
     "osmTags": {
       "addr:city": "Weesp",
@@ -9853,6 +10682,8 @@
     "lat": 52.6616027,
     "lng": 4.8288723,
     "description": null,
+    "phone": "+31 72 571 3132",
+    "website": "https://www.dierenkliniekmiddenwaard.nl/",
     "osmId": "node/2861569419",
     "osmTags": {
       "addr:city": "Heerhugowaard",
@@ -9879,6 +10710,8 @@
     "lat": 52.8900157,
     "lng": 6.1403962,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2862320101",
     "osmTags": {
       "addr:city": "Noordwolde",
@@ -9902,6 +10735,8 @@
     "lat": 52.3220801,
     "lng": 4.9780923,
     "description": null,
+    "phone": "+31 20 699 6959",
+    "website": "http://www.dierenarts.polanen.nl",
     "osmId": "node/2862572951",
     "osmTags": {
       "addr:city": "Amsterdam",
@@ -9928,6 +10763,8 @@
     "lat": 52.3202124,
     "lng": 4.9816349,
     "description": null,
+    "phone": "+31 20 211 79 49",
+    "website": "https://orthomanueeldierenarts.nl/",
     "osmId": "node/2862573088",
     "osmTags": {
       "addr:city": "Amsterdam",
@@ -9953,6 +10790,8 @@
     "lat": 52.6748718,
     "lng": 4.8541431,
     "description": null,
+    "phone": null,
+    "website": "https://www.ossehoofd.nl/",
     "osmId": "node/2862706911",
     "osmTags": {
       "addr:city": "Heerhugowaard",
@@ -9980,6 +10819,8 @@
     "lat": 52.1864858,
     "lng": 4.4866471,
     "description": null,
+    "phone": "+31 71 515 6161",
+    "website": "https://www.anicura.nl/klinieken/zuid-holland/rijngeest-oegstgeest/",
     "osmId": "node/2864294090",
     "osmTags": {
       "addr:city": "Oegstgeest",
@@ -10013,6 +10854,8 @@
     "lat": 52.9436859,
     "lng": 4.746611,
     "description": null,
+    "phone": "+31 223 620 006",
+    "website": "https://www.anicura.nl/klinieken/noord-holland/den-helder/",
     "osmId": "node/2864707004",
     "osmTags": {
       "addr:city": "Den Helder",
@@ -10043,6 +10886,8 @@
     "lat": 52.2015167,
     "lng": 5.1403158,
     "description": null,
+    "phone": "+31 35 582 4493",
+    "website": "http://www.dierenkliniekloosdrecht.nl/",
     "osmId": "node/2865651642",
     "osmTags": {
       "addr:city": "Loosdrecht",
@@ -10068,6 +10913,8 @@
     "lat": 51.4930619,
     "lng": 4.0513149,
     "description": null,
+    "phone": null,
+    "website": "https://julder-dierenarts.nl/",
     "osmId": "node/2867524326",
     "osmTags": {
       "addr:city": "Yerseke",
@@ -10091,6 +10938,8 @@
     "lat": 51.6416699,
     "lng": 4.8932986,
     "description": null,
+    "phone": "+31 162 748 062",
+    "website": "https://diernartsen.nl/",
     "osmId": "node/2869184801",
     "osmTags": {
       "addr:city": "Oosteind",
@@ -10116,6 +10965,8 @@
     "lat": 52.295314,
     "lng": 5.2634459,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2871016282",
     "osmTags": {
       "addr:city": "Huizen",
@@ -10138,6 +10989,8 @@
     "lat": 52.1312542,
     "lng": 4.5953502,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2871280096",
     "osmTags": {
       "addr:city": "Hazerswoude-Rijndijk",
@@ -10160,6 +11013,8 @@
     "lat": 51.4178252,
     "lng": 5.5423119,
     "description": null,
+    "phone": null,
+    "website": "http://www.cylex.nl/reviews/viewcompanywebsite.aspx?firmaName=dierenarts+johan&companyId=12759074",
     "osmId": "node/2871430965",
     "osmTags": {
       "addr:city": "Geldrop",
@@ -10183,6 +11038,8 @@
     "lat": 51.4621041,
     "lng": 5.805308,
     "description": null,
+    "phone": "+31 493 352 424",
+    "website": "https://www.anicura.nl/klinieken/zuidoost/deurne/",
     "osmId": "node/2872428134",
     "osmTags": {
       "addr:city": "Deurne",
@@ -10212,6 +11069,8 @@
     "lat": 52.0845747,
     "lng": 4.9031068,
     "description": null,
+    "phone": "+31 348 414 114",
+    "website": "https://kliniekvoordierenwoerden.nl",
     "osmId": "node/2872631050",
     "osmTags": {
       "addr:city": "Woerden",
@@ -10238,6 +11097,8 @@
     "lat": 50.8616726,
     "lng": 6.0231078,
     "description": null,
+    "phone": "+31 45 541 0292",
+    "website": "https://www.dierenklinieksmeets.com/",
     "osmId": "node/2872976871",
     "osmTags": {
       "addr:city": "Kerkrade",
@@ -10267,6 +11128,8 @@
     "lat": 51.4109173,
     "lng": 5.5590392,
     "description": null,
+    "phone": null,
+    "website": "https://www.edz-zuidoostbrabant.nl",
     "osmId": "node/2873606443",
     "osmTags": {
       "addr:city": "Geldrop",
@@ -10291,6 +11154,8 @@
     "lat": 52.4302257,
     "lng": 4.9137274,
     "description": null,
+    "phone": "+31 20 482 1854",
+    "website": "https://www.dierenklinieken.net/site/dierenkliniek-landsmeer",
     "osmId": "node/2874256070",
     "osmTags": {
       "addr:city": "Landsmeer",
@@ -10317,6 +11182,8 @@
     "lat": 52.511615,
     "lng": 5.0013789,
     "description": null,
+    "phone": "+31 299 436 084",
+    "website": "https://www.dierenambulance-purmerend.nl",
     "osmId": "node/2875613289",
     "osmTags": {
       "addr:city": "Purmerend",
@@ -10343,6 +11210,8 @@
     "lat": 52.0859861,
     "lng": 5.4144077,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2875783439",
     "osmTags": {
       "addr:city": "Woudenberg",
@@ -10365,6 +11234,8 @@
     "lat": 52.0823313,
     "lng": 5.4108954,
     "description": null,
+    "phone": "+31 33 286 1210",
+    "website": "https://www.dierenartsvanalphen.nl/",
     "osmId": "node/2875783510",
     "osmTags": {
       "addr:city": "Woudenberg",
@@ -10390,6 +11261,8 @@
     "lat": 51.4455037,
     "lng": 5.6146586,
     "description": null,
+    "phone": null,
+    "website": "https://www.dier-en-dokter.nl",
     "osmId": "node/2876288792",
     "osmTags": {
       "addr:city": "Mierlo",
@@ -10413,6 +11286,8 @@
     "lat": 52.0829182,
     "lng": 4.9646593,
     "description": null,
+    "phone": "+31 348 442 653",
+    "website": "https://www.ulp.nu/",
     "osmId": "node/2876793994",
     "osmTags": {
       "addr:city": "Harmelen",
@@ -10439,6 +11314,8 @@
     "lat": 52.0827533,
     "lng": 4.9647289,
     "description": null,
+    "phone": "+31 348 445 763",
+    "website": "https://www.dgcdelimes.nl/nl-nl/vestigingen/locatie-harmelen",
     "osmId": "node/2876796767",
     "osmTags": {
       "addr:city": "Harmelen",
@@ -10465,6 +11342,8 @@
     "lat": 52.0517915,
     "lng": 5.283227,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2877300756",
     "osmTags": {
       "addr:city": "Driebergen-Rijsenburg",
@@ -10487,6 +11366,8 @@
     "lat": 52.0517553,
     "lng": 5.2833256,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2877300783",
     "osmTags": {
       "addr:city": "Driebergen-Rijsenburg",
@@ -10509,6 +11390,8 @@
     "lat": 52.4865125,
     "lng": 6.1133458,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenkliniekittersum.nl/",
     "osmId": "node/2877617457",
     "osmTags": {
       "addr:city": "Zwolle",
@@ -10532,6 +11415,8 @@
     "lat": 52.2171854,
     "lng": 5.1474454,
     "description": null,
+    "phone": "+31 35 621 4147",
+    "website": "https://www.anicura.nl/klinieken/noord-holland/kerkelanden/",
     "osmId": "node/2878210253",
     "osmTags": {
       "addr:city": "Hilversum",
@@ -10561,6 +11446,8 @@
     "lat": 52.2124862,
     "lng": 5.1468967,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2878213186",
     "osmTags": {
       "addr:city": "Hilversum",
@@ -10583,6 +11470,8 @@
     "lat": 52.2129664,
     "lng": 5.1376185,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2878219136",
     "osmTags": {
       "addr:city": "Hilversum",
@@ -10605,6 +11494,8 @@
     "lat": 52.5035033,
     "lng": 4.9591049,
     "description": null,
+    "phone": "+31 299 435 674",
+    "website": "https://www.dierenkliniekwaterland.nl/",
     "osmId": "node/2878225032",
     "osmTags": {
       "addr:city": "Purmerend",
@@ -10632,6 +11523,8 @@
     "lat": 52.5004463,
     "lng": 6.0850916,
     "description": null,
+    "phone": "+31 38 465 4480",
+    "website": "https://www.dierenkliniekhanzeland.nl/",
     "osmId": "node/2878331045",
     "osmTags": {
       "addr:city": "Zwolle",
@@ -10658,6 +11551,8 @@
     "lat": 52.4921381,
     "lng": 4.9451279,
     "description": null,
+    "phone": "+31 299 47 10 74",
+    "website": null,
     "osmId": "node/2878767399",
     "osmTags": {
       "addr:city": "Purmerend",
@@ -10681,6 +11576,8 @@
     "lat": 52.2224324,
     "lng": 5.1817029,
     "description": null,
+    "phone": null,
+    "website": "https://pcsdierenartsen.nl/",
     "osmId": "node/2878779185",
     "osmTags": {
       "addr:city": "Hilversum",
@@ -10704,6 +11601,8 @@
     "lat": 52.217773,
     "lng": 5.185038,
     "description": null,
+    "phone": null,
+    "website": "https://www.dapsoestdijkerstraatweg.nl",
     "osmId": "node/2878796254",
     "osmTags": {
       "addr:city": "Hilversum",
@@ -10727,6 +11626,8 @@
     "lat": 52.2270675,
     "lng": 5.1796192,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2878966964",
     "osmTags": {
       "addr:city": "Hilversum",
@@ -10750,6 +11651,8 @@
     "lat": 52.5077569,
     "lng": 6.0555308,
     "description": null,
+    "phone": null,
+    "website": "https://dezwolsedierenkliniek.nl/",
     "osmId": "node/2880073079",
     "osmTags": {
       "addr:city": "Zwolle",
@@ -10772,6 +11675,8 @@
     "lat": 51.4926334,
     "lng": 3.9846786,
     "description": null,
+    "phone": "+31 113 405 069",
+    "website": "https://daplindenbergh.nl/",
     "osmId": "node/2880515141",
     "osmTags": {
       "addr:city": "Kapelle",
@@ -10807,6 +11712,8 @@
     "lat": 52.4990189,
     "lng": 4.8141833,
     "description": null,
+    "phone": "+31 75 820 0265",
+    "website": "https://dapwormer.nl",
     "osmId": "node/2881330126",
     "osmTags": {
       "addr:city": "Wormer",
@@ -10832,6 +11739,8 @@
     "lat": 52.2028646,
     "lng": 4.4014601,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2884345527",
     "osmTags": {
       "addr:city": "Katwijk",
@@ -10853,6 +11762,8 @@
     "lat": 52.5003329,
     "lng": 4.7697858,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2885890275",
     "osmTags": {
       "addr:city": "Krommenie",
@@ -10875,6 +11786,8 @@
     "lat": 51.4888732,
     "lng": 3.9049768,
     "description": null,
+    "phone": "+31 113 213 419",
+    "website": "https://dierenartszeeland.nl/locaties/goes",
     "osmId": "node/2886863459",
     "osmTags": {
       "addr:city": "Goes",
@@ -10908,6 +11821,8 @@
     "lat": 52.1066511,
     "lng": 5.0108025,
     "description": null,
+    "phone": "+31 30 677 2366",
+    "website": "https://www.dgcdelimes.nl/nl-nl/vestigingen/locatie-vleuten",
     "osmId": "node/2887634231",
     "osmTags": {
       "addr:city": "Vleuten",
@@ -10933,6 +11848,8 @@
     "lat": 52.2692595,
     "lng": 5.1620712,
     "description": null,
+    "phone": "+31 35 692 2013",
+    "website": "https://www.anicura.nl/klinieken/noord-holland/naarden-bussum/",
     "osmId": "node/2889057506",
     "osmTags": {
       "addr:city": "Bussum",
@@ -10963,6 +11880,8 @@
     "lat": 51.6252494,
     "lng": 4.9447748,
     "description": null,
+    "phone": "+31 162 317 005",
+    "website": "https://www.dierenkliniekdongen.nl",
     "osmId": "node/2890086613",
     "osmTags": {
       "addr:city": "Dongen",
@@ -10988,6 +11907,8 @@
     "lat": 52.2978614,
     "lng": 5.6136052,
     "description": null,
+    "phone": "+31 341 553 325",
+    "website": "https://www.anicura.nl/klinieken/gelderland/ermelo/",
     "osmId": "node/2891713388",
     "osmTags": {
       "addr:city": "Ermelo",
@@ -11017,6 +11938,8 @@
     "lat": 51.6841166,
     "lng": 5.0724604,
     "description": null,
+    "phone": null,
+    "website": "https://www.edz-hartvanbrabant.nl/nl-nl",
     "osmId": "node/2892147620",
     "osmTags": {
       "addr:city": "Waalwijk",
@@ -11040,6 +11963,8 @@
     "lat": 52.1919932,
     "lng": 4.439376,
     "description": null,
+    "phone": "+31 71 515 6161",
+    "website": "https://www.anicura.nl/klinieken/zuid-holland/rijngeest-rijnsburg/",
     "osmId": "node/2894353481",
     "osmTags": {
       "addr:city": "Rijnsburg",
@@ -11071,6 +11996,8 @@
     "lat": 52.445948,
     "lng": 4.8364259,
     "description": null,
+    "phone": "+31 75 617 3911",
+    "website": "https://www.plusdierenklinieken.nl/de-saen/",
     "osmId": "node/2895377093",
     "osmTags": {
       "addr:city": "Zaandam",
@@ -11096,6 +12023,8 @@
     "lat": 52.2502296,
     "lng": 5.5907956,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2896646021",
     "osmTags": {
       "amenity": "veterinary",
@@ -11112,6 +12041,8 @@
     "lat": 51.732552,
     "lng": 5.1209523,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2897441770",
     "osmTags": {
       "addr:city": "Heesbeen",
@@ -11134,6 +12065,8 @@
     "lat": 51.4852996,
     "lng": 5.6063155,
     "description": null,
+    "phone": "+31 492 533 808",
+    "website": "https://www.anicura.nl/klinieken/zuidoost/helmond-stiphout/",
     "osmId": "node/2898128964",
     "osmTags": {
       "addr:city": "Helmond",
@@ -11163,6 +12096,8 @@
     "lat": 51.6915199,
     "lng": 5.1943658,
     "description": null,
+    "phone": null,
+    "website": "https://www.vanschotenmane.nl",
     "osmId": "node/2898129035",
     "osmTags": {
       "addr:city": "Vlijmen",
@@ -11186,6 +12121,8 @@
     "lat": 51.5103263,
     "lng": 3.8744619,
     "description": null,
+    "phone": "+31 113 223 381",
+    "website": "https://www.dapvananrooij.nl/",
     "osmId": "node/2899689274",
     "osmTags": {
       "addr:city": "Goes",
@@ -11215,6 +12152,8 @@
     "lat": 52.6592331,
     "lng": 4.7665444,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2899752729",
     "osmTags": {
       "addr:city": "Alkmaar",
@@ -11238,6 +12177,8 @@
     "lat": 51.4668597,
     "lng": 5.711085,
     "description": null,
+    "phone": "+31 492 515 977",
+    "website": "https://www.anicura.nl/klinieken/zuidoost/helmond-brouwhuis/",
     "osmId": "node/2900000069",
     "osmTags": {
       "addr:city": "Helmond",
@@ -11267,6 +12208,8 @@
     "lat": 52.6535983,
     "lng": 4.7580225,
     "description": null,
+    "phone": "+31 72 562 2263",
+    "website": "https://www.dierenartsendemare.nl",
     "osmId": "node/2900590855",
     "osmTags": {
       "addr:city": "Alkmaar",
@@ -11291,6 +12234,8 @@
     "lat": 51.5288764,
     "lng": 5.6332944,
     "description": null,
+    "phone": "+31 492 462 899",
+    "website": "https://www.anicura.nl/klinieken/zuidoost/beekendonk/",
     "osmId": "node/2900703174",
     "osmTags": {
       "addr:city": "Beek en Donk",
@@ -11320,6 +12265,8 @@
     "lat": 51.1575708,
     "lng": 6.0133559,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2901732583",
     "osmTags": {
       "addr:city": "Melick",
@@ -11342,6 +12289,8 @@
     "lat": 51.4886874,
     "lng": 5.6689663,
     "description": null,
+    "phone": "+31 492 524856",
+    "website": "https://www.dierenzoohelmond.nl/",
     "osmId": "node/2903260678",
     "osmTags": {
       "addr:city": "Helmond",
@@ -11368,6 +12317,8 @@
     "lat": 51.4836373,
     "lng": 5.6740299,
     "description": null,
+    "phone": "+31 492 525 348",
+    "website": "https://www.anicura.nl/klinieken/zuidoost/helmond-bijsterveld/",
     "osmId": "node/2904092682",
     "osmTags": {
       "addr:city": "Helmond",
@@ -11397,6 +12348,8 @@
     "lat": 53.0270947,
     "lng": 7.1080519,
     "description": null,
+    "phone": null,
+    "website": "http://www.dierenkliniekvlagtwedde.nl/nederlands/index.htm",
     "osmId": "node/2904175500",
     "osmTags": {
       "addr:city": "Vlagtwedde",
@@ -11420,6 +12373,8 @@
     "lat": 52.8478557,
     "lng": 5.7156494,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2904347207",
     "osmTags": {
       "addr:city": "Lemmer",
@@ -11442,6 +12397,8 @@
     "lat": 52.8747963,
     "lng": 7.0587778,
     "description": null,
+    "phone": "+31 599 587 200",
+    "website": "https://www.artsendier.nl/hst/a13r09t/arts_dier.nsf/Main/Huisdieren~Vestigingen~Ter%20Apel",
     "osmId": "node/2904568604",
     "osmTags": {
       "addr:city": "Ter Apel",
@@ -11469,6 +12426,8 @@
     "lat": 52.509663,
     "lng": 4.6738884,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2905575512",
     "osmTags": {
       "addr:city": "Heemskerk",
@@ -11491,6 +12450,8 @@
     "lat": 51.5060563,
     "lng": 3.8780528,
     "description": null,
+    "phone": "+31 113 228 866",
+    "website": "https://www.dierenartsgoes.nl/contact#goes",
     "osmId": "node/2905822847",
     "osmTags": {
       "addr:city": "Goes",
@@ -11517,6 +12478,8 @@
     "lat": 51.818449,
     "lng": 4.9518288,
     "description": null,
+    "phone": "+31 183 301 708",
+    "website": "https://www.anicura.nl/klinieken/noord-brabant/sleeuwijk/",
     "osmId": "node/2907428539",
     "osmTags": {
       "addr:city": "Sleeuwijk",
@@ -11547,6 +12510,8 @@
     "lat": 52.4952644,
     "lng": 4.664185,
     "description": null,
+    "phone": "+31 251 254 254",
+    "website": "https://www.anicura.nl/klinieken/beverwijk/beverwijk-bullerlaan/",
     "osmId": "node/2909604501",
     "osmTags": {
       "addr:city": "Beverwijk",
@@ -11576,6 +12541,8 @@
     "lat": 52.4848282,
     "lng": 4.648017,
     "description": null,
+    "phone": "+31 251 212 031",
+    "website": "https://www.anicura.nl/klinieken/beverwijk/beverwijk-duinwijk/",
     "osmId": "node/2911245461",
     "osmTags": {
       "addr:city": "Beverwijk",
@@ -11605,6 +12572,8 @@
     "lat": 52.2347747,
     "lng": 4.4457267,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2914060425",
     "osmTags": {
       "addr:city": "Noordwijk",
@@ -11628,6 +12597,8 @@
     "lat": 52.0106994,
     "lng": 5.0393497,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2914161551",
     "osmTags": {
       "addr:city": "IJsselstein",
@@ -11650,6 +12621,8 @@
     "lat": 52.1867793,
     "lng": 6.1022215,
     "description": null,
+    "phone": "+31 55 301 2255",
+    "website": "https://www.dierenartsenpraktijk.com/",
     "osmId": "node/2914857956",
     "osmTags": {
       "addr:city": "Klarenbeek",
@@ -11674,6 +12647,8 @@
     "lat": 52.244727,
     "lng": 4.4367994,
     "description": null,
+    "phone": "+31 71 361 5305",
+    "website": "https://www.anicura.nl/klinieken/zuid-holland/noordwijk/",
     "osmId": "node/2918534878",
     "osmTags": {
       "addr:city": "Noordwijk",
@@ -11706,6 +12681,8 @@
     "lat": 52.5175351,
     "lng": 5.4588633,
     "description": null,
+    "phone": "+31 320 748 054",
+    "website": "https://www.dierenartsencentrumlelystad.nl/",
     "osmId": "node/2922314953",
     "osmTags": {
       "addr:city": "Lelystad",
@@ -11733,6 +12710,8 @@
     "lat": 52.5329049,
     "lng": 5.5011338,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2926064075",
     "osmTags": {
       "addr:city": "Lelystad",
@@ -11756,6 +12735,8 @@
     "lat": 52.178775,
     "lng": 4.5099245,
     "description": null,
+    "phone": "+31 71 522 0513",
+    "website": "https://www.anicura.nl/klinieken/zuid-holland/leiden/",
     "osmId": "node/2926120725",
     "osmTags": {
       "addr:city": "Leiden",
@@ -11785,6 +12766,8 @@
     "lat": 51.3759896,
     "lng": 6.1893743,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2926685435",
     "osmTags": {
       "addr:city": "Venlo",
@@ -11807,6 +12790,8 @@
     "lat": 51.2192628,
     "lng": 5.7962549,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2929492746",
     "osmTags": {
       "addr:city": "Ell",
@@ -11830,6 +12815,8 @@
     "lat": 51.2502879,
     "lng": 5.8893897,
     "description": null,
+    "phone": "+31 475 496262",
+    "website": "https://www.dierenkliniekheythuysen.nl",
     "osmId": "node/2929737313",
     "osmTags": {
       "addr:city": "Heythuysen",
@@ -11857,6 +12844,8 @@
     "lat": 51.3995421,
     "lng": 5.4753632,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenkliniekwaalre.nl",
     "osmId": "node/2929822001",
     "osmTags": {
       "addr:city": "Waalre",
@@ -11880,6 +12869,8 @@
     "lat": 51.7602451,
     "lng": 5.5156963,
     "description": null,
+    "phone": "+31 412 656 767",
+    "website": "https://www.anicura.nl/klinieken/noord-brabant/oss/",
     "osmId": "node/2931267873",
     "osmTags": {
       "addr:city": "Oss",
@@ -11910,6 +12901,8 @@
     "lat": 51.1798584,
     "lng": 5.9632668,
     "description": null,
+    "phone": "+31 475 310 043",
+    "website": null,
     "osmId": "node/2932750405",
     "osmTags": {
       "addr:city": "Herten",
@@ -11934,6 +12927,8 @@
     "lat": 52.2219098,
     "lng": 4.4916315,
     "description": null,
+    "phone": "+31 252 215 231",
+    "website": "https://www.anicura.nl/klinieken/zuid-holland/rijngeest-voorhout/",
     "osmId": "node/2933415083",
     "osmTags": {
       "addr:city": "Voorhout",
@@ -11965,6 +12960,8 @@
     "lat": 51.1865832,
     "lng": 5.9911452,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2933477298",
     "osmTags": {
       "addr:city": "Roermond",
@@ -11987,6 +12984,8 @@
     "lat": 52.1566933,
     "lng": 4.522314,
     "description": null,
+    "phone": "+31 71 589 0405",
+    "website": "https://www.anicura.nl/klinieken/zuid-holland/leiderdorp/",
     "osmId": "node/2936592541",
     "osmTags": {
       "addr:city": "Leiderdorp",
@@ -12017,6 +13016,8 @@
     "lat": 52.162216,
     "lng": 4.531579,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2938745508",
     "osmTags": {
       "addr:city": "Leiderdorp",
@@ -12039,6 +13040,8 @@
     "lat": 52.3515427,
     "lng": 6.6654446,
     "description": null,
+    "phone": null,
+    "website": "https://www.almeloord.nl/",
     "osmId": "node/2941885586",
     "osmTags": {
       "addr:city": "Almelo",
@@ -12063,6 +13066,8 @@
     "lat": 52.3422659,
     "lng": 6.6377485,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2942963191",
     "osmTags": {
       "addr:city": "Almelo",
@@ -12085,6 +13090,8 @@
     "lat": 53.1081163,
     "lng": 6.0963086,
     "description": null,
+    "phone": null,
+    "website": "https://www.elkedierenarts.nl/arts/drachten",
     "osmId": "node/2949998737",
     "osmTags": {
       "addr:city": "Drachten",
@@ -12108,6 +13115,8 @@
     "lat": 51.8633976,
     "lng": 5.8657152,
     "description": null,
+    "phone": "+31 24 360 6422",
+    "website": "https://www.dierenklinieklent.nl/",
     "osmId": "node/2960032816",
     "osmTags": {
       "addr:city": "Lent",
@@ -12134,6 +13143,8 @@
     "lat": 51.3572982,
     "lng": 6.0489079,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2961247937",
     "osmTags": {
       "addr:city": "Maasbree",
@@ -12156,6 +13167,8 @@
     "lat": 53.1079058,
     "lng": 5.4733287,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2965746873",
     "osmTags": {
       "addr:city": "Witmarsum",
@@ -12179,6 +13192,8 @@
     "lat": 51.8845061,
     "lng": 5.6090882,
     "description": null,
+    "phone": null,
+    "website": "https://www.dgcmaasenwaal.nl/",
     "osmId": "node/2974854896",
     "osmTags": {
       "addr:city": "Druten",
@@ -12203,6 +13218,8 @@
     "lat": 51.8630831,
     "lng": 5.7744461,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenkliniekbeuningen.nl/",
     "osmId": "node/2977225746",
     "osmTags": {
       "addr:city": "Beuningen Gld",
@@ -12226,6 +13243,8 @@
     "lat": 51.8223535,
     "lng": 5.7386046,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenartswijchen.nl",
     "osmId": "node/2979839099",
     "osmTags": {
       "addr:city": "Wijchen",
@@ -12249,6 +13268,8 @@
     "lat": 53.1605233,
     "lng": 6.7584521,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2996349056",
     "osmTags": {
       "addr:city": "Hoogezand",
@@ -12271,6 +13292,8 @@
     "lat": 51.2790104,
     "lng": 6.0817675,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/3000185749",
     "osmTags": {
       "addr:city": "Reuver",
@@ -12293,6 +13316,8 @@
     "lat": 51.2865404,
     "lng": 6.0802717,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/3000338157",
     "osmTags": {
       "addr:city": "Reuver",
@@ -12315,6 +13340,8 @@
     "lat": 52.0134141,
     "lng": 5.1004583,
     "description": null,
+    "phone": "+31 30 603 2482",
+    "website": "https://www.dierenartsenpraktijknieuwegein.nl/",
     "osmId": "node/3005281318",
     "osmTags": {
       "addr:city": "Nieuwegein",
@@ -12343,6 +13370,8 @@
     "lat": 51.5548516,
     "lng": 5.6915798,
     "description": null,
+    "phone": "+31 492 361 402",
+    "website": "https://www.anicura.nl/klinieken/zuidoost/gemert/",
     "osmId": "node/3005554004",
     "osmTags": {
       "addr:city": "Gemert",
@@ -12373,6 +13402,8 @@
     "lat": 51.9168018,
     "lng": 5.8586369,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/3008636928",
     "osmTags": {
       "addr:city": "Elst",
@@ -12395,6 +13426,8 @@
     "lat": 51.9285926,
     "lng": 5.8745535,
     "description": null,
+    "phone": "+31 481 711 100",
+    "website": "https://www.dierenkliniekdeoudelinge.nl/",
     "osmId": "node/3008790720",
     "osmTags": {
       "addr:city": "Elst",
@@ -12421,6 +13454,8 @@
     "lat": 12.2255127,
     "lng": -69.0329537,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/3009399006",
     "osmTags": {
       "addr:city": "Tera Corá",
@@ -12439,6 +13474,8 @@
     "lat": 51.6563618,
     "lng": 5.6124282,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenkliniekuden.nl",
     "osmId": "node/3011246061",
     "osmTags": {
       "addr:city": "Uden",
@@ -12462,6 +13499,8 @@
     "lat": 51.6671407,
     "lng": 5.6102885,
     "description": null,
+    "phone": null,
+    "website": "https://vivadier.nl/",
     "osmId": "node/3011365259",
     "osmTags": {
       "addr:city": "Uden",
@@ -12485,6 +13524,8 @@
     "lat": 51.9814834,
     "lng": 5.6447856,
     "description": null,
+    "phone": "+31 317 412 432",
+    "website": "https://kortenoord.com",
     "osmId": "node/3013231375",
     "osmTags": {
       "addr:city": "Wageningen",
@@ -12512,6 +13553,8 @@
     "lat": 51.9720712,
     "lng": 5.6644178,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/3013351053",
     "osmTags": {
       "addr:city": "Wageningen",
@@ -12534,6 +13577,8 @@
     "lat": 51.9891091,
     "lng": 5.8446166,
     "description": null,
+    "phone": null,
+    "website": "https://www.mijndierenartsarnhem.nl/contactgegevens/contact#Oosterbeek",
     "osmId": "node/3015331730",
     "osmTags": {
       "addr:city": "Oosterbeek",
@@ -12558,6 +13603,8 @@
     "lat": 51.9122488,
     "lng": 5.6564703,
     "description": null,
+    "phone": null,
+    "website": "https://kliniek-klaver4dieren.nl/",
     "osmId": "node/3018041349",
     "osmTags": {
       "addr:city": "Dodewaard",
@@ -12581,6 +13628,8 @@
     "lat": 51.8958107,
     "lng": 5.4025504,
     "description": null,
+    "phone": "+31 344 612976",
+    "website": "https://www.dierenkliniektiel.nl/",
     "osmId": "node/3019997934",
     "osmTags": {
       "addr:city": "Tiel",
@@ -12605,6 +13654,8 @@
     "lat": 51.8855648,
     "lng": 5.4248989,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/3020111247",
     "osmTags": {
       "addr:city": "Tiel",
@@ -12626,6 +13677,8 @@
     "lat": 51.8711228,
     "lng": 5.4001744,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/3020654441",
     "osmTags": {
       "addr:city": "Tiel",
@@ -12648,6 +13701,8 @@
     "lat": 51.8995116,
     "lng": 6.2653627,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/3022887819",
     "osmTags": {
       "addr:city": "Zeddam",
@@ -12670,6 +13725,8 @@
     "lat": 52.0763869,
     "lng": 5.1140017,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/3024584088",
     "osmTags": {
       "amenity": "veterinary",
@@ -12688,6 +13745,8 @@
     "lat": 52.0716847,
     "lng": 5.1261872,
     "description": null,
+    "phone": "+31 30 288 6469",
+    "website": "https://dierenkliniekhoograven.nl",
     "osmId": "node/3035940136",
     "osmTags": {
       "addr:city": "Utrecht",
@@ -12715,6 +13774,8 @@
     "lat": 52.110879,
     "lng": 5.0820849,
     "description": null,
+    "phone": "+31 30 244 6933",
+    "website": "http://www.dierenkliniekzuilen.nl/",
     "osmId": "node/3041794930",
     "osmTags": {
       "addr:city": "Utrecht",
@@ -12741,6 +13802,8 @@
     "lat": 52.0837731,
     "lng": 5.181815,
     "description": null,
+    "phone": null,
+    "website": "https://www.uu.nl/en/prof-dr-h-jakob-building",
     "osmId": "node/3042082947",
     "osmTags": {
       "addr:city": "Utrecht",
@@ -12769,6 +13832,8 @@
     "lat": 52.1139397,
     "lng": 5.1143144,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenkliniekzamenhofdreef.nl/",
     "osmId": "node/3043884340",
     "osmTags": {
       "addr:city": "Utrecht",
@@ -12793,6 +13858,8 @@
     "lat": 53.1854142,
     "lng": 5.7859304,
     "description": null,
+    "phone": "+31 58 288 4919",
+    "website": "https://www.dierenklinieknijlan.nl",
     "osmId": "node/3064652842",
     "osmTags": {
       "addr:city": "Leeuwarden",
@@ -12817,6 +13884,8 @@
     "lat": 53.2172434,
     "lng": 5.8265691,
     "description": null,
+    "phone": null,
+    "website": "https://www.elkedierenarts.nl/",
     "osmId": "node/3065113777",
     "osmTags": {
       "addr:city": "Leeuwarden",
@@ -12840,6 +13909,8 @@
     "lat": 53.1839529,
     "lng": 5.4863249,
     "description": null,
+    "phone": null,
+    "website": "https://www.demobieledierenarts.nl/",
     "osmId": "node/3065966647",
     "osmTags": {
       "addr:city": "Herbaijum",
@@ -12863,6 +13934,8 @@
     "lat": 53.1963282,
     "lng": 5.7830044,
     "description": null,
+    "phone": null,
+    "website": "https://www.elkedierenarts.nl/arts/leeuwarden",
     "osmId": "node/3066949042",
     "osmTags": {
       "addr:city": "Leeuwarden",
@@ -12886,6 +13959,8 @@
     "lat": 52.3717868,
     "lng": 6.6875426,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/3067124459",
     "osmTags": {
       "addr:city": "Almelo",
@@ -12908,6 +13983,8 @@
     "lat": 52.0908443,
     "lng": 4.3066255,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/3186398221",
     "osmTags": {
       "amenity": "veterinary",
@@ -12924,6 +14001,8 @@
     "lat": 52.090914,
     "lng": 4.3067093,
     "description": null,
+    "phone": null,
+    "website": "http://www.dierenartsthijsse.nl/",
     "osmId": "node/3186398222",
     "osmTags": {
       "amenity": "veterinary",
@@ -12941,6 +14020,8 @@
     "lat": 51.6926983,
     "lng": 4.2031021,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/3195335406",
     "osmTags": {
       "amenity": "veterinary",
@@ -12957,6 +14038,8 @@
     "lat": 51.891008,
     "lng": 5.897965,
     "description": null,
+    "phone": "+31 481 464760",
+    "website": "https://www.dierenklinieklingewaard.nl/",
     "osmId": "node/3239935155",
     "osmTags": {
       "addr:city": "Bemmel",
@@ -12979,6 +14062,8 @@
     "lat": 51.5827304,
     "lng": 4.7409358,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenkliniekbreda.nl/",
     "osmId": "node/3371985288",
     "osmTags": {
       "addr:city": "Breda",
@@ -13002,6 +14087,8 @@
     "lat": 12.158765,
     "lng": -68.9649154,
     "description": null,
+    "phone": "+5999 868 2621",
+    "website": null,
     "osmId": "node/3483390888",
     "osmTags": {
       "addr:housenumber": "41",
@@ -13021,6 +14108,8 @@
     "lat": 52.2354824,
     "lng": 5.9745798,
     "description": null,
+    "phone": "+31 55 576 0800",
+    "website": "https://www.dierenkliniekapeldoornnoord.nl",
     "osmId": "node/3560431801",
     "osmTags": {
       "addr:city": "Apeldoorn",
@@ -13046,6 +14135,8 @@
     "lat": 52.0378246,
     "lng": 4.3216178,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/3609518866",
     "osmTags": {
       "amenity": "veterinary",
@@ -13062,6 +14153,8 @@
     "lat": 52.0123887,
     "lng": 4.347374,
     "description": null,
+    "phone": "+31 15 212 3565",
+    "website": "https://www.dierenkliniekwestland.nl/",
     "osmId": "node/3782443253",
     "osmTags": {
       "addr:city": "Delft",
@@ -13089,6 +14182,8 @@
     "lat": 51.9905222,
     "lng": 4.4555077,
     "description": null,
+    "phone": "+31 10 313 8635",
+    "website": "https://www.dkwestpolder.nl",
     "osmId": "node/3867950046",
     "osmTags": {
       "addr:city": "Berkel en Rodenrijs",
@@ -13116,6 +14211,8 @@
     "lat": 51.8667401,
     "lng": 4.6035195,
     "description": null,
+    "phone": "+31 85 273 1919",
+    "website": "https://www.dierenkliniekridderkerk.nl",
     "osmId": "node/3914772155",
     "osmTags": {
       "addr:city": "Ridderkerk",
@@ -13138,6 +14235,8 @@
     "lat": 51.8981748,
     "lng": 4.1724674,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenkliniekbrielle.nl/",
     "osmId": "node/3920338517",
     "osmTags": {
       "addr:city": "Brielle",
@@ -13161,6 +14260,8 @@
     "lat": 52.0430584,
     "lng": 4.3941875,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenartsypenburgnootdorp.nl/",
     "osmId": "node/3925554311",
     "osmTags": {
       "addr:city": "Nootdorp",
@@ -13183,6 +14284,8 @@
     "lat": 51.697433,
     "lng": 3.7505776,
     "description": null,
+    "phone": "+31 111 652 254",
+    "website": "https://www.anicura.nl/klinieken/zeeland/burgh-haamstede/",
     "osmId": "node/3966961130",
     "osmTags": {
       "addr:city": "Burgh-Haamstede",
@@ -13218,6 +14321,8 @@
     "lat": 52.9823105,
     "lng": 5.4580913,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/4024954739",
     "osmTags": {
       "amenity": "veterinary"
@@ -13233,6 +14338,8 @@
     "lat": 52.0545417,
     "lng": 4.4822038,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenarts-zoetermeer.nl/",
     "osmId": "node/4141160220",
     "osmTags": {
       "addr:city": "Zoetermeer",
@@ -13255,6 +14362,8 @@
     "lat": 52.3252178,
     "lng": 4.5927511,
     "description": null,
+    "phone": "+31 23 743 3477",
+    "website": "https://www.dierenkliniek-aerdenhout.nl/",
     "osmId": "node/4143901112",
     "osmTags": {
       "amenity": "veterinary",
@@ -13274,6 +14383,8 @@
     "lat": 52.9377718,
     "lng": 6.1257865,
     "description": null,
+    "phone": "+31 516 451 777",
+    "website": null,
     "osmId": "node/4157592157",
     "osmTags": {
       "amenity": "veterinary",
@@ -13291,6 +14402,8 @@
     "lat": 52.7216896,
     "lng": 5.7431339,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/4164853890",
     "osmTags": {
       "amenity": "veterinary",
@@ -13307,6 +14420,8 @@
     "lat": 52.0881509,
     "lng": 6.3174051,
     "description": null,
+    "phone": null,
+    "website": "https://degraafschapdierenartsen.nl/",
     "osmId": "node/4194831680",
     "osmTags": {
       "addr:city": "Vorden",
@@ -13330,6 +14445,8 @@
     "lat": 51.3462604,
     "lng": 5.8811952,
     "description": null,
+    "phone": null,
+    "website": "https://www.dapmeijel.nl/",
     "osmId": "node/4226361555",
     "osmTags": {
       "amenity": "veterinary",
@@ -13347,6 +14464,8 @@
     "lat": 51.9296017,
     "lng": 4.5500031,
     "description": null,
+    "phone": "+31 10 450 2916",
+    "website": "https://www.anicura.nl/klinieken/rotterdam/rotterdam-capelle/",
     "osmId": "node/4327259404",
     "osmTags": {
       "addr:city": "Rotterdam",
@@ -13378,6 +14497,8 @@
     "lat": 52.8862789,
     "lng": 6.0384142,
     "description": null,
+    "phone": null,
+    "website": "https://dierenkliniekwolvega.nl/paarden",
     "osmId": "node/4333669554",
     "osmTags": {
       "amenity": "veterinary",
@@ -13395,6 +14516,8 @@
     "lat": 52.4487133,
     "lng": 4.5966852,
     "description": null,
+    "phone": "+31 255 51 12 36",
+    "website": "https://www.anicura.nl/klinieken/noord-holland/ijmond-ijmuiden/",
     "osmId": "node/4339470057",
     "osmTags": {
       "addr:city": "IJmuiden",
@@ -13424,6 +14547,8 @@
     "lat": 12.1087236,
     "lng": -68.9191222,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/4357631530",
     "osmTags": {
       "addr:housenumber": "z/n",
@@ -13442,6 +14567,8 @@
     "lat": 51.5577825,
     "lng": 4.8345117,
     "description": null,
+    "phone": "+31 161 437 777",
+    "website": "https://www.dmcderoosberg.nl",
     "osmId": "node/4414695383",
     "osmTags": {
       "addr:city": "Bavel",
@@ -13466,6 +14593,8 @@
     "lat": 51.8240173,
     "lng": 4.7779981,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/4429529680",
     "osmTags": {
       "amenity": "veterinary",
@@ -13482,6 +14611,8 @@
     "lat": 52.0615592,
     "lng": 4.5117218,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/4463654534",
     "osmTags": {
       "amenity": "veterinary",
@@ -13498,6 +14629,8 @@
     "lat": 51.8708949,
     "lng": 4.779499,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/4463952486",
     "osmTags": {
       "amenity": "veterinary",
@@ -13514,6 +14647,8 @@
     "lat": 53.2845919,
     "lng": 6.1556176,
     "description": null,
+    "phone": null,
+    "website": "https://www.dapkollumbuitenpost.nl/",
     "osmId": "node/4499968895",
     "osmTags": {
       "addr:city": "Kollum",
@@ -13537,6 +14672,8 @@
     "lat": 51.3284156,
     "lng": 3.4893551,
     "description": null,
+    "phone": "+31 117 454 484",
+    "website": "https://www.dacwest.nl/",
     "osmId": "node/4529142073",
     "osmTags": {
       "addr:city": "Oostburg",
@@ -13566,6 +14703,8 @@
     "lat": 51.7229051,
     "lng": 5.3141325,
     "description": null,
+    "phone": "+31 73 644 79 44",
+    "website": "https://www.dierenkliniekdenbosch.nl/",
     "osmId": "node/4614082052",
     "osmTags": {
       "addr:city": "'s-Hertogenbosch",
@@ -13592,6 +14731,8 @@
     "lat": 51.8892324,
     "lng": 4.6878662,
     "description": null,
+    "phone": "+31 78 693 0055",
+    "website": "https://www.anicura.nl/klinieken/zuid-holland/de-waard-nieuw-lekkerland/",
     "osmId": "node/4619095185",
     "osmTags": {
       "addr:city": "Nieuw-Lekkerland",
@@ -13624,6 +14765,8 @@
     "lat": 52.2595438,
     "lng": 4.5651196,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenartsenpraktijklisse.nl/",
     "osmId": "node/4712319884",
     "osmTags": {
       "amenity": "veterinary",
@@ -13641,6 +14784,8 @@
     "lat": 52.354099,
     "lng": 4.8711394,
     "description": null,
+    "phone": "+31 20 662 0101",
+    "website": "https://dierenkliniekvondelpark.nl/",
     "osmId": "node/4745134222",
     "osmTags": {
       "addr:city": "Amsterdam",
@@ -13666,6 +14811,8 @@
     "lat": 52.0842166,
     "lng": 5.2439352,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/4755386226",
     "osmTags": {
       "amenity": "veterinary",
@@ -13683,6 +14830,8 @@
     "lat": 52.0635982,
     "lng": 4.2889462,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/4758370185",
     "osmTags": {
       "amenity": "veterinary",
@@ -13699,6 +14848,8 @@
     "lat": 52.1626897,
     "lng": 5.1683684,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenkliniekmiddennederland.nl/dierenklinieken/dierenkliniek-maartensdijk/",
     "osmId": "node/4775809931",
     "osmTags": {
       "addr:city": "Maartensdijk",
@@ -13722,6 +14873,8 @@
     "lat": 51.7287707,
     "lng": 5.8681918,
     "description": null,
+    "phone": null,
+    "website": "https://dierenkliniek-overhage.nl",
     "osmId": "node/4795912623",
     "osmTags": {
       "addr:city": "Cuijk",
@@ -13743,6 +14896,8 @@
     "lat": 51.9287762,
     "lng": 4.4654227,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/4803890218",
     "osmTags": {
       "addr:city": "Rotterdam",
@@ -13763,6 +14918,8 @@
     "lat": 50.9072363,
     "lng": 6.0357225,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/4814717845",
     "osmTags": {
       "addr:city": "Landgraaf",
@@ -13783,6 +14940,8 @@
     "lat": 51.4370194,
     "lng": 5.387049,
     "description": null,
+    "phone": "+31 40 254 0958",
+    "website": "https://www.anicura.nl/klinieken/noord-brabant/theike-veldhoven/",
     "osmId": "node/4873638309",
     "osmTags": {
       "addr:city": "Veldhoven",
@@ -13813,6 +14972,8 @@
     "lat": 52.2296788,
     "lng": 5.9549517,
     "description": null,
+    "phone": null,
+    "website": "https://www.groepspraktijkdierenartsenapeldoorn.nl/",
     "osmId": "node/4886445349",
     "osmTags": {
       "addr:city": "Apeldoorn",
@@ -13838,6 +14999,8 @@
     "lat": 53.2378431,
     "lng": 6.6320532,
     "description": null,
+    "phone": "+31 50 541 6070",
+    "website": "https://www.vanstadtotwad.nl/",
     "osmId": "node/4894410897",
     "osmTags": {
       "addr:city": "Groningen",
@@ -13862,6 +15025,8 @@
     "lat": 52.2500695,
     "lng": 6.2319424,
     "description": null,
+    "phone": "+31 570 653 000",
+    "website": "https://www.anicura.nl/klinieken/overijssel/deventer/",
     "osmId": "node/4984343777",
     "osmTags": {
       "addr:city": "Colmschate",
@@ -13892,6 +15057,8 @@
     "lat": 52.3499816,
     "lng": 4.9774203,
     "description": null,
+    "phone": "+31 20 737 3170",
+    "website": "https://www.dierenziekenhuisdiemen.nl",
     "osmId": "node/4986899407",
     "osmTags": {
       "addr:city": "Diemen",
@@ -13916,6 +15083,8 @@
     "lat": 53.0648093,
     "lng": 6.5773291,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/5024894973",
     "osmTags": {
       "amenity": "veterinary",
@@ -13933,6 +15102,8 @@
     "lat": 53.236682,
     "lng": 6.5214723,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/5035445233",
     "osmTags": {
       "amenity": "veterinary",
@@ -13950,6 +15121,8 @@
     "lat": 52.5297581,
     "lng": 6.0998619,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/5073994991",
     "osmTags": {
       "addr:city": "Zwolle",
@@ -13972,6 +15145,8 @@
     "lat": 52.0026967,
     "lng": 4.6812235,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenkliniekwestergouwe.nl/",
     "osmId": "node/5082392610",
     "osmTags": {
       "addr:city": "Gouda",
@@ -13995,6 +15170,8 @@
     "lat": 52.3580468,
     "lng": 4.8572599,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/5101755624",
     "osmTags": {
       "amenity": "veterinary",
@@ -14012,6 +15189,8 @@
     "lat": 51.9777966,
     "lng": 4.6264202,
     "description": null,
+    "phone": null,
+    "website": "http://www.dierenkliniekzuidplas.nl/",
     "osmId": "node/5126102281",
     "osmTags": {
       "amenity": "veterinary",
@@ -14029,6 +15208,8 @@
     "lat": 52.3713997,
     "lng": 4.5312821,
     "description": null,
+    "phone": null,
+    "website": "https://zandvoortsedierenarts.nl",
     "osmId": "node/5143804177",
     "osmTags": {
       "addr:housenumber": "30-32",
@@ -14050,6 +15231,8 @@
     "lat": 51.5649917,
     "lng": 5.0945593,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/5170101569",
     "osmTags": {
       "addr:city": "Tilburg",
@@ -14072,6 +15255,8 @@
     "lat": 51.7733293,
     "lng": 5.3407726,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/5175488112",
     "osmTags": {
       "amenity": "veterinary"
@@ -14087,6 +15272,8 @@
     "lat": 51.9749172,
     "lng": 5.3443237,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/5176766401",
     "osmTags": {
       "addr:city": "Wijk bij Duurstede",
@@ -14110,6 +15297,8 @@
     "lat": 52.378353,
     "lng": 4.9326342,
     "description": null,
+    "phone": null,
+    "website": "https://dierenkliniekijhavens.nl",
     "osmId": "node/5243976908",
     "osmTags": {
       "amenity": "veterinary",
@@ -14129,6 +15318,8 @@
     "lat": 51.7133059,
     "lng": 4.2875828,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/5256739711",
     "osmTags": {
       "amenity": "veterinary",
@@ -14145,6 +15336,8 @@
     "lat": 52.3257619,
     "lng": 5.6175459,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/5299972711",
     "osmTags": {
       "addr:city": "Harderwijk",
@@ -14167,6 +15360,8 @@
     "lat": 52.0311034,
     "lng": 4.4447506,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenkliniekpijnacker.nl/",
     "osmId": "node/5319887389",
     "osmTags": {
       "addr:city": "Pijnacker",
@@ -14190,6 +15385,8 @@
     "lat": 53.1147551,
     "lng": 6.142748,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/5323720822",
     "osmTags": {
       "amenity": "veterinary",
@@ -14206,6 +15403,8 @@
     "lat": 51.7951603,
     "lng": 4.705045,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/5337395720",
     "osmTags": {
       "addr:city": "Dordrecht",
@@ -14228,6 +15427,8 @@
     "lat": 52.079278,
     "lng": 4.2783472,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/5613563064",
     "osmTags": {
       "amenity": "veterinary",
@@ -14246,6 +15447,8 @@
     "lat": 51.8211126,
     "lng": 4.4425405,
     "description": null,
+    "phone": "+31 186 612 066",
+    "website": "https://www.anicura.nl/klinieken/oud-beijerland/oud-beijerland/",
     "osmId": "node/5620309834",
     "osmTags": {
       "addr:city": "Oud-Beijerland",
@@ -14275,6 +15478,8 @@
     "lat": 52.1480695,
     "lng": 4.4807166,
     "description": null,
+    "phone": null,
+    "website": "https://www.mijndierenkliniek.nl/nl-nl/contact#Mijnleiden",
     "osmId": "node/5643419971",
     "osmTags": {
       "addr:city": "Leiden",
@@ -14299,6 +15504,8 @@
     "lat": 52.0757213,
     "lng": 4.2748805,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/5643859250",
     "osmTags": {
       "amenity": "veterinary",
@@ -14317,6 +15524,8 @@
     "lat": 51.9615287,
     "lng": 5.9667535,
     "description": null,
+    "phone": "+31 26 311 4889",
+    "website": null,
     "osmId": "node/5696457646",
     "osmTags": {
       "addr:city": "Westervoort",
@@ -14340,6 +15549,8 @@
     "lat": 52.2206078,
     "lng": 5.4930876,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/5832323153",
     "osmTags": {
       "addr:city": "Nijkerk",
@@ -14360,6 +15571,8 @@
     "lat": 53.0620136,
     "lng": 5.5246613,
     "description": null,
+    "phone": "+31 515 572 380",
+    "website": "https://www.dierenartsenpraktijkbolsward.nl",
     "osmId": "node/5844160313",
     "osmTags": {
       "addr:city": "Bolsward",
@@ -14384,6 +15597,8 @@
     "lat": 52.2563263,
     "lng": 6.2240991,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/5892594852",
     "osmTags": {
       "addr:city": "Deventer",
@@ -14406,6 +15621,8 @@
     "lat": 53.1426362,
     "lng": 6.2569739,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/5908433185",
     "osmTags": {
       "amenity": "veterinary",
@@ -14424,6 +15641,8 @@
     "lat": 51.6413914,
     "lng": 4.6031116,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/6001351940",
     "osmTags": {
       "amenity": "veterinary",
@@ -14440,6 +15659,8 @@
     "lat": 51.8813355,
     "lng": 5.8470576,
     "description": null,
+    "phone": "+31 24 303 1101",
+    "website": null,
     "osmId": "node/6090358113",
     "osmTags": {
       "addr:city": "Nijmegen",
@@ -14464,6 +15685,8 @@
     "lat": 12.152065,
     "lng": -68.9105156,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/6187376294",
     "osmTags": {
       "addr:housenumber": "11",
@@ -14482,6 +15705,8 @@
     "lat": 51.5786993,
     "lng": 4.759934,
     "description": null,
+    "phone": "+31 76 532 8358",
+    "website": "https://www.dierendokters.com/",
     "osmId": "node/6240259165",
     "osmTags": {
       "addr:city": "Breda",
@@ -14505,6 +15730,8 @@
     "lat": 53.2305597,
     "lng": 6.6172061,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/6404172094",
     "osmTags": {
       "amenity": "veterinary",
@@ -14521,6 +15748,8 @@
     "lat": 52.691555,
     "lng": 6.2248269,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/6512967889",
     "osmTags": {
       "amenity": "veterinary",
@@ -14537,6 +15766,8 @@
     "lat": 52.3918186,
     "lng": 5.1756667,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/6535015855",
     "osmTags": {
       "amenity": "veterinary"
@@ -14552,6 +15783,8 @@
     "lat": 52.7597605,
     "lng": 6.345653,
     "description": null,
+    "phone": "+31 528 371 291",
+    "website": "https://dierenartsenpraktijkdewolden.nl",
     "osmId": "node/6596691991",
     "osmTags": {
       "addr:city": "Ruinen",
@@ -14575,6 +15808,8 @@
     "lat": 52.5828179,
     "lng": 4.6875559,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/6712766203",
     "osmTags": {
       "amenity": "veterinary",
@@ -14591,6 +15826,8 @@
     "lat": 52.9035766,
     "lng": 6.6970621,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/6718146987",
     "osmTags": {
       "amenity": "veterinary",
@@ -14607,6 +15844,8 @@
     "lat": 52.125346,
     "lng": 5.4138779,
     "description": null,
+    "phone": "+31 6 3853 4366",
+    "website": "https://dierentandheelkunde.nl/",
     "osmId": "node/6893974421",
     "osmTags": {
       "addr:city": "Leusden",
@@ -14634,6 +15873,8 @@
     "lat": 52.3111805,
     "lng": 5.1204246,
     "description": null,
+    "phone": "+31 35 632 1021",
+    "website": "https://www.deboerdierenruiter.nl",
     "osmId": "node/6909315292",
     "osmTags": {
       "amenity": "veterinary",
@@ -14654,6 +15895,8 @@
     "lat": 51.5604573,
     "lng": 4.5436191,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/6910222353",
     "osmTags": {
       "amenity": "veterinary",
@@ -14671,6 +15914,8 @@
     "lat": 52.7088146,
     "lng": 6.5430995,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/6917974905",
     "osmTags": {
       "amenity": "veterinary",
@@ -14687,6 +15932,8 @@
     "lat": 52.0248745,
     "lng": 5.5824077,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/6925054281",
     "osmTags": {
       "amenity": "veterinary",
@@ -14703,6 +15950,8 @@
     "lat": 51.6117452,
     "lng": 5.5588902,
     "description": null,
+    "phone": "+31 413 364 589",
+    "website": "https://www.aadal.nl",
     "osmId": "node/7199924090",
     "osmTags": {
       "addr:city": "Veghel",
@@ -14727,6 +15976,8 @@
     "lat": 52.1034098,
     "lng": 4.6385687,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/7223535903",
     "osmTags": {
       "amenity": "veterinary",
@@ -14743,6 +15994,8 @@
     "lat": 52.2716082,
     "lng": 4.6196995,
     "description": null,
+    "phone": "+31 252 680 160",
+    "website": "https://www.anicura.nl/klinieken/noord-holland/nieuw-vennep/",
     "osmId": "node/7253372667",
     "osmTags": {
       "addr:city": "Nieuw-Vennep",
@@ -14773,6 +16026,8 @@
     "lat": 52.5323835,
     "lng": 6.0521986,
     "description": null,
+    "phone": "+31 38 4771951",
+    "website": "https://www.dapzw.nl/",
     "osmId": "node/7299930522",
     "osmTags": {
       "addr:city": "Zwolle",
@@ -14800,6 +16055,8 @@
     "lat": 52.1987322,
     "lng": 5.9910089,
     "description": null,
+    "phone": "+31 55 533 2610",
+    "website": "https://www.groepspraktijkdierenartsenapeldoorn.nl",
     "osmId": "node/7415096188",
     "osmTags": {
       "addr:city": "Apeldoorn",
@@ -14826,6 +16083,8 @@
     "lat": 52.0803315,
     "lng": 4.7736013,
     "description": null,
+    "phone": null,
+    "website": "https://www.dapbodegraven.nl/",
     "osmId": "node/7532796112",
     "osmTags": {
       "addr:city": "Bodegraven",
@@ -14849,6 +16108,8 @@
     "lat": 51.9749175,
     "lng": 5.9653339,
     "description": null,
+    "phone": null,
+    "website": "https://evidensiadierenziekenhuis.nl/dierenziekenhuizen/arnhem/",
     "osmId": "node/7685011991",
     "osmTags": {
       "addr:city": "Arnhem",
@@ -14873,6 +16134,8 @@
     "lat": 52.0512567,
     "lng": 5.116505,
     "description": null,
+    "phone": null,
+    "website": "https://www.diebo.nl/diebo-dierenarts",
     "osmId": "node/7728279917",
     "osmTags": {
       "addr:city": "Nieuwegein",
@@ -14895,6 +16158,8 @@
     "lat": 51.587123,
     "lng": 5.1342435,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/7950715610",
     "osmTags": {
       "amenity": "veterinary",
@@ -14912,6 +16177,8 @@
     "lat": 51.5435823,
     "lng": 4.4738702,
     "description": null,
+    "phone": "+31 165 557 500",
+    "website": "https://www.dierenartsroosendaal.nl",
     "osmId": "node/7997559985",
     "osmTags": {
       "addr:city": "Roosendaal",
@@ -14938,6 +16205,8 @@
     "lat": 52.2123097,
     "lng": 6.9047905,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/8093829612",
     "osmTags": {
       "amenity": "veterinary",
@@ -14954,6 +16223,8 @@
     "lat": 52.2073378,
     "lng": 6.8708555,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/8251999529",
     "osmTags": {
       "amenity": "veterinary",
@@ -14970,6 +16241,8 @@
     "lat": 50.8194273,
     "lng": 5.8220935,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/8411403333",
     "osmTags": {
       "addr:city": "Margraten",
@@ -14992,6 +16265,8 @@
     "lat": 52.0949194,
     "lng": 5.0653678,
     "description": null,
+    "phone": "+31 30 662 0025",
+    "website": null,
     "osmId": "node/8585278251",
     "osmTags": {
       "addr:city": "Utrecht",
@@ -15018,6 +16293,8 @@
     "lat": 52.3136401,
     "lng": 6.914305,
     "description": null,
+    "phone": "+31 541 533 220",
+    "website": "https://www.anicura.nl/klinieken/overijssel/oldenzaal/",
     "osmId": "node/8610403622",
     "osmTags": {
       "addr:city": "Oldenzaal",
@@ -15047,6 +16324,8 @@
     "lat": 51.5890226,
     "lng": 5.1727776,
     "description": null,
+    "phone": "+31 13 528 3535",
+    "website": "https://www.dierenartsenoisterwijk.nl",
     "osmId": "node/8615506524",
     "osmTags": {
       "addr:city": "Oisterwijk",
@@ -15070,6 +16349,8 @@
     "lat": 51.5201038,
     "lng": 5.5883874,
     "description": null,
+    "phone": "+31 499 423 389",
+    "website": "https://dierenklinieklieshout.nl",
     "osmId": "node/8680693317",
     "osmTags": {
       "addr:city": "Lieshout",
@@ -15096,6 +16377,8 @@
     "lat": 52.2514233,
     "lng": 6.8154929,
     "description": null,
+    "phone": null,
+    "website": "https://balkdierenarts.nl/",
     "osmId": "node/8798272661",
     "osmTags": {
       "addr:city": "Hengelo",
@@ -15120,6 +16403,8 @@
     "lat": 52.442288,
     "lng": 5.8599469,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/8998400018",
     "osmTags": {
       "amenity": "veterinary",
@@ -15136,6 +16421,8 @@
     "lat": 52.488804,
     "lng": 4.7532081,
     "description": null,
+    "phone": null,
+    "website": "https://www.plusdierenklinieken.nl",
     "osmId": "node/9006653253",
     "osmTags": {
       "addr:city": "Assendelft",
@@ -15159,6 +16446,8 @@
     "lat": 51.5829248,
     "lng": 4.7535957,
     "description": null,
+    "phone": "+31 76 2003434",
+    "website": "https://dierenkliniek-hartvoordieren.nl",
     "osmId": "node/9137186263",
     "osmTags": {
       "addr:city": "Breda",
@@ -15183,6 +16472,8 @@
     "lat": 51.505472,
     "lng": 5.4005005,
     "description": null,
+    "phone": "+31 499 399 827",
+    "website": "https://www.dierenartsverstappen.nl",
     "osmId": "node/9365349317",
     "osmTags": {
       "addr:city": "Best",
@@ -15209,6 +16500,8 @@
     "lat": 52.5003496,
     "lng": 4.9652465,
     "description": null,
+    "phone": "+31 299 421 000",
+    "website": "https://www.dierenartspurmerend.nl/",
     "osmId": "node/9394161882",
     "osmTags": {
       "addr:city": "Purmerend",
@@ -15234,6 +16527,8 @@
     "lat": 53.1036953,
     "lng": 6.8888914,
     "description": null,
+    "phone": null,
+    "website": "https://noorderdierenkliniek.nl/",
     "osmId": "node/9407051982",
     "osmTags": {
       "addr:city": "Veendam",
@@ -15257,6 +16552,8 @@
     "lat": 51.5073024,
     "lng": 3.6264312,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/9484215246",
     "osmTags": {
       "addr:city": "Middelburg",
@@ -15279,6 +16576,8 @@
     "lat": 53.2931348,
     "lng": 6.5945215,
     "description": null,
+    "phone": "+31 50 371 0220",
+    "website": "https://www.dierenartsbedum.nl/",
     "osmId": "node/9576523098",
     "osmTags": {
       "addr:city": "Bedum",
@@ -15306,6 +16605,8 @@
     "lat": 52.0024432,
     "lng": 5.6600154,
     "description": null,
+    "phone": "+31 318 416 500",
+    "website": "https://www.bosweidedierenartsen.nl/",
     "osmId": "node/9584817306",
     "osmTags": {
       "addr:city": "Bennekom",
@@ -15333,6 +16634,8 @@
     "lat": 52.1867078,
     "lng": 5.9423078,
     "description": null,
+    "phone": "+31 55 533 7692",
+    "website": "https://www.dierenartsenugchelen.nl/",
     "osmId": "node/9604024539",
     "osmTags": {
       "addr:city": "Ugchelen",
@@ -15358,6 +16661,8 @@
     "lat": 52.7251006,
     "lng": 5.9557869,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/9680340921",
     "osmTags": {
       "addr:city": "Blokzijl",
@@ -15378,6 +16683,8 @@
     "lat": 51.6014571,
     "lng": 4.7719338,
     "description": "Het dierenziekenhuis is de hoofdlocatie van AniCura Breda.",
+    "phone": "+31 76 572 2999",
+    "website": "https://www.anicura.nl/klinieken/breda/dierenziekenhuisbreda/",
     "osmId": "node/9707570500",
     "osmTags": {
       "addr:city": "Breda",
@@ -15410,6 +16717,8 @@
     "lat": 51.7370817,
     "lng": 5.3572164,
     "description": null,
+    "phone": "+31 73 532 5580",
+    "website": "https://dierenkliniekdegrootevriend.nl/",
     "osmId": "node/9721947914",
     "osmTags": {
       "addr:city": "Rosmalen",
@@ -15437,6 +16746,8 @@
     "lat": 51.847206,
     "lng": 4.4982095,
     "description": null,
+    "phone": "+31 180 790 011",
+    "website": "https://drwoof.nl/nl/dierenartsenklinieken/barendrecht/",
     "osmId": "node/9843546763",
     "osmTags": {
       "addr:city": "Barendrecht",
@@ -15460,6 +16771,8 @@
     "lat": 52.7205653,
     "lng": 6.4518911,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/9879383641",
     "osmTags": {
       "addr:city": "Hoogeveen",
@@ -15482,6 +16795,8 @@
     "lat": 52.4476604,
     "lng": 4.8027525,
     "description": null,
+    "phone": "+31 75 616 0761",
+    "website": "https://www.plusdierenklinieken.nl",
     "osmId": "node/10050773497",
     "osmTags": {
       "addr:city": "Zaandam",
@@ -15506,6 +16821,8 @@
     "lat": 52.1815859,
     "lng": 5.4306995,
     "description": null,
+    "phone": null,
+    "website": "https://wellensiek.nl/vestigingen/vathorst/",
     "osmId": "node/10126307588",
     "osmTags": {
       "addr:city": "Amersfoort",
@@ -15529,6 +16846,8 @@
     "lat": 52.6633589,
     "lng": 4.8102105,
     "description": null,
+    "phone": "+31 72 201 9072",
+    "website": "https://dierenkliniekhhw.nl/",
     "osmId": "node/10304946621",
     "osmTags": {
       "addr:city": "Heerhugowaard",
@@ -15551,6 +16870,8 @@
     "lat": 51.971858,
     "lng": 5.5296057,
     "description": null,
+    "phone": "+31 317 621 165",
+    "website": "https://www.dk-utrechtseheuvelrug.nl/",
     "osmId": "node/10308463413",
     "osmTags": {
       "addr:city": "Rhenen",
@@ -15577,6 +16898,8 @@
     "lat": 51.8678493,
     "lng": 4.3518886,
     "description": null,
+    "phone": "+31 10 295 0530",
+    "website": "https://www.anicura.nl/klinieken/zuid-holland/hoogvliet/",
     "osmId": "node/10736740898",
     "osmTags": {
       "addr:city": "Hoogvliet Rotterdam",
@@ -15604,6 +16927,8 @@
     "lat": 51.7758813,
     "lng": 4.6224396,
     "description": null,
+    "phone": "+31 78 673 2526",
+    "website": "https://www.anicura.nl/klinieken/zuid-holland/sgravendeel/",
     "osmId": "node/10743098727",
     "osmTags": {
       "addr:city": "'s-Gravendeel",
@@ -15632,6 +16957,8 @@
     "lat": 51.5262237,
     "lng": 5.0234609,
     "description": null,
+    "phone": null,
+    "website": "https://www.vogelpraktijkdehorst.com/",
     "osmId": "node/10753629170",
     "osmTags": {
       "addr:city": "Riel",
@@ -15653,6 +16980,8 @@
     "lat": 52.2662451,
     "lng": 6.7814021,
     "description": null,
+    "phone": null,
+    "website": "https://dierenkliniekbeekzicht.nl/",
     "osmId": "node/11100002029",
     "osmTags": {
       "addr:city": "Hengelo",
@@ -15676,6 +17005,8 @@
     "lat": 52.3872743,
     "lng": 4.9055013,
     "description": null,
+    "phone": "+31 20 636 1743",
+    "website": "https://www.dierenkliniekdockland.com/",
     "osmId": "node/11144492659",
     "osmTags": {
       "amenity": "veterinary",
@@ -15698,6 +17029,8 @@
     "lat": 52.0406996,
     "lng": 5.0753591,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/11438173060",
     "osmTags": {
       "amenity": "veterinary",
@@ -15715,6 +17048,8 @@
     "lat": 52.387051,
     "lng": 4.8815241,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/11733722850",
     "osmTags": {
       "amenity": "veterinary",
@@ -15732,6 +17067,8 @@
     "lat": 52.380534,
     "lng": 4.8841898,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/11733818954",
     "osmTags": {
       "amenity": "veterinary",
@@ -15749,6 +17086,8 @@
     "lat": 52.294502,
     "lng": 4.6394899,
     "description": null,
+    "phone": "+31 252 673 547",
+    "website": null,
     "osmId": "node/11910235311",
     "osmTags": {
       "amenity": "veterinary",
@@ -15766,6 +17105,8 @@
     "lat": 51.9294017,
     "lng": 4.4672406,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/11987838554",
     "osmTags": {
       "amenity": "veterinary",
@@ -15782,6 +17123,8 @@
     "lat": 51.9118636,
     "lng": 4.5591275,
     "description": null,
+    "phone": "+31 10 451 3727",
+    "website": "https://dekattenpraktijk.nl",
     "osmId": "node/12017507076",
     "osmTags": {
       "addr:city": "Capelle aan den IJssel",
@@ -15806,6 +17149,8 @@
     "lat": 52.3758692,
     "lng": 4.8738176,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/12055417841",
     "osmTags": {
       "amenity": "veterinary",
@@ -15822,6 +17167,8 @@
     "lat": 52.6137538,
     "lng": 4.8076443,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/12067725978",
     "osmTags": {
       "addr:city": "Stompetoren",
@@ -15843,6 +17190,8 @@
     "lat": 52.136506,
     "lng": 4.4621297,
     "description": null,
+    "phone": "+31 71 561 3836",
+    "website": "https://www.keerhoeve.nl/",
     "osmId": "node/12163104694",
     "osmTags": {
       "amenity": "veterinary",
@@ -15864,6 +17213,8 @@
     "lat": 52.1636578,
     "lng": 4.4460316,
     "description": null,
+    "phone": "+31 71 531 5512",
+    "website": "https://dkleiden.nl/",
     "osmId": "node/12163137586",
     "osmTags": {
       "amenity": "veterinary",
@@ -15884,6 +17235,8 @@
     "lat": 53.1960471,
     "lng": 6.52015,
     "description": null,
+    "phone": null,
+    "website": "https://evidensiadierenziekenhuis.nl/dierenziekenhuizen/het-noorden/",
     "osmId": "node/12273504386",
     "osmTags": {
       "addr:city": "Eelderwolde",
@@ -15908,6 +17261,8 @@
     "lat": 52.3439424,
     "lng": 5.9827718,
     "description": null,
+    "phone": "+31 578 613121",
+    "website": "https://dierenkliniek-epe.nl/",
     "osmId": "node/12309641742",
     "osmTags": {
       "addr:city": "Epe",
@@ -15934,6 +17289,8 @@
     "lat": 52.2959617,
     "lng": 4.9882231,
     "description": null,
+    "phone": "+31 20 691 2347",
+    "website": "https://www.dierenartspraktijkgein.nl/",
     "osmId": "node/12339998967",
     "osmTags": {
       "addr:housenumber": "65",
@@ -15958,6 +17315,8 @@
     "lat": 52.7926498,
     "lng": 4.9175218,
     "description": null,
+    "phone": null,
+    "website": "https://www.paardenkliniekhollandskroon.nl",
     "osmId": "node/12374270751",
     "osmTags": {
       "addr:city": "Middenmeer",
@@ -15979,6 +17338,8 @@
     "lat": 52.3350107,
     "lng": 4.9421745,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/12468962254",
     "osmTags": {
       "amenity": "veterinary",
@@ -16000,6 +17361,8 @@
     "lat": 52.2498045,
     "lng": 6.2864602,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/12529593839",
     "osmTags": {
       "addr:city": "Bathmen",
@@ -16018,6 +17381,8 @@
     "lat": 51.8616095,
     "lng": 4.5196346,
     "description": null,
+    "phone": "+31 85 4877090",
+    "website": null,
     "osmId": "node/12532917002",
     "osmTags": {
       "addr:housenumber": "12",
@@ -16038,6 +17403,8 @@
     "lat": 52.3522934,
     "lng": 4.8568404,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/12565719901",
     "osmTags": {
       "amenity": "veterinary",
@@ -16054,6 +17421,8 @@
     "lat": 51.5997111,
     "lng": 5.7577469,
     "description": null,
+    "phone": "+31 492 351140",
+    "website": "https://dierenklinieklandhorst.nl/",
     "osmId": "node/12587420942",
     "osmTags": {
       "addr:city": "Landhorst",
@@ -16078,6 +17447,8 @@
     "lat": 52.1296006,
     "lng": 5.0374401,
     "description": null,
+    "phone": "+31 346 799 100",
+    "website": "https://www.dgcdelimes.nl/nl-nl/vestigingen/locatie-maarssenbroek",
     "osmId": "node/12688489690",
     "osmTags": {
       "addr:city": "Maarssen",
@@ -16102,6 +17473,8 @@
     "lat": 53.0634651,
     "lng": 6.4601203,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/12706094331",
     "osmTags": {
       "amenity": "veterinary",
@@ -16118,6 +17491,8 @@
     "lat": 52.3495542,
     "lng": 4.9378968,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/12730903211",
     "osmTags": {
       "amenity": "veterinary",
@@ -16134,6 +17509,8 @@
     "lat": 52.6010105,
     "lng": 6.3903917,
     "description": null,
+    "phone": "+31 523 656202",
+    "website": "https://dkbn.nl",
     "osmId": "node/12833921420",
     "osmTags": {
       "addr:city": "Balkbrug",
@@ -16161,6 +17538,8 @@
     "lat": 52.5844488,
     "lng": 6.2871255,
     "description": null,
+    "phone": "+31 523 656202",
+    "website": "https://dkbn.nl",
     "osmId": "node/13013662001",
     "osmTags": {
       "addr:housenumber": "26",
@@ -16187,6 +17566,8 @@
     "lat": 52.2811428,
     "lng": 5.9665544,
     "description": null,
+    "phone": "+31 578 574 427",
+    "website": "https://dapvaassen.nl/",
     "osmId": "node/13100749894",
     "osmTags": {
       "amenity": "veterinary",
@@ -16206,6 +17587,8 @@
     "lat": 51.8735932,
     "lng": 4.9482184,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/13112639843",
     "osmTags": {
       "amenity": "veterinary",
@@ -16223,6 +17606,8 @@
     "lat": 52.5108848,
     "lng": 5.0448034,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/13175419901",
     "osmTags": {
       "amenity": "veterinary",
@@ -16240,6 +17625,8 @@
     "lat": 51.9281795,
     "lng": 4.5083384,
     "description": null,
+    "phone": "+31 10 452 6695",
+    "website": "https://dierenkliniekkralingen.nl",
     "osmId": "node/13237617827",
     "osmTags": {
       "addr:city": "Rotterdam",
@@ -16266,6 +17653,8 @@
     "lat": 52.9546163,
     "lng": 5.9287012,
     "description": null,
+    "phone": "+31 513 728 001",
+    "website": "https://huisdierenkliniekheerenveen.com",
     "osmId": "node/13256588699",
     "osmTags": {
       "addr:city": "Heerenveen",
@@ -16289,6 +17678,8 @@
     "lat": 52.878824,
     "lng": 5.9880413,
     "description": null,
+    "phone": null,
+    "website": "https://dierenkliniekwolvega.nl",
     "osmId": "node/13328109475",
     "osmTags": {
       "amenity": "veterinary",
@@ -16306,6 +17697,8 @@
     "lat": 52.0998393,
     "lng": 5.0367734,
     "description": null,
+    "phone": "+31 30 227 1770",
+    "website": "https://030dierenartsen.nl",
     "osmId": "node/13328404001",
     "osmTags": {
       "addr:housenumber": "2",
@@ -16329,6 +17722,8 @@
     "lat": 50.9493754,
     "lng": 5.9717586,
     "description": null,
+    "phone": "+31 45 2001112",
+    "website": "https://www.dierenkliniek-brunssum.com/",
     "osmId": "node/13334319441",
     "osmTags": {
       "amenity": "veterinary",
@@ -16347,6 +17742,8 @@
     "lat": 52.0837778,
     "lng": 5.1821829,
     "description": null,
+    "phone": null,
+    "website": "https://diergeneeskunde.nl/telefoonnummers/",
     "osmId": "node/13363982433",
     "osmTags": {
       "addr:city": "Utrecht",
@@ -16370,6 +17767,8 @@
     "lat": 52.2100368,
     "lng": 6.2050907,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenarts-gorssel.nl/",
     "osmId": "node/13374638646",
     "osmTags": {
       "addr:city": "Gorssel",
@@ -16392,6 +17791,8 @@
     "lat": 52.0834578,
     "lng": 4.8989437,
     "description": null,
+    "phone": "+31 348 414 114",
+    "website": "https://kliniekvoordierenwoerden.nl",
     "osmId": "node/13381160850",
     "osmTags": {
       "addr:city": "Woerden",
@@ -16416,6 +17817,8 @@
     "lat": 52.3404133,
     "lng": 4.9557996,
     "description": null,
+    "phone": "+31 20 694 7578",
+    "website": "https://jhdierenklinieken.nl/locaties/diemen/",
     "osmId": "node/13605384301",
     "osmTags": {
       "addr:housenumber": "24",
@@ -16439,6 +17842,8 @@
     "lat": 51.9202429,
     "lng": 5.8331548,
     "description": null,
+    "phone": null,
+    "website": "https://www.deklompdierenartsen.nl/",
     "osmId": "node/13629841434",
     "osmTags": {
       "addr:city": "Elst",
@@ -16460,6 +17865,8 @@
     "lat": 51.6002835,
     "lng": 5.2262139,
     "description": null,
+    "phone": "+31 411 608 219",
+    "website": "https://diermedicentrum.nl",
     "osmId": "node/13699819526",
     "osmTags": {
       "addr:city": "Haaren",
@@ -16483,6 +17890,8 @@
     "lat": 52.3723172,
     "lng": 4.528887,
     "description": null,
+    "phone": null,
+    "website": "https://dierenkliniekzandvoort.nl",
     "osmId": "node/13807912809",
     "osmTags": {
       "addr:housenumber": "9a",
@@ -16504,6 +17913,8 @@
     "lat": 52.0416598,
     "lng": 6.1031963,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/13955859151",
     "osmTags": {
       "addr:housenumber": "7",
@@ -16523,6 +17934,8 @@
     "lat": 53.3237864,
     "lng": 6.0211785,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "way/44969070",
     "osmTags": {
       "addr:housenumber": "106",
@@ -16548,6 +17961,8 @@
     "lat": 51.8766874,
     "lng": 4.5230973,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "way/54091911",
     "osmTags": {
       "amenity": "veterinary",
@@ -16569,6 +17984,8 @@
     "lat": 51.9203439,
     "lng": 6.5699863,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "way/58119889",
     "osmTags": {
       "amenity": "veterinary",
@@ -16591,6 +18008,8 @@
     "lat": 52.0463326,
     "lng": 6.0985227,
     "description": null,
+    "phone": null,
+    "website": "https://www.kliniekdieren.nl/",
     "osmId": "way/114379041",
     "osmTags": {
       "amenity": "veterinary",
@@ -16614,6 +18033,8 @@
     "lat": 52.8278044,
     "lng": 6.8556657,
     "description": null,
+    "phone": null,
+    "website": "https://www.artsendier.nl",
     "osmId": "way/133956406",
     "osmTags": {
       "amenity": "veterinary",
@@ -16631,6 +18052,8 @@
     "lat": 52.0922934,
     "lng": 4.2774976,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "way/250686457",
     "osmTags": {
       "amenity": "veterinary",
@@ -16650,6 +18073,8 @@
     "lat": 52.181831,
     "lng": 5.4071632,
     "description": null,
+    "phone": "+31 33 455 3013",
+    "website": "https://www.dierenkliniekzielhorst.nl/",
     "osmId": "way/261891722",
     "osmTags": {
       "addr:city": "Amersfoort",
@@ -16679,6 +18104,8 @@
     "lat": 51.2274887,
     "lng": 3.7991515,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenklinieksasvangent.nl",
     "osmId": "way/269052892",
     "osmTags": {
       "amenity": "veterinary",
@@ -16701,6 +18128,8 @@
     "lat": 51.7146095,
     "lng": 5.3616956,
     "description": null,
+    "phone": "+31 73 522 0009",
+    "website": "https://www.dierenkliniekrosmalencentrum.nl/",
     "osmId": "way/269228876",
     "osmTags": {
       "amenity": "veterinary",
@@ -16725,6 +18154,8 @@
     "lat": 53.0011455,
     "lng": 6.5409139,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenartsnijhuis.nl",
     "osmId": "way/270952313",
     "osmTags": {
       "amenity": "veterinary",
@@ -16747,6 +18178,8 @@
     "lat": 53.335797,
     "lng": 6.5051757,
     "description": null,
+    "phone": "+31 595 441 706",
+    "website": "https://www.dapnwg.nl/",
     "osmId": "way/271235726",
     "osmTags": {
       "addr:city": "Winsum",
@@ -16778,6 +18211,8 @@
     "lat": 53.0129714,
     "lng": 6.5759482,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "way/272360178",
     "osmTags": {
       "amenity": "veterinary",
@@ -16799,6 +18234,8 @@
     "lat": 51.7500196,
     "lng": 5.2421861,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "way/273148620",
     "osmTags": {
       "amenity": "veterinary",
@@ -16820,6 +18257,8 @@
     "lat": 51.8489017,
     "lng": 4.9731132,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "way/273827078",
     "osmTags": {
       "amenity": "veterinary",
@@ -16840,6 +18279,8 @@
     "lat": 51.8772758,
     "lng": 4.5125701,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenambulance.nl",
     "osmId": "way/274351780",
     "osmTags": {
       "amenity": "veterinary",
@@ -16862,6 +18303,8 @@
     "lat": 53.1677904,
     "lng": 6.613874,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "way/276710671",
     "osmTags": {
       "amenity": "veterinary",
@@ -16882,6 +18325,8 @@
     "lat": 52.3237214,
     "lng": 5.5334948,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "way/280831494",
     "osmTags": {
       "amenity": "veterinary",
@@ -16903,6 +18348,8 @@
     "lat": 51.9381453,
     "lng": 6.030936,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "way/280895831",
     "osmTags": {
       "amenity": "veterinary",
@@ -16924,6 +18371,8 @@
     "lat": 52.8934857,
     "lng": 6.1461718,
     "description": null,
+    "phone": "+31 561 431 999",
+    "website": "https://www.dierenartsencentrum.nl/",
     "osmId": "way/282308185",
     "osmTags": {
       "amenity": "veterinary",
@@ -16948,6 +18397,8 @@
     "lat": 52.1974784,
     "lng": 4.4718276,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "way/282855697",
     "osmTags": {
       "amenity": "veterinary",
@@ -16968,6 +18419,8 @@
     "lat": 51.4908626,
     "lng": 3.9065144,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenkliniekgoes.nl/",
     "osmId": "way/284986360",
     "osmTags": {
       "amenity": "veterinary",
@@ -16994,6 +18447,8 @@
     "lat": 52.1799322,
     "lng": 5.0020374,
     "description": null,
+    "phone": "+31 346 261 415",
+    "website": null,
     "osmId": "way/285329586",
     "osmTags": {
       "addr:housenumber": "96",
@@ -17019,6 +18474,8 @@
     "lat": 52.1576678,
     "lng": 4.4473852,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "way/285755782",
     "osmTags": {
       "amenity": "veterinary",
@@ -17040,6 +18497,8 @@
     "lat": 51.9937736,
     "lng": 5.7046746,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "way/297513074",
     "osmTags": {
       "addr:city": "Wageningen",
@@ -17065,6 +18524,8 @@
     "lat": 18.0313927,
     "lng": -63.0700231,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "way/368527254",
     "osmTags": {
       "addr:city": "Phillipsburg",
@@ -17087,6 +18548,8 @@
     "lat": 12.1619678,
     "lng": -68.2603454,
     "description": null,
+    "phone": "+599 7174255",
+    "website": null,
     "osmId": "way/375699841",
     "osmTags": {
       "addr:housenumber": "24A",
@@ -17108,6 +18571,8 @@
     "lat": 12.1253302,
     "lng": -68.8822699,
     "description": null,
+    "phone": "+599 9 465 5182",
+    "website": null,
     "osmId": "way/376300969",
     "osmTags": {
       "amenity": "veterinary",
@@ -17127,6 +18592,8 @@
     "lat": 51.8211183,
     "lng": 4.4425398,
     "description": null,
+    "phone": null,
+    "website": "https://www.anicura.nl/klinieken/oud-beijerland/oud-beijerland/",
     "osmId": "way/434728640",
     "osmTags": {
       "addr:city": "Oud-Beijerland",
@@ -17153,6 +18620,8 @@
     "lat": 12.1520885,
     "lng": -68.8651172,
     "description": null,
+    "phone": "+5999 737 2185",
+    "website": null,
     "osmId": "way/467500284",
     "osmTags": {
       "addr:housenumber": "z/n",
@@ -17173,6 +18642,8 @@
     "lat": 51.6890557,
     "lng": 5.1458463,
     "description": null,
+    "phone": null,
+    "website": "https://www.dierenkliniekdrunen.nl",
     "osmId": "way/468560655",
     "osmTags": {
       "amenity": "veterinary",
@@ -17195,6 +18666,8 @@
     "lat": 53.2118632,
     "lng": 5.7879639,
     "description": null,
+    "phone": "+31 58 212 3891",
+    "website": "https://www.anicura.nl/klinieken/friesland/leeuwarden/",
     "osmId": "way/680705751",
     "osmTags": {
       "addr:city": "Leeuwarden",
@@ -17223,6 +18696,8 @@
     "lat": 53.1780458,
     "lng": 5.7960366,
     "description": null,
+    "phone": null,
+    "website": "https://www.elkedierenarts.nl/arts/goutum",
     "osmId": "way/771030220",
     "osmTags": {
       "amenity": "veterinary",
@@ -17240,6 +18715,8 @@
     "lat": 12.1032967,
     "lng": -68.8892374,
     "description": null,
+    "phone": "+5999 465 1515",
+    "website": "https://www.clausclinic.com/",
     "osmId": "way/777506296",
     "osmTags": {
       "addr:housenumber": "7",
@@ -17263,6 +18740,8 @@
     "lat": 12.5081417,
     "lng": -70.0028729,
     "description": null,
+    "phone": "+297 582 1720",
+    "website": "https://www.arubavets.com",
     "osmId": "way/792712137",
     "osmTags": {
       "addr:city": "Oranjestad (city)",

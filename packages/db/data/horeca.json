@@ -9,6 +9,8 @@
     "lat": 51.8200605,
     "lng": 4.1289973,
     "description": null,
+    "phone": "+31 85 087 6079",
+    "website": "https://heerenaandevesting.nl/",
     "osmId": "node/1295886795",
     "osmTags": {
       "addr:city": "Hellevoetsluis",
@@ -36,6 +38,8 @@
     "lat": 52.9940527,
     "lng": 6.5621208,
     "description": null,
+    "phone": null,
+    "website": "https://restaurantporto.metro.rest",
     "osmId": "node/2122451181",
     "osmTags": {
       "addr:city": "Assen",
@@ -74,6 +78,8 @@
     "lat": 52.1545626,
     "lng": 5.388865,
     "description": null,
+    "phone": "+31 6 8344 7656",
+    "website": "https://cafestu.nl",
     "osmId": "node/2672774927",
     "osmTags": {
       "addr:city": "Amersfoort",
@@ -123,6 +129,8 @@
     "lat": 52.157227,
     "lng": 5.2925108,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "node/2750104774",
     "osmTags": {
       "addr:city": "Soest",
@@ -153,6 +161,8 @@
     "lat": 53.0363193,
     "lng": 6.6641554,
     "description": null,
+    "phone": "+31 592 231 385",
+    "website": "https://www.pannenkoekenboerderij.nl",
     "osmId": "node/2773054096",
     "osmTags": {
       "addr:city": "Gasteren",
@@ -189,6 +199,8 @@
     "lat": 52.1600744,
     "lng": 4.488723,
     "description": null,
+    "phone": "+31 71 532 7646",
+    "website": "https://stadsbrouwhuis.nl",
     "osmId": "node/2774026430",
     "osmTags": {
       "addr:city": "Leiden",
@@ -224,6 +236,8 @@
     "lat": 51.7307872,
     "lng": 3.7716281,
     "description": null,
+    "phone": null,
+    "website": "https://www.eetcafesimpel.nl/",
     "osmId": "node/2807324690",
     "osmTags": {
       "addr:city": "Renesse",
@@ -248,6 +262,8 @@
     "lat": 52.3704157,
     "lng": 4.851612,
     "description": null,
+    "phone": null,
+    "website": "https://whitelabelcoffee.nl",
     "osmId": "node/2811984970",
     "osmTags": {
       "addr:city": "Amsterdam",
@@ -295,6 +311,8 @@
     "lat": 52.35523,
     "lng": 4.9290902,
     "description": null,
+    "phone": "+31 6 17273170",
+    "website": "https://moche.nl/",
     "osmId": "node/2829436740",
     "osmTags": {
       "addr:city": "Amsterdam",
@@ -332,6 +350,8 @@
     "lat": 52.3505307,
     "lng": 5.984413,
     "description": null,
+    "phone": "+31 578 222002",
+    "website": "https://www.vanoudsepe.nl/",
     "osmId": "node/2853564739",
     "osmTags": {
       "addr:city": "Epe",
@@ -360,6 +380,8 @@
     "lat": 51.8999499,
     "lng": 5.4360077,
     "description": null,
+    "phone": "+31 344 622 020",
+    "website": "https://www.hoteltiel.nl",
     "osmId": "node/3018761551",
     "osmTags": {
       "addr:city": "Tiel",
@@ -391,6 +413,8 @@
     "lat": 50.8463439,
     "lng": 5.69195,
     "description": null,
+    "phone": "+31 43 311 6213",
+    "website": "https://www.wijmakenkoffie.nl/",
     "osmId": "node/4471342790",
     "osmTags": {
       "amenity": "cafe",
@@ -416,6 +440,8 @@
     "lat": 50.8566653,
     "lng": 5.6913617,
     "description": null,
+    "phone": "+31 43 321 4080",
+    "website": "https://lumiere.nl/restaurant",
     "osmId": "node/5718108330",
     "osmTags": {
       "amenity": "restaurant",
@@ -455,6 +481,8 @@
     "lat": 52.3638845,
     "lng": 4.9360762,
     "description": null,
+    "phone": "+31 20 337 9897",
+    "website": "https://lafucina.nl/la-fucina-javastraat/",
     "osmId": "node/8338843317",
     "osmTags": {
       "addr:city": "Amsterdam",
@@ -497,6 +525,8 @@
     "lat": 51.8841193,
     "lng": 5.2876833,
     "description": null,
+    "phone": "+31 345 573 311",
+    "website": "https://restaurantlocals.nl/",
     "osmId": "node/9646660615",
     "osmTags": {
       "addr:city": "Geldermalsen",
@@ -526,6 +556,8 @@
     "lat": 51.8832721,
     "lng": 5.1020393,
     "description": null,
+    "phone": "+31 345 638080",
+    "website": "https://www.brasserie-dirk.nl",
     "osmId": "node/13059547663",
     "osmTags": {
       "addr:city": "Asperen",
@@ -554,6 +586,8 @@
     "lat": 52.2352347,
     "lng": 4.420368,
     "description": null,
+    "phone": "+31 71 3617891",
+    "website": "https://briesnoordwijk.nl",
     "osmId": "node/13204517943",
     "osmTags": {
       "addr:city": "Noordwijk",

@@ -31,7 +31,7 @@ import { randomUUID } from 'crypto';
 import { existsSync, readFileSync } from 'node:fs';
 import { Pool } from 'pg';
 import sharp from 'sharp';
-import { uploadObject } from '@devrijehond/s3';
+import { objectExists, publicUrl, uploadObject } from '@devrijehond/s3';
 import { db } from './src/client';
 import { tallyVotesLike } from './seed-helpers';
 
@@ -79,6 +79,8 @@ type RawPoi = {
   lat: number;
   lng: number;
   description: string | null;
+  phone?: string | null;
+  website?: string | null;
   osmId?: string;
   osmTags?: Record<string, string>;
   geometry?: number[][]; // POIs have none; present for union compatibility
@@ -336,7 +338,8 @@ async function streetViewPhotoForSpot(
   spotId: string,
   lat: number,
   lng: number,
-): Promise<string | null> {
+  allowNewFetch: boolean,
+): Promise<{ url: string; reused: boolean } | null> {
   if (!MAPS_KEY) {
     if (!warnedNoStreetviewKey) {
       console.warn('[seed] GOOGLE_STATIC_MAPS_API_KEY not set — skipping Street View fallbacks');
@@ -344,7 +347,16 @@ async function streetViewPhotoForSpot(
     }
     return null;
   }
+  // Deterministic key per coordinate so a re-seed reuses the stored image and
+  // never re-bills Google for a location we already fetched.
+  const key = `streetview/${lat.toFixed(5)}_${lng.toFixed(5)}.jpg`;
   try {
+    if (await objectExists(key)) {
+      return { url: publicUrl(key), reused: true };
+    }
+    // Nothing stored yet and we're over the new-fetch cap: skip the Google call.
+    if (!allowNewFetch) return null;
+
     // 1. Coverage check (free, doesn't count against quota).
     const metaUrl = new URL('https://maps.googleapis.com/maps/api/streetview/metadata');
     metaUrl.searchParams.set('location', `${lat},${lng}`);
@@ -371,9 +383,8 @@ async function streetViewPhotoForSpot(
 
     const raw = Buffer.from(await res.arrayBuffer());
     const processed = await sharp(raw).jpeg({ quality: 82, mozjpeg: true }).toBuffer();
-    const key = `spots/seed/streetview-${spotId}.jpg`;
-    const { publicUrl } = await uploadObject(key, processed, 'image/jpeg');
-    return publicUrl;
+    const uploaded = await uploadObject(key, processed, 'image/jpeg');
+    return { url: uploaded.publicUrl, reused: false };
   } catch (err) {
     console.warn(`[seed] Street View fallback skipped for ${spotId}: ${String(err)}`);
     return null;
@@ -391,9 +402,13 @@ async function staticMapForSpot(
   lat: number,
   lng: number,
   type: 'POI' | 'REGION',
+  allowNewFetch: boolean,
   geometry?: number[][],
-): Promise<string | null> {
+): Promise<{ url: string; reused: boolean } | null> {
   if (!MAPS_KEY) return null;
+  // Deterministic key per coordinate so a re-seed reuses the stored image
+  // instead of re-billing Google for the same location.
+  const key = `staticmap/${lat.toFixed(5)}_${lng.toFixed(5)}.jpg`;
   const center = `${lat.toFixed(6)},${lng.toFixed(6)}`;
   const u = new URL('https://maps.googleapis.com/maps/api/staticmap');
   u.searchParams.set('center', center);
@@ -411,13 +426,17 @@ async function staticMapForSpot(
   }
   u.searchParams.set('key', MAPS_KEY);
   try {
+    if (await objectExists(key)) {
+      return { url: publicUrl(key), reused: true };
+    }
+    // Nothing stored yet and we're over the new-fetch cap: skip the Google call.
+    if (!allowNewFetch) return null;
     const res = await fetch(u.toString(), { signal: AbortSignal.timeout(30_000) });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const raw = Buffer.from(await res.arrayBuffer());
     const processed = await sharp(raw).jpeg({ quality: 82, mozjpeg: true }).toBuffer();
-    const key = `spots/seed/staticmap-${spotId}.jpg`;
-    const { publicUrl } = await uploadObject(key, processed, 'image/jpeg');
-    return publicUrl;
+    const uploaded = await uploadObject(key, processed, 'image/jpeg');
+    return { url: uploaded.publicUrl, reused: false };
   } catch (err) {
     console.warn(`[seed] static map fallback skipped for ${spotId}: ${String(err)}`);
     return null;
@@ -508,6 +527,7 @@ interface SpotSeed {
   votes?: VoteSpec[];
   reviews?: ReviewSpec[];
   address?: string;
+  phone?: string;
   website?: string;
   regionRadiusM?: number; // for REGION polygon size
   geometry?: number[][]; // real [lng,lat] polygon ring; falls back to a circle
@@ -526,6 +546,8 @@ const RESEARCH: {
   description: string;
   radiusM?: number;
   amenities?: string[];
+  phone?: string | null;
+  website?: string | null;
   raw: RawLosloop | RawPoi;
 }[] = [
   ...LOSLOOP.map((r) => {
@@ -556,6 +578,8 @@ const RESEARCH: {
         lng: r.lng,
         description: r.description ?? descFallback,
         amenities: AMENITIES_BY_CATEGORY[category],
+        phone: r.phone ?? null,
+        website: r.website ?? null,
         raw: r,
       })),
     ),
@@ -606,6 +630,8 @@ function buildSpots(): SpotSeed[] {
       votes,
       reviews: [],
       amenities: r.amenities,
+      phone: r.phone ?? undefined,
+      website: r.website ?? undefined,
       rawData: r.raw,
       geometry: isRegion ? r.raw.geometry : undefined,
       regionRadiusM: isRegion ? (r.radiusM ?? 400) : undefined,
@@ -742,6 +768,7 @@ async function main() {
         lat: s.lat,
         lng: s.lng,
         address: s.address ?? null,
+        phone: s.phone ?? null,
         website: s.website ?? null,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         rawData: (s.rawData ?? undefined) as any,
@@ -793,33 +820,36 @@ async function main() {
 
     // No real photo for this spot: try a Street View ground photo at its
     // coordinates: Street View where there's panorama coverage, else a static
-    // map. Capped to FALLBACK_IMAGE_LIMIT spots around Amsterdam to bound the
-    // Google API spend while we evaluate it.
-    if (
-      photosCreated === 0 &&
-      s.lat != null &&
-      s.lng != null &&
-      fallbackImageCount < FALLBACK_IMAGE_LIMIT
-    ) {
-      let url = await streetViewPhotoForSpot(spot.id, s.lat, s.lng);
+    // map. The FALLBACK_IMAGE_LIMIT only bounds NEW Google fetches; an image we
+    // already stored at this location (deterministic S3 key) is reused for free
+    // and doesn't count against the cap. So we always attempt when there's no
+    // real photo, but only allow a fresh Google call while under the cap.
+    if (photosCreated === 0 && s.lat != null && s.lng != null) {
+      const underCap = fallbackImageCount < FALLBACK_IMAGE_LIMIT;
+      let result = await streetViewPhotoForSpot(spot.id, s.lat, s.lng, underCap);
       let source = 'streetview';
-      if (!url) {
-        url = await staticMapForSpot(spot.id, s.lat, s.lng, cat.type, s.geometry);
+      if (!result) {
+        result = await staticMapForSpot(spot.id, s.lat, s.lng, cat.type, underCap, s.geometry);
         source = 'static-map';
       }
-      if (url) {
+      if (result) {
         await db.spotPhoto.create({
           data: {
             spotId: spot.id,
-            url,
+            url: result.url,
             uploadedById: submitterOf(s),
             status: 'ACTIVE',
             sortOrder: 0,
           },
         });
         totalPhotos++;
-        fallbackImageCount++;
-        fallbackImageLog.push({ name: s.name, type: cat.type, source });
+        // Only a genuine new Google fetch counts against the cap; reuse is free.
+        if (!result.reused) fallbackImageCount++;
+        fallbackImageLog.push({
+          name: s.name,
+          type: cat.type,
+          source: result.reused ? `${source}-reused` : source,
+        });
       }
     }
 
@@ -963,7 +993,7 @@ async function main() {
 
   // Coordinate-fallback breakdown: which Amsterdam spots got which image source.
   if (fallbackImageLog.length > 0) {
-    const sv = fallbackImageLog.filter((f) => f.source === 'streetview').length;
+    const sv = fallbackImageLog.filter((f) => f.source.startsWith('streetview')).length;
     const sm = fallbackImageLog.length - sv;
     console.log(
       `\nCoordinate fallbacks (nationwide, cap ${FALLBACK_IMAGE_LIMIT}): ` +

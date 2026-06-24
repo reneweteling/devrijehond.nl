@@ -22,6 +22,8 @@ type RawPoi = {
   lat: number;
   lng: number;
   description: string | null;
+  phone: string | null;
+  website: string | null;
 };
 
 type Retailer = {
@@ -50,6 +52,8 @@ async function fetchJson(path: string): Promise<Retailer[]> {
 function toPoi(r: Retailer, urlSegment: string): RawPoi | null {
   if (typeof r.latitude !== 'number' || typeof r.longitude !== 'number') return null;
   const addr = [r.street].filter(Boolean).join(' ') || null;
+  // The Ranzijn store page is the closest thing to a per-location website.
+  const storeUrl = `https://www.ranzijn.nl/winkels/${r.url_key}`;
   return {
     source: 'ranzijn',
     sourceUrl: `https://www.ranzijn.nl/${urlSegment}/${r.url_key}`,
@@ -60,6 +64,8 @@ function toPoi(r: Retailer, urlSegment: string): RawPoi | null {
     lat: r.latitude,
     lng: r.longitude,
     description: null,
+    phone: r.phone ?? null,
+    website: storeUrl,
   };
 }
 

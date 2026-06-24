@@ -4,10 +4,11 @@
  * Exports:
  *   - `uploadObject`   , server-side PUT of (already-processed) bytes to S3.
  *   - `createUploadUrl`, presigned PUT URL for direct browser/app uploads.
+ *   - `objectExists`   , HEAD-check whether an object key is already stored.
  *   - `publicUrl`      , resolve a stored object key to its public URL.
  */
 
-import { PutObjectCommand } from '@aws-sdk/client-s3';
+import { HeadObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { getS3, bucketName, publicBaseUrl } from './client';
 
@@ -71,6 +72,30 @@ export async function createUploadUrl({
   });
   const uploadUrl = await getSignedUrl(getS3(), command, { expiresIn });
   return { uploadUrl, key, publicUrl: publicUrl(key) };
+}
+
+/**
+ * HEAD-check whether an object already exists in the bucket. Returns true when
+ * the key is present, false on a 404 / NotFound. Lets callers reuse an existing
+ * object (e.g. a cached Street View image) instead of re-fetching/re-uploading.
+ * Other errors are re-thrown so a genuine S3 failure isn't masked as "missing".
+ */
+export async function objectExists(key: string): Promise<boolean> {
+  try {
+    await getS3().send(
+      new HeadObjectCommand({
+        Bucket: bucketName(),
+        Key: key.replace(/^\/+/, ''),
+      }),
+    );
+    return true;
+  } catch (err) {
+    const e = err as { name?: string; $metadata?: { httpStatusCode?: number } };
+    if (e.name === 'NotFound' || e.$metadata?.httpStatusCode === 404) {
+      return false;
+    }
+    throw err;
+  }
 }
 
 /** Resolve a stored object key to its public (CDN or S3) URL. */

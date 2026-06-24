@@ -8,7 +8,9 @@
     "address": "Omval 55",
     "lat": 52.622148,
     "lng": 4.774686,
-    "description": null
+    "description": null,
+    "phone": "072 5402176",
+    "website": "https://www.ranzijn.nl/winkels/alkmaar"
   },
   {
     "source": "ranzijn",
@@ -19,7 +21,9 @@
     "address": "Aalsmeerderweg 436",
     "lat": 52.287661,
     "lng": 4.819252,
-    "description": null
+    "description": null,
+    "phone": "0297 346721",
+    "website": "https://www.ranzijn.nl/winkels/aalsmeer"
   },
   {
     "source": "ranzijn",
@@ -30,7 +34,9 @@
     "address": "Bostonweg 70",
     "lat": 52.394016,
     "lng": 5.272969,
-    "description": null
+    "description": null,
+    "phone": "036 5370337",
+    "website": "https://www.ranzijn.nl/winkels/almere"
   },
   {
     "source": "ranzijn",
@@ -41,7 +47,9 @@
     "address": "De Zonnecel 15",
     "lat": 52.168696,
     "lng": 5.426137,
-    "description": null
+    "description": null,
+    "phone": "033 4726040",
+    "website": "https://www.ranzijn.nl/winkels/amersfoort"
   },
   {
     "source": "ranzijn",
@@ -52,7 +60,9 @@
     "address": "Spaklerweg 44c",
     "lat": 52.336987,
     "lng": 4.92168,
-    "description": null
+    "description": null,
+    "phone": "020 8944294",
+    "website": "https://www.ranzijn.nl/winkels/amsterdam"
   },
   {
     "source": "ranzijn",
@@ -63,7 +73,9 @@
     "address": "Universiteitsweg 2",
     "lat": 52.101929,
     "lng": 5.18414,
-    "description": null
+    "description": null,
+    "phone": "030 2203019",
+    "website": "https://www.ranzijn.nl/winkels/de-bilt"
   },
   {
     "source": "ranzijn",
@@ -74,7 +86,9 @@
     "address": "Rijksstraatweg 11",
     "lat": 52.005259,
     "lng": 4.386877,
-    "description": null
+    "description": null,
+    "phone": "015 2570625",
+    "website": "https://www.ranzijn.nl/winkels/delft"
   },
   {
     "source": "ranzijn",
@@ -85,7 +99,9 @@
     "address": "Dr. Lelylaan 2",
     "lat": 52.28849,
     "lng": 5.24099,
-    "description": null
+    "description": null,
+    "phone": "035-5250221",
+    "website": "https://www.ranzijn.nl/winkels/huizen"
   },
   {
     "source": "ranzijn",
@@ -96,7 +112,9 @@
     "address": "Willem-Alexanderlaan 15",
     "lat": 52.151949,
     "lng": 4.532494,
-    "description": null
+    "description": null,
+    "phone": "071 5812385",
+    "website": "https://www.ranzijn.nl/winkels/leiderdorp"
   },
   {
     "source": "ranzijn",
@@ -107,7 +125,9 @@
     "address": "IJweg 1336",
     "lat": 52.294505,
     "lng": 4.6395,
-    "description": null
+    "description": null,
+    "phone": "0252 673547",
+    "website": "https://www.ranzijn.nl/winkels/nieuw-vennep"
   },
   {
     "source": "ranzijn",
@@ -118,7 +138,9 @@
     "address": "Zonnedauw 1",
     "lat": 53.021075,
     "lng": 5.665314,
-    "description": null
+    "description": null,
+    "phone": "0515 423474",
+    "website": "https://www.ranzijn.nl/winkels/sneek"
   },
   {
     "source": "ranzijn",
@@ -129,7 +151,9 @@
     "address": "Haarweg 2c",
     "lat": 51.847546,
     "lng": 5.014531,
-    "description": null
+    "description": null,
+    "phone": "0183 646310",
+    "website": "https://www.ranzijn.nl/winkels/spijk"
   },
   {
     "source": "ranzijn",
@@ -140,7 +164,9 @@
     "address": "Rijksweg 287",
     "lat": 52.441048,
     "lng": 4.653904,
-    "description": null
+    "description": null,
+    "phone": "023 5376190",
+    "website": "https://www.ranzijn.nl/winkels/velserbroek"
   },
   {
     "source": "ranzijn",
@@ -151,6 +177,8 @@
     "address": "Kleine Tocht 19",
     "lat": 52.431427,
     "lng": 4.810522,
-    "description": null
+    "description": null,
+    "phone": "075 6178244",
+    "website": "https://www.ranzijn.nl/winkels/zaandam"
   }
 ]

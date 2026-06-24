@@ -9,6 +9,8 @@
     "lat": 52.7029375,
     "lng": 6.2316901,
     "description": null,
+    "phone": null,
+    "website": "https://blootkompas.nl/locaties/naaktstrand-engelgaarde/",
     "osmId": "node/3854615585",
     "osmTags": {
       "access": "yes",
@@ -41,6 +43,8 @@
     "lat": 51.665673,
     "lng": 3.7160443,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "way/141582474",
     "osmTags": {
       "dog": "yes",
@@ -57,6 +61,8 @@
     "lat": 51.9681765,
     "lng": 4.5115158,
     "description": "Hondenstrand",
+    "phone": null,
+    "website": null,
     "osmId": "way/457979789",
     "osmTags": {
       "animal": "swimming",
@@ -77,6 +83,8 @@
     "lat": 52.0068167,
     "lng": 4.193952,
     "description": null,
+    "phone": null,
+    "website": null,
     "osmId": "way/621241908",
     "osmTags": {
       "dog": "yes",
@@ -93,6 +101,8 @@
     "lat": 52.0810523,
     "lng": 4.2345776,
     "description": "Strandslag 8, Den Haag. 100 m links van golfbreker 34 tot golfbreker 35.",
+    "phone": null,
+    "website": null,
     "osmId": "way/872993385",
     "osmTags": {
       "description": "Strandslag 8, Den Haag. 100 m links van golfbreker 34 tot golfbreker 35.",
@@ -116,6 +126,8 @@
     "lat": 51.8580717,
     "lng": 4.6065575,
     "description": "Er staat hier een bord hondenstrand.",
+    "phone": null,
+    "website": null,
     "osmId": "way/1410172412",
     "osmTags": {
       "description": "Er staat hier een bord hondenstrand.",
