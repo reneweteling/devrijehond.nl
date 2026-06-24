@@ -28,7 +28,20 @@ enum AuthService {
 
     // MARK: - Apple
 
-    /// Exchange the Apple identityToken (from SignInWithAppleButton) for a bearer.
+    @MainActor private static let appleController = AppleSignInController()
+
+    /// Run Sign in with Apple via our custom button and exchange for a bearer.
+    @MainActor
+    static func signInWithApple() async throws -> AuthToken {
+        do {
+            let auth = try await appleController.signIn()
+            return try await exchangeApple(auth)
+        } catch let e as ASAuthorizationError where e.code == .canceled {
+            throw AuthError.cancelled
+        }
+    }
+
+    /// Exchange the Apple identityToken for a bearer.
     static func exchangeApple(_ authorization: ASAuthorization) async throws -> AuthToken {
         guard
             let credential = authorization.credential as? ASAuthorizationAppleIDCredential,

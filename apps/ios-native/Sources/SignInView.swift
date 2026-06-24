@@ -45,12 +45,13 @@ struct SignInView: View {
                             .multilineTextAlignment(.center)
                     }
 
-                    Text("Door in te loggen ga je akkoord met onze voorwaarden en privacybeleid.")
-                        .font(.system(size: 11, design: .rounded))
-                        .foregroundStyle(Brand.ink2.opacity(0.8))
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, DVH.s6)
-                        .padding(.top, DVH.s1)
+                    Text("Door in te loggen ga je akkoord met onze [voorwaarden](https://devrijehond.nl/terms) en [privacybeleid](https://devrijehond.nl/privacy).")
+                    .font(.system(size: 11, design: .rounded))
+                    .foregroundStyle(Brand.ink2.opacity(0.8))
+                    .tint(Brand.moss)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, DVH.s6)
+                    .padding(.top, DVH.s1)
                 }
                 .padding(.horizontal, DVH.s5)
                 .padding(.top, dismissable ? DVH.s8 : DVH.s6)
@@ -78,16 +79,10 @@ struct SignInView: View {
 
     private var hero: some View {
         VStack(spacing: DVH.s4) {
-            ZStack {
-                Circle().fill(
-                    LinearGradient(colors: [Brand.moss, Brand.mossDark],
-                                   startPoint: .topLeading, endPoint: .bottomTrailing))
-                    .frame(width: 92, height: 92)
-                    .shadow(color: Brand.moss.opacity(0.35), radius: 14, y: 6)
-                Image(systemName: "pawprint.fill")
-                    .font(.system(size: 40, weight: .bold))
-                    .foregroundStyle(.white)
-            }
+            Image("Logo")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 180, height: 150)
             VStack(spacing: DVH.s2) {
                 Text("Welkom")
                     .font(.dvhDisplay(30)).foregroundStyle(Brand.ink)
@@ -103,20 +98,24 @@ struct SignInView: View {
 
     private var providerButtons: some View {
         VStack(spacing: DVH.s3) {
-            SignInWithAppleButton(.continue) { request in
-                request.requestedScopes = [.fullName, .email]
-            } onCompletion: { result in
-                handleApple(result)
+            // Custom Apple button (bigger logo + Dutch label) over the native flow.
+            Button { handleApple() } label: {
+                HStack(spacing: DVH.s2) {
+                    Image(systemName: "applelogo").font(.system(size: 22, weight: .medium))
+                    Text("Doorgaan met Apple").font(.dvhHeadline)
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: DVH.controlHeight)
+                .background(Color.black, in: RoundedRectangle(cornerRadius: DVH.rMd))
+                .foregroundStyle(.white)
             }
-            .signInWithAppleButtonStyle(.black)
-            .frame(height: DVH.controlHeight)
-            .clipShape(RoundedRectangle(cornerRadius: DVH.rMd))
+            .buttonStyle(.plain)
             .disabled(working)
 
             if AuthService.googleAvailable {
                 Button { handleGoogle() } label: {
                     HStack(spacing: DVH.s2) {
-                        GoogleGlyph(size: 18)
+                        GoogleGlyph(size: 20)
                         Text("Verder met Google").font(.dvhHeadline)
                     }
                 }
@@ -135,12 +134,23 @@ struct SignInView: View {
 
     private var magicLinkForm: some View {
         VStack(spacing: DVH.s3) {
-            TextField("jij@email.nl", text: $email)
-                .textFieldStyle(.dvh)
-                .textContentType(.emailAddress)
-                .keyboardType(.emailAddress)
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
+            ZStack(alignment: .leading) {
+                if email.isEmpty {
+                    Text("jij@email.nl").foregroundStyle(Brand.ink2)
+                }
+                TextField("", text: $email)
+                    .foregroundStyle(Brand.ink)
+                    .tint(Brand.moss)
+                    .textContentType(.emailAddress)
+                    .keyboardType(.emailAddress)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+            }
+            .font(.dvhBody)
+            .padding(.horizontal, DVH.s4)
+            .frame(height: DVH.controlHeight)
+            .background(Brand.cream, in: RoundedRectangle(cornerRadius: DVH.rMd))
+            .overlay(RoundedRectangle(cornerRadius: DVH.rMd).strokeBorder(Brand.ink.opacity(0.12)))
 
             Button { sendMagicLink() } label: {
                 HStack(spacing: DVH.s2) {
@@ -173,23 +183,19 @@ struct SignInView: View {
 
     // MARK: - Actions
 
-    private func handleApple(_ result: Result<ASAuthorization, Error>) {
+    private func handleApple() {
         error = nil
-        switch result {
-        case .success(let auth):
-            working = true
-            Task {
-                do {
-                    let t = try await AuthService.exchangeApple(auth)
-                    session.signIn(token: t.token, expiresAt: t.expiresAt)
-                } catch {
-                    self.error = (error as? LocalizedError)?.errorDescription ?? "Inloggen mislukt."
-                }
-                working = false
+        working = true
+        Task {
+            do {
+                let t = try await AuthService.signInWithApple()
+                session.signIn(token: t.token, expiresAt: t.expiresAt)
+            } catch AuthService.AuthError.cancelled {
+                // user backed out
+            } catch {
+                self.error = (error as? LocalizedError)?.errorDescription ?? "Apple inloggen mislukt."
             }
-        case .failure(let err):
-            if (err as? ASAuthorizationError)?.code == .canceled { return }
-            error = "Apple inloggen mislukt."
+            working = false
         }
     }
 
@@ -229,22 +235,13 @@ struct SignInView: View {
 
 /// A small, recognizable four-color Google "G" built from SwiftUI shapes (no
 /// asset / SVG dependency), matching the Expo app's hand-built mark.
+/// The official Google "G" (four-colour SVG asset in the catalog).
 struct GoogleGlyph: View {
     var size: CGFloat = 18
     var body: some View {
-        ZStack {
-            Circle().trim(from: 0.0, to: 0.25).stroke(Color(hex: 0xEA4335), lineWidth: size * 0.28)
-                .rotationEffect(.degrees(-45 - 90))
-            Circle().trim(from: 0.0, to: 0.25).stroke(Color(hex: 0xFBBC05), lineWidth: size * 0.28)
-                .rotationEffect(.degrees(-45 + 0))
-            Circle().trim(from: 0.0, to: 0.25).stroke(Color(hex: 0x34A853), lineWidth: size * 0.28)
-                .rotationEffect(.degrees(-45 + 90))
-            Circle().trim(from: 0.0, to: 0.30).stroke(Color(hex: 0x4285F4), lineWidth: size * 0.28)
-                .rotationEffect(.degrees(-45 + 175))
-            Rectangle().fill(Color(hex: 0x4285F4))
-                .frame(width: size * 0.5, height: size * 0.28)
-                .offset(x: size * 0.25, y: 0)
-        }
-        .frame(width: size, height: size)
+        Image("GoogleLogo")
+            .resizable()
+            .scaledToFit()
+            .frame(width: size, height: size)
     }
 }
