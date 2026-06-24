@@ -54,6 +54,15 @@ function pinIcon(color: string): string {
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 }
 
+// A count bubble for a server-side cluster. The count itself is drawn via the
+// Marker `label`, so this is just the moss disc behind it.
+function clusterIcon(): string {
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><circle cx='20' cy='20' r='17' fill='#41481f' stroke='white' stroke-width='2.5'/></svg>`;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+}
+
+type ClusterItem = { lat: number; lng: number; count: number };
+
 // ---- Region polygon overlay (runs inside the Map context) -------------------
 
 type LngLat = [number, number];
@@ -180,8 +189,10 @@ function useNarrow() {
 export function FullMap() {
   // Fetched spots for current viewport.
   const [spots, setSpots] = useState<MapItem[]>([]);
+  const [clusters, setClusters] = useState<ClusterItem[]>([]);
   const [loadingSpots, setLoadingSpots] = useState(false);
   const lastBboxKey = useRef('');
+  const lastBbox = useRef<Bbox | null>(null);
 
   const narrow = useNarrow();
 
@@ -237,27 +248,56 @@ export function FullMap() {
 
   // ---- Fetch spots on bounds change ----------------------------------------
 
-  const handleBoundsChange = useCallback((bbox: Bbox) => {
-    const key = [bbox.minLng, bbox.minLat, bbox.maxLng, bbox.maxLat]
-      .map((n) => n.toFixed(3))
-      .join(',');
-    if (key === lastBboxKey.current) return;
-    lastBboxKey.current = key;
+  // Fetch the viewport via the server-clustered endpoint: dense cells come back
+  // as count bubbles, sparse cells as individual pins, so a NL-wide read returns
+  // a few dozen markers instead of thousands. When exactly one category is
+  // selected we push that filter to the server so the cluster counts respect it
+  // (multi-select still falls back to client-side filtering of the singles).
+  const loadSpots = useCallback(
+    (bbox: Bbox) => {
+      lastBbox.current = bbox;
+      const params = new URLSearchParams({
+        minLng: String(bbox.minLng),
+        minLat: String(bbox.minLat),
+        maxLng: String(bbox.maxLng),
+        maxLat: String(bbox.maxLat),
+        cluster: 'true',
+      });
+      if (activeCats.size === 1) params.set('categoryId', [...activeCats][0]!);
 
-    const params = new URLSearchParams({
-      minLng: String(bbox.minLng),
-      minLat: String(bbox.minLat),
-      maxLng: String(bbox.maxLng),
-      maxLat: String(bbox.maxLat),
-    });
+      setLoadingSpots(true);
+      fetch(`/api/v1/spots/map?${params.toString()}`)
+        .then((r) => (r.ok ? r.json() : { items: [], clusters: [] }))
+        .then((data: { items?: MapItem[]; clusters?: ClusterItem[] }) => {
+          setSpots(data.items ?? []);
+          setClusters(data.clusters ?? []);
+        })
+        .catch(() => {
+          setSpots([]);
+          setClusters([]);
+        })
+        .finally(() => setLoadingSpots(false));
+    },
+    [activeCats],
+  );
 
-    setLoadingSpots(true);
-    fetch(`/api/v1/spots/map?${params.toString()}`)
-      .then((r) => (r.ok ? r.json() : { items: [] }))
-      .then((data: { items?: MapItem[] }) => setSpots(data.items ?? []))
-      .catch(() => setSpots([]))
-      .finally(() => setLoadingSpots(false));
-  }, []);
+  const handleBoundsChange = useCallback(
+    (bbox: Bbox) => {
+      const key = [bbox.minLng, bbox.minLat, bbox.maxLng, bbox.maxLat]
+        .map((n) => n.toFixed(3))
+        .join(',');
+      if (key === lastBboxKey.current) return;
+      lastBboxKey.current = key;
+      loadSpots(bbox);
+    },
+    [loadSpots],
+  );
+
+  // Re-fetch the current viewport when the category filter changes, so the
+  // server-side clustering/filtering reflects the new selection.
+  useEffect(() => {
+    if (lastBbox.current) loadSpots(lastBbox.current);
+  }, [loadSpots]);
 
   // Timer ref used inside the Map's onIdle to debounce bounds changes.
   const boundsTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -441,6 +481,22 @@ export function FullMap() {
                 onClick={() => setSelected(s)}
               />
             ))}
+
+          {/* Cluster count bubbles (server-side). Click zooms in to resolve. */}
+          {clusters.map((c, i) => (
+            <Marker
+              key={`cluster-${i}-${c.lat.toFixed(4)}-${c.lng.toFixed(4)}`}
+              position={{ lat: c.lat, lng: c.lng }}
+              icon={clusterIcon()}
+              label={{
+                text: String(c.count),
+                color: '#fff',
+                fontSize: '12px',
+                fontWeight: '700',
+              }}
+              onClick={() => setFlyTarget({ lat: c.lat, lng: c.lng, zoom: 13 })}
+            />
+          ))}
 
           {/* Peek card / InfoWindow */}
           {selected && selected.lat != null && selected.lng != null ? (
@@ -869,7 +925,9 @@ export function FullMap() {
             transition: 'background 0.3s',
           }}
         />
-        {loadingSpots ? 'Laden…' : `${visibleSpots.length} plekken`}
+        {loadingSpots
+          ? 'Laden…'
+          : `${visibleSpots.length + clusters.reduce((n, c) => n + c.count, 0)} plekken`}
       </div>
 
       {/* ---- Empty state (active filter, 0 results) ------------------------- */}
