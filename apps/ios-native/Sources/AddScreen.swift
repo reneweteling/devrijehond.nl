@@ -51,16 +51,18 @@ struct AddScreen: View {
                     jumpTo: $jumpTo,
                     userCoordinate: loc.coordinate
                 )
-                .ignoresSafeArea(edges: .bottom)
+                .ignoresSafeArea()
 
                 controls
             }
-            // Floating top controls: type toggle + search pill
+            // Floating top controls, same layout language as the map: a search
+            // box with the Gebied/Plek toggle right beside it.
             .overlay(alignment: .top) {
-                VStack(spacing: DVH.s2) {
-                    typeToggle
+                HStack(spacing: DVH.s2) {
                     searchPill
+                    typeToggle
                 }
+                .padding(.horizontal, DVH.s4)
                 .padding(.top, DVH.s2)
             }
             .navigationTitle("")
@@ -133,15 +135,14 @@ struct AddScreen: View {
         .background(Brand.cream, in: Capsule())
         .overlay(Capsule().strokeBorder(Brand.ink.opacity(0.08)))
         .shadow(color: Brand.ink.opacity(0.10), radius: 8, y: 2)
-        .padding(.horizontal, DVH.s4)
     }
 
     private func toggleSegment(label: String, selected: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(label)
-                .font(.dvhCallout.weight(.semibold))
+                .font(.dvhCaption.weight(.semibold))
                 .foregroundStyle(selected ? .white : Brand.ink2)
-                .frame(width: 88, height: 34)
+                .frame(width: 58, height: 38)
                 .background(selected ? Brand.moss : Color.clear, in: Capsule())
         }
         .buttonStyle(.plain)
@@ -156,19 +157,20 @@ struct AddScreen: View {
                 Image(systemName: "magnifyingglass")
                     .font(.body.weight(.semibold))
                     .foregroundStyle(Brand.moss)
-                Text("Zoek een locatie")
+                Text("Zoek locatie")
                     .font(.dvhBody)
                     .foregroundStyle(Brand.ink2)
-                Spacer()
+                    .lineLimit(1)
+                Spacer(minLength: 0)
             }
             .padding(.horizontal, DVH.s4)
+            .frame(maxWidth: .infinity)
             .frame(height: 44)
             .background(.ultraThinMaterial, in: Capsule())
             .overlay(Capsule().strokeBorder(Brand.ink.opacity(0.08)))
             .shadow(color: Brand.ink.opacity(0.08), radius: 8, y: 2)
         }
         .buttonStyle(.plain)
-        .padding(.horizontal, DVH.s4)
     }
 
     // MARK: - Bottom controls card

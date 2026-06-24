@@ -122,8 +122,12 @@ struct DVHChip: View {
             }
             .padding(.horizontal, DVH.s3)
             .padding(.vertical, DVH.s2 + 1)
-            .background(selected ? tint : Brand.mossSoft.opacity(0.6),
-                        in: Capsule())
+            // Unselected matches the map legend exactly: a frosted material pill
+            // that stays legible over both the map and the sand background.
+            // Selected fills with the tint.
+            .background {
+                Capsule().fill(selected ? AnyShapeStyle(tint) : AnyShapeStyle(.ultraThinMaterial))
+            }
             .foregroundStyle(selected ? .white : Brand.mossDark)
         }
         .buttonStyle(.plain)
