@@ -56,6 +56,15 @@ Native iOS dev loop: generate the Xcode project and run in the simulator
 (`cd apps/ios-native && xcodegen generate && open DeVrijeHondNative.xcodeproj`).
 DEBUG builds talk to `http://localhost:3030`, so run the web app first.
 
+**Deploy + seeding.** Deploy is `git push dokku main`; the Dokku release runs
+`db:release` (migrate + seed). The seed is **idempotent**: it skips the
+destructive re-seed when the DB already has spots, so a normal deploy does not
+wipe community data or re-fetch Street View photos (a Google API cost). When the
+seed data itself changes (new scraper output, taxonomy), force a one-time
+rebuild: set `SEED_FORCE=1` for that deploy, e.g.
+`ssh dokku@weteling.com config:set devrijehond SEED_FORCE=1`, deploy, then
+`config:unset devrijehond SEED_FORCE`.
+
 ## Infrastructure (AWS)
 
 - **All AWS infra lives in the `devrijehond` account, ID `262517452192`.** Never
