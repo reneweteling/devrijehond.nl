@@ -151,11 +151,11 @@ struct DVHChip: View {
             }
             .padding(.horizontal, DVH.s3)
             .padding(.vertical, DVH.s2 + 1)
-            // Unselected matches the map legend exactly: a frosted material pill
-            // that stays legible over both the map and the sand background.
+            // Unselected uses the system bar material so it matches the tab bar
+            // exactly (legible over both the map and the sand background).
             // Selected fills with the tint.
             .background {
-                Capsule().fill(selected ? AnyShapeStyle(tint) : AnyShapeStyle(.ultraThinMaterial))
+                Capsule().fill(selected ? AnyShapeStyle(tint) : AnyShapeStyle(.bar))
             }
             .foregroundStyle(selected ? .white : Brand.mossDark)
         }

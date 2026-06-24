@@ -128,7 +128,7 @@ struct MapScreen: View {
             }
             .padding(.horizontal, DVH.s4)
             .frame(height: 46)
-            .background(.ultraThinMaterial, in: Capsule())
+            .background(.bar, in: Capsule())
             .overlay(Capsule().strokeBorder(Brand.ink.opacity(0.08)))
             .shadow(color: Brand.ink.opacity(0.08), radius: 8, y: 2)
         }
@@ -195,7 +195,7 @@ struct MapScreen: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 9)
-        .background(.ultraThinMaterial, in: Capsule())
+        .background(.bar, in: Capsule())
         .padding(.bottom, 6)
     }
 
@@ -222,7 +222,7 @@ private struct MapControlButton: View {
                 .font(.system(size: 17, weight: .semibold))
                 .foregroundStyle(Brand.mossDark)
                 .frame(width: 44, height: 44)
-                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: DVH.rSm))
+                .background(.bar, in: RoundedRectangle(cornerRadius: DVH.rSm))
                 .overlay(RoundedRectangle(cornerRadius: DVH.rSm)
                     .strokeBorder(Brand.ink.opacity(0.10)))
                 .shadow(color: Brand.ink.opacity(0.10), radius: 6, y: 2)
