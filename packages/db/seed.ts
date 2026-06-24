@@ -623,6 +623,20 @@ async function main() {
   const pool = new Pool({ connectionString: process.env.DATABASE_URL });
   await pool.query('CREATE EXTENSION IF NOT EXISTS postgis;');
 
+  // Idempotent on deploy: the release runs this every time, but a destructive
+  // re-seed wipes community data and re-fetches up to FALLBACK_IMAGE_LIMIT Street
+  // View photos (an API cost). So skip when the DB is already populated unless
+  // SEED_FORCE=1 is set (use that when the seed data itself changed).
+  const force = process.env.SEED_FORCE === '1';
+  const existing = await db.spot.count();
+  if (existing > 0 && !force) {
+    console.log(
+      `↩︎  ${existing} spots already present — skipping re-seed (set SEED_FORCE=1 to rebuild).`,
+    );
+    await pool.end();
+    return;
+  }
+
   // --- Reset (re-runnable). Deleting spots + non-admin users cascades. ---
   await db.vote.deleteMany({});
   await db.review.deleteMany({});
