@@ -1,7 +1,7 @@
 # De Vrije Hond — Mobile App Wireframes (Low-Fi)
 
-**Platform:** Expo (iOS + Android)
-**Fidelity:** Low-fi — structure, hierarchy, and flow. No final visuals.
+**Platform:** native iOS (SwiftUI), `apps/ios-native`
+**Fidelity:** Low-fi, structure, hierarchy, and flow. No final visuals.
 **Companion:** clickable prototype at `docs/wireframes/mobile-prototype.html`
 **Status:** Draft v2 — community-driven verification model
 
@@ -13,8 +13,8 @@
 
 Two primary content types drive everything:
 
-- **Region** — a polygon/geofenced *area*. Off-leash zones and dog-swimming beaches. Has a boundary you can be *inside* or *near*.
-- **POI (Point of Interest)** — a single *point*. Dog-friendly horeca, wash/rinse stations, shops, public drinking points.
+- **Region** — a polygon/geofenced _area_. Off-leash zones and dog-swimming beaches. Has a boundary you can be _inside_ or _near_.
+- **POI (Point of Interest)** — a single _point_. Dog-friendly horeca, wash/rinse stations, shops, public drinking points.
 
 Both belong to a **category**, both carry **amenities/features**, both are **published immediately** and then move through **community verification** (not a moderator queue).
 
@@ -29,21 +29,22 @@ There are no moderators in normal operation. The platform builds and verifies it
 3. Votes are **weighted by contributor reputation**.
 4. Thresholds (all configurable in the web admin):
 
-| Trigger | Condition | Result |
-|---|---|---|
-| Auto-verify | weighted score (confirms − denies) **≥ +5** | status → `verified` (badge) |
-| Auto-hide | **≥ 3 denials** | status → `hidden`, removed from public map, admin notified |
-| Report | spam/inappropriate flags reach threshold | surfaced to admin |
+| Trigger     | Condition                                   | Result                                                     |
+| ----------- | ------------------------------------------- | ---------------------------------------------------------- |
+| Auto-verify | weighted score (confirms − denies) **≥ +5** | status → `verified` (badge)                                |
+| Auto-hide   | **≥ 3 denials**                             | status → `hidden`, removed from public map, admin notified |
+| Report      | spam/inappropriate flags reach threshold    | surfaced to admin                                          |
 
-Open conflict (noted): a spot could reach +5 net *and* 3 denials at once. **Auto-hide takes precedence** (safety first); both thresholds are admin-configurable. → see §9.
+Open conflict (noted): a spot could reach +5 net _and_ 3 denials at once. **Auto-hide takes precedence** (safety first); both thresholds are admin-configurable. → see §9.
 
 **Vote integrity rules:**
+
 - One vote per user per spot.
 - Submitter cannot vote on their own spot.
 - Voter must have been **physically near** the spot (proximity gate via location).
 - Vote weight scales with the voter's reputation (new accounts light, proven contributors heavy).
 
-**Verification vote ≠ review.** The community check answers "does this place really exist / is the info right?" (confirm/deny). A **review** is a separate 0–5 star rating + comment about the *experience* (see §6). They live side by side on the detail screen.
+**Verification vote ≠ review.** The community check answers "does this place really exist / is the info right?" (confirm/deny). A **review** is a separate 0–5 star rating + comment about the _experience_ (see §6). They live side by side on the detail screen.
 
 **Admin (web only) can always override:** restore a hidden spot, force-verify, remove permanently, and curate the taxonomy (§7).
 
@@ -51,29 +52,29 @@ Open conflict (noted): a spot could reach +5 net *and* 3 denials at once. **Auto
 
 ## 3. Screen inventory
 
-| # | Screen | Flow | Auth |
-|---|--------|------|------|
-| S0 | Splash / location permission | Onboarding | no |
-| S1 | Map (home) | Discovery | no |
-| S2 | Filter sheet | Discovery | no |
-| S3 | Search | Discovery | no |
-| S4 | Nearby list | Discovery | no |
-| S5 | Spot detail — Region (verified example) | Detail | no |
-| S6 | Spot detail — POI (unverified example, with vote UI) | Detail | no (vote: yes) |
-| S7 | Write review | Reviews | yes |
-| S8 | Photo viewer | Detail | no |
-| S9 | Auth (sign in / up) | Account | — |
-| S10 | Submit — choose type | Submission | yes |
-| S11 | Submit — place on map (pin / polygon) | Submission | yes |
-| S12 | Submit — details form (incl. growable amenities) | Submission | yes |
-| S13 | Submit — live & unverified | Submission | yes |
-| S14 | Profile / My submissions (avatar, bio, dogs) | Account | yes |
-| S14b | Edit profile (avatar upload, bio, dogs) | Account | yes |
-| S14c | Add / edit dog (photo, name, breed) | Account | yes |
-| S15 | Feature requests (list + vote) | Feature requests | no (vote: yes) |
-| S16 | New feature request | Feature requests | yes |
-| S17 | Admin — needs attention (queue) | Admin safety-net | admin |
-| S18 | Admin — review item | Admin safety-net | admin |
+| #    | Screen                                               | Flow             | Auth           |
+| ---- | ---------------------------------------------------- | ---------------- | -------------- |
+| S0   | Splash / location permission                         | Onboarding       | no             |
+| S1   | Map (home)                                           | Discovery        | no             |
+| S2   | Filter sheet                                         | Discovery        | no             |
+| S3   | Search                                               | Discovery        | no             |
+| S4   | Nearby list                                          | Discovery        | no             |
+| S5   | Spot detail — Region (verified example)              | Detail           | no             |
+| S6   | Spot detail — POI (unverified example, with vote UI) | Detail           | no (vote: yes) |
+| S7   | Write review                                         | Reviews          | yes            |
+| S8   | Photo viewer                                         | Detail           | no             |
+| S9   | Auth (sign in / up)                                  | Account          | —              |
+| S10  | Submit — choose type                                 | Submission       | yes            |
+| S11  | Submit — place on map (pin / polygon)                | Submission       | yes            |
+| S12  | Submit — details form (incl. growable amenities)     | Submission       | yes            |
+| S13  | Submit — live & unverified                           | Submission       | yes            |
+| S14  | Profile / My submissions (avatar, bio, dogs)         | Account          | yes            |
+| S14b | Edit profile (avatar upload, bio, dogs)              | Account          | yes            |
+| S14c | Add / edit dog (photo, name, breed)                  | Account          | yes            |
+| S15  | Feature requests (list + vote)                       | Feature requests | no (vote: yes) |
+| S16  | New feature request                                  | Feature requests | yes            |
+| S17  | Admin — needs attention (queue)                      | Admin safety-net | admin          |
+| S18  | Admin — review item                                  | Admin safety-net | admin          |
 
 (The clickable prototype currently includes S1, S2, S5, S6, S7, S10–S18.)
 
@@ -89,7 +90,7 @@ Open conflict (noted): a spot could reach +5 net *and* 3 denials at once. **Auto
 
 **S4 Nearby** — list counterpart to the map, shares filter state. Row: thumbnail, title, category, key amenities, distance, rating, verified badge.
 
-*Data:* geometry + bbox query, category, amenity flags, `verification_status`, rating aggregate, thumbnail.
+_Data:_ geometry + bbox query, category, amenity flags, `verification_status`, rating aggregate, thumbnail.
 
 ---
 
@@ -105,7 +106,7 @@ Open conflict (noted): a spot could reach +5 net *and* 3 denials at once. **Auto
 - **"Klopt deze plek?"** → confirm / deny buttons;
 - eligibility line ("Je bent hier geweest — jouw stem telt mee"), or disabled with reason if not near / own submission / already voted.
 
-*Data:* geometry, category, amenities, hours/address/contact, photos[], reviews[], `confirm_weight`, `deny_weight`, `net_score`, submitter ref, verification_status, per-user vote record, proximity proof.
+_Data:_ geometry, category, amenities, hours/address/contact, photos[], reviews[], `confirm_weight`, `deny_weight`, `net_score`, submitter ref, verification_status, per-user vote record, proximity proof.
 
 ---
 
@@ -116,7 +117,7 @@ Separate from verification. Any authenticated user can leave a **0–5 star rati
 - Detail screen shows an **aggregate** (e.g. 4,6 ★, 23 reviews) and a list of review cards (avatar, name, stars, text, date, helpful count).
 - **S7 Write review**: star selector, comment, photo upload. A note clarifies it's distinct from the community-check.
 
-*Data:* `review { spot_id, user_id, stars 0–5, body, photos[], created_at, helpful_count }`; aggregate (avg, count) on the spot. Reviews can be reported → admin (§7).
+_Data:_ `review { spot_id, user_id, stars 0–5, body, photos[], created_at, helpful_count }`; aggregate (avg, count) on the spot. Reviews can be reported → admin (§7).
 
 ---
 
@@ -131,9 +132,9 @@ Separate from verification. Any authenticated user can leave a **0–5 star rati
 
 **S13** — explicit messaging: "live now as unverified; reaches verified automatically at net +5, no moderator needed."
 
-**Taxonomy curation (web admin):** categories and amenities are data, not hardcoded. Admin controls **which are visible and in what order**, can **merge** proposed/duplicate terms into canonical ones, promote a proposed amenity to a real one, and promote a popular requested category (e.g. *hondentrimsalons*, §8) into a first-class category. This keeps the taxonomy community-grown but curated.
+**Taxonomy curation (web admin):** categories and amenities are data, not hardcoded. Admin controls **which are visible and in what order**, can **merge** proposed/duplicate terms into canonical ones, promote a proposed amenity to a real one, and promote a popular requested category (e.g. _hondentrimsalons_, §8) into a first-class category. This keeps the taxonomy community-grown but curated.
 
-*Data:* `category { id, label, type, visible, sort_order, status: active|proposed }`, `amenity { id, label, applies_to_categories[], visible, sort_order, status }`, plus a `proposed_by` link.
+_Data:_ `category { id, label, type, visible, sort_order, status: active|proposed }`, `amenity { id, label, applies_to_categories[], visible, sort_order, status }`, plus a `proposed_by` link.
 
 ---
 
@@ -144,7 +145,7 @@ A built-in flow where users shape the product (this is also where "I want to see
 - **S15 list** — requests sorted by upvotes, each with a **status tag** (in consideration / planned / done / declined) and an upvote control. Filter by Popular / New / Planned / Done.
 - **S16 new request** — title, description, area/component; **autocomplete against existing requests while typing** so duplicates merge.
 
-*Data:* `feature_request { id, title, body, component, status, upvotes, created_by }`, `feature_vote { request_id, user_id }`. Admin sets status from the web admin.
+_Data:_ `feature_request { id, title, body, component, status, upvotes, created_by }`, `feature_vote { request_id, user_id }`. Admin sets status from the web admin.
 
 ---
 
@@ -156,7 +157,7 @@ Because the community self-governs, the admin is an **exception handler**, not a
 
 **S18 review item** — map + duplicate-proximity warning, the **weighted vote breakdown** (who voted, their weights, why it surfaced), photos (individually reportable), internal admin note, and actions: **restore**, **force-verify**, **remove permanently**. Plus taxonomy actions per §7.
 
-*Data:* `verification_status` (`unverified | verified | hidden | removed`), `report { target, reason, reporter }`, vote ledger, admin action log, near-duplicate spatial check.
+_Data:_ `verification_status` (`unverified | verified | hidden | removed`), `report { target, reason, reporter }`, vote ledger, admin action log, near-duplicate spatial check.
 
 ---
 
@@ -168,7 +169,7 @@ Because the community self-governs, the admin is an **exception handler**, not a
 4. **Public drinking points** as their own POI category vs only a "has water bowl" amenity — keep both? (Currently: water bowl = amenity; standalone drink point = category candidate.)
 5. **Reviews in v1?** Confirmed in scope. Decide moderation of reviews (report-only vs community vote too).
 6. **Unverified visibility.** Show unverified spots to everyone by default, or let users opt out via the filter only? (Currently shown by default with a clear badge.)
-7. **Editable-before-verify.** Admin can fix fields; should the community also be able to *suggest edits* (wiki-style) that themselves get voted on? (Post-MVP candidate.)
+7. **Editable-before-verify.** Admin can fix fields; should the community also be able to _suggest edits_ (wiki-style) that themselves get voted on? (Post-MVP candidate.)
 8. **Photo moderation.** Per-photo report/status (not just per-spot).
 9. **Hero photo fallback provider.** Google Places Photo / Street View (terms + attribution + cost) vs Mapillary vs a generated map thumbnail. Affects API keys, billing, and attribution UI.
 

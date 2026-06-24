@@ -6,13 +6,13 @@ Manual + automated test plan, walked as a real user. Status legend: ✅ pass,
 How it's executed:
 
 - **App**: iOS simulator (deep links via `vrijehond://`, taps via `idb`,
-  screenshots) + a multi-lens code-review workflow over `apps/mobile`.
+  screenshots) + a multi-lens code-review workflow over `apps/ios-native`.
 - **Web**: live site + Playwright screenshots (desktop 1440 + mobile 390) +
   a multi-lens design-critique workflow.
 
 ## Mobile app
 
-### Map (S1, `(tabs)/index.tsx`)
+### Map (S1)
 
 | #   | Step                   | Expected                                                  | Status |
 | --- | ---------------------- | --------------------------------------------------------- | ------ |
@@ -24,7 +24,7 @@ How it's executed:
 | 6   | Category chips         | Filter the markers by category                            | ⬜     |
 | 7   | Search pill → place    | Map flies to the place AND loads its spots (no empty map) | 🔧     |
 
-### Search (`search.tsx`)
+### Search
 
 | #   | Step                          | Expected                                       | Status |
 | --- | ----------------------------- | ---------------------------------------------- | ------ |
@@ -34,7 +34,7 @@ How it's executed:
 | 4   | Tap the place result          | Returns to the map and flies there             | ✅     |
 | 5   | Empty / no results            | Sensible empty copy, no crash                  | ⬜     |
 
-### Nearby (`(tabs)/nearby.tsx`)
+### Nearby
 
 | #   | Step                   | Expected                                                 | Status |
 | --- | ---------------------- | -------------------------------------------------------- | ------ |
@@ -43,7 +43,7 @@ How it's executed:
 | 3   | Tap a row              | Opens the spot detail                                    | ⬜     |
 | 4   | No location permission | Graceful state (no distances, still a list)              | ⬜     |
 
-### Spot detail (`spot/[slug]/index.tsx`)
+### Spot detail
 
 | #   | Step               | Expected                                                 | Status |
 | --- | ------------------ | -------------------------------------------------------- | ------ |
@@ -56,7 +56,7 @@ How it's executed:
 | 7   | Report             | Report sheet; gated to login                             | ⬜     |
 | 8   | Back               | Returns to the previous screen                           | ✅     |
 
-### Add (`(tabs)/add.tsx`) — auth-gated
+### Add — auth-gated
 
 | #   | Step                 | Expected                                                         | Status |
 | --- | -------------------- | ---------------------------------------------------------------- | ------ |
@@ -65,7 +65,7 @@ How it's executed:
 | 3   | (auth) Pick type     | Region vs POI                                                    | ⬜     |
 | 4   | (auth) Draw geofence | Tap out a polygon ring for a region (undo/clear), sent on submit | 🔧     |
 
-### Wensen (`(tabs)/requests.tsx`)
+### Wensen
 
 | #   | Step              | Expected                                      | Status |
 | --- | ----------------- | --------------------------------------------- | ------ |
@@ -74,7 +74,7 @@ How it's executed:
 | 3   | Upvote while anon | Routes to sign-in                             | ⬜     |
 | 4   | New request       | Gated to login                                | ⬜     |
 
-### Profile + auth (`(tabs)/profile.tsx`, `(auth)/*`)
+### Profile + auth
 
 | #   | Step               | Expected                                         | Status    |
 | --- | ------------------ | ------------------------------------------------ | --------- |
@@ -99,10 +99,12 @@ How it's executed:
 
 ## iOS release
 
-| #   | Step                      | Status                                                  |
-| --- | ------------------------- | ------------------------------------------------------- |
-| 1   | Compile (no signing)      | ✅                                                      |
-| 2   | Pods (modular headers)    | ✅                                                      |
-| 3   | Signed archive (macos-26) | ✅                                                      |
-| 4   | Export IPA                | ⚠️ needs App ID + app record + API-key role (see CI.md) |
-| 5   | Upload to TestFlight      | ⚠️ blocked on #4                                        |
+Native app, shipped locally via `apps/ios-native/scripts/release-native.sh`
+(xcodegen project, no CocoaPods). See `docs/CI.md`.
+
+| #   | Step                        | Status |
+| --- | --------------------------- | ------ |
+| 1   | xcodegen generate + compile | ✅     |
+| 2   | Signed archive (local Mac)  | ✅     |
+| 3   | Export IPA (manual signing) | ✅     |
+| 4   | Upload to TestFlight        | ✅     |

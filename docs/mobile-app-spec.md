@@ -2,14 +2,14 @@
 
 Status: levend document, bijgewerkt 2026-06-24.
 
-Dit is de canonieke, framework-onafhankelijke spec van de mobiele app. Het is
-geschreven als blauwdruk voor een **Flutter-POC** (eigen branch, zie onderaan),
-maar geldt net zo goed voor de bestaande Expo-app (`apps/mobile`) en de native
-SwiftUI-app (`apps/ios-native`, branch `native-ios-spike`).
+Dit is de canonieke, framework-onafhankelijke spec van de mobiele app. De
+huidige client is de native SwiftUI-app (`apps/ios-native`). De spec is ook
+geschreven als blauwdruk voor een **Flutter-POC** (eigen branch, zie onderaan).
+De eerdere Expo-app (`apps/mobile`) is verwijderd.
 
-De drie clients praten met exact dezelfde backend. De client-laag is dus
-vervangbaar; de API, auth en datacontracten hieronder veranderen niet als je van
-framework wisselt.
+Elke client praat met exact dezelfde backend. De client-laag is dus vervangbaar;
+de API, auth en datacontracten hieronder veranderen niet als je van framework
+wisselt.
 
 ## 0. Architectuur in één alinea
 
@@ -43,7 +43,7 @@ resource, `mod` = moderator/admin.
 - Sessiepersistentie (Keychain/Keystore), boot-verificatie, sliding refresh
 - 401 op een geauthenticeerde call → terugvallen naar anoniem
 - Anonymous-first: uitgelogd start je gewoon op de kaart, nooit een gedwongen login
-- (Expo heeft ook) Force-update-gate via `GET /api/v1/app-config`
+- Force-update-gate via `GET /api/v1/app-config`
 
 ### 1.2 Kaart en ontdekken
 
@@ -85,7 +85,7 @@ resource, `mod` = moderator/admin.
 - Foto-upload (los endpoint, dan URL's meesturen)
 - Indienen → plek verschijnt direct als niet-geverifieerd
 - Mijn inzendingen (eigen plekken) `auth`
-- (Nog niet in Expo of native) eigen plek bewerken/verwijderen, zie §7
+- (Nog niet gebouwd) eigen plek bewerken/verwijderen, zie §7
 
 ### 1.5 Profiel, honden, account
 
@@ -96,7 +96,7 @@ resource, `mod` = moderator/admin.
 - Moderator-aanmelding (motivatie) + status (pending/approved/rejected) `auth`
 - Over De Vrije Hond (externe links, versie)
 - Uitloggen
-- (Expo) Feedback via Sentry-widget
+- Feedback via Sentry
 
 ### 1.6 Wensen (feature requests)
 
@@ -272,12 +272,12 @@ Wens-detail, Sign-in (ook als gating-sheet vanuit Toevoegen/stemmen).
 ## 6. Geleerde lessen en valkuilen (lees dit vóór je begint)
 
 1. **De bewerkbare polygon-editor is het kernpunt.** Een editable polygon "gratis"
-   bestaat alleen in de Google Maps **JS**-API (web). Op native iOS (MapKit),
-   react-native-maps én Flutter (`google_maps_flutter`) bouw je hem zelf:
-   sleepbare hoekpunt-markers + de polygon hertekenen tijdens slepen + tik-om-toe-
-   te-voegen. In Flutter is `Marker(draggable: true)` eersteklas, dus dit wordt naar
-   verwachting soepeler dan de react-native-maps-poging waar dit traject mee begon.
-   Maak dit het eerste wat je in de POC bouwt en beoordeelt.
+   bestaat alleen in de Google Maps **JS**-API (web). Op native iOS (MapKit) en in
+   Flutter (`google_maps_flutter`) bouw je hem zelf: sleepbare hoekpunt-markers +
+   de polygon hertekenen tijdens slepen + tik-om-toe-te-voegen. In Flutter is
+   `Marker(draggable: true)` eersteklas, dus dit wordt naar verwachting soepeler
+   dan de react-native-maps-poging waar dit traject mee begon. Maak dit het eerste
+   wat je in de POC bouwt en beoordeelt.
 2. **Coördinaat-volgorde.** Alles op de draad in GeoJSON is `[lng, lat]` (longitude
    eerst). De vriendelijke submit-vormen (`point`/`polygon`) gebruiken juist named
    keys `{lat, lng}`; de server flipt ze. Niet door elkaar halen.
@@ -306,7 +306,7 @@ Wens-detail, Sign-in (ook als gating-sheet vanuit Toevoegen/stemmen).
 
 ---
 
-## 7. Bekende beperkingen / openstaand (gelijk in Expo en native)
+## 7. Bekende beperkingen / openstaand
 
 - Eigen plek **bewerken/verwijderen** zit nog niet in de client (API-kant deels
   aanwezig). Voor de POC optioneel.

@@ -37,9 +37,6 @@ Next (deliberate, not yet done):
 
 - Deploy: run `git push dokku main` on your server (no access from here). The
   full Dokku command list (incl. PostGIS) was provided in chat.
-- Expo SDK 55 to 56: a native migration (prebuild + pod install + rebuild +
-  device re-test). Left as a focused follow-up so the working SDK 55 app stays
-  stable.
 - Mobile auth-gated screens still stubbed: my-submissions list, edit profile
   (S14b), add dog (S14c).
 - Admin is typechecked + builds but not screenshot-verified (gated; needs an
@@ -49,14 +46,18 @@ Next (deliberate, not yet done):
 
 Project arc: **wireframes → design → build**. Wireframes and design are done;
 the build foundation is **scaffolded, bootstrapped, and green**: it installs,
-code-generates, migrates/seeds, typechecks (`pnpm typecheck` → 11/11), and lints
-(`pnpm lint` → 9/9). The mobile app is wired to the generated API client and the
+code-generates, migrates/seeds, typechecks (`pnpm typecheck`), and lints
+(`pnpm lint`). The native iOS app talks to the API via `APIClient.swift` and the
 verification gate is smoke-tested.
+
+> Since this log was written the mobile client moved from Expo to a native
+> SwiftUI app in `apps/ios-native`. `apps/mobile` and `packages/api-client` are
+> gone, along with the Orval codegen and `EXPO_PUBLIC_*` env. Older dated entries
+> below still mention them; read those as history.
 
 What landed (all the old `TODO(verify)` code markers are resolved):
 
-- Node pinned via `.tool-versions` (24.13.1); `apps/mobile` Expo/RN deps aligned
-  to the installed SDK 55 bundle.
+- Node pinned via `.tool-versions` (24.13.1).
 - DB: access-policy plugin provider is `@zenstackhq/plugin-policy`; policies are
   enforced by `PolicyPlugin` installed with `$use` on a dedicated `policyDb`
   (raw `db` stays policy-free for BetterAuth + migrations/seed); `anonDb` passes
@@ -64,10 +65,8 @@ What landed (all the old `TODO(verify)` code markers are resolved):
   categories, 8 amenities, sample spot `cafe-de-waterbak`).
 - OpenAPI: `@asteasolutions/zod-to-openapi` bumped to ^8 (zod 4). Component
   schemas now carry a refId via `.openapi('Name', …)` so nested uses emit
-  `$ref` instead of inlining (snapshot 121KB → 39KB). The Orval `api-client`
-  has clean types (`items: SpotSummary[]`, …).
-- Mobile: `apps/mobile/lib/api.ts` delegates to the generated fetchers and
-  re-exports the contract types; no hand-maintained DTO copies.
+  `$ref` instead of inlining (snapshot 121KB to 39KB). The Swift `Codable` types
+  in `apps/ios-native` mirror these schemas by hand.
 - Verification gate smoke-tested at the data+policy+logic level: new spot
   UNVERIFIED, owner can't vote own spot, 5 weighted confirms → VERIFIED, one
   vote per user (DB unique), 3 denies → HIDDEN, anon can't read HIDDEN, plus
@@ -79,8 +78,8 @@ generated `BETTER_AUTH_SECRET` (other secrets still blank — see BUILD-STATUS).
 
 ## Immediate next steps (in order)
 
-1. Fill real secrets in `.env.local` (Apple/Google/Resend/S3) + Maps API keys in
-   `apps/mobile/app.json`, then do a real end-to-end run: magic-link sign-in
+1. Fill real secrets in `.env.local` (Apple/Google/Resend/S3) + the web Maps API
+   key, then do a real end-to-end run: magic-link sign-in
    (needs `RESEND_API_KEY`) → submit a spot → vote it through. The data-layer
    gate is proven; what's untested is the HTTP/auth shell, because a valid
    bearer/session token needs a real better-auth sign-in (a raw `Session` row
@@ -91,13 +90,12 @@ generated `BETTER_AUTH_SECRET` (other secrets still blank — see BUILD-STATUS).
    job / `SECURITY DEFINER` trigger for R1).
 3. Finish the stubbed/lighter handlers + mobile sheets listed below.
 4. **Geofence editing (the one remaining piece of the add/edit ask).** Adding a
-   region geofence is done: the Add flow taps out a polygon ring and submits it
-   (`apps/mobile/app/(tabs)/add.tsx`). Editing an existing spot's geometry is not
-   wired on mobile yet, but the backend is ready: `PATCH /api/v1/me/spots/[id]`
-   already accepts `name` / `description` / `polygon` / `geometry`
-   (`apps/web/app/api/v1/me/spots/[id]/route.ts`). To finish: add a
-   `useUpdateSpot` hook (raw fetch with the bearer, like `useMySpots`, since the
-   generated client has no patch-spot fn yet), an edit screen that loads the spot
+   region geofence is done in the native Add flow (taps out a polygon ring and
+   submits it). Editing an existing spot's geometry is not wired in the app yet,
+   but the backend is ready: `PATCH /api/v1/me/spots/[id]` already accepts
+   `name` / `description` / `polygon` / `geometry`
+   (`apps/web/app/api/v1/me/spots/[id]/route.ts`). To finish in `apps/ios-native`:
+   add a patch-spot call to `APIClient.swift`, an edit screen that loads the spot
    detail, pre-fills the fields and pre-loads the polygon into the same editor,
    and an entry point from the profile "Mijn inzendingen" list (and/or the spot
    detail when you're the submitter).
@@ -108,8 +106,8 @@ map loading/error + recenter, profile auth states, 401 session-clear, search
 fly-to nonce, sign-in redirect intent, shared `ListState`/`Banner` primitives);
 the geofence add editor; web spot-page enrichment ("In de buurt" + Route link +
 JSON-LD); an FAQ + structured data; a11y (skip link, focus ring). See
-`docs/TEST-PLAN.md`. iOS build archives on `macos-26`; export needs the Apple
-App ID + app record (see `docs/CI.md`).
+`docs/TEST-PLAN.md`. The native iOS build is shipped locally via
+`apps/ios-native/scripts/release-native.sh` (see `docs/CI.md`).
 
 Local toolchain note: Node/pnpm run via asdf. Prefix commands with
 `ASDF_NODEJS_VERSION=24.13.1` (or `asdf shell nodejs 24.13.1`) and use
@@ -122,9 +120,9 @@ and the browser `NEXT_PUBLIC_*` vars (e.g. the Google Maps key) to
 `pnpm --filter web dev`. The symlink is gitignored, so recreate it on a fresh
 clone: `ln -sf ../../.env.local apps/web/.env.local`. `NEXT_PUBLIC_*` is inlined
 when the dev server starts, so restart after changing the key. The DB generators
-(`db:migrate`, `db:seed`) and the OpenAPI route read the root `.env.local`; the
-snapshot was taken from `http://localhost:3030` (the `https://devrijehond.local`
-host in `package.json` / `input.ts` assumes a reverse proxy not set up locally).
+(`db:migrate`, `db:seed`) and the OpenAPI route read the root `.env.local`. The
+web dev server serves the OpenAPI doc at `http://localhost:3030/api/v1/openapi.json`,
+which is also where DEBUG native builds point.
 
 ## What's fully implemented vs stubbed
 
@@ -133,13 +131,13 @@ policies; `GET /api/v1/spots` (PostGIS bbox + filters), `GET spots/[slug]`,
 `POST /me/spots` (geometry insert), `POST /me/spots/[id]/vote` (weighted
 recompute + verify/hide thresholds), `GET /api/v1/openapi.json`; BetterAuth +
 native bridge + `/verify-mobile` interstitial; SSR spot pages; admin queue +
-taxonomy with action log; mobile auth + map + spot-detail.
+taxonomy with action log; native iOS auth + map + spot-detail.
 
 **Stubbed / lighter (finish these):** `categories`/`amenities` filtering edge
 cases; `me/reviews`, `me/dogs`, `me` profile, `reports`, `feature-requests`
-handlers (working but thin); mobile add-flow details, edit-profile, add-dog and
+handlers (working but thin); native add-flow details, edit-profile, add-dog and
 report sheets; a "my submissions" endpoint + screen; polygon geometry on the map
-DTO; `expo-location` for centring + the vote proximity proof; real Maps API keys.
+DTO; `CoreLocation` for centring + the vote proximity proof; real Maps API keys.
 
 ## Open product/design decisions (not blocking)
 
@@ -157,5 +155,5 @@ DTO; `expo-location` for centring + the vote proximity proof; real Maps API keys
 - Visual identity + icons: `docs/design/brand-direction.md`; target UI: `docs/design/hifi-prototype.html`
 - Bootstrap + verify items: `docs/BUILD-STATUS.md`
 - Reference implementation to mirror patterns from: the sibling `dekmantel` repo
-  (`~/projects/bravoure/dekmantel`) — same chassis (pnpm/turbo, ZenStack v3,
-  Orval, BetterAuth). Mirror shape; never copy code blindly.
+  (`~/projects/bravoure/dekmantel`), same backend chassis (pnpm/turbo, ZenStack
+  v3, BetterAuth). Mirror shape; never copy code blindly.

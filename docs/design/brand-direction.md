@@ -19,18 +19,18 @@ The product leans **heavily on free stock photography**. Every spot, category an
 
 Earthy core: moss green + warm sand, with a terracotta accent.
 
-| Token | Hex | Use |
-|---|---|---|
-| `--moss` (primary) | `#6E7B33` | primary actions, wordmark, verified, region fills |
-| `--moss-dark` | `#4C5622` | text on light, hovers, headings on sand |
-| `--moss-soft` | `#E7E9D5` | chip / badge backgrounds, soft surfaces |
+| Token                   | Hex       | Use                                                         |
+| ----------------------- | --------- | ----------------------------------------------------------- |
+| `--moss` (primary)      | `#6E7B33` | primary actions, wordmark, verified, region fills           |
+| `--moss-dark`           | `#4C5622` | text on light, hovers, headings on sand                     |
+| `--moss-soft`           | `#E7E9D5` | chip / badge backgrounds, soft surfaces                     |
 | `--terracotta` (accent) | `#C2762E` | highlights, unverified marker, secondary CTA, ratings stars |
-| `--terracotta-dark` | `#8A4F1B` | accent text on light |
-| `--sand` (app bg) | `#F3EFE3` | warm off-white page background |
-| `--ink` | `#2C2A1E` | primary text (warm near-black) |
-| `--ink-2` | `#5E5A48` | secondary text |
-| `--ink-3` | `#908B79` | hints, captions |
-| `--rust` | `#A33B2D` | hidden / rejected / danger |
+| `--terracotta-dark`     | `#8A4F1B` | accent text on light                                        |
+| `--sand` (app bg)       | `#F3EFE3` | warm off-white page background                              |
+| `--ink`                 | `#2C2A1E` | primary text (warm near-black)                              |
+| `--ink-2`               | `#5E5A48` | secondary text                                              |
+| `--ink-3`               | `#908B79` | hints, captions                                             |
+| `--rust`                | `#A33B2D` | hidden / rejected / danger                                  |
 
 **Category pin colors** (muted to sit on the map without shouting):
 
@@ -71,36 +71,36 @@ This direction is now applied to the clickable prototype (`docs/wireframes/mobil
 
 ## 6. Icon system
 
-Every category and amenity has a fixed icon. Mockups/web use **Tabler** names; the native app should map each to an **SF Symbol** (iOS, via `expo-symbols`) and a **Material** name (Android) for a native feel — see architecture §6b.
+Every category and amenity has a fixed icon. Mockups/web use **Tabler** names; the native iOS app maps each to an **SF Symbol** for a native feel, see architecture §6b.
 
 **Categories** (also the map pin glyph):
 
-| Category | Tabler | SF Symbol (iOS) |
-|---|---|---|
-| Losloopgebied | `ti-paw` | `pawprint.fill` |
-| Hondvriendelijke horeca | `ti-coffee` | `cup.and.saucer.fill` |
-| Was- / spoelplek | `ti-droplet` | `drop.fill` |
-| Zwemstrand | `ti-beach` | `beach.umbrella.fill` |
-| Winkel | `ti-building-store` | `bag.fill` |
-| Drinkpunt | `ti-fountain` | `spigot.fill` |
-| Trimsalon *(toekomst)* | `ti-scissors` | `scissors` |
+| Category                | Tabler              | SF Symbol (iOS)       |
+| ----------------------- | ------------------- | --------------------- |
+| Losloopgebied           | `ti-paw`            | `pawprint.fill`       |
+| Hondvriendelijke horeca | `ti-coffee`         | `cup.and.saucer.fill` |
+| Was- / spoelplek        | `ti-droplet`        | `drop.fill`           |
+| Zwemstrand              | `ti-beach`          | `beach.umbrella.fill` |
+| Winkel                  | `ti-building-store` | `bag.fill`            |
+| Drinkpunt               | `ti-fountain`       | `spigot.fill`         |
+| Trimsalon _(toekomst)_  | `ti-scissors`       | `scissors`            |
 
 **Amenities / voorzieningen:**
 
-| Voorziening | Tabler | SF Symbol |
-|---|---|---|
-| Waterbak | `ti-bowl` | `bowl.fill` |
-| Snoepjes / treats | `ti-bone` | `pawprint.fill` |
-| Binnen ok | `ti-home` | `house.fill` |
-| Terras / buiten | `ti-umbrella` | `sun.umbrella.fill` |
-| Omheind | `ti-fence` | `fence` |
-| Parkeren | `ti-parking` | `parkingsign` |
-| Schaduw | `ti-tree` | `tree.fill` |
-| Gratis | `ti-currency-euro-off` | `eurosign.circle` |
-| Hondendouche | `ti-shower` | `shower.fill` |
-| Poepzakjes | `ti-bag` | `bag.fill` |
-| Drinkfontein | `ti-droplet` | `drop.fill` |
-| Verlicht | `ti-bulb` | `lightbulb.fill` |
+| Voorziening       | Tabler                 | SF Symbol           |
+| ----------------- | ---------------------- | ------------------- |
+| Waterbak          | `ti-bowl`              | `bowl.fill`         |
+| Snoepjes / treats | `ti-bone`              | `pawprint.fill`     |
+| Binnen ok         | `ti-home`              | `house.fill`        |
+| Terras / buiten   | `ti-umbrella`          | `sun.umbrella.fill` |
+| Omheind           | `ti-fence`             | `fence`             |
+| Parkeren          | `ti-parking`           | `parkingsign`       |
+| Schaduw           | `ti-tree`              | `tree.fill`         |
+| Gratis            | `ti-currency-euro-off` | `eurosign.circle`   |
+| Hondendouche      | `ti-shower`            | `shower.fill`       |
+| Poepzakjes        | `ti-bag`               | `bag.fill`          |
+| Drinkfontein      | `ti-droplet`           | `drop.fill`         |
+| Verlicht          | `ti-bulb`              | `lightbulb.fill`    |
 
 Render rule: amenity icons sit in a soft-moss rounded tile (`--moss-soft` bg, `--moss-dark` glyph); the spot's signature amenity (e.g. waterbak) gets the solid-moss highlight tile. New community-proposed amenities fall back to a neutral `ti-tag` / `tag.fill` until an admin assigns a proper icon during curation.
 
