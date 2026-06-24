@@ -36,7 +36,18 @@ enum APIError: LocalizedError {
 /// mobile app's data layer; the native screens never touch the DB directly. Every
 /// request carries the X-API-Version header; /me/* calls carry the bearer.
 struct APIClient {
-    static let base = URL(string: "https://api.devrijehond.nl")!
+    /// DEBUG builds talk to the local web server by default (the simulator shares
+    /// the Mac network, and http://localhost is exempt from ATS). Override with the
+    /// `-apiBase <url>` launch argument. Release always uses production.
+    static let base: URL = {
+        #if DEBUG
+        if let override = UserDefaults.standard.string(forKey: "apiBase"),
+           let u = URL(string: override) { return u }
+        return URL(string: "http://localhost:3030")!
+        #else
+        return URL(string: "https://api.devrijehond.nl")!
+        #endif
+    }()
     static let clientVersion = "native-0.1.0"
 
     // MARK: - Core request

@@ -92,30 +92,27 @@ struct ProfileScreen: View {
                 }
             }
 
-            HStack(spacing: DVH.s3) {
-                Label(
-                    "\(me.reputation ?? 0) punten",
-                    systemImage: "rosette"
-                )
-                .font(.dvhCallout.weight(.semibold))
-                .foregroundStyle(Brand.mossDark)
-                .padding(.horizontal, DVH.s3)
-                .padding(.vertical, DVH.s1 + 2)
-                .background(Brand.mossSoft, in: Capsule())
-
+            HStack(spacing: DVH.s2) {
+                profilePill(icon: "rosette", text: "\(me.reputation ?? 0) punten")
                 if me.isModerator {
-                    Text(me.isAdmin ? "Beheerder" : "Moderator")
-                        .font(.dvhCaption.weight(.semibold))
-                        .foregroundStyle(Brand.mossDark)
-                        .padding(.horizontal, DVH.s3)
-                        .padding(.vertical, DVH.s1 + 2)
-                        .background(Brand.moss.opacity(0.18), in: Capsule())
-                        .overlay(Capsule().strokeBorder(Brand.moss.opacity(0.35)))
+                    profilePill(
+                        icon: "checkmark.seal.fill",
+                        text: me.isAdmin ? "Beheerder" : "Moderator")
                 }
             }
         }
         .frame(maxWidth: .infinity)
         .dvhCard(padding: DVH.s5)
+    }
+
+    // Uniform profile pill (reputation, role) — same size, font and surface.
+    private func profilePill(icon: String, text: String) -> some View {
+        Label(text, systemImage: icon)
+            .font(.dvhCaption.weight(.semibold))
+            .foregroundStyle(Brand.mossDark)
+            .padding(.horizontal, DVH.s3)
+            .padding(.vertical, DVH.s2)
+            .background(Brand.mossSoft, in: Capsule())
     }
 
     // MARK: - Dogs section
