@@ -15,7 +15,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { APIProvider, InfoWindow, Map, Marker, useMap } from '@vis.gl/react-google-maps';
 import type { CategoryDto } from '@devrijehond/types';
 import type { Bbox, MapItem } from './map-shared';
-import { DEFAULT_CENTER, DEFAULT_ZOOM, spotHref } from './map-shared';
+import { API_BASE, DEFAULT_CENTER, DEFAULT_ZOOM, spotHref } from './map-shared';
 import { useViewportSpots } from './use-viewport-spots';
 
 const GOOGLE_MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '';
@@ -219,7 +219,7 @@ export function FullMap() {
   // ---- Load categories once -------------------------------------------------
 
   useEffect(() => {
-    fetch('/api/v1/categories')
+    fetch(`${API_BASE}/api/v1/categories`)
       .then((r) => (r.ok ? r.json() : { items: [] }))
       .then((data: { items?: CategoryDto[] }) => {
         const cats = data.items ?? [];
@@ -245,7 +245,7 @@ export function FullMap() {
       return;
     }
     const params = new URLSearchParams({ q });
-    fetch(`/api/v1/geocode?${params.toString()}`)
+    fetch(`${API_BASE}/api/v1/geocode?${params.toString()}`)
       .then((r) => (r.ok ? r.json() : { items: [] }))
       .then((data: { items?: GeocodeHit[] }) => {
         setSearchResults(data.items ?? []);

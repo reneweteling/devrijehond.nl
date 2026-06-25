@@ -1,5 +1,11 @@
 import type { SpotSummaryDto } from '@devrijehond/types';
 
+/** Base URL for public API reads from the browser. In production this points at
+ * the CDN-fronted api.devrijehond.nl so markers are served from the edge; in dev
+ * it's empty (relative), hitting the local Next app. Set via NEXT_PUBLIC_API_BASE
+ * (inlined at build time). No trailing slash. */
+export const API_BASE = (process.env.NEXT_PUBLIC_API_BASE ?? '').replace(/\/$/, '');
+
 /** Viewport bounding box (WGS84 degrees) shared by both map backends. */
 export type Bbox = { minLng: number; minLat: number; maxLng: number; maxLat: number };
 

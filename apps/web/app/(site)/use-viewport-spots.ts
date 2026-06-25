@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { Bbox, ClusterItem, MapItem } from './map-shared';
+import { API_BASE, type Bbox, type ClusterItem, type MapItem } from './map-shared';
 
 /**
  * Shared map data source for both the homepage island and the full /kaart page.
@@ -32,7 +32,7 @@ export function useViewportSpots(categoryId?: string) {
       if (categoryId) params.set('categoryId', categoryId);
 
       setLoading(true);
-      fetch(`/api/v1/spots/map?${params.toString()}`)
+      fetch(`${API_BASE}/api/v1/spots/map?${params.toString()}`)
         .then((r) => (r.ok ? r.json() : { items: [], clusters: [] }))
         .then((data: { items?: MapItem[]; clusters?: ClusterItem[] }) => {
           setSpots(data.items ?? []);

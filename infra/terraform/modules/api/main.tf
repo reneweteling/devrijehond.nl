@@ -64,6 +64,31 @@ resource "aws_cloudfront_cache_policy" "public_api" {
 }
 
 # ---------------------------------------------------------------------------
+# CORS for the public API reads: the website fetches markers etc. cross-origin
+# from api.devrijehond.nl. Anonymous GETs, so a wildcard origin is fine and the
+# header is added at the edge by CloudFront.
+# ---------------------------------------------------------------------------
+resource "aws_cloudfront_response_headers_policy" "api_cors" {
+  name    = "devrijehond-api-${var.environment}-cors"
+  comment = "Allow the website to read the public API cross-origin."
+
+  cors_config {
+    access_control_allow_credentials = false
+    origin_override                  = true
+
+    access_control_allow_headers {
+      items = ["*"]
+    }
+    access_control_allow_methods {
+      items = ["GET", "HEAD", "OPTIONS"]
+    }
+    access_control_allow_origins {
+      items = ["*"]
+    }
+  }
+}
+
+# ---------------------------------------------------------------------------
 # CloudFront — custom origin in front of the dokku app.
 # ---------------------------------------------------------------------------
 resource "aws_cloudfront_distribution" "this" {
@@ -113,13 +138,14 @@ resource "aws_cloudfront_distribution" "this" {
   # Everything else (public API reads + SSR pages): cached at the edge for up to
   # 1 minute, respecting the origin Cache-Control.
   default_cache_behavior {
-    target_origin_id         = local.origin_id
-    viewer_protocol_policy   = "redirect-to-https"
-    allowed_methods          = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
-    cached_methods           = ["GET", "HEAD"]
-    compress                 = true
-    cache_policy_id          = aws_cloudfront_cache_policy.public_api.id
-    origin_request_policy_id = local.origin_request_all_viewer_except_host
+    target_origin_id           = local.origin_id
+    viewer_protocol_policy     = "redirect-to-https"
+    allowed_methods            = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+    cached_methods             = ["GET", "HEAD"]
+    compress                   = true
+    cache_policy_id            = aws_cloudfront_cache_policy.public_api.id
+    origin_request_policy_id   = local.origin_request_all_viewer_except_host
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.api_cors.id
   }
 
   restrictions {
