@@ -21,6 +21,7 @@ import {
   removeSpotPhoto,
 } from '../../actions';
 import { RichTextEditor } from '../../_components/rich-text-editor';
+import { statusLabel } from '../../_components/status-pill';
 import { TagInput, type TagOption } from '../../_components/tag-input';
 import { createAmenityTag } from './actions';
 
@@ -785,7 +786,7 @@ export function EditSpot({
         {/* Status — immediate action, separate from the form save */}
         <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--line)' }}>
           <p style={{ fontSize: 13, color: 'var(--ink-3)', marginBottom: 10 }}>
-            Status: <strong>{currentStatus}</strong>
+            Status: <strong>{statusLabel(currentStatus)}</strong>
           </p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
             {STATUS_TRANSITIONS.filter((t) => t.status !== currentStatus).map((t) => (

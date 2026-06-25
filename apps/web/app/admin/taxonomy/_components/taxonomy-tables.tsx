@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition, type CSSProperties } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { StatusPill } from '../../_components/status-pill';
 import { IconAction, ConfirmAction, Icons } from '../../_components/action-buttons';
 import { promoteCategory, promoteAmenity } from '../../actions';
@@ -84,9 +85,26 @@ function Pager({
   total: number;
   pageSize: number;
 }) {
+  // Both tables share one URL (?cpage for categories, ?apage for amenities), so
+  // paging one must preserve the sibling's current page instead of dropping it
+  // back to page 1. We read the live search params and only override our own
+  // param. Mirrors buildHref in _components/table-ui.tsx: a param is omitted
+  // when it is page 1.
+  const searchParams = useSearchParams();
+  const siblingParam = param === 'cpage' ? 'apage' : 'cpage';
+  const sibling = Number(searchParams.get(siblingParam) ?? '');
+  const siblingPage = Number.isFinite(sibling) && sibling >= 1 ? Math.floor(sibling) : 1;
+
+  const href = (p: number) => {
+    const sp = new URLSearchParams();
+    if (p > 1) sp.set(param, String(p));
+    if (siblingPage > 1) sp.set(siblingParam, String(siblingPage));
+    const q = sp.toString();
+    return q ? `/admin/taxonomy?${q}` : '/admin/taxonomy';
+  };
+
   const pages = Math.max(1, Math.ceil(total / pageSize));
   if (pages <= 1) return null;
-  const href = (p: number) => (p <= 1 ? '/admin/taxonomy' : `/admin/taxonomy?${param}=${p}`);
   const prev = page > 1;
   const next = page < pages;
   return (

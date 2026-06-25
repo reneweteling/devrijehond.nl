@@ -143,11 +143,11 @@ export function ApplicationsTable({
         <table className="admin-table">
           <colgroup>
             <col style={{ width: '24%' }} />
-            <col style={{ width: '12%' }} />
-            <col style={{ width: '32%' }} />
-            <col style={{ width: '12%' }} />
-            <col style={{ width: '10%' }} />
-            <col style={{ width: '10%' }} />
+            <col style={{ width: '13%' }} />
+            <col style={{ width: '24%' }} />
+            <col style={{ width: '14%' }} />
+            <col style={{ width: '13%' }} />
+            <col style={{ width: '100px' }} />
           </colgroup>
           <thead>
             <tr>
@@ -183,7 +183,7 @@ export function ApplicationsTable({
                         whiteSpace: 'nowrap',
                       }}
                     >
-                      {app.userName ?? '–'}
+                      {app.userName ?? '-'}
                       {app.userHandle ? (
                         <span
                           className="muted"
@@ -209,7 +209,7 @@ export function ApplicationsTable({
                       }}
                       title={app.motivation ?? undefined}
                     >
-                      {app.motivation ?? <span className="muted">–</span>}
+                      {app.motivation ?? <span className="muted">-</span>}
                     </td>
                     <td>
                       <StatusPill status={app.status} />

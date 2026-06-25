@@ -26,7 +26,7 @@ const STATUS_MAP: Record<string, PillMeta> = {
   DONE: { label: 'Klaar', cls: 'admin-pill--green' },
   REJECTED: { label: 'Afgewezen', cls: 'admin-pill--red' },
   DUPLICATE: { label: 'Duplicaat', cls: 'admin-pill--grey' },
-  CONSIDERING: { label: 'Wordt overwogen', cls: 'admin-pill--blue' },
+  CONSIDERING: { label: 'In overweging', cls: 'admin-pill--blue' },
   DECLINED: { label: 'Afgewezen', cls: 'admin-pill--red' },
 
   // Moderator applications

@@ -17,7 +17,7 @@ type Status = 'CONSIDERING' | 'PLANNED' | 'DONE' | 'DECLINED';
 // Non-destructive transitions, rendered as small icon buttons.
 const STATUS_ACTIONS: { status: Status; label: string; icon: keyof typeof Icons }[] = [
   { status: 'CONSIDERING', label: 'In overweging', icon: 'restore' },
-  { status: 'PLANNED', label: 'Gepland', icon: 'view' },
+  { status: 'PLANNED', label: 'Gepland', icon: 'planned' },
   { status: 'DONE', label: 'Klaar', icon: 'approve' },
 ];
 
@@ -169,7 +169,7 @@ export function FeatureRequestsTable({
                       </span>
                     ) : null}
                   </td>
-                  <td>{r.component ? r.component : <span className="muted">–</span>}</td>
+                  <td>{r.component ? r.component : <span className="muted">-</span>}</td>
                   <td>
                     <StatusPill status={r.status} />
                   </td>

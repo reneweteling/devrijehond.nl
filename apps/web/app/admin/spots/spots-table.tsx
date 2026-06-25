@@ -199,7 +199,7 @@ export function SpotsTable({
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    {spot.categoryLabel ?? <span className="muted">–</span>}
+                    {spot.categoryLabel ?? <span className="muted">-</span>}
                   </td>
                   <td>
                     <StatusPill status={spot.status} />

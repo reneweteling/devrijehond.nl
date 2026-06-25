@@ -91,16 +91,21 @@ export async function updateUser(userId: string, patch: UpdateUserPatch): Promis
       },
     });
   } catch (e) {
-    // Prisma unique-constraint violation (P2002). Map handle/email clashes to a
-    // readable Dutch message instead of leaking the raw error.
-    const code = (e as { code?: string }).code;
-    const targets = (e as { meta?: { target?: string[] | string } }).meta?.target;
-    if (code === 'P2002') {
-      const fields = Array.isArray(targets) ? targets.join(',') : String(targets ?? '');
-      if (fields.includes('handle')) {
+    // ZenStack v3 runs on Kysely, not Prisma, so a unique-constraint violation
+    // does not surface as `e.code === 'P2002'`. It surfaces as an ORMError whose
+    // `dbErrorCode` is the raw Postgres SQLSTATE: 23505 (unique_violation). The
+    // constraint name lives in `dbErrorMessage` (e.g. "...User_handle_key...").
+    // Map handle/email clashes to a readable Dutch message instead of leaking a
+    // raw 500 to the edit modal.
+    const err = e as { dbErrorCode?: unknown; dbErrorMessage?: string };
+    if (String(err.dbErrorCode ?? '') === '23505') {
+      const detail = (err.dbErrorMessage ?? '').toLowerCase();
+      // Only claim a specific field when the patch actually touched it and the
+      // constraint name mentions it, so the message can't point at the wrong one.
+      if (handle !== undefined && detail.includes('handle')) {
         throw new Error('Deze handle is al in gebruik. Kies een andere.');
       }
-      if (fields.includes('email')) {
+      if (email !== undefined && detail.includes('email')) {
         throw new Error('Dit e-mailadres is al in gebruik.');
       }
       throw new Error('Deze waarde is al in gebruik.');

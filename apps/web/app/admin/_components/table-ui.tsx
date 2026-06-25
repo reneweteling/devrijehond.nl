@@ -71,20 +71,23 @@ export function Pagination({
 }) {
   const pages = Math.max(1, Math.ceil(total / pageSize));
   if (pages <= 1) return null;
-  const prev = page > 1;
-  const next = page < pages;
+  // Clamp an out-of-range ?page so the display and the Prev/Next targets stay
+  // inside [1, pages]. From page 99999 Prev now lands on the last real page.
+  const current = Math.min(Math.max(page, 1), pages);
+  const prev = current > 1;
+  const next = current < pages;
   return (
     <nav className="admin-pager" aria-label="Paginering">
       {prev ? (
-        <a href={buildHref(basePath, { ...params, page: page - 1 })}>Vorige</a>
+        <a href={buildHref(basePath, { ...params, page: current - 1 })}>Vorige</a>
       ) : (
         <span className="disabled">Vorige</span>
       )}
       <span className="current">
-        {page} / {pages}
+        {current} / {pages}
       </span>
       {next ? (
-        <a href={buildHref(basePath, { ...params, page: page + 1 })}>Volgende</a>
+        <a href={buildHref(basePath, { ...params, page: current + 1 })}>Volgende</a>
       ) : (
         <span className="disabled">Volgende</span>
       )}

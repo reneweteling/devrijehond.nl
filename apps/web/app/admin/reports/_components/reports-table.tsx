@@ -34,6 +34,7 @@ export type ReportRow = {
   reporterLabel: string;
   spotName: string | null;
   spotSlug: string | null;
+  spotType: string | null;
 };
 
 const TABS: { value: ReportFilter; label: string }[] = [
@@ -43,7 +44,12 @@ const TABS: { value: ReportFilter; label: string }[] = [
 ];
 
 function targetHref(r: ReportRow): string | null {
-  if (r.targetType === 'SPOT' && r.spotSlug) return `/plek/${r.spotSlug}`;
+  // Region spots live at /gebied/<slug>, POI spots at /plek/<slug> (mirrors
+  // admin/spots/[id]/page.tsx). Using /plek for a region would 404.
+  if (r.targetType === 'SPOT' && r.spotSlug) {
+    const base = r.spotType === 'REGION' ? '/gebied/' : '/plek/';
+    return `${base}${r.spotSlug}`;
+  }
   return null;
 }
 
@@ -140,7 +146,7 @@ export function ReportsTable({
                         {REASON_LABELS[r.reason] ?? r.reason}
                       </span>
                     </td>
-                    <td>{r.note ? r.note : <span className="muted">—</span>}</td>
+                    <td>{r.note ? r.note : <span className="muted">-</span>}</td>
                     <td>{r.reporterLabel}</td>
                     <td style={{ whiteSpace: 'nowrap' }}>{formatDate(r.createdAt)}</td>
                     <td>

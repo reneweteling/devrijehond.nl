@@ -59,13 +59,13 @@ export default async function AdminReportsPage({
   // Resolve spot names only for SPOT-type reports on this page (one extra query,
   // scoped to the visible page so it stays cheap).
   const spotIds = reports.filter((r) => r.targetType === 'SPOT').map((r) => r.targetId);
-  const spotMap = new Map<string, { name: string; slug: string }>();
+  const spotMap = new Map<string, { name: string; slug: string; type: string }>();
   if (spotIds.length > 0) {
     const spots = await db.spot.findMany({
       where: { id: { in: spotIds } },
-      select: { id: true, name: true, slug: true },
+      select: { id: true, name: true, slug: true, type: true },
     });
-    for (const s of spots) spotMap.set(s.id, { name: s.name, slug: s.slug });
+    for (const s of spots) spotMap.set(s.id, { name: s.name, slug: s.slug, type: s.type });
   }
 
   const rows: ReportRow[] = reports.map((r) => {
@@ -81,6 +81,7 @@ export default async function AdminReportsPage({
       reporterLabel: r.reporter.handle ?? r.reporter.name ?? 'Onbekend',
       spotName: spot?.name ?? null,
       spotSlug: spot?.slug ?? null,
+      spotType: spot?.type ?? null,
     };
   });
 

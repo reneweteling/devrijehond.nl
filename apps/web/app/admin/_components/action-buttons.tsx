@@ -172,6 +172,24 @@ export const Icons: Record<string, ReactNode> = {
       <line x1="10" y1="14" x2="21" y2="3" />
     </svg>
   ),
+  planned: (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+      <line x1="16" y1="2" x2="16" y2="6" />
+      <line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
+    </svg>
+  ),
 };
 
 // ---------------------------------------------------------------------------
@@ -273,6 +291,7 @@ export function ConfirmAction({
 }: ConfirmActionProps) {
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   // Sync open state with the <dialog> native show/close.
@@ -290,18 +309,35 @@ export function ConfirmAction({
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
-    const onCancel = () => setOpen(false);
+    const onCancel = () => closeDialog();
     dialog.addEventListener('cancel', onCancel);
     return () => dialog.removeEventListener('cancel', onCancel);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  function openDialog() {
+    setError(null);
+    setOpen(true);
+  }
+
+  function closeDialog() {
+    setError(null);
+    setOpen(false);
+  }
 
   async function handleConfirm() {
     setPending(true);
+    setError(null);
     try {
       await onConfirm();
+      setOpen(false);
+    } catch (e) {
+      // Keep the dialog open and surface the friendly Dutch message thrown by
+      // the server action, falling back to a generic message.
+      const message = e instanceof Error && e.message ? e.message : null;
+      setError(message ?? 'Er ging iets mis. Probeer het opnieuw.');
     } finally {
       setPending(false);
-      setOpen(false);
     }
   }
 
@@ -315,24 +351,33 @@ export function ConfirmAction({
         className={triggerCls}
         title={label}
         aria-label={label}
-        onClick={() => setOpen(true)}
+        onClick={openDialog}
         disabled={disabled}
       >
         {icon}
       </button>
 
       <dialog ref={dialogRef} className="admin-confirm-dialog" aria-labelledby="confirm-title">
-        <div className="admin-confirm-overlay" onClick={() => setOpen(false)} aria-hidden="true" />
+        <div className="admin-confirm-overlay" onClick={() => closeDialog()} aria-hidden="true" />
         <div className="admin-confirm-box">
           <p id="confirm-title" className="admin-confirm-title">
             {confirmTitle}
           </p>
           {confirmBody ? <p className="admin-confirm-body">{confirmBody}</p> : null}
+          {error ? (
+            <p
+              className="admin-confirm-error"
+              role="alert"
+              style={{ color: 'var(--red, #dc2626)' }}
+            >
+              {error}
+            </p>
+          ) : null}
           <div className="admin-confirm-actions">
             <button
               type="button"
               className="btn btn-sm btn-ghost"
-              onClick={() => setOpen(false)}
+              onClick={() => closeDialog()}
               disabled={pending}
             >
               Annuleren
