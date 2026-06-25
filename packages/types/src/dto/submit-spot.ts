@@ -91,6 +91,8 @@ export const UpdateSpotRequestSchema = z
     phone: z.string().max(40).nullish(),
     website: z.string().url().nullish(),
     hours: z.unknown().optional(),
+    // When provided, replaces the spot's photo set with these (already uploaded).
+    photoUrls: z.array(z.string().url()).max(10).optional(),
   })
   .openapi('UpdateSpotRequest', {
     description: 'Body for `PATCH /api/v1/me/spots/:id` (owner edit while UNVERIFIED).',

@@ -94,6 +94,23 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
   }
 
+  // Replace the photo set if supplied (client uploaded to S3 first).
+  if (dto.photoUrls) {
+    await db.spotPhoto.deleteMany({ where: { spotId: id } });
+    if (dto.photoUrls.length > 0) {
+      await db.spotPhoto
+        .createMany({
+          data: dto.photoUrls.map((url, i) => ({
+            spotId: id,
+            url,
+            uploadedById: user.id,
+            sortOrder: i,
+          })),
+        })
+        .catch(() => undefined);
+    }
+  }
+
   if (geom) {
     await pgQuery(
       `UPDATE "Spot" SET "geom" = ST_SetSRID(ST_GeomFromGeoJSON($1), 4326) WHERE "id" = $2`,
