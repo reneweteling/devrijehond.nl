@@ -23,6 +23,9 @@ struct SpotFormView: View {
     @State private var pickerItems: [PhotosPickerItem] = []
     @State private var images: [UIImage] = []
     @State private var uploadedURLs: [String] = []
+    @State private var showPhotoSource = false
+    @State private var showCamera = false
+    @State private var showLibrary = false
     @State private var submitting = false
     @State private var error: String?
 
@@ -116,6 +119,23 @@ struct SpotFormView: View {
             }
             .task { if categories.isEmpty { categories = (try? await APIClient.categories()) ?? [] } }
             .onChange(of: pickerItems) { _, items in Task { await loadImages(items) } }
+            .confirmationDialog("Foto toevoegen", isPresented: $showPhotoSource, titleVisibility: .visible) {
+                if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                    Button("Maak een foto") { showCamera = true }
+                }
+                Button("Kies uit bibliotheek") { showLibrary = true }
+                Button("Annuleer", role: .cancel) {}
+            }
+            .photosPicker(
+                isPresented: $showLibrary, selection: $pickerItems,
+                maxSelectionCount: 10, matching: .images)
+            .fullScreenCover(isPresented: $showCamera) {
+                CameraPicker { img in
+                    images.append(img)
+                    uploadedURLs = []
+                }
+                .ignoresSafeArea()
+            }
         }
     }
 
@@ -144,13 +164,14 @@ struct SpotFormView: View {
     private var photoRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {
-                PhotosPicker(selection: $pickerItems, maxSelectionCount: 10, matching: .images) {
+                Button { showPhotoSource = true } label: {
                     ZStack {
                         RoundedRectangle(cornerRadius: 12).fill(Brand.mossSoft)
                         Image(systemName: "camera.fill").foregroundStyle(Brand.mossDark)
                     }
                     .frame(width: 76, height: 76)
                 }
+                .buttonStyle(.plain)
                 ForEach(Array(images.enumerated()), id: \.offset) { _, img in
                     Image(uiImage: img).resizable().scaledToFill()
                         .frame(width: 76, height: 76)
@@ -168,14 +189,14 @@ struct SpotFormView: View {
     }
 
     private func loadImages(_ items: [PhotosPickerItem]) async {
-        var loaded: [UIImage] = []
+        guard !items.isEmpty else { return }
         for item in items {
             if let data = try? await item.loadTransferable(type: Data.self),
                let img = UIImage(data: data) {
-                loaded.append(img)
+                images.append(img)
             }
         }
-        images = loaded
+        pickerItems = []  // consumed; allow picking more later
         uploadedURLs = []  // selection changed: invalidate any cached uploads
     }
 

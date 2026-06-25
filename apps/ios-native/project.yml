@@ -18,7 +18,7 @@ settings:
   base:
     SWIFT_VERSION: '5.0'
     MARKETING_VERSION: '1.1.0'
-    CURRENT_PROJECT_VERSION: '40'
+    CURRENT_PROJECT_VERSION: '41'
     DEVELOPMENT_TEAM: ND82KXRD2Q
 targets:
   DeVrijeHondNative:
@@ -48,6 +48,7 @@ targets:
         UIUserInterfaceStyle: Light
         ITSAppUsesNonExemptEncryption: false
         NSLocationWhenInUseUsageDescription: 'Je locatie laat de kaart zien welke hondenplekken bij jou in de buurt zijn, en bepaalt of je een plek kunt bevestigen.'
+        NSCameraUsageDescription: 'Met de camera maak je direct een foto van je hond of een plek om toe te voegen.'
         GIDClientID: '762592672284-8atreoupa0ic702gnrg61bds9h88qrmp.apps.googleusercontent.com'
         GIDServerClientID: '762592672284-cr47iv5jq6d0p2ghvmrcrf1lar90vpiq.apps.googleusercontent.com'
         CFBundleURLTypes:

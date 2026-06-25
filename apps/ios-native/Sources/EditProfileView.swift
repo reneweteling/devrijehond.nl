@@ -10,7 +10,7 @@ struct EditProfileView: View {
     @State private var bio = ""
     @State private var uploadedImageUrl: String?
     @State private var localImage: UIImage?
-    @State private var pickerItem: PhotosPickerItem?
+    @State private var showPhotoSource = false
     @State private var uploading = false
     @State private var saving = false
     @State private var error: String?
@@ -60,8 +60,8 @@ struct EditProfileView: View {
                 .disabled(!canSave)
             }
         }
-        .onChange(of: pickerItem) { _, item in
-            Task { await loadAndUpload(item) }
+        .photoSource(isPresented: $showPhotoSource) { img in
+            Task { await uploadImage(img) }
         }
         .onAppear { prefill() }
     }
@@ -70,7 +70,7 @@ struct EditProfileView: View {
 
     private var avatarSection: some View {
         VStack(spacing: DVH.s3) {
-            PhotosPicker(selection: $pickerItem, matching: .images) {
+            Button { showPhotoSource = true } label: {
                 ZStack(alignment: .bottomTrailing) {
                     if let img = localImage {
                         Image(uiImage: img)
@@ -186,10 +186,8 @@ struct EditProfileView: View {
         uploadedImageUrl = me.image
     }
 
-    private func loadAndUpload(_ item: PhotosPickerItem?) async {
-        guard let item, let token = session.token else { return }
-        guard let data = try? await item.loadTransferable(type: Data.self),
-              let img = UIImage(data: data) else { return }
+    private func uploadImage(_ img: UIImage) async {
+        guard let token = session.token else { return }
         localImage = img
         uploading = true
         error = nil

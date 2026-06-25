@@ -15,7 +15,7 @@ struct DogEditView: View {
     @State private var birthDate = Date()
     @State private var uploadedPhotoUrl: String?
     @State private var localImage: UIImage?
-    @State private var pickerItem: PhotosPickerItem?
+    @State private var showPhotoSource = false
     @State private var uploading = false
     @State private var saving = false
     @State private var deleteAlert = false
@@ -56,8 +56,8 @@ struct DogEditView: View {
         } message: {
             Text("Dit kan niet ongedaan worden gemaakt.")
         }
-        .onChange(of: pickerItem) { _, item in
-            Task { await loadAndUpload(item) }
+        .photoSource(isPresented: $showPhotoSource) { img in
+            Task { await uploadImage(img) }
         }
         .onAppear { prefill() }
     }
@@ -66,7 +66,7 @@ struct DogEditView: View {
 
     private var photoSection: some View {
         VStack(spacing: DVH.s3) {
-            PhotosPicker(selection: $pickerItem, matching: .images) {
+            Button { showPhotoSource = true } label: {
                 ZStack(alignment: .bottomTrailing) {
                     dogAvatar
                     ZStack {
@@ -205,10 +205,8 @@ struct DogEditView: View {
         }
     }
 
-    private func loadAndUpload(_ item: PhotosPickerItem?) async {
-        guard let item, let token = session.token else { return }
-        guard let data = try? await item.loadTransferable(type: Data.self),
-              let img = UIImage(data: data) else { return }
+    private func uploadImage(_ img: UIImage) async {
+        guard let token = session.token else { return }
         localImage = img
         uploading = true
         error = nil
