@@ -182,6 +182,19 @@ struct CreatedSpot: Decodable {
     let status: String
 }
 
+/// Body for PATCH /api/v1/me/spots/:id (mirrors UpdateSpotRequestSchema).
+/// All fields optional; nil optionals are omitted by the synthesized encoder,
+/// so an omitted field leaves the existing value unchanged.
+struct UpdateSpotBody: Encodable {
+    var name: String?
+    var description: String?
+    var website: String?
+    var phone: String?
+    var categoryId: String?
+    var amenityIds: [String]?
+    var address: String?
+}
+
 struct Vote: Decodable {
     let id: String
     let spotId: String

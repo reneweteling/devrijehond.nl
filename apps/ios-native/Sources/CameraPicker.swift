@@ -1,16 +1,19 @@
-import PhotosUI
 import SwiftUI
 import UIKit
 
-/// Take a photo with the camera. SwiftUI has no native camera picker, so this
-/// wraps UIImagePickerController. Needs NSCameraUsageDescription in Info.plist.
-struct CameraPicker: UIViewControllerRepresentable {
+/// Pick a photo from the camera or the photo library and crop it square.
+/// SwiftUI has no native cropping picker, so this wraps UIImagePickerController
+/// with `allowsEditing = true`, which gives the built-in square crop UI for
+/// both sources. The camera source needs NSCameraUsageDescription in Info.plist.
+struct ImagePicker: UIViewControllerRepresentable {
+    let sourceType: UIImagePickerController.SourceType
     let onImage: (UIImage) -> Void
     @Environment(\.dismiss) private var dismiss
 
     func makeUIViewController(context: Context) -> UIImagePickerController {
         let picker = UIImagePickerController()
-        picker.sourceType = .camera
+        picker.sourceType = sourceType
+        picker.allowsEditing = true
         picker.delegate = context.coordinator
         return picker
     }
@@ -20,14 +23,16 @@ struct CameraPicker: UIViewControllerRepresentable {
     func makeCoordinator() -> Coordinator { Coordinator(self) }
 
     final class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-        let parent: CameraPicker
-        init(_ parent: CameraPicker) { self.parent = parent }
+        let parent: ImagePicker
+        init(_ parent: ImagePicker) { self.parent = parent }
 
         func imagePickerController(
             _ picker: UIImagePickerController,
             didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]
         ) {
-            if let image = info[.originalImage] as? UIImage { parent.onImage(image) }
+            if let image = info[.editedImage] as? UIImage ?? info[.originalImage] as? UIImage {
+                parent.onImage(image)
+            }
             parent.dismiss()
         }
 
@@ -38,15 +43,14 @@ struct CameraPicker: UIViewControllerRepresentable {
 }
 
 /// Attach to a tappable view: on `isPresented`, offers "Maak een foto" (camera,
-/// when available) or "Kies uit bibliotheek", and calls `onImage` with the
-/// resulting UIImage from either source.
+/// when available) or "Kies uit bibliotheek", lets the user crop the result
+/// square, and calls `onImage` with the resulting UIImage from either source.
 struct PhotoSourceModifier: ViewModifier {
     @Binding var isPresented: Bool
     let onImage: (UIImage) -> Void
 
     @State private var showCamera = false
     @State private var showLibrary = false
-    @State private var pickerItem: PhotosPickerItem?
 
     func body(content: Content) -> some View {
         content
@@ -57,20 +61,13 @@ struct PhotoSourceModifier: ViewModifier {
                 Button("Kies uit bibliotheek") { showLibrary = true }
                 Button("Annuleer", role: .cancel) {}
             }
-            .photosPicker(isPresented: $showLibrary, selection: $pickerItem, matching: .images)
             .fullScreenCover(isPresented: $showCamera) {
-                CameraPicker { img in onImage(img) }
+                ImagePicker(sourceType: .camera) { img in onImage(img) }
                     .ignoresSafeArea()
             }
-            .onChange(of: pickerItem) { _, item in
-                guard let item else { return }
-                Task {
-                    if let data = try? await item.loadTransferable(type: Data.self),
-                       let img = UIImage(data: data) {
-                        onImage(img)
-                    }
-                    pickerItem = nil
-                }
+            .fullScreenCover(isPresented: $showLibrary) {
+                ImagePicker(sourceType: .photoLibrary) { img in onImage(img) }
+                    .ignoresSafeArea()
             }
     }
 }

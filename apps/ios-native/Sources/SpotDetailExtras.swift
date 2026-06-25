@@ -346,6 +346,8 @@ struct ReportSheet: View {
 struct ModerationCardView: View {
     let spotId: String
     let currentStatus: String
+    /// Called with the new status after a successful moderation action.
+    var onModerated: ((String) -> Void)? = nil
 
     @EnvironmentObject var session: Session
 
@@ -444,6 +446,7 @@ struct ModerationCardView: View {
                 try await APIClient.moderateSpot(spotId: spotId, status: status, token: token)
                 updatedStatus = status
                 resultMessage = statusLabel(status)
+                onModerated?(status)
             } catch let e as APIError {
                 _ = session.signOutIfUnauthorized(e)
                 resultMessage = e.errorDescription ?? "Actie mislukt."

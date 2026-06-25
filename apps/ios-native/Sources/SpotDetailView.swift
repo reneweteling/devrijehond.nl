@@ -5,6 +5,9 @@ import SwiftUI
 struct SpotDetailView: View {
     let spot: SpotSummary
     let category: Category?
+    /// Called when the spot's status or fields changed (vote, moderation, edit),
+    /// so the presenter (e.g. the map) can refresh.
+    var onChanged: (() -> Void)? = nil
 
     @EnvironmentObject var session: Session
     @StateObject private var loc = LocationManager()
@@ -15,6 +18,8 @@ struct SpotDetailView: View {
     @State private var voteResult: VoteResponse?
     @State private var voting = false
     @State private var voteError: String?
+    @State private var moderatedStatus: String?
+    @State private var showEdit = false
     @State private var activeSheet: SpotDetailSheet?
 
     // MARK: - Derived helpers
@@ -24,8 +29,16 @@ struct SpotDetailView: View {
         return nil
     }
 
-    private var status: String { voteResult?.status ?? detail?.status ?? spot.status }
+    private var status: String {
+        voteResult?.status ?? moderatedStatus ?? detail?.status ?? spot.status
+    }
     private var isVerified: Bool { status == "VERIFIED" }
+
+    /// Staff (moderator/admin) may edit any spot; the owner may edit while it's
+    /// still unverified (matches the API policy).
+    private var canEdit: Bool {
+        session.profile?.isModerator == true || (isOwner && status == "UNVERIFIED")
+    }
 
     private var effectiveRating: Rating {
         detail?.rating ?? spot.rating
@@ -75,6 +88,14 @@ struct SpotDetailView: View {
                         .buttonStyle(.dvhSecondary)
                     }
 
+                    // Edit this spot (moderators/admins; owner while unverified)
+                    if canEdit {
+                        Button { showEdit = true } label: {
+                            Label("Bewerken", systemImage: "square.and.pencil")
+                        }
+                        .buttonStyle(.dvhSecondary)
+                    }
+
                     // Description
                     if let desc = detail?.description, !desc.isEmpty {
                         Text(stripHTML(desc))
@@ -108,8 +129,11 @@ struct SpotDetailView: View {
 
                     // Moderation card (moderators only)
                     if session.profile?.isModerator == true {
-                        ModerationCardView(spotId: spotId, currentStatus: status)
-                            .environmentObject(session)
+                        ModerationCardView(spotId: spotId, currentStatus: status) { newStatus in
+                            moderatedStatus = newStatus
+                            onChanged?()
+                        }
+                        .environmentObject(session)
                     }
                 }
                 .padding(.horizontal, DVH.s4)
@@ -118,6 +142,13 @@ struct SpotDetailView: View {
             }
         }
         .background(Brand.sand)
+        .sheet(isPresented: $showEdit) {
+            SpotEditView(spot: spot, detail: detail) {
+                onChanged?()
+                Task { detail = try? await APIClient.spotDetail(slug: spot.slug) }
+            }
+            .environmentObject(session)
+        }
         .task {
             loc.request()
             if detail == nil {
@@ -447,6 +478,7 @@ struct SpotDetailView: View {
             do {
                 voteResult = try await APIClient.vote(
                     spotId: spot.id, value: value, proof: proof, token: token)
+                onChanged?()  // tally may have flipped the status: refresh the map
             } catch let e as APIError {
                 if session.signOutIfUnauthorized(e) {
                     voteError = "Je sessie is verlopen. Log opnieuw in."

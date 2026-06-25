@@ -49,6 +49,7 @@ struct MapScreen: View {
     // Spots held in MapKitView coordinator; we expose a binding so chip
     // filtering can be applied client-side without a new fetch.
     @State private var allFetchedSpots: [SpotSummary] = []
+    @State private var reloadToken = 0
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -60,7 +61,8 @@ struct MapScreen: View {
                 recenterTrigger: recenterTrigger,
                 jumpToCoordinate: jumpToCoordinate,
                 onSelectSpot: { selected = $0 },
-                onFetchedSpots: { allFetchedSpots = $0 }
+                onFetchedSpots: { allFetchedSpots = $0 },
+                reloadToken: reloadToken
             )
             .ignoresSafeArea()
         }
@@ -97,8 +99,10 @@ struct MapScreen: View {
             DispatchQueue.main.async { session.mapFocus = nil }
         }
         .sheet(item: $selected) { spot in
-            SpotDetailView(spot: spot, category: categoriesById[spot.categoryId])
-                .presentationDetents([.medium, .large])
+            SpotDetailView(spot: spot, category: categoriesById[spot.categoryId]) {
+                reloadToken += 1  // status/edit changed: refresh the map markers
+            }
+            .presentationDetents([.medium, .large])
         }
         .sheet(isPresented: $showSearch) {
             SearchView(
@@ -245,6 +249,8 @@ struct MapKitView: UIViewRepresentable {
     var jumpToCoordinate: CLLocationCoordinate2D?
     var onSelectSpot: (SpotSummary) -> Void
     var onFetchedSpots: ([SpotSummary]) -> Void
+    /// Bumped to force a re-fetch (e.g. after a spot's status changed in detail).
+    var reloadToken: Int = 0
 
     func makeCoordinator() -> Coordinator {
         Coordinator(onSelectSpot: onSelectSpot, onFetchedSpots: onFetchedSpots)
@@ -309,6 +315,13 @@ struct MapKitView: UIViewRepresentable {
             context.coordinator.appliedCategoryId = selectedCategoryId
             context.coordinator.scheduleFetch(map)
         }
+
+        // A spot changed status (vote/moderation/edit) in the detail sheet:
+        // re-fetch so the marker colour + clusters reflect the new status.
+        if reloadToken != context.coordinator.lastReloadToken {
+            context.coordinator.lastReloadToken = reloadToken
+            context.coordinator.scheduleFetch(map)
+        }
     }
 
     // MARK: - Coordinator
@@ -336,6 +349,7 @@ struct MapKitView: UIViewRepresentable {
         var lastRecenterLongitude: Double = 0
         var lastJumpLatitude: Double = 0
         var lastJumpLongitude: Double = 0
+        var lastReloadToken = 0
 
         init(onSelectSpot: @escaping (SpotSummary) -> Void,
              onFetchedSpots: @escaping ([SpotSummary]) -> Void) {
@@ -387,17 +401,27 @@ struct MapKitView: UIViewRepresentable {
         /// the active category. Safe to call from any main-thread context.
         func renderFilteredAnnotations(on map: MKMapView) {
             // --- Spot annotations ---
+            // Render signature: what the marker actually shows. If it changes for
+            // an existing spot (e.g. status flips to verified, or category edited),
+            // we remove + re-add so its annotation view is rebuilt with the new
+            // colour/icon instead of being kept as an unchanged survivor.
+            func sig(_ s: SpotSummary) -> String { "\(s.categoryId)|\(s.isVerified)" }
             var desiredSpots: [String: SpotAnnotation] = [:]
             for spot in allItems {
                 if let ann = SpotAnnotation(spot) {
                     desiredSpots[ann.spotId] = ann
                 }
             }
-            let spotsToRemove = liveSpots.filter { desiredSpots[$0.key] == nil }.map(\.value)
-            let spotsToAdd   = desiredSpots.filter { liveSpots[$0.key] == nil }.map(\.value)
+            let spotsToRemove = liveSpots.filter { key, ann in
+                guard let d = desiredSpots[key] else { return true }  // gone
+                return sig(d.spot) != sig(ann.spot)                   // appearance changed
+            }.map(\.value)
+            let spotsToAdd = desiredSpots.filter { key, ann in
+                guard let live = liveSpots[key] else { return true }  // new
+                return sig(ann.spot) != sig(live.spot)                // appearance changed
+            }.map(\.value)
             if !spotsToRemove.isEmpty { map.removeAnnotations(spotsToRemove) }
             if !spotsToAdd.isEmpty    { map.addAnnotations(spotsToAdd) }
-            // Update live set: keep survivors, add newcomers.
             for ann in spotsToRemove { liveSpots.removeValue(forKey: ann.spotId) }
             for ann in spotsToAdd    { liveSpots[ann.spotId] = ann }
 

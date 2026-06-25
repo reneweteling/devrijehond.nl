@@ -1,4 +1,5 @@
-import PhotosUI
+import SwiftUI
+import UIKit
 import SwiftUI
 
 /// Step 2 of adding a spot: the geometry is already drawn, here the user fills
@@ -20,12 +21,9 @@ struct SpotFormView: View {
     @State private var categories: [Category] = []
     @State private var amenities: [Amenity] = []
     @State private var selectedAmenities: Set<String> = []
-    @State private var pickerItems: [PhotosPickerItem] = []
     @State private var images: [UIImage] = []
     @State private var uploadedURLs: [String] = []
     @State private var showPhotoSource = false
-    @State private var showCamera = false
-    @State private var showLibrary = false
     @State private var submitting = false
     @State private var error: String?
 
@@ -118,23 +116,9 @@ struct SpotFormView: View {
                 }
             }
             .task { if categories.isEmpty { categories = (try? await APIClient.categories()) ?? [] } }
-            .onChange(of: pickerItems) { _, items in Task { await loadImages(items) } }
-            .confirmationDialog("Foto toevoegen", isPresented: $showPhotoSource, titleVisibility: .visible) {
-                if UIImagePickerController.isSourceTypeAvailable(.camera) {
-                    Button("Maak een foto") { showCamera = true }
-                }
-                Button("Kies uit bibliotheek") { showLibrary = true }
-                Button("Annuleer", role: .cancel) {}
-            }
-            .photosPicker(
-                isPresented: $showLibrary, selection: $pickerItems,
-                maxSelectionCount: 10, matching: .images)
-            .fullScreenCover(isPresented: $showCamera) {
-                CameraPicker { img in
-                    images.append(img)
-                    uploadedURLs = []
-                }
-                .ignoresSafeArea()
+            .photoSource(isPresented: $showPhotoSource) { img in
+                images.append(img)
+                uploadedURLs = []  // new photo added: re-upload all on submit
             }
         }
     }
@@ -186,18 +170,6 @@ struct SpotFormView: View {
 
     private func loadAmenities(_ id: String) async {
         amenities = (try? await APIClient.amenities(categoryId: id)) ?? []
-    }
-
-    private func loadImages(_ items: [PhotosPickerItem]) async {
-        guard !items.isEmpty else { return }
-        for item in items {
-            if let data = try? await item.loadTransferable(type: Data.self),
-               let img = UIImage(data: data) {
-                images.append(img)
-            }
-        }
-        pickerItems = []  // consumed; allow picking more later
-        uploadedURLs = []  // selection changed: invalidate any cached uploads
     }
 
     private func submit() {

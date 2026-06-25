@@ -292,6 +292,12 @@ struct APIClient {
         try await post("/api/v1/me/spots", body: body, token: token, as: CreatedSpot.self)
     }
 
+    /// PATCH /api/v1/me/spots/:id. The owner may edit while UNVERIFIED; staff
+    /// (ADMIN/MODERATOR) may edit any spot. Returns the updated spot detail.
+    static func updateSpot(id: String, body: UpdateSpotBody, token: String) async throws -> SpotDetail {
+        try await patch("/api/v1/me/spots/\(id)", body: body, token: token, as: SpotDetail.self)
+    }
+
     static func vote(
         spotId: String, value: String, proof: GeoPoint?, token: String
     ) async throws -> VoteResponse {
