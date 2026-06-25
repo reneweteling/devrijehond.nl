@@ -30,3 +30,4 @@ coverage/
 
 # Firebase config (kept local, contains the iOS API key)
 apps/ios-native/Sources/GoogleService-Info.plist
+secrets/GoogleService-Info.plist
