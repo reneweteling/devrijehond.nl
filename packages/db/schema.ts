@@ -251,6 +251,24 @@ export class SchemaType implements SchemaDef {
       },
       attributes: [
         {
+          name: '@@index',
+          args: [
+            {
+              name: 'fields',
+              value: ExpressionUtils.array('DateTime', [ExpressionUtils.field('createdAt')]),
+            },
+          ],
+        },
+        {
+          name: '@@index',
+          args: [
+            {
+              name: 'fields',
+              value: ExpressionUtils.array('UserRole', [ExpressionUtils.field('role')]),
+            },
+          ],
+        },
+        {
           name: '@@allow',
           args: [
             { name: 'operation', value: ExpressionUtils.literal('read') },
@@ -869,6 +887,33 @@ export class SchemaType implements SchemaDef {
       },
       attributes: [
         {
+          name: '@@index',
+          args: [
+            {
+              name: 'fields',
+              value: ExpressionUtils.array('TaxonomyStatus', [ExpressionUtils.field('status')]),
+            },
+          ],
+        },
+        {
+          name: '@@index',
+          args: [
+            {
+              name: 'fields',
+              value: ExpressionUtils.array('Int', [ExpressionUtils.field('sortOrder')]),
+            },
+          ],
+        },
+        {
+          name: '@@index',
+          args: [
+            {
+              name: 'fields',
+              value: ExpressionUtils.array('String', [ExpressionUtils.field('proposedById')]),
+            },
+          ],
+        },
+        {
           name: '@@allow',
           args: [
             { name: 'operation', value: ExpressionUtils.literal('read') },
@@ -1062,6 +1107,33 @@ export class SchemaType implements SchemaDef {
       },
       attributes: [
         {
+          name: '@@index',
+          args: [
+            {
+              name: 'fields',
+              value: ExpressionUtils.array('TaxonomyStatus', [ExpressionUtils.field('status')]),
+            },
+          ],
+        },
+        {
+          name: '@@index',
+          args: [
+            {
+              name: 'fields',
+              value: ExpressionUtils.array('Int', [ExpressionUtils.field('sortOrder')]),
+            },
+          ],
+        },
+        {
+          name: '@@index',
+          args: [
+            {
+              name: 'fields',
+              value: ExpressionUtils.array('String', [ExpressionUtils.field('proposedById')]),
+            },
+          ],
+        },
+        {
           name: '@@allow',
           args: [
             { name: 'operation', value: ExpressionUtils.literal('read') },
@@ -1214,6 +1286,15 @@ export class SchemaType implements SchemaDef {
                 ExpressionUtils.field('amenityId'),
                 ExpressionUtils.field('categoryId'),
               ]),
+            },
+          ],
+        },
+        {
+          name: '@@index',
+          args: [
+            {
+              name: 'fields',
+              value: ExpressionUtils.array('String', [ExpressionUtils.field('categoryId')]),
             },
           ],
         },
@@ -1530,6 +1611,36 @@ export class SchemaType implements SchemaDef {
           ],
         },
         {
+          name: '@@index',
+          args: [
+            {
+              name: 'fields',
+              value: ExpressionUtils.array('DateTime', [ExpressionUtils.field('createdAt')]),
+            },
+          ],
+        },
+        {
+          name: '@@index',
+          args: [
+            {
+              name: 'fields',
+              value: ExpressionUtils.array('SpotStatus', [
+                ExpressionUtils.field('status'),
+                ExpressionUtils.field('createdAt'),
+              ]),
+            },
+          ],
+        },
+        {
+          name: '@@index',
+          args: [
+            {
+              name: 'fields',
+              value: ExpressionUtils.array('String', [ExpressionUtils.field('submittedById')]),
+            },
+          ],
+        },
+        {
           name: '@@deny',
           args: [
             { name: 'operation', value: ExpressionUtils.literal('read') },
@@ -1757,6 +1868,15 @@ export class SchemaType implements SchemaDef {
           ],
         },
         {
+          name: '@@index',
+          args: [
+            {
+              name: 'fields',
+              value: ExpressionUtils.array('String', [ExpressionUtils.field('amenityId')]),
+            },
+          ],
+        },
+        {
           name: '@@allow',
           args: [
             { name: 'operation', value: ExpressionUtils.literal('read') },
@@ -1920,6 +2040,24 @@ export class SchemaType implements SchemaDef {
         },
       },
       attributes: [
+        {
+          name: '@@index',
+          args: [
+            {
+              name: 'fields',
+              value: ExpressionUtils.array('String', [ExpressionUtils.field('spotId')]),
+            },
+          ],
+        },
+        {
+          name: '@@index',
+          args: [
+            {
+              name: 'fields',
+              value: ExpressionUtils.array('String', [ExpressionUtils.field('uploadedById')]),
+            },
+          ],
+        },
         {
           name: '@@allow',
           args: [
@@ -2135,7 +2273,7 @@ export class SchemaType implements SchemaDef {
           args: [
             {
               name: 'fields',
-              value: ExpressionUtils.array('String', [ExpressionUtils.field('spotId')]),
+              value: ExpressionUtils.array('String', [ExpressionUtils.field('userId')]),
             },
           ],
         },
@@ -2546,6 +2684,36 @@ export class SchemaType implements SchemaDef {
           ],
         },
         {
+          name: '@@index',
+          args: [
+            {
+              name: 'fields',
+              value: ExpressionUtils.array('Boolean', [
+                ExpressionUtils.field('resolved'),
+                ExpressionUtils.field('createdAt'),
+              ]),
+            },
+          ],
+        },
+        {
+          name: '@@index',
+          args: [
+            {
+              name: 'fields',
+              value: ExpressionUtils.array('DateTime', [ExpressionUtils.field('createdAt')]),
+            },
+          ],
+        },
+        {
+          name: '@@index',
+          args: [
+            {
+              name: 'fields',
+              value: ExpressionUtils.array('String', [ExpressionUtils.field('reporterId')]),
+            },
+          ],
+        },
+        {
           name: '@@allow',
           args: [
             { name: 'operation', value: ExpressionUtils.literal('create') },
@@ -2793,6 +2961,45 @@ export class SchemaType implements SchemaDef {
         },
       },
       attributes: [
+        {
+          name: '@@index',
+          args: [
+            {
+              name: 'fields',
+              value: ExpressionUtils.array('FeatureStatus', [ExpressionUtils.field('status')]),
+            },
+          ],
+        },
+        {
+          name: '@@index',
+          args: [
+            {
+              name: 'fields',
+              value: ExpressionUtils.array('DateTime', [ExpressionUtils.field('createdAt')]),
+            },
+          ],
+        },
+        {
+          name: '@@index',
+          args: [
+            {
+              name: 'fields',
+              value: ExpressionUtils.array('FeatureStatus', [
+                ExpressionUtils.field('status'),
+                ExpressionUtils.field('createdAt'),
+              ]),
+            },
+          ],
+        },
+        {
+          name: '@@index',
+          args: [
+            {
+              name: 'fields',
+              value: ExpressionUtils.array('String', [ExpressionUtils.field('createdById')]),
+            },
+          ],
+        },
         {
           name: '@@allow',
           args: [
@@ -3092,6 +3299,47 @@ export class SchemaType implements SchemaDef {
         },
       },
       attributes: [
+        {
+          name: '@@index',
+          args: [
+            {
+              name: 'fields',
+              value: ExpressionUtils.array('ModeratorApplicationStatus', [
+                ExpressionUtils.field('status'),
+              ]),
+            },
+          ],
+        },
+        {
+          name: '@@index',
+          args: [
+            {
+              name: 'fields',
+              value: ExpressionUtils.array('DateTime', [ExpressionUtils.field('createdAt')]),
+            },
+          ],
+        },
+        {
+          name: '@@index',
+          args: [
+            {
+              name: 'fields',
+              value: ExpressionUtils.array('ModeratorApplicationStatus', [
+                ExpressionUtils.field('status'),
+                ExpressionUtils.field('createdAt'),
+              ]),
+            },
+          ],
+        },
+        {
+          name: '@@index',
+          args: [
+            {
+              name: 'fields',
+              value: ExpressionUtils.array('String', [ExpressionUtils.field('decidedById')]),
+            },
+          ],
+        },
         {
           name: '@@allow',
           args: [
