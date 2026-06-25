@@ -1,5 +1,6 @@
 import AuthenticationServices
 import SwiftUI
+import UIKit
 
 /// The sign-in surface: native Apple, native Google, and magic-link email.
 /// Used both as the signed-out Profile state and as a sheet gating Add/vote.
@@ -179,6 +180,13 @@ struct SignInView: View {
             Text("We hebben een inloglink gestuurd naar \(email). Open hem op deze telefoon, dan ben je ingelogd.")
                 .font(.dvhCallout).foregroundStyle(Brand.ink2)
                 .multilineTextAlignment(.center)
+            Button {
+                if let url = URL(string: "message://") { UIApplication.shared.open(url) }
+            } label: {
+                Text("Open je e-mailapp").frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.dvhPrimary)
+            .padding(.top, DVH.s2)
             Button("Ander e-mailadres") { magicSent = false; error = nil }
                 .font(.dvhCallout.weight(.semibold)).foregroundStyle(Brand.moss).padding(.top, DVH.s1)
         }

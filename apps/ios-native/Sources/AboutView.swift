@@ -64,6 +64,15 @@ struct AboutView: View {
     }
 
     // Community self-moderation: explain it and let people apply.
+    /// A moderator application only makes sense once people can recognise you:
+    /// require a profile photo and a name before the apply button unlocks.
+    private var profileComplete: Bool {
+        guard let p = session.profile else { return false }
+        let hasPhoto = !(p.image ?? "").isEmpty
+        let hasName = !(p.name ?? "").trimmingCharacters(in: .whitespaces).isEmpty
+        return hasPhoto && hasName
+    }
+
     private var moderatorCard: some View {
         VStack(alignment: .leading, spacing: DVH.s3) {
             Text("Help mee modereren").font(.dvhHeadline).foregroundStyle(Brand.ink)
@@ -77,10 +86,17 @@ struct AboutView: View {
                 Label("Je bent al moderator", systemImage: "checkmark.seal.fill")
                     .font(.dvhCallout.weight(.semibold)).foregroundStyle(Brand.mossDark)
             } else if session.isAuthenticated {
-                Button { showModerator = true } label: {
-                    Text("Meld je aan als moderator")
+                Button { if profileComplete { showModerator = true } } label: {
+                    Text("Meld je aan als moderator").frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.dvhPrimary)
+                .disabled(!profileComplete)
+                .opacity(profileComplete ? 1 : 0.5)
+                if !profileComplete {
+                    Text("Voeg eerst een profielfoto toe en vul je naam in bij je profiel. "
+                        + "Daarna kun je je aanmelden als moderator.")
+                        .font(.dvhCaption).foregroundStyle(Brand.ink2).lineSpacing(3)
+                }
             } else {
                 Text("Log in om je aan te melden als moderator.")
                     .font(.dvhCallout).foregroundStyle(Brand.ink2)

@@ -17,8 +17,8 @@ packages:
 settings:
   base:
     SWIFT_VERSION: '5.0'
-    MARKETING_VERSION: '1.1.0'
-    CURRENT_PROJECT_VERSION: '45'
+    MARKETING_VERSION: '1.0.0'
+    CURRENT_PROJECT_VERSION: '46'
     DEVELOPMENT_TEAM: ND82KXRD2Q
 targets:
   DeVrijeHondNative:
@@ -41,6 +41,9 @@ targets:
         # build number actually tracks the setting.
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        # Home-screen / app name. Without this it falls back to the target name
+        # "DeVrijeHondNative"; show the real product name instead.
+        CFBundleDisplayName: De Vrije Hond
         UILaunchScreen: {}
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
