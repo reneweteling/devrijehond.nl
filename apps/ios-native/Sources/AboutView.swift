@@ -76,11 +76,14 @@ struct AboutView: View {
             if session.profile?.isModerator == true {
                 Label("Je bent al moderator", systemImage: "checkmark.seal.fill")
                     .font(.dvhCallout.weight(.semibold)).foregroundStyle(Brand.mossDark)
-            } else {
+            } else if session.isAuthenticated {
                 Button { showModerator = true } label: {
                     Text("Meld je aan als moderator")
                 }
                 .buttonStyle(.dvhPrimary)
+            } else {
+                Text("Log in om je aan te melden als moderator.")
+                    .font(.dvhCallout).foregroundStyle(Brand.ink2)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
