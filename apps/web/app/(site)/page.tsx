@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { unstable_cache } from 'next/cache';
 import { pgQuery } from '@devrijehond/server';
 
 import { MapIsland } from './map-island';
@@ -13,11 +14,12 @@ import { Reveal, FadeIn } from './motion';
  *
  * Rendered dynamically (not prerendered at build): the build container has no
  * DB, so a build-time render would bake in the loadData() catch fallback
- * (0 plekken). The category counts / featured / stats are cached via ISR rather
- * than re-queried on every request, so the page loads fast; the map markers load
- * client-side from the API and aren't part of this render.
+ * (0 plekken). The page stays dynamic so it queries the live DB at runtime (the
+ * build has no DB access), but the category counts / featured / stats are cached
+ * at runtime via unstable_cache so they aren't re-queried on every request. Map
+ * markers load client-side from the API and aren't part of this render.
  */
-export const revalidate = 600;
+export const dynamic = 'force-dynamic';
 
 const IOS_URL = 'https://apps.apple.com/app/de-vrije-hond/id000000000';
 const ANDROID_URL = 'https://play.google.com/store/apps/details?id=nl.devrijehond.app';
@@ -97,12 +99,17 @@ async function loadData() {
   }
 }
 
+// Cache the (live-DB) home data at runtime so the dynamic page stays fast without
+// re-querying on every request. Runs at request time, not at build, so the DB is
+// available and the counts are real.
+const getHomeData = unstable_cache(loadData, ['home-data-v1'], { revalidate: 300 });
+
 function detailHref(type: 'REGION' | 'POI', slug: string) {
   return `/${type === 'REGION' ? 'gebied' : 'plek'}/${slug}`;
 }
 
 export default async function HomePage() {
-  const { cats, featured, stats } = await loadData();
+  const { cats, featured, stats } = await getHomeData();
 
   return (
     <main>
