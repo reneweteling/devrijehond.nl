@@ -13,9 +13,11 @@ import { Reveal, FadeIn } from './motion';
  *
  * Rendered dynamically (not prerendered at build): the build container has no
  * DB, so a build-time render would bake in the loadData() catch fallback
- * (0 plekken). Per-request SSR queries the live DB instead.
+ * (0 plekken). The category counts / featured / stats are cached via ISR rather
+ * than re-queried on every request, so the page loads fast; the map markers load
+ * client-side from the API and aren't part of this render.
  */
-export const dynamic = 'force-dynamic';
+export const revalidate = 600;
 
 const IOS_URL = 'https://apps.apple.com/app/de-vrije-hond/id000000000';
 const ANDROID_URL = 'https://play.google.com/store/apps/details?id=nl.devrijehond.app';
