@@ -36,6 +36,18 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
     return NextResponse.redirect(url, 308);
   }
 
+  // The native app is bearer-only, but URLSession.shared can replay a stale
+  // BetterAuth session cookie (set during an Apple/Google login) on the
+  // unauthenticated magic-link sign-in POST. A request that carries a cookie but
+  // no Origin trips BetterAuth's CSRF guard (403 MISSING_OR_NULL_ORIGIN), which
+  // broke email sign-in from the app. This endpoint never needs a cookie, so
+  // strip it here so any client (including older app builds) can sign in.
+  if (pathname === '/api/auth/sign-in/magic-link' && request.headers.get('cookie')) {
+    const headers = new Headers(request.headers);
+    headers.delete('cookie');
+    return NextResponse.next({ request: { headers } });
+  }
+
   // Only the admin section is gated here. Everything else (public site + API)
   // passes through; API routes enforce auth per-route via `requireAuth`.
   if (!(pathname === ADMIN_PREFIX || pathname.startsWith(`${ADMIN_PREFIX}/`))) {
