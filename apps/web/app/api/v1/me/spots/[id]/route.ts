@@ -43,9 +43,12 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
   const db = authDb({ id: user.id, role: user.role });
 
-  // Confirm ownership + slug (and give a clean 404 rather than a policy 500).
+  // Staff (ADMIN/MODERATOR) may edit any spot, any status; the owner may only
+  // edit their own spot while it is still UNVERIFIED. The ZenStack policy
+  // enforces the same; this lookup just yields a clean 404 instead of a 500.
+  const isStaff = user.role === 'ADMIN' || user.role === 'MODERATOR';
   const existing = await db.spot.findFirst({
-    where: { id, submittedById: user.id, status: 'UNVERIFIED' },
+    where: isStaff ? { id } : { id, submittedById: user.id, status: 'UNVERIFIED' },
     select: { id: true, slug: true },
   });
   if (!existing) {

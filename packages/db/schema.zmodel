@@ -357,8 +357,9 @@ model Spot {
   @@deny('read', (status == 'HIDDEN' || status == 'REMOVED') && auth().role != 'ADMIN' && auth().role != 'MODERATOR' && auth().id != submittedById)
   @@allow('read', true)
   @@allow('create', auth() != null && auth().id == submittedById)
-  // Owner may edit while still unverified; admin may always edit.
+  // Owner may edit while still unverified; staff may edit any spot, any status.
   @@allow('update', auth().id == submittedById && status == 'UNVERIFIED')
+  @@allow('update', (auth().role == 'ADMIN' || auth().role == 'MODERATOR'))
   @@allow('all', (auth().role == 'ADMIN' || auth().role == 'MODERATOR'))
 }
 
