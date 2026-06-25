@@ -1,24 +1,24 @@
 'use client';
 
-import { DataTable, type ColumnDef } from '../../_components/data-table';
+import type { ReactNode } from 'react';
+import { StatusPill } from '../../_components/status-pill';
+import { ConfirmAction, Icons } from '../../_components/action-buttons';
 import { setFeatureStatus } from '../../actions';
+import { deleteFeatureRequest } from '../actions';
 
-const STATUSES = ['CONSIDERING', 'PLANNED', 'DONE', 'DECLINED'] as const;
-type Status = (typeof STATUSES)[number];
+/**
+ * Server-rendered table for the "Wensen" board. Status is shown as a StatusPill;
+ * non-destructive transitions are small IconAction buttons, the destructive ones
+ * (afwijzen + verwijderen) are ConfirmAction with a Dutch confirm dialog.
+ */
 
-const STATUS_META: Record<Status, { label: string; bg: string; fg: string }> = {
-  CONSIDERING: { label: 'In overweging', bg: 'var(--terra-soft)', fg: 'var(--terra-700)' },
-  PLANNED: { label: 'Gepland', bg: '#dde6f2', fg: '#3a5a86' },
-  DONE: { label: 'Gedaan', bg: 'var(--moss-soft)', fg: 'var(--moss-700)' },
-  DECLINED: { label: 'Afgewezen', bg: '#eee', fg: '#8a8a76' },
-};
+type Status = 'CONSIDERING' | 'PLANNED' | 'DONE' | 'DECLINED';
 
-const STATUS_FILTER_LABELS: { value: string; label: string }[] = [
-  { value: '', label: 'Alle' },
-  { value: 'CONSIDERING', label: 'In overweging' },
-  { value: 'PLANNED', label: 'Gepland' },
-  { value: 'DONE', label: 'Gedaan' },
-  { value: 'DECLINED', label: 'Afgewezen' },
+// Non-destructive transitions, rendered as small icon buttons.
+const STATUS_ACTIONS: { status: Status; label: string; icon: keyof typeof Icons }[] = [
+  { status: 'CONSIDERING', label: 'In overweging', icon: 'restore' },
+  { status: 'PLANNED', label: 'Gepland', icon: 'view' },
+  { status: 'DONE', label: 'Klaar', icon: 'approve' },
 ];
 
 export type FeatureRequestRow = {
@@ -31,85 +31,74 @@ export type FeatureRequestRow = {
   createdAt: string;
 };
 
-const columns: ColumnDef<FeatureRequestRow, unknown>[] = [
-  {
-    accessorKey: 'title',
-    header: 'Titel',
-    meta: { className: 'row-title' },
-    cell: ({ row }) => {
-      const r = row.original;
-      return (
-        <>
-          <span className="row-title">{r.title}</span>
-          {r.body ? (
-            <span className="muted" style={{ display: 'block', fontSize: 13, marginTop: 2 }}>
-              {r.body.length > 100 ? `${r.body.slice(0, 100)}…` : r.body}
-            </span>
-          ) : null}
-        </>
-      );
-    },
-  },
-  {
-    accessorKey: 'component',
-    header: 'Onderdeel',
-    cell: ({ row }) =>
-      row.original.component ? row.original.component : <span className="muted">—</span>,
-  },
-  {
-    accessorKey: 'status',
-    header: 'Status',
-    enableSorting: true,
-    cell: ({ row }) => {
-      const meta = STATUS_META[row.original.status as Status];
-      if (!meta) return <span className="muted">{row.original.status}</span>;
-      return (
-        <span
-          className="badge"
-          style={{ background: meta.bg, color: meta.fg, whiteSpace: 'nowrap' }}
-        >
-          {meta.label}
-        </span>
-      );
-    },
-  },
-  {
-    accessorKey: 'upvoteCount',
-    header: 'Stemmen',
-    meta: { className: 'num' },
-    enableSorting: true,
-  },
-  {
-    accessorKey: 'createdAt',
-    header: 'Datum',
-    enableSorting: true,
-    cell: ({ row }) =>
-      new Date(row.original.createdAt).toLocaleDateString('nl-NL', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-      }),
-  },
-  {
-    id: 'status-actie',
-    header: 'Status-actie',
-    meta: { className: 'actions' },
-    cell: ({ row }) => {
-      const r = row.original;
-      return (
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-          {STATUSES.filter((s) => s !== r.status).map((s) => (
-            <form key={s} action={setFeatureStatus.bind(null, r.id, s)}>
-              <button type="submit" className="btn btn-sm btn-soft">
-                {STATUS_META[s].label}
-              </button>
-            </form>
-          ))}
-        </div>
-      );
-    },
-  },
+function RowActions({ row }: { row: FeatureRequestRow }) {
+  return (
+    <span style={{ display: 'flex', gap: 4, justifyContent: 'flex-end', flexWrap: 'nowrap' }}>
+      {STATUS_ACTIONS.filter((a) => a.status !== row.status).map((a) => (
+        <form key={a.status} action={setFeatureStatus.bind(null, row.id, a.status)}>
+          <IconButtonSubmit icon={Icons[a.icon]} label={a.label} />
+        </form>
+      ))}
+
+      {row.status !== 'DECLINED' ? (
+        <ConfirmAction
+          icon={Icons.reject}
+          label="Afwijzen"
+          variant="danger"
+          confirmTitle="Wens afwijzen?"
+          confirmBody="De wens wordt op afgewezen gezet. De community ziet dit terug."
+          confirmLabel="Afwijzen"
+          onConfirm={() => setFeatureStatus(row.id, 'DECLINED')}
+        />
+      ) : null}
+
+      <ConfirmAction
+        icon={Icons.trash}
+        label="Verwijderen"
+        variant="danger"
+        confirmTitle="Wens verwijderen?"
+        confirmBody="De wens en alle stemmen worden definitief verwijderd. Dit kan niet ongedaan worden gemaakt."
+        confirmLabel="Verwijderen"
+        onConfirm={() => deleteFeatureRequest(row.id)}
+      />
+    </span>
+  );
+}
+
+/**
+ * IconAction inside a server-action <form> needs a real submit button, so we use
+ * the same look via a plain button with the admin-icon-btn class.
+ */
+function IconButtonSubmit({ icon, label }: { icon: ReactNode; label: string }) {
+  return (
+    <button
+      type="submit"
+      className="admin-icon-btn admin-icon-btn--default"
+      title={label}
+      aria-label={label}
+    >
+      {icon}
+    </button>
+  );
+}
+
+const FILTER_OPTIONS: { label: string; value: string }[] = [
+  { label: 'Alle', value: '' },
+  { label: 'In overweging', value: 'CONSIDERING' },
+  { label: 'Gepland', value: 'PLANNED' },
+  { label: 'Klaar', value: 'DONE' },
+  { label: 'Afgewezen', value: 'DECLINED' },
 ];
+
+const BASE = '/admin/feature-requests';
+
+function fmtDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('nl-NL', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
 
 export function FeatureRequestsTable({
   rows,
@@ -118,32 +107,83 @@ export function FeatureRequestsTable({
   rows: FeatureRequestRow[];
   statusFilter: string;
 }) {
-  const BASE = '/admin/feature-requests';
-
-  const toolbarExtra = (
-    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-      {STATUS_FILTER_LABELS.map(({ value, label }) => {
-        const active = value === statusFilter;
-        return (
-          <a
-            key={value || 'alle'}
-            href={value ? `${BASE}?status=${value}` : BASE}
-            className={`btn btn-sm${active ? ' btn-primary' : ' btn-soft'}`}
-          >
-            {label}
-          </a>
-        );
-      })}
-    </div>
-  );
-
   return (
-    <DataTable
-      columns={columns}
-      data={rows}
-      searchPlaceholder="Zoek wens…"
-      toolbarExtra={toolbarExtra}
-      emptyText="Geen wensen gevonden."
-    />
+    <>
+      <div className="admin-toolbar">
+        <div className="admin-filters">
+          {FILTER_OPTIONS.map((opt) => {
+            const active = opt.value === statusFilter;
+            const href = opt.value ? `${BASE}?status=${opt.value}` : BASE;
+            return (
+              <a
+                key={opt.value || 'alle'}
+                href={href}
+                className="btn btn-sm"
+                style={
+                  active
+                    ? { background: 'var(--ink)', color: '#fff', borderColor: 'var(--ink)' }
+                    : undefined
+                }
+              >
+                {opt.label}
+              </a>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="admin-table-wrap">
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>Titel</th>
+              <th>Onderdeel</th>
+              <th>Status</th>
+              <th className="num">Stemmen</th>
+              <th>Datum</th>
+              <th className="actions" />
+            </tr>
+          </thead>
+          <tbody>
+            {rows.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={6}
+                  className="muted"
+                  style={{ textAlign: 'center', padding: '28px 16px' }}
+                >
+                  Geen wensen gevonden.
+                </td>
+              </tr>
+            ) : (
+              rows.map((r) => (
+                <tr key={r.id}>
+                  <td>
+                    <span className="row-title">{r.title}</span>
+                    {r.body ? (
+                      <span
+                        className="muted"
+                        style={{ display: 'block', fontSize: 13, marginTop: 2 }}
+                      >
+                        {r.body.length > 100 ? `${r.body.slice(0, 100)}…` : r.body}
+                      </span>
+                    ) : null}
+                  </td>
+                  <td>{r.component ? r.component : <span className="muted">–</span>}</td>
+                  <td>
+                    <StatusPill status={r.status} />
+                  </td>
+                  <td className="num">{r.upvoteCount}</td>
+                  <td style={{ whiteSpace: 'nowrap' }}>{fmtDate(r.createdAt)}</td>
+                  <td className="actions">
+                    <RowActions row={r} />
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }

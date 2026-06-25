@@ -1,7 +1,11 @@
 'use client';
 
-import { DataTable, type ColumnDef } from '../../_components/data-table';
-import { resolveReport } from '../../actions';
+import { StatusPill } from '../../_components/status-pill';
+import { ConfirmAction, IconAction, Icons } from '../../_components/action-buttons';
+import { Pagination } from '../../_components/table-ui';
+import { resolveReport } from '../actions';
+
+const BASE = '/admin/reports';
 
 const REASON_LABELS: Record<string, string> = {
   DUPLICATE: 'Duplicaat',
@@ -17,6 +21,8 @@ const TARGET_LABELS: Record<string, string> = {
   REVIEW: 'Recensie',
 };
 
+export type ReportFilter = 'open' | 'resolved' | 'all';
+
 export type ReportRow = {
   id: string;
   targetType: string;
@@ -30,108 +36,147 @@ export type ReportRow = {
   spotSlug: string | null;
 };
 
-const columns: ColumnDef<ReportRow, unknown>[] = [
-  {
-    accessorKey: 'spotName',
-    header: 'Doel',
-    meta: { className: 'row-title' },
-    cell: ({ row }) => {
-      const r = row.original;
-      if (r.targetType === 'SPOT' && r.spotSlug && r.spotName) {
-        return <a href={`/plek/${r.spotSlug}`}>{r.spotName}</a>;
-      }
-      return `${TARGET_LABELS[r.targetType] ?? r.targetType} · ${r.targetId.slice(0, 8)}`;
-    },
-  },
-  {
-    accessorKey: 'reason',
-    header: 'Reden',
-    cell: ({ row }) => (
-      <span
-        className="badge"
-        style={{ background: 'var(--terra-soft)', color: 'var(--terra-700)' }}
-      >
-        {REASON_LABELS[row.original.reason] ?? row.original.reason}
-      </span>
-    ),
-  },
-  {
-    accessorKey: 'note',
-    header: 'Notitie',
-    cell: ({ row }) => (row.original.note ? row.original.note : <span className="muted">—</span>),
-  },
-  {
-    accessorKey: 'reporterLabel',
-    header: 'Melder',
-  },
-  {
-    accessorKey: 'createdAt',
-    header: 'Datum',
-    enableSorting: true,
-    cell: ({ row }) =>
-      new Date(row.original.createdAt).toLocaleDateString('nl-NL', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-      }),
-  },
-  {
-    accessorKey: 'resolved',
-    header: 'Status / Actie',
-    meta: { className: 'actions' },
-    cell: ({ row }) => {
-      const r = row.original;
-      if (r.resolved) {
-        return (
-          <span
-            className="badge"
-            style={{ background: '#eee', color: '#8a8a76', whiteSpace: 'nowrap' }}
-          >
-            Afgehandeld
-          </span>
-        );
-      }
-      return (
-        <form action={resolveReport.bind(null, r.id)}>
-          <button type="submit" className="btn btn-sm btn-soft">
-            Afhandelen
-          </button>
-        </form>
-      );
-    },
-  },
+const TABS: { value: ReportFilter; label: string }[] = [
+  { value: 'open', label: 'Open' },
+  { value: 'resolved', label: 'Afgehandeld' },
+  { value: 'all', label: 'Alles' },
 ];
+
+function targetHref(r: ReportRow): string | null {
+  if (r.targetType === 'SPOT' && r.spotSlug) return `/plek/${r.spotSlug}`;
+  return null;
+}
+
+function targetLabel(r: ReportRow): string {
+  if (r.targetType === 'SPOT' && r.spotName) return r.spotName;
+  return `${TARGET_LABELS[r.targetType] ?? r.targetType} · ${r.targetId.slice(0, 8)}`;
+}
+
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('nl-NL', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
 
 export function ReportsTable({
   rows,
-  statusFilter,
+  page,
+  total,
+  filter,
 }: {
   rows: ReportRow[];
-  statusFilter: 'open' | 'done';
+  page: number;
+  total: number;
+  filter: ReportFilter;
 }) {
-  const BASE = '/admin/reports';
-
-  const toolbarExtra = (
-    <nav style={{ display: 'flex', gap: 8 }}>
-      <a href={BASE} className={statusFilter === 'open' ? 'filter-link active' : 'filter-link'}>
-        Open
-      </a>
-      <a
-        href={`${BASE}?status=done`}
-        className={statusFilter === 'done' ? 'filter-link active' : 'filter-link'}
-      >
-        Afgehandeld
-      </a>
-    </nav>
-  );
+  const emptyText =
+    filter === 'open'
+      ? 'Geen open meldingen.'
+      : filter === 'resolved'
+        ? 'Geen afgehandelde meldingen.'
+        : 'Geen meldingen.';
 
   return (
-    <DataTable
-      columns={columns}
-      data={rows}
-      searchPlaceholder="Zoek melding…"
-      toolbarExtra={toolbarExtra}
-      emptyText={statusFilter === 'open' ? 'Geen open meldingen.' : 'Geen afgehandelde meldingen.'}
-    />
+    <div>
+      <div className="admin-toolbar">
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {TABS.map((tab) => {
+            const isActive = tab.value === filter;
+            const href = tab.value === 'open' ? BASE : `${BASE}?filter=${tab.value}`;
+            return (
+              <a
+                key={tab.value}
+                href={href}
+                className="btn btn-sm"
+                style={
+                  isActive
+                    ? { background: 'var(--ink)', color: '#fff', borderColor: 'var(--ink)' }
+                    : undefined
+                }
+              >
+                {tab.label}
+              </a>
+            );
+          })}
+        </div>
+        <span className="admin-count">{total} resultaten</span>
+      </div>
+
+      <div className="admin-table-wrap">
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th className="row-title">Doel</th>
+              <th>Reden</th>
+              <th>Notitie</th>
+              <th>Melder</th>
+              <th>Datum</th>
+              <th>Status</th>
+              <th className="actions" />
+            </tr>
+          </thead>
+          <tbody>
+            {rows.length === 0 ? (
+              <tr>
+                <td colSpan={7} style={{ textAlign: 'center', color: 'var(--ink-3)' }}>
+                  {emptyText}
+                </td>
+              </tr>
+            ) : (
+              rows.map((r) => {
+                const href = targetHref(r);
+                return (
+                  <tr key={r.id}>
+                    <td className="row-title">
+                      {href ? <a href={href}>{targetLabel(r)}</a> : targetLabel(r)}
+                    </td>
+                    <td>
+                      <span
+                        className="badge"
+                        style={{ background: 'var(--terra-soft)', color: 'var(--terra-700)' }}
+                      >
+                        {REASON_LABELS[r.reason] ?? r.reason}
+                      </span>
+                    </td>
+                    <td>{r.note ? r.note : <span className="muted">—</span>}</td>
+                    <td>{r.reporterLabel}</td>
+                    <td style={{ whiteSpace: 'nowrap' }}>{formatDate(r.createdAt)}</td>
+                    <td>
+                      <StatusPill status={r.resolved ? 'RESOLVED' : 'OPEN'} />
+                    </td>
+                    <td className="actions">
+                      <span style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
+                        {href ? (
+                          <IconAction icon={Icons.view} label="Bekijk doel" href={href} />
+                        ) : null}
+                        {r.resolved ? null : (
+                          <ConfirmAction
+                            icon={Icons.approve}
+                            label="Afhandelen"
+                            confirmTitle="Melding afhandelen?"
+                            confirmBody="De melding wordt gemarkeerd als afgehandeld."
+                            confirmLabel="Afhandelen"
+                            onConfirm={() => resolveReport(r.id)}
+                          />
+                        )}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <Pagination
+        basePath={BASE}
+        page={page}
+        total={total}
+        params={{ filter: filter === 'open' ? undefined : filter }}
+      />
+    </div>
   );
 }

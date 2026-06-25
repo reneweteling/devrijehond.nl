@@ -1,13 +1,14 @@
 import { staffDb } from '@/lib/admin-db';
+import { Pagination, parsePage, ADMIN_PAGE_SIZE } from '../_components/table-ui';
 import { FeatureRequestsTable, type FeatureRequestRow } from './_components/feature-requests-table';
 
 /**
- * Admin control over the public "Wensen" board. Lists feature requests by
- * upvotes and lets an admin set the status (CONSIDERING / PLANNED / DONE /
- * DECLINED), which the mobile app surfaces back to the community.
+ * Admin control over the public "Wensen" board. Lists feature requests and lets
+ * staff set the status (CONSIDERING / PLANNED / DONE / DECLINED), which the
+ * mobile app surfaces back to the community, or delete a request.
  *
- * Fetches all rows (admin data volumes are small); client-side DataTable handles
- * sort/search/paging.
+ * Server-side pagination + optional ?status filter, ordered by status then
+ * newest first (backed by the [status, createdAt] index).
  */
 export const dynamic = 'force-dynamic';
 
@@ -18,40 +19,49 @@ function isValidStatus(v: string | undefined): v is Status {
   return VALID_STATUSES.includes(v as Status);
 }
 
+const BASE = '/admin/feature-requests';
+
 export default async function AdminFeatureRequestsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; page?: string }>;
 }) {
   const sp = await searchParams;
   const statusFilter = isValidStatus(sp.status) ? sp.status : '';
+  const page = parsePage(sp.page);
+
+  const where = statusFilter ? { status: statusFilter } : {};
 
   const db = await staffDb();
 
-  const requests = await db.featureRequest.findMany({
-    orderBy: [{ upvoteCount: 'desc' }, { createdAt: 'desc' }],
-    select: {
-      id: true,
-      title: true,
-      body: true,
-      component: true,
-      status: true,
-      upvoteCount: true,
-      createdAt: true,
-    },
-  });
+  const [requests, total] = await Promise.all([
+    db.featureRequest.findMany({
+      where,
+      orderBy: [{ status: 'asc' }, { createdAt: 'desc' }],
+      take: ADMIN_PAGE_SIZE,
+      skip: (page - 1) * ADMIN_PAGE_SIZE,
+      select: {
+        id: true,
+        title: true,
+        body: true,
+        component: true,
+        status: true,
+        upvoteCount: true,
+        createdAt: true,
+      },
+    }),
+    db.featureRequest.count({ where }),
+  ]);
 
-  const rows: FeatureRequestRow[] = requests
-    .filter((r) => (statusFilter ? r.status === statusFilter : true))
-    .map((r) => ({
-      id: r.id,
-      title: r.title,
-      body: r.body,
-      component: r.component,
-      status: r.status,
-      upvoteCount: r.upvoteCount,
-      createdAt: r.createdAt.toISOString(),
-    }));
+  const rows: FeatureRequestRow[] = requests.map((r) => ({
+    id: r.id,
+    title: r.title,
+    body: r.body,
+    component: r.component,
+    status: r.status,
+    upvoteCount: r.upvoteCount,
+    createdAt: r.createdAt.toISOString(),
+  }));
 
   return (
     <div>
@@ -62,6 +72,12 @@ export default async function AdminFeatureRequestsPage({
         terugzien.
       </p>
       <FeatureRequestsTable rows={rows} statusFilter={statusFilter} />
+      <Pagination
+        basePath={BASE}
+        page={page}
+        total={total}
+        params={{ status: statusFilter || undefined }}
+      />
     </div>
   );
 }

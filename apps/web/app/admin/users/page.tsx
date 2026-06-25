@@ -1,22 +1,46 @@
 import { adminDb, currentStaff } from '@/lib/admin-db';
+import { parsePage, ADMIN_PAGE_SIZE } from '../_components/table-ui';
 import { UsersTable, type UserRow } from './users-table';
 
 /**
- * User management — ADMIN only. Lists every user with role, reputation and
- * activity counts. The full row set is fetched server-side and handed to the
- * client DataTable which handles search/sort/pagination in the browser.
+ * User management — ADMIN only. Lists users with role, reputation and spot
+ * count. Paging, search and field edits are all server-driven: this page reads
+ * `?page` / `?q` from the URL, fetches only the rows shown (take + skip) and the
+ * total count, and selects only the columns the table renders.
  *
- * `adminDb()` throws a 403 Response if the caller is a MODERATOR, so no
- * additional role check is needed here.
+ * `adminDb()` throws a 403 Response if the caller is a MODERATOR, so no extra
+ * role check is needed here.
  */
 export const dynamic = 'force-dynamic';
 
-export default async function AdminUsersPage() {
+export default async function AdminUsersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; q?: string }>;
+}) {
+  const sp = await searchParams;
+  const page = parsePage(sp.page);
+  const q = sp.q?.trim() || undefined;
+
   const [db, me] = await Promise.all([adminDb(), currentStaff()]);
 
-  const [users, totalUsers, totalMods, totalAdmins] = await Promise.all([
+  // Optional search across name / handle / email (case-insensitive).
+  const where = q
+    ? {
+        OR: [
+          { name: { contains: q, mode: 'insensitive' as const } },
+          { handle: { contains: q, mode: 'insensitive' as const } },
+          { email: { contains: q, mode: 'insensitive' as const } },
+        ],
+      }
+    : {};
+
+  const [users, total, totalMods, totalAdmins] = await Promise.all([
     db.user.findMany({
-      orderBy: [{ role: 'desc' }, { createdAt: 'asc' }],
+      where,
+      orderBy: { createdAt: 'desc' },
+      take: ADMIN_PAGE_SIZE,
+      skip: (page - 1) * ADMIN_PAGE_SIZE,
       select: {
         id: true,
         name: true,
@@ -28,7 +52,7 @@ export default async function AdminUsersPage() {
         _count: { select: { spots: true } },
       },
     }),
-    db.user.count(),
+    db.user.count({ where }),
     db.user.count({ where: { role: 'MODERATOR' } }),
     db.user.count({ where: { role: 'ADMIN' } }),
   ]);
@@ -49,14 +73,14 @@ export default async function AdminUsersPage() {
       <span className="eyebrow">Beheer</span>
       <h1 style={{ fontSize: 'clamp(26px, 4vw, 36px)', margin: '8px 0 8px' }}>Gebruikers</h1>
       <p className="muted" style={{ maxWidth: '60ch', marginBottom: 20 }}>
-        Alle geregistreerde gebruikers. Verander hier de rol; moderatoren kunnen content beoordelen,
-        beheerders kunnen alles.
+        Alle geregistreerde gebruikers. Verander hier de rol of bewerk een profiel; moderatoren
+        kunnen content beoordelen, beheerders kunnen alles.
       </p>
 
       <div className="admin-stats">
         <div className="admin-stat">
-          <div className="n">{totalUsers}</div>
-          <div className="l">gebruikers totaal</div>
+          <div className="n">{total}</div>
+          <div className="l">{q ? 'gevonden' : 'gebruikers totaal'}</div>
         </div>
         <div className="admin-stat">
           <div className="n">{totalMods}</div>
@@ -68,7 +92,7 @@ export default async function AdminUsersPage() {
         </div>
       </div>
 
-      <UsersTable rows={rows} currentUserId={me.id} />
+      <UsersTable rows={rows} currentUserId={me.id} page={page} total={total} query={q} />
     </div>
   );
 }

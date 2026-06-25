@@ -1,33 +1,21 @@
 'use client';
 
 /**
- * Client table for /admin/spots. Receives pre-serialised rows from the server
- * page and wires them into the shared DataTable + setSpotStatus server action.
+ * Presentational table for /admin/spots. Renders one server-paginated page of
+ * spots with status filter chips, a search box and small icon actions per row.
+ * Paging/filtering/search are all driven by URL search params (server-side), so
+ * this component holds no list state, it only fires the moderation server
+ * actions and refreshes the route.
  */
 
-import Link from 'next/link';
-import { DataTable, type ColumnDef } from '../_components/data-table';
-import { setSpotStatus } from '../actions';
+import { useRouter } from 'next/navigation';
+import { useTransition, useState } from 'react';
+import { StatusPill } from '../_components/status-pill';
+import { IconAction, ConfirmAction, Icons } from '../_components/action-buttons';
+import { AdminSearch, Pagination } from '../_components/table-ui';
+import { setSpotStatus, removeSpot } from '../actions';
 
 type SpotStatus = 'UNVERIFIED' | 'VERIFIED' | 'HIDDEN' | 'REMOVED';
-
-const STATUS_META: Record<SpotStatus, { label: string; bg: string; fg: string }> = {
-  UNVERIFIED: { label: 'Niet geverifieerd', bg: 'var(--terra-soft)', fg: 'var(--terra-700)' },
-  VERIFIED: { label: 'Geverifieerd', bg: 'var(--moss-soft)', fg: 'var(--moss-700)' },
-  HIDDEN: { label: 'Verborgen', bg: '#eee', fg: '#8a8a76' },
-  REMOVED: { label: 'Verwijderd', bg: '#f5e0de', fg: 'var(--rust, #a33b2d)' },
-};
-
-const STATUS_ACTIONS: {
-  status: SpotStatus;
-  label: string;
-  variant: 'primary' | 'soft' | 'danger';
-}[] = [
-  { status: 'VERIFIED', label: 'Verifieer', variant: 'primary' },
-  { status: 'UNVERIFIED', label: 'Herstel', variant: 'soft' },
-  { status: 'HIDDEN', label: 'Verberg', variant: 'soft' },
-  { status: 'REMOVED', label: 'Verwijder', variant: 'danger' },
-];
 
 export type SpotRow = {
   id: string;
@@ -42,150 +30,222 @@ export type SpotRow = {
   submitterLabel: string;
 };
 
-const columns: ColumnDef<SpotRow, unknown>[] = [
-  {
-    accessorKey: 'name',
-    header: 'Naam',
-    meta: { className: 'row-title' },
-    cell: ({ row }) => <Link href={`/admin/spots/${row.original.id}`}>{row.original.name}</Link>,
-  },
-  {
-    accessorKey: 'categoryLabel',
-    header: 'Categorie',
-    cell: ({ getValue }) => {
-      const v = getValue() as string | null;
-      return v ?? <span className="muted">–</span>;
-    },
-  },
-  {
-    accessorKey: 'type',
-    header: 'Type',
-  },
-  {
-    accessorKey: 'status',
-    header: 'Status',
-    enableSorting: true,
-    cell: ({ getValue }) => {
-      const s = getValue() as SpotStatus;
-      const meta = STATUS_META[s];
-      return meta ? (
-        <span className="badge" style={{ background: meta.bg, color: meta.fg }}>
-          {meta.label}
-        </span>
-      ) : (
-        <span className="muted">{s}</span>
-      );
-    },
-  },
-  {
-    accessorKey: 'netScore',
-    header: 'Score',
-    meta: { className: 'num' },
-    enableSorting: true,
-    cell: ({ row }) => (
-      <>
-        {row.original.netScore >= 0 ? '+' : ''}
-        {row.original.netScore}
-        {row.original.denyCount > 0 ? (
-          <small className="muted" style={{ marginLeft: 4 }}>
-            ({row.original.denyCount}✕)
-          </small>
-        ) : null}
-      </>
-    ),
-  },
-  {
-    accessorKey: 'submitterLabel',
-    header: 'Inzender',
-  },
-  {
-    accessorKey: 'createdAt',
-    header: 'Aangemaakt',
-    enableSorting: true,
-    sortingFn: 'datetime',
-    cell: ({ getValue }) => {
-      const iso = getValue() as string;
-      return (
-        <span style={{ whiteSpace: 'nowrap' }}>
-          {new Date(iso).toLocaleDateString('nl-NL', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric',
-          })}
-        </span>
-      );
-    },
-  },
-  {
-    id: 'actions',
-    header: '',
-    meta: { className: 'actions' },
-    enableSorting: false,
-    cell: ({ row }) => {
-      const spot = row.original;
-      return (
-        <span style={{ display: 'flex', gap: 4, justifyContent: 'flex-end', flexWrap: 'nowrap' }}>
-          {STATUS_ACTIONS.filter((a) => a.status !== spot.status).map((a) => {
-            const cls =
-              a.variant === 'primary'
-                ? 'btn btn-sm btn-primary'
-                : a.variant === 'danger'
-                  ? 'btn btn-sm btn-danger'
-                  : 'btn btn-sm btn-soft';
-            return (
-              <form key={a.status} action={setSpotStatus.bind(null, spot.id, a.status)}>
-                <button type="submit" className={cls}>
-                  {a.label}
-                </button>
-              </form>
-            );
-          })}
-        </span>
-      );
-    },
-  },
+const FILTER_OPTIONS: { label: string; value: string }[] = [
+  { label: 'Alle', value: 'ALL' },
+  { label: 'Niet geverifieerd', value: 'UNVERIFIED' },
+  { label: 'Geverifieerd', value: 'VERIFIED' },
+  { label: 'Verborgen', value: 'HIDDEN' },
+  { label: 'Verwijderd', value: 'REMOVED' },
 ];
 
-export function SpotsTable({ rows, statusFilter }: { rows: SpotRow[]; statusFilter?: SpotStatus }) {
-  const FILTER_OPTIONS: { label: string; value: string }[] = [
-    { label: 'Alle', value: 'ALL' },
-    { label: 'Niet geverifieerd', value: 'UNVERIFIED' },
-    { label: 'Geverifieerd', value: 'VERIFIED' },
-    { label: 'Verborgen', value: 'HIDDEN' },
-    { label: 'Verwijderd', value: 'REMOVED' },
-  ];
+function filterHref(value: string, query?: string): string {
+  const sp = new URLSearchParams();
+  if (value !== 'ALL') sp.set('status', value);
+  if (query) sp.set('q', query);
+  const qs = sp.toString();
+  return qs ? `/admin/spots?${qs}` : '/admin/spots';
+}
 
-  const toolbarExtra = (
-    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-      {FILTER_OPTIONS.map((opt) => {
-        const isActive = opt.value === 'ALL' ? !statusFilter : opt.value === statusFilter;
-        const href = opt.value === 'ALL' ? '/admin/spots' : `/admin/spots?status=${opt.value}`;
-        return (
-          <a
-            key={opt.value}
-            href={href}
-            className="btn btn-sm"
-            style={
-              isActive
-                ? { background: 'var(--ink)', color: '#fff', borderColor: 'var(--ink)' }
-                : undefined
-            }
-          >
-            {opt.label}
-          </a>
-        );
-      })}
-    </div>
-  );
+function SpotActions({ spot }: { spot: SpotRow }) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [busy, setBusy] = useState<string | null>(null);
 
-  const filtered = statusFilter ? rows.filter((r) => r.status === statusFilter) : rows;
+  function run(key: string, fn: () => Promise<void>) {
+    setBusy(key);
+    startTransition(async () => {
+      try {
+        await fn();
+        router.refresh();
+      } finally {
+        setBusy(null);
+      }
+    });
+  }
 
   return (
-    <DataTable
-      columns={columns}
-      data={filtered}
-      searchPlaceholder="Zoek op naam, categorie, inzender…"
-      toolbarExtra={toolbarExtra}
-    />
+    <span style={{ display: 'inline-flex', gap: 4, justifyContent: 'flex-end' }}>
+      <IconAction icon={Icons.edit} label="Bewerken" href={`/admin/spots/${spot.id}`} />
+      {spot.status !== 'VERIFIED' ? (
+        <IconAction
+          icon={Icons.verify}
+          label="Verifiëren"
+          variant="success"
+          pending={isPending && busy === 'verify'}
+          disabled={isPending}
+          onClick={() => run('verify', () => setSpotStatus(spot.id, 'VERIFIED'))}
+        />
+      ) : null}
+      {spot.status !== 'HIDDEN' ? (
+        <IconAction
+          icon={Icons.hide}
+          label="Verbergen"
+          pending={isPending && busy === 'hide'}
+          disabled={isPending}
+          onClick={() => run('hide', () => setSpotStatus(spot.id, 'HIDDEN'))}
+        />
+      ) : null}
+      <ConfirmAction
+        icon={Icons.remove}
+        label="Verwijderen"
+        variant="danger"
+        confirmTitle="Plek verwijderen?"
+        confirmBody={spot.name}
+        confirmLabel="Verwijderen"
+        disabled={isPending}
+        onConfirm={async () => {
+          await removeSpot(spot.id);
+          router.refresh();
+        }}
+      />
+    </span>
+  );
+}
+
+export function SpotsTable({
+  rows,
+  statusFilter,
+  page,
+  total,
+  query,
+}: {
+  rows: SpotRow[];
+  statusFilter?: SpotStatus;
+  page: number;
+  total: number;
+  query?: string;
+}) {
+  return (
+    <div>
+      <div className="admin-toolbar">
+        <AdminSearch
+          basePath="/admin/spots"
+          q={query}
+          placeholder="Zoek op naam…"
+          keep={{ status: statusFilter }}
+        />
+        <div className="admin-filters">
+          {FILTER_OPTIONS.map((opt) => {
+            const isActive = opt.value === 'ALL' ? !statusFilter : opt.value === statusFilter;
+            return (
+              <a
+                key={opt.value}
+                href={filterHref(opt.value, query)}
+                className="btn btn-sm"
+                style={
+                  isActive
+                    ? { background: 'var(--ink)', color: '#fff', borderColor: 'var(--ink)' }
+                    : undefined
+                }
+              >
+                {opt.label}
+              </a>
+            );
+          })}
+        </div>
+        <span className="admin-count">{total} resultaten</span>
+      </div>
+
+      <div className="admin-table-wrap">
+        <table className="admin-table" style={{ tableLayout: 'fixed' }}>
+          <colgroup>
+            <col style={{ width: '30%' }} />
+            <col style={{ width: '16%' }} />
+            <col style={{ width: '14%' }} />
+            <col style={{ width: '8%' }} />
+            <col style={{ width: '14%' }} />
+            <col style={{ width: '10%' }} />
+            <col style={{ width: '8%' }} />
+          </colgroup>
+          <thead>
+            <tr>
+              <th>Naam</th>
+              <th>Categorie</th>
+              <th>Status</th>
+              <th className="num">Score</th>
+              <th>Inzender</th>
+              <th>Aangemaakt</th>
+              <th className="actions" />
+            </tr>
+          </thead>
+          <tbody>
+            {rows.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="muted" style={{ textAlign: 'center', padding: 24 }}>
+                  Geen plekken gevonden.
+                </td>
+              </tr>
+            ) : (
+              rows.map((spot) => (
+                <tr key={spot.id}>
+                  <td className="row-title">
+                    <a
+                      href={`/admin/spots/${spot.id}`}
+                      style={{
+                        display: 'block',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                      title={spot.name}
+                    >
+                      {spot.name}
+                    </a>
+                  </td>
+                  <td
+                    style={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {spot.categoryLabel ?? <span className="muted">–</span>}
+                  </td>
+                  <td>
+                    <StatusPill status={spot.status} />
+                  </td>
+                  <td className="num">
+                    {spot.netScore >= 0 ? '+' : ''}
+                    {spot.netScore}
+                    {spot.denyCount > 0 ? (
+                      <small className="muted" style={{ marginLeft: 4 }}>
+                        ({spot.denyCount}✕)
+                      </small>
+                    ) : null}
+                  </td>
+                  <td
+                    style={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                    title={spot.submitterLabel}
+                  >
+                    {spot.submitterLabel}
+                  </td>
+                  <td style={{ whiteSpace: 'nowrap' }}>
+                    {new Date(spot.createdAt).toLocaleDateString('nl-NL', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
+                  </td>
+                  <td className="actions">
+                    <SpotActions spot={spot} />
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <Pagination
+        basePath="/admin/spots"
+        page={page}
+        total={total}
+        params={{ status: statusFilter, q: query }}
+      />
+    </div>
   );
 }

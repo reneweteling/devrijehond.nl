@@ -21,6 +21,8 @@ import {
   removeSpotPhoto,
 } from '../../actions';
 import { RichTextEditor } from '../../_components/rich-text-editor';
+import { TagInput, type TagOption } from '../../_components/tag-input';
+import { createAmenityTag } from './actions';
 
 const GOOGLE_MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '';
 
@@ -30,7 +32,6 @@ const GOOGLE_MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '';
 
 type Point = { lat: number; lng: number };
 type Photo = { id: string; url: string };
-type Amenity = { id: string; label: string };
 type Category = { id: string; label: string; type?: string };
 
 export type EditSpotProps = {
@@ -43,7 +44,7 @@ export type EditSpotProps = {
   initialAddress: string | null;
   initialPhone: string | null;
   initialWebsite: string | null;
-  initialAmenityIds: string[];
+  initialAmenities: TagOption[];
   initialPhotos: Photo[];
   lat: number | null;
   lng: number | null;
@@ -73,21 +74,11 @@ const inputStyle: React.CSSProperties = {
   fontFamily: 'inherit',
 };
 
+// Card section heading. Matches the rest of the admin (e.g. the taxonomy page's
+// card titles): plain display font, no uppercase / letter-spacing tweaks that
+// would make Fraunces read like a different typeface.
 function SectionHeading({ children }: { children: React.ReactNode }) {
-  return (
-    <h3
-      style={{
-        fontSize: 13,
-        fontWeight: 600,
-        letterSpacing: '0.07em',
-        textTransform: 'uppercase',
-        color: 'var(--ink-3)',
-        margin: '0 0 14px',
-      }}
-    >
-      {children}
-    </h3>
-  );
+  return <h2 style={{ fontSize: 18, margin: '0 0 14px' }}>{children}</h2>;
 }
 
 function Feedback({ msg, ok }: { msg: string | null; ok: boolean }) {
@@ -577,7 +568,7 @@ export function EditSpot({
   initialAddress,
   initialPhone,
   initialWebsite,
-  initialAmenityIds,
+  initialAmenities,
   initialPhotos,
   lat,
   lng,
@@ -590,9 +581,9 @@ export function EditSpot({
   const [address, setAddress] = useState(initialAddress ?? '');
   const [phone, setPhone] = useState(initialPhone ?? '');
   const [website, setWebsite] = useState(initialWebsite ?? '');
-  const [selectedAmenities, setSelectedAmenities] = useState<Set<string>>(
-    new Set(initialAmenityIds),
-  );
+  // Selected amenities as full {id,label} tags so the tag input can render
+  // labels even for amenities that aren't in the current category's suggestions.
+  const [selectedAmenities, setSelectedAmenities] = useState<TagOption[]>(initialAmenities);
 
   // geometry
   const defaultPoiPos: Point = { lat: lat ?? 52.13, lng: lng ?? 5.29 };
@@ -607,14 +598,14 @@ export function EditSpot({
     address: initialAddress ?? '',
     phone: initialPhone ?? '',
     website: initialWebsite ?? '',
-    amenityIds: [...initialAmenityIds].sort(),
+    amenityIds: initialAmenities.map((a) => a.id).sort(),
     markerPos: defaultPoiPos,
     polyPoints: polygonCoords ?? [],
   });
 
-  // --- categories + amenities ---
+  // --- categories + amenity suggestions (scoped to the spot's category) ---
   const [categories, setCategories] = useState<Category[]>([]);
-  const [amenities, setAmenities] = useState<Amenity[]>([]);
+  const [amenitySuggestions, setAmenitySuggestions] = useState<TagOption[]>([]);
 
   useEffect(() => {
     const qs = spotType === 'REGION' ? '?type=REGION' : '?type=POI';
@@ -628,7 +619,7 @@ export function EditSpot({
     if (!categoryId) return;
     fetch(`/api/v1/amenities?categoryId=${categoryId}`)
       .then((r) => r.json())
-      .then((data: { items?: Amenity[] }) => setAmenities(data.items ?? []))
+      .then((data: { items?: TagOption[] }) => setAmenitySuggestions(data.items ?? []))
       .catch(() => {});
   }, [categoryId]);
 
@@ -664,7 +655,7 @@ export function EditSpot({
     const trimAddr = address.trim();
     const trimPhone = phone.trim();
     const trimWebsite = website.trim();
-    const amenityIds = Array.from(selectedAmenities).sort();
+    const amenityIds = selectedAmenities.map((a) => a.id).sort();
 
     const fieldsChanged =
       trimName !== b.name || trimDesc !== b.description || categoryId !== b.categoryId;
@@ -855,47 +846,18 @@ export function EditSpot({
       {/* 3 — Voorzieningen */}
       <section className="card" style={{ padding: 20 }}>
         <SectionHeading>Voorzieningen</SectionHeading>
-        {amenities.length === 0 ? (
-          <p style={{ fontSize: 14, color: 'var(--ink-3)' }}>
-            Geen voorzieningen beschikbaar voor deze categorie.
-          </p>
-        ) : (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {amenities.map((a) => {
-              const active = selectedAmenities.has(a.id);
-              return (
-                <button
-                  key={a.id}
-                  type="button"
-                  onClick={() =>
-                    setSelectedAmenities((prev) => {
-                      const next = new Set(prev);
-                      if (next.has(a.id)) next.delete(a.id);
-                      else next.add(a.id);
-                      return next;
-                    })
-                  }
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    padding: '6px 14px',
-                    borderRadius: 999,
-                    border: `1.5px solid ${active ? 'var(--moss)' : 'var(--line)'}`,
-                    background: active ? 'var(--moss-soft)' : '#fff',
-                    color: active ? 'var(--moss-700)' : 'var(--ink-2)',
-                    fontSize: 14,
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                    transition: 'all 0.12s ease',
-                  }}
-                >
-                  {a.label}
-                </button>
-              );
-            })}
-          </div>
-        )}
+        <TagInput
+          value={selectedAmenities}
+          onChange={setSelectedAmenities}
+          suggestions={amenitySuggestions}
+          allowCreate
+          onCreate={(label) => createAmenityTag(label, categoryId)}
+          placeholder="Voorziening zoeken of toevoegen…"
+        />
+        <p style={{ fontSize: 13, color: 'var(--ink-3)', margin: '10px 0 0' }}>
+          Typ om te zoeken. Bestaat een voorziening nog niet, dan kun je hem hier toevoegen, hij
+          komt dan als voorstel op de taxonomiepagina.
+        </p>
       </section>
 
       {/* 4 — Foto's (immediate action — outside the form save flow) */}

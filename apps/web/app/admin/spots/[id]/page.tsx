@@ -70,7 +70,10 @@ export default async function AdminSpotDetailPage({ params }: { params: Promise<
 
   const publicUrl = spot.type === 'REGION' ? `/gebied/${spot.slug}` : `/plek/${spot.slug}`;
 
-  const initialAmenityIds = spot.amenities.map((sa) => sa.amenity.id);
+  const initialAmenities = spot.amenities.map((sa) => ({
+    id: sa.amenity.id,
+    label: sa.amenity.label,
+  }));
   const initialPhotos = spot.photos.map((p) => ({ id: p.id, url: p.url }));
 
   return (
@@ -162,7 +165,7 @@ export default async function AdminSpotDetailPage({ params }: { params: Promise<
         initialAddress={spot.address ?? null}
         initialPhone={spot.phone ?? null}
         initialWebsite={spot.website ?? null}
-        initialAmenityIds={initialAmenityIds}
+        initialAmenities={initialAmenities}
         initialPhotos={initialPhotos}
         lat={spot.lat ?? null}
         lng={spot.lng ?? null}

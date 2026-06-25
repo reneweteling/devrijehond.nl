@@ -1,16 +1,21 @@
 'use client';
 
-import { useState } from 'react';
-import { DataTable, type ColumnDef } from '../_components/data-table';
+/**
+ * Presentational table for /admin/applications. Renders one server-paginated
+ * page of moderator applications with status filter chips and small icon
+ * actions per row. Paging/filtering are driven by URL search params
+ * (server-side), so this component holds no list state, it only fires the
+ * decision server actions and refreshes the route.
+ */
+
+import { useRouter } from 'next/navigation';
+import { useTransition, useState } from 'react';
+import { StatusPill } from '../_components/status-pill';
+import { IconAction, ConfirmAction, Icons } from '../_components/action-buttons';
+import { Pagination } from '../_components/table-ui';
 import { approveModeratorApplication, rejectModeratorApplication } from '../actions';
 
 type AppStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
-
-const STATUS_META: Record<AppStatus, { label: string; bg: string; fg: string }> = {
-  PENDING: { label: 'In behandeling', bg: '#fef3c7', fg: '#92400e' },
-  APPROVED: { label: 'Goedgekeurd', bg: '#d1fae5', fg: '#065f46' },
-  REJECTED: { label: 'Afgewezen', bg: '#fee2e2', fg: '#991b1b' },
-};
 
 const ROLE_META: Record<string, { label: string; bg: string; fg: string }> = {
   USER: { label: 'Gebruiker', bg: '#eee', fg: '#5a5a4a' },
@@ -18,17 +23,9 @@ const ROLE_META: Record<string, { label: string; bg: string; fg: string }> = {
   ADMIN: { label: 'Admin', bg: 'var(--terra-soft)', fg: 'var(--terra-700)' },
 };
 
-const FILTER_OPTIONS: { label: string; value: AppStatus | '' }[] = [
-  { label: 'Alle', value: '' },
-  { label: 'In behandeling', value: 'PENDING' },
-  { label: 'Goedgekeurd', value: 'APPROVED' },
-  { label: 'Afgewezen', value: 'REJECTED' },
-];
-
 export type ApplicationRow = {
   id: string;
   userName: string | null;
-  userEmail: string;
   userHandle: string | null;
   userRole: string;
   motivation: string | null;
@@ -36,158 +33,211 @@ export type ApplicationRow = {
   createdAt: string;
 };
 
-const columns: ColumnDef<ApplicationRow, unknown>[] = [
-  {
-    accessorKey: 'userName',
-    header: 'Aanvrager',
-    meta: { className: 'row-title' },
-    cell: ({ row }) => (
-      <>
-        {row.original.userName ?? '—'}
-        {row.original.userHandle ? (
-          <span className="muted" style={{ marginLeft: 6, fontSize: 13, fontWeight: 400 }}>
-            @{row.original.userHandle}
-          </span>
-        ) : null}
-      </>
-    ),
-  },
-  {
-    accessorKey: 'userEmail',
-    header: 'E-mail',
-    cell: ({ getValue }) => (
-      <span className="muted" style={{ whiteSpace: 'nowrap' }}>
-        {getValue() as string}
-      </span>
-    ),
-  },
-  {
-    accessorKey: 'userRole',
-    header: 'Huidige rol',
-    cell: ({ getValue }) => {
-      const role = getValue() as string;
-      const meta = ROLE_META[role] ?? { label: role, bg: '#eee', fg: '#5a5a4a' };
-      return (
-        <span className="badge" style={{ background: meta.bg, color: meta.fg }}>
-          {meta.label}
-        </span>
-      );
-    },
-  },
-  {
-    accessorKey: 'motivation',
-    header: 'Motivatie',
-    cell: ({ getValue }) => {
-      const v = getValue() as string | null;
-      return v ? (
-        <span
-          title={v}
-          style={{
-            maxWidth: 320,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            display: 'block',
-          }}
-        >
-          {v}
-        </span>
-      ) : (
-        <span className="muted">—</span>
-      );
-    },
-  },
-  {
-    accessorKey: 'status',
-    header: 'Status',
-    enableSorting: true,
-    cell: ({ getValue }) => {
-      const s = getValue() as string;
-      const meta = STATUS_META[s as AppStatus] ?? { label: s, bg: '#eee', fg: '#5a5a4a' };
-      return (
-        <span className="badge" style={{ background: meta.bg, color: meta.fg }}>
-          {meta.label}
-        </span>
-      );
-    },
-  },
-  {
-    accessorKey: 'createdAt',
-    header: 'Datum',
-    enableSorting: true,
-    cell: ({ getValue }) =>
-      new Date(getValue() as string).toLocaleDateString('nl-NL', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-      }),
-  },
-  {
-    id: 'actions',
-    header: 'Acties',
-    enableSorting: false,
-    meta: { className: 'actions' },
-    cell: ({ row }) =>
-      row.original.status === 'PENDING' ? (
-        <span style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-          <form action={approveModeratorApplication.bind(null, row.original.id)}>
-            <button type="submit" className="btn btn-sm btn-primary">
-              Goedkeuren
-            </button>
-          </form>
-          <form action={rejectModeratorApplication.bind(null, row.original.id)}>
-            <button type="submit" className="btn btn-sm btn-soft">
-              Afwijzen
-            </button>
-          </form>
-        </span>
-      ) : (
-        <span className="muted" style={{ fontSize: 13 }}>
-          Afgehandeld
-        </span>
-      ),
-  },
+// "Alles" maps to ?status=ALL; the default (no param) is PENDING.
+const FILTER_OPTIONS: { label: string; value: string }[] = [
+  { label: 'In behandeling', value: 'PENDING' },
+  { label: 'Goedgekeurd', value: 'APPROVED' },
+  { label: 'Afgewezen', value: 'REJECTED' },
+  { label: 'Alles', value: 'ALL' },
 ];
 
-function StatusFilter({
-  value,
-  onChange,
-}: {
-  value: AppStatus | '';
-  onChange: (v: AppStatus | '') => void;
-}) {
+function filterHref(value: string): string {
+  // PENDING is the server default, so it needs no query string.
+  return value === 'PENDING' ? '/admin/applications' : `/admin/applications?status=${value}`;
+}
+
+function ApplicationActions({ app }: { app: ApplicationRow }) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [busy, setBusy] = useState<string | null>(null);
+
+  function run(key: string, fn: () => Promise<void>) {
+    setBusy(key);
+    startTransition(async () => {
+      try {
+        await fn();
+        router.refresh();
+      } finally {
+        setBusy(null);
+      }
+    });
+  }
+
+  if (app.status !== 'PENDING') {
+    return (
+      <span className="muted" style={{ fontSize: 13 }}>
+        Afgehandeld
+      </span>
+    );
+  }
+
   return (
-    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-      {FILTER_OPTIONS.map((opt) => (
-        <button
-          key={opt.value || 'all'}
-          type="button"
-          className="btn btn-sm"
-          style={
-            opt.value === value
-              ? { background: 'var(--ink)', color: '#fff', borderColor: 'var(--ink)' }
-              : undefined
-          }
-          onClick={() => onChange(opt.value)}
-        >
-          {opt.label}
-        </button>
-      ))}
-    </div>
+    <span style={{ display: 'inline-flex', gap: 4, justifyContent: 'flex-end' }}>
+      <IconAction
+        icon={Icons.approve}
+        label="Goedkeuren"
+        variant="success"
+        pending={isPending && busy === 'approve'}
+        disabled={isPending}
+        onClick={() => run('approve', () => approveModeratorApplication(app.id))}
+      />
+      <ConfirmAction
+        icon={Icons.reject}
+        label="Afwijzen"
+        variant="danger"
+        confirmTitle="Aanmelding afwijzen?"
+        confirmBody={app.userName ?? (app.userHandle ? `@${app.userHandle}` : undefined)}
+        confirmLabel="Afwijzen"
+        disabled={isPending}
+        onConfirm={async () => {
+          await rejectModeratorApplication(app.id);
+          router.refresh();
+        }}
+      />
+    </span>
   );
 }
 
-export function ApplicationsTable({ rows }: { rows: ApplicationRow[] }) {
-  const [statusFilter, setStatusFilter] = useState<AppStatus | ''>('');
-
-  const filtered = statusFilter ? rows.filter((r) => r.status === statusFilter) : rows;
+export function ApplicationsTable({
+  rows,
+  statusFilter,
+  statusParam,
+  page,
+  total,
+}: {
+  rows: ApplicationRow[];
+  statusFilter?: AppStatus;
+  statusParam?: AppStatus | 'ALL';
+  page: number;
+  total: number;
+}) {
+  // No filter means the PENDING default is active.
+  const activeValue = statusFilter ?? 'PENDING';
 
   return (
-    <DataTable
-      columns={columns}
-      data={filtered}
-      searchPlaceholder="Zoek op naam, e-mail of motivatie…"
-      toolbarExtra={<StatusFilter value={statusFilter} onChange={setStatusFilter} />}
-    />
+    <div>
+      <div className="admin-toolbar">
+        <div className="admin-filters">
+          {FILTER_OPTIONS.map((opt) => {
+            const isActive = opt.value === 'ALL' ? !statusFilter : opt.value === activeValue;
+            return (
+              <a
+                key={opt.value}
+                href={filterHref(opt.value)}
+                className="btn btn-sm"
+                style={
+                  isActive
+                    ? { background: 'var(--ink)', color: '#fff', borderColor: 'var(--ink)' }
+                    : undefined
+                }
+              >
+                {opt.label}
+              </a>
+            );
+          })}
+        </div>
+        <span className="admin-count">{total} resultaten</span>
+      </div>
+
+      <div className="admin-table-wrap">
+        <table className="admin-table">
+          <colgroup>
+            <col style={{ width: '24%' }} />
+            <col style={{ width: '12%' }} />
+            <col style={{ width: '32%' }} />
+            <col style={{ width: '12%' }} />
+            <col style={{ width: '10%' }} />
+            <col style={{ width: '10%' }} />
+          </colgroup>
+          <thead>
+            <tr>
+              <th>Aanvrager</th>
+              <th>Huidige rol</th>
+              <th>Motivatie</th>
+              <th>Status</th>
+              <th>Aangemeld</th>
+              <th className="actions" />
+            </tr>
+          </thead>
+          <tbody>
+            {rows.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="muted" style={{ textAlign: 'center', padding: 24 }}>
+                  Geen aanmeldingen gevonden.
+                </td>
+              </tr>
+            ) : (
+              rows.map((app) => {
+                const roleMeta = ROLE_META[app.userRole] ?? {
+                  label: app.userRole,
+                  bg: '#eee',
+                  fg: '#5a5a4a',
+                };
+                return (
+                  <tr key={app.id}>
+                    <td
+                      className="row-title"
+                      style={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {app.userName ?? '–'}
+                      {app.userHandle ? (
+                        <span
+                          className="muted"
+                          style={{ marginLeft: 6, fontSize: 13, fontWeight: 400 }}
+                        >
+                          @{app.userHandle}
+                        </span>
+                      ) : null}
+                    </td>
+                    <td>
+                      <span
+                        className="badge"
+                        style={{ background: roleMeta.bg, color: roleMeta.fg }}
+                      >
+                        {roleMeta.label}
+                      </span>
+                    </td>
+                    <td
+                      style={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                      title={app.motivation ?? undefined}
+                    >
+                      {app.motivation ?? <span className="muted">–</span>}
+                    </td>
+                    <td>
+                      <StatusPill status={app.status} />
+                    </td>
+                    <td style={{ whiteSpace: 'nowrap' }}>
+                      {new Date(app.createdAt).toLocaleDateString('nl-NL', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                      })}
+                    </td>
+                    <td className="actions">
+                      <ApplicationActions app={app} />
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <Pagination
+        basePath="/admin/applications"
+        page={page}
+        total={total}
+        params={{ status: statusParam }}
+      />
+    </div>
   );
 }
