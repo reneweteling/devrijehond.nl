@@ -88,8 +88,9 @@ struct SpotDetailView: View {
                         .buttonStyle(.dvhSecondary)
                     }
 
-                    // Edit this spot (moderators/admins; owner while unverified)
-                    if canEdit {
+                    // Edit this spot. Owners get the button here; moderators get it
+                    // inside the moderation card below, so it's not shown twice.
+                    if canEdit && session.profile?.isModerator != true {
                         Button { showEdit = true } label: {
                             Label("Bewerken", systemImage: "square.and.pencil")
                         }
@@ -129,7 +130,10 @@ struct SpotDetailView: View {
 
                     // Moderation card (moderators only)
                     if session.profile?.isModerator == true {
-                        ModerationCardView(spotId: spotId, currentStatus: status) { newStatus in
+                        ModerationCardView(
+                            spotId: spotId, currentStatus: status,
+                            onEdit: { showEdit = true }
+                        ) { newStatus in
                             moderatedStatus = newStatus
                             onChanged?()
                         }

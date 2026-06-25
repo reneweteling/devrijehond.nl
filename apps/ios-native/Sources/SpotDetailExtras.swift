@@ -346,6 +346,8 @@ struct ReportSheet: View {
 struct ModerationCardView: View {
     let spotId: String
     let currentStatus: String
+    /// Opens the spot editor (moderators edit from here).
+    var onEdit: (() -> Void)? = nil
     /// Called with the new status after a successful moderation action.
     var onModerated: ((String) -> Void)? = nil
 
@@ -379,6 +381,13 @@ struct ModerationCardView: View {
                 Text("Moderatie")
                     .font(.dvhHeadline)
                     .foregroundStyle(Brand.ink)
+            }
+
+            if let onEdit {
+                Button { onEdit() } label: {
+                    Label("Plek bewerken", systemImage: "square.and.pencil")
+                }
+                .buttonStyle(.dvhSecondary)
             }
 
             LazyVGrid(

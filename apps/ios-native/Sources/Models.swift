@@ -193,6 +193,7 @@ struct UpdateSpotBody: Encodable {
     var categoryId: String?
     var amenityIds: [String]?
     var address: String?
+    var photoUrls: [String]?
 }
 
 struct Vote: Decodable {

@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// Edit a spot's text details. The owner may edit while the spot is still
 /// UNVERIFIED; staff (ADMIN/MODERATOR) may edit any spot, any status. The map
@@ -33,6 +34,10 @@ struct SpotEditView: View {
     @State private var loaded = false
     @State private var saving = false
     @State private var error: String?
+    @State private var localImage: UIImage?
+    @State private var uploadedPhotoUrl: String?
+    @State private var showPhotoSource = false
+    @State private var uploadingPhoto = false
 
     private var typeString: String { detail?.type ?? spot.type }
 
@@ -43,12 +48,13 @@ struct SpotEditView: View {
 
     private var canSave: Bool {
         let n = name.trimmingCharacters(in: .whitespaces).count
-        return n >= 2 && n <= 120 && categoryId != nil && !saving
+        return n >= 2 && n <= 120 && categoryId != nil && !saving && !uploadingPhoto
     }
 
     var body: some View {
         ScrollView {
             VStack(spacing: DVH.s5) {
+                photoSection
                 fieldsSection
                 if !amenities.isEmpty {
                     amenitiesSection
@@ -64,6 +70,9 @@ struct SpotEditView: View {
             .padding(.vertical, DVH.s5)
         }
         .dvhScreenBackground()
+        .photoSource(isPresented: $showPhotoSource) { img in
+            Task { await uploadPhoto(img) }
+        }
         .navigationTitle("Plek bewerken")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -85,6 +94,48 @@ struct SpotEditView: View {
     }
 
     // MARK: - Sections
+
+    private var currentPhotoURL: URL? {
+        if let u = detail?.photos.first?.url ?? spot.photoUrl { return URL(string: u) }
+        return nil
+    }
+
+    private var photoSection: some View {
+        VStack(alignment: .leading, spacing: DVH.s3) {
+            Text("Foto").font(.dvhHeadline).foregroundStyle(Brand.ink)
+            Button { showPhotoSource = true } label: {
+                ZStack(alignment: .bottomTrailing) {
+                    Group {
+                        if let img = localImage {
+                            Image(uiImage: img).resizable().scaledToFill()
+                        } else if let url = currentPhotoURL {
+                            AsyncImage(url: url) { $0.resizable().scaledToFill() } placeholder: {
+                                Rectangle().fill(Brand.mossSoft)
+                            }
+                        } else {
+                            ZStack {
+                                Rectangle().fill(Brand.mossSoft)
+                                Image(systemName: "photo").font(.title).foregroundStyle(Brand.mossDark)
+                            }
+                        }
+                    }
+                    .frame(maxWidth: .infinity).frame(height: 160).clipped()
+                    .clipShape(RoundedRectangle(cornerRadius: DVH.rMd))
+                    ZStack {
+                        Circle().fill(Brand.moss).frame(width: 32, height: 32)
+                        Image(systemName: uploadingPhoto ? "arrow.triangle.2.circlepath" : "camera.fill")
+                            .font(.system(size: 13, weight: .bold)).foregroundStyle(.white)
+                    }
+                    .padding(DVH.s2)
+                }
+            }
+            .buttonStyle(.plain)
+            Text(uploadingPhoto ? "Foto uploaden…" : "Tik om de foto te wijzigen")
+                .font(.dvhCaption).foregroundStyle(Brand.ink2)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .dvhCard()
+    }
 
     private var fieldsSection: some View {
         VStack(alignment: .leading, spacing: DVH.s4) {
@@ -222,6 +273,23 @@ struct SpotEditView: View {
         amenities = (try? await APIClient.amenities(categoryId: id)) ?? []
     }
 
+    private func uploadPhoto(_ img: UIImage) async {
+        guard let token = session.token else { return }
+        localImage = img
+        uploadingPhoto = true
+        error = nil
+        do {
+            let jpeg = ImageUtil.squareJPEG(img)
+            uploadedPhotoUrl = try await APIClient.uploadPhoto(jpeg: jpeg, token: token)
+        } catch let e as APIError {
+            _ = session.signOutIfUnauthorized(e)
+            self.error = "Foto uploaden mislukt."
+        } catch {
+            self.error = "Foto uploaden mislukt. Probeer het opnieuw."
+        }
+        uploadingPhoto = false
+    }
+
     private func save() async {
         guard let token = session.token, let categoryId else { return }
         saving = true
@@ -237,7 +305,8 @@ struct SpotEditView: View {
             phone: trimmedPhone.isEmpty ? nil : trimmedPhone,
             categoryId: categoryId,
             amenityIds: Array(selectedAmenities),
-            address: trimmedAddr.isEmpty ? nil : trimmedAddr
+            address: trimmedAddr.isEmpty ? nil : trimmedAddr,
+            photoUrls: uploadedPhotoUrl.map { [$0] }
         )
         do {
             _ = try await APIClient.updateSpot(id: spot.id, body: body, token: token)
