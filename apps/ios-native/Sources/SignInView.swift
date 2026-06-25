@@ -229,8 +229,14 @@ struct SignInView: View {
                 magicSent = true
             } catch let e as APIError where e.status == 429 {
                 self.error = "Te veel pogingen. Probeer het straks opnieuw."
+            } catch let e as APIError {
+                if case .transport = e {
+                    self.error = "Geen verbinding met de server. Controleer je internet en probeer opnieuw."
+                } else {
+                    self.error = "Kon de link niet versturen. Probeer het later opnieuw."
+                }
             } catch {
-                self.error = "Kon de link niet versturen. Controleer je e-mailadres."
+                self.error = "Kon de link niet versturen. Probeer het later opnieuw."
             }
             working = false
         }

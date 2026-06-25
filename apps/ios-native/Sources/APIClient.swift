@@ -66,6 +66,13 @@ struct APIClient {
         var req = URLRequest(url: comps.url!)
         req.httpMethod = method
         req.timeoutInterval = 20
+        // The app authenticates with a bearer token (Keychain), never cookies.
+        // URLSession.shared otherwise stores + replays any Set-Cookie BetterAuth
+        // returns (e.g. a session cookie from an Apple/Google login); a later
+        // request carrying that cookie but no Origin header trips BetterAuth's
+        // CSRF guard with 403 MISSING_OR_NULL_ORIGIN (notably on magic-link
+        // sign-in). Disabling cookie handling keeps every request bearer-only.
+        req.httpShouldHandleCookies = false
         req.setValue("v1", forHTTPHeaderField: "X-API-Version")
         req.setValue(clientVersion, forHTTPHeaderField: "X-Client-Version")
         req.setValue("application/json", forHTTPHeaderField: "Accept")
