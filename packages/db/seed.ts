@@ -125,8 +125,8 @@ const POI_SOURCES: { category: string; file: string; descFallback: string }[] = 
   },
   {
     category: 'swim-beach',
-    file: 'zwemstranden.json',
-    descFallback: 'Hondenstrand om te zwemmen.',
+    file: 'hondenstranden.json',
+    descFallback: 'Hondenstrand waar je hond mag zwemmen.',
   },
   {
     category: 'vet',
@@ -147,6 +147,16 @@ const POI_SOURCES: { category: string; file: string; descFallback: string }[] = 
     category: 'wash',
     file: 'ranzijn-wasstraat.json',
     descFallback: 'Hondenwasstraat bij Ranzijn.',
+  },
+  {
+    category: 'wash',
+    file: 'wasplekken.json',
+    descFallback: 'Plek om je hond te wassen.',
+  },
+  {
+    category: 'horeca',
+    file: 'horeca-curated.json',
+    descFallback: 'Hondvriendelijke horeca.',
   },
 ];
 
