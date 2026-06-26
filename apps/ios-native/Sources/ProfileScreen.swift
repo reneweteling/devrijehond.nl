@@ -18,6 +18,10 @@ struct ProfileScreen: View {
     @State private var modApplication: ModeratorApplication?
     @State private var modLoaded = false
 
+    @State private var showDeleteConfirm = false
+    @State private var deleting = false
+    @State private var deleteError: String?
+
     var body: some View {
         NavigationStack {
             Group {
@@ -57,6 +61,7 @@ struct ProfileScreen: View {
                 actionsSection
                 moderationSection(me)
                 footerSection
+                dangerZone
             }
             .padding(.horizontal, DVH.s4)
             .padding(.vertical, DVH.s5)
@@ -66,6 +71,26 @@ struct ProfileScreen: View {
         .navigationBarTitleDisplayMode(.inline)
         .refreshable { await session.hydrate() }
         .task(id: me.id) { await loadModeratorApplication() }
+        .alert("Account verwijderen?", isPresented: $showDeleteConfirm) {
+            Button("Annuleren", role: .cancel) {}
+            Button("Verwijderen", role: .destructive) {
+                Task { await deleteAccount() }
+            }
+        } message: {
+            Text(
+                "Dit verwijdert je account en je gegevens definitief. "
+                    + "Dit kan niet ongedaan worden gemaakt.")
+        }
+        .alert(
+            "Verwijderen mislukt",
+            isPresented: Binding(
+                get: { deleteError != nil },
+                set: { if !$0 { deleteError = nil } })
+        ) {
+            Button("Oké", role: .cancel) {}
+        } message: {
+            Text(deleteError ?? "")
+        }
         .navigationDestination(for: ProfileRoute.self) { route in
             switch route {
             case .editProfile: EditProfileView()
@@ -235,7 +260,54 @@ struct ProfileScreen: View {
         .dvhCard(padding: 0)
     }
 
+    // MARK: - Danger zone
+
+    private var dangerZone: some View {
+        VStack(spacing: 0) {
+            Button(role: .destructive) {
+                showDeleteConfirm = true
+            } label: {
+                HStack(spacing: DVH.s3) {
+                    if deleting {
+                        ProgressView()
+                            .frame(width: 24)
+                    } else {
+                        Image(systemName: "trash")
+                            .font(.system(size: 16))
+                            .foregroundStyle(Brand.rust)
+                            .frame(width: 24)
+                    }
+                    Text("Verwijder account")
+                        .font(.dvhBody).foregroundStyle(Brand.rust)
+                    Spacer()
+                }
+                .padding(.horizontal, DVH.s4)
+                .padding(.vertical, DVH.s4)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .disabled(deleting)
+        }
+        .dvhCard(padding: 0)
+    }
+
     // MARK: - Data
+
+    private func deleteAccount() async {
+        guard let token = session.token, !deleting else { return }
+        deleting = true
+        defer { deleting = false }
+        do {
+            try await APIClient.deleteAccount(token: token)
+            // Clears the bearer + Keychain and returns the UI to signed-out.
+            session.signOut()
+            session.authNotice = "Je account is verwijderd."
+        } catch {
+            deleteError =
+                (error as? LocalizedError)?.errorDescription
+                ?? "Er ging iets mis. Probeer het later opnieuw."
+        }
+    }
 
     private func loadModeratorApplication() async {
         guard let token = session.token, !(session.profile?.isModerator ?? false) else {

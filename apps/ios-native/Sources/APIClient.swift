@@ -224,6 +224,13 @@ struct APIClient {
         try await get("/api/v1/me", token: token, as: MeProfile.self)
     }
 
+    /// DELETE /api/v1/me/account, permanently deletes the signed-in user's
+    /// account and personal data. Community spots they submitted stay on the map
+    /// (reassigned to a system account server-side). Throws on failure.
+    static func deleteAccount(token: String) async throws {
+        try await delete("/api/v1/me/account", token: token)
+    }
+
     static func updateProfile(_ patch: MeProfilePatchBody, token: String) async throws -> MeProfile {
         try await self.patch("/api/v1/me", body: patch, token: token, as: MeProfile.self)
     }

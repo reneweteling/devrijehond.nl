@@ -481,6 +481,12 @@ struct MapKitView: UIViewRepresentable {
                 view.markerTintColor = spot.isVerified ? UIColor(color) : UIColor(hex: 0xC2762E)
                 view.glyphImage = UIImage(systemName: cat?.icon ?? "pawprint.fill")
                 view.displayPriority = spot.isVerified ? .defaultHigh : .defaultLow
+                // Keep the map clean: no persistent name label next to every pin
+                // (the name shows in the detail sheet on tap). The title stays set
+                // for VoiceOver.
+                view.titleVisibility = .hidden
+                view.subtitleVisibility = .hidden
+                view.accessibilityLabel = spot.name
                 return view
             }
             return nil

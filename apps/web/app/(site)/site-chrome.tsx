@@ -133,9 +133,14 @@ export function AppCta() {
             in de buurt. En jij helpt mee verifiëren.
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          <StoreButton href={IOS_URL} kind="ios" />
-          <StoreButton href={ANDROID_URL} kind="android" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-start' }}>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <StoreButton href={IOS_URL} kind="ios" />
+            <StoreButton href={ANDROID_URL} kind="android" />
+          </div>
+          <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.85)' }}>
+            Binnenkort te downloaden
+          </span>
         </div>
       </div>
     </section>

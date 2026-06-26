@@ -18,7 +18,7 @@ settings:
   base:
     SWIFT_VERSION: '5.0'
     MARKETING_VERSION: '1.0.0'
-    CURRENT_PROJECT_VERSION: '46'
+    CURRENT_PROJECT_VERSION: '47'
     DEVELOPMENT_TEAM: ND82KXRD2Q
 targets:
   DeVrijeHondNative:
@@ -52,6 +52,7 @@ targets:
         ITSAppUsesNonExemptEncryption: false
         NSLocationWhenInUseUsageDescription: 'Je locatie laat de kaart zien welke hondenplekken bij jou in de buurt zijn, en bepaalt of je een plek kunt bevestigen.'
         NSCameraUsageDescription: 'Met de camera maak je direct een foto van je hond of een plek om toe te voegen.'
+        NSPhotoLibraryUsageDescription: 'Kies een foto uit je bibliotheek om bij je hond of een plek te plaatsen.'
         # Firebase Analytics links the IDFA framework, so the binary needs this
         # purpose string even though we keep ad personalisation off (below).
         NSUserTrackingUsageDescription: 'Alleen om de app te verbeteren met geanonimiseerde, geaggregeerde statistieken. We tonen geen advertenties.'

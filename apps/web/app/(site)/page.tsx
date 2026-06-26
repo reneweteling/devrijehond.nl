@@ -132,6 +132,9 @@ export default async function HomePage() {
                 Bekijk de kaart
               </a>
             </div>
+            <p style={{ margin: '10px 0 0', fontSize: 13.5, color: 'var(--ink-2, #6b6b63)' }}>
+              De app is binnenkort te downloaden. Bekijk nu alvast de kaart in je browser.
+            </p>
             <div className="hero-stats">
               <div>
                 <div className="num">{stats.spots}+</div>
