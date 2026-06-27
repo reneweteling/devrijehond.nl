@@ -9,29 +9,14 @@ import GoogleSignIn
 import Sentry
 #endif
 
-#if canImport(FirebaseCore)
-import FirebaseCore
-#endif
-
 @main
 struct DeVrijeHondNativeApp: App {
     @StateObject private var session = Session()
     @State private var booted = false
 
     init() {
-        Self.startFirebase()
         Self.startSentry()
         Self.configureNavigationBar()
-    }
-
-    /// Google Analytics for iOS via Firebase. Only configures when the
-    /// GoogleService-Info.plist is bundled, so the app still runs without it.
-    private static func startFirebase() {
-        #if canImport(FirebaseCore)
-        if Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist") != nil {
-            FirebaseApp.configure()
-        }
-        #endif
     }
 
     private static func startSentry() {
