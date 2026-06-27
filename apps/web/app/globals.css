@@ -1021,30 +1021,26 @@ img {
   justify-self: center;
   width: 290px;
   max-width: 80vw;
-  aspect-ratio: 290 / 600;
+  /* Inner screen area must match the screenshot ratio (720/1564 = 0.4604) so
+     object-fit: cover fills the frame with neither crop nor side letterbox.
+     Inner = width-2*padding by height-2*padding, so the outer aspect-ratio is
+     derived from the inner ratio plus the 12px padding on each side. */
+  aspect-ratio: 290 / 602;
   background: #1c2116;
-  border-radius: 44px;
+  border-radius: 46px;
   padding: 12px;
   box-shadow: var(--shadow-lg);
   position: relative;
   transform: rotate(2deg);
 }
-.phone::before {
-  content: '';
-  position: absolute;
-  top: 16px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 96px;
-  height: 26px;
-  background: #1c2116;
-  border-radius: 0 0 16px 16px;
-  z-index: 2;
-}
+/* No notch overlay: the screenshot already includes the device status bar /
+   Dynamic Island, so an extra notch would render a double cutout. */
 .phone img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* Inner radius = frame radius (46) minus padding (12) so the screen corners
+     follow the bezel curvature instead of clipping the app UI. */
   border-radius: 34px;
 }
 

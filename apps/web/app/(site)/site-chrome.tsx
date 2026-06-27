@@ -48,7 +48,13 @@ export function StoreButton({ href, kind }: { href: string; kind: 'ios' | 'andro
   // package). Render a non-clickable "Binnenkort" pill instead of a dead link.
   const comingSoon = href.includes('id000000000') || href.includes('details?id=nl.devrijehond.app');
   const glyph = kind === 'ios' ? <AppleGlyph /> : <PlayGlyph />;
-  const small = comingSoon ? 'Binnenkort in de' : kind === 'ios' ? 'Download in de' : 'Ontdek op';
+  const small = comingSoon
+    ? kind === 'ios'
+      ? 'Binnenkort in de'
+      : 'Binnenkort op'
+    : kind === 'ios'
+      ? 'Download in de'
+      : 'Ontdek op';
   const big = kind === 'ios' ? 'App Store' : 'Google Play';
   const inner = (
     <>

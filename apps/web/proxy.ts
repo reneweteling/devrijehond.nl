@@ -23,6 +23,15 @@ const ADMIN_PREFIX = '/admin';
 export async function proxy(request: NextRequest): Promise<NextResponse> {
   const { pathname, search } = request.nextUrl;
 
+  // iOS Universal Links: Apple fetches the Apple App Site Association file
+  // WITHOUT following redirects, from every domain in the entitlement (apex +
+  // www). The apex->www redirect below would break it on the apex, so this path
+  // must always pass through untouched, served directly on both hosts. Keep this
+  // the very first check.
+  if (pathname === '/.well-known/apple-app-site-association') {
+    return NextResponse.next();
+  }
+
   // Canonical host: redirect the apex (devrijehond.nl) to www. Keeping one host
   // means the page origin always matches the auth/API origin, so the BetterAuth
   // social sign-in fetch is same-origin (a no-www page POSTing to www was a
