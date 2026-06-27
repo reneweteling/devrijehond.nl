@@ -155,8 +155,8 @@ export default async function HomePage() {
               <Image
                 src="/app-map.png"
                 alt="De Vrije Hond app met de kaart van hondenplekken"
-                width={580}
-                height={1200}
+                width={720}
+                height={1564}
                 priority
               />
             </div>

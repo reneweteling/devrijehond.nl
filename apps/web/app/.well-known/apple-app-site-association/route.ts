@@ -11,7 +11,9 @@ import { NextResponse } from 'next/server';
  * the early pass-through there), so the file is served directly on both hosts.
  *
  * `appID` = "<teamID>.<bundleID>". The `paths` cover the crawlable spot URLs
- * (`/plek/<slug>` = POI, `/gebied/<slug>` = REGION) that should open the app.
+ * (`/plek/<slug>` = POI, `/gebied/<slug>` = REGION) plus the magic-link
+ * interstitial (`/verify-mobile`) so the email sign-in link opens the app
+ * directly when installed (instead of the web interstitial hop).
  */
 const AASA = {
   applinks: {
@@ -19,7 +21,7 @@ const AASA = {
     details: [
       {
         appID: 'ND82KXRD2Q.nl.devrijehond.app',
-        paths: ['/plek/*', '/gebied/*'],
+        paths: ['/plek/*', '/gebied/*', '/verify-mobile', '/verify-mobile*'],
       },
     ],
   },

@@ -1021,10 +1021,11 @@ img {
   justify-self: center;
   width: 290px;
   max-width: 80vw;
-  /* Inner screen area must match the screenshot ratio (720/1564 = 0.4604) so
-     object-fit: cover fills the frame with neither crop nor side letterbox.
-     Inner = width-2*padding by height-2*padding, so the outer aspect-ratio is
-     derived from the inner ratio plus the 12px padding on each side. */
+  /* Inner screen area matches the screenshot ratio (720/1564 = 0.4604) so
+     object-fit: contain shows the whole screen (status bar + tab bar) with
+     neither crop nor visible letterbox. Inner = width-2*padding by
+     height-2*padding, so the outer aspect-ratio is derived from the inner
+     ratio plus the 12px padding on each side. */
   aspect-ratio: 290 / 602;
   background: #1c2116;
   border-radius: 46px;
@@ -1038,10 +1039,13 @@ img {
 .phone img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: top center;
   /* Inner radius = frame radius (46) minus padding (12) so the screen corners
-     follow the bezel curvature instead of clipping the app UI. */
-  border-radius: 34px;
+     follow the bezel curvature instead of clipping the app UI. A smaller radius
+     keeps the rounded corners off the status-bar content (clock top-left,
+     battery top-right) so nothing is clipped by the curve. */
+  border-radius: 26px;
 }
 
 /* ---- Steps -------------------------------------------------------------- */
