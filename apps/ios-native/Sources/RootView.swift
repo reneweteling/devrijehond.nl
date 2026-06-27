@@ -27,6 +27,15 @@ struct RootView: View {
             WensenScreen().tabItem { Label("Wensen", systemImage: "lightbulb.circle") }.tag(3)
             ProfileScreen().tabItem { Label("Profiel", systemImage: "person.crop.circle.fill") }.tag(4)
         }
+        // A Universal Link (https://www.devrijehond.nl/plek|gebied/<slug>) resolves
+        // to a spot in App.swift, which sets session.deepLinkedSpot. Present its
+        // detail over whatever tab is active. SpotDetailView loads its own detail,
+        // so a nil category is fine here.
+        .sheet(item: $session.deepLinkedSpot) { spot in
+            NavigationStack {
+                SpotDetailView(spot: spot, category: nil)
+            }
+        }
         .alert("Inloggen", isPresented: Binding(
             get: { session.authNotice != nil },
             set: { if !$0 { session.authNotice = nil } })

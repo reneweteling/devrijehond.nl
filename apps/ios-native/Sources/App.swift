@@ -91,6 +91,9 @@ struct DeVrijeHondNativeApp: App {
             .preferredColorScheme(.light)
             .task { await boot() }
             .onOpenURL { handle($0) }
+            .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
+                if let url = activity.webpageURL { openWebLink(url) }
+            }
         }
     }
 
@@ -107,6 +110,12 @@ struct DeVrijeHondNativeApp: App {
         #if canImport(GoogleSignIn)
         if GIDSignIn.sharedInstance.handle(url) { return }
         #endif
+        // A Universal Link can also be delivered through onOpenURL (e.g. when the
+        // app is opened from another app's web view), so route https URLs here too.
+        if url.scheme == "https" || url.scheme == "http" {
+            openWebLink(url)
+            return
+        }
         // Magic-link landing: vrijehond://verify?token=...
         guard url.scheme == "vrijehond" else { return }
         let comps = URLComponents(url: url, resolvingAgainstBaseURL: false)
@@ -120,5 +129,43 @@ struct DeVrijeHondNativeApp: App {
                 session.authNotice = "Deze inloglink is verlopen of al gebruikt. Vraag een nieuwe aan."
             }
         }
+    }
+
+    /// A Universal Link to a spot. Production links look like
+    /// https://www.devrijehond.nl/plek/<slug> (POI) or /gebied/<slug> (REGION).
+    /// We pull the slug from the path, fetch the spot, and present its detail.
+    /// Works on both a cold start (the link launches the app) and a warm start.
+    @MainActor
+    private func openWebLink(_ url: URL) {
+        let parts = url.path.split(separator: "/", omittingEmptySubsequences: true).map(String.init)
+        // Expect ["plek", "<slug>"] or ["gebied", "<slug>"].
+        guard parts.count >= 2, parts[0] == "plek" || parts[0] == "gebied" else { return }
+        let slug = parts[1]
+        guard !slug.isEmpty else { return }
+        Task { @MainActor in
+            do {
+                let detail = try await APIClient.spotDetail(slug: slug)
+                session.deepLinkedSpot = Self.summary(from: detail)
+            } catch {
+                session.authNotice = "We konden deze plek niet openen. Probeer het later opnieuw."
+            }
+        }
+    }
+
+    /// SpotDetailView takes a SpotSummary and loads its own detail by slug, so a
+    /// minimal summary mapped from the fetched detail is enough to drive it.
+    private static func summary(from d: SpotDetail) -> SpotSummary {
+        SpotSummary(
+            id: d.id,
+            slug: d.slug,
+            type: d.type,
+            name: d.name,
+            categoryId: d.category.id,
+            status: d.status,
+            lat: d.lat,
+            lng: d.lng,
+            rating: d.rating,
+            photoUrl: d.photos.first?.url,
+            geometry: nil)
     }
 }

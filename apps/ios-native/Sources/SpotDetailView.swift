@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// Spot peek/detail. Starts from the summary we already have (instant), then
 /// loads the full detail (description, amenities, photos, reviews) in the background.
@@ -20,6 +21,7 @@ struct SpotDetailView: View {
     @State private var voteError: String?
     @State private var moderatedStatus: String?
     @State private var showEdit = false
+    @State private var showNav = false
     @State private var activeSheet: SpotDetailSheet?
 
     // MARK: - Derived helpers
@@ -50,6 +52,33 @@ struct SpotDetailView: View {
     }
 
     private var spotId: String { detail?.id ?? spot.id }
+
+    /// Public web page for this spot, used by the share sheet (and a deep link
+    /// back into the app when installed).
+    private var webURL: URL? {
+        let kind = (detail?.type ?? spot.type) == "REGION" ? "gebied" : "plek"
+        return URL(string: "https://www.devrijehond.nl/\(kind)/\(spot.slug)")
+    }
+
+    private enum MapApp { case apple, google, waze }
+
+    private func canOpen(_ scheme: String) -> Bool {
+        guard let u = URL(string: scheme) else { return false }
+        return UIApplication.shared.canOpenURL(u)
+    }
+
+    private func openMaps(_ app: MapApp) {
+        guard let lat = spot.lat, let lng = spot.lng else { return }
+        let name = (detail?.name ?? spot.name)
+            .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let urlStr: String
+        switch app {
+        case .apple: urlStr = "http://maps.apple.com/?daddr=\(lat),\(lng)&q=\(name)"
+        case .google: urlStr = "comgooglemaps://?daddr=\(lat),\(lng)&directionsmode=driving"
+        case .waze: urlStr = "waze://?ll=\(lat),\(lng)&navigate=yes"
+        }
+        if let u = URL(string: urlStr) { UIApplication.shared.open(u) }
+    }
 
     /// Vote only on still-unverified spots, never your own.
     private var canVote: Bool {
@@ -86,6 +115,24 @@ struct SpotDetailView: View {
                             Label("Bekijk op kaart", systemImage: "map")
                         }
                         .buttonStyle(.dvhSecondary)
+                    }
+
+                    // Navigate + share
+                    HStack(spacing: DVH.s2) {
+                        if spot.lat != nil, spot.lng != nil {
+                            Button { showNav = true } label: {
+                                Label("Route", systemImage: "location.fill")
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(.dvhSecondary)
+                        }
+                        if let url = webURL {
+                            ShareLink(item: url) {
+                                Label("Deel", systemImage: "square.and.arrow.up")
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(.dvhSecondary)
+                        }
                     }
 
                     // Edit this spot. Owners get the button here; moderators get it
@@ -152,6 +199,12 @@ struct SpotDetailView: View {
                 Task { detail = try? await APIClient.spotDetail(slug: spot.slug) }
             }
             .environmentObject(session)
+        }
+        .confirmationDialog("Navigeer naar deze plek", isPresented: $showNav, titleVisibility: .visible) {
+            Button("Apple Maps") { openMaps(.apple) }
+            if canOpen("comgooglemaps://") { Button("Google Maps") { openMaps(.google) } }
+            if canOpen("waze://") { Button("Waze") { openMaps(.waze) } }
+            Button("Annuleer", role: .cancel) {}
         }
         .task {
             loc.request()

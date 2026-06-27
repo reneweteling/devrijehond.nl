@@ -17,6 +17,10 @@ final class Session: ObservableObject {
     /// When set, the map centers on this spot then clears it. Used to jump from a
     /// list/detail to the map.
     @Published var mapFocus: SpotSummary?
+    /// When set, RootView presents the spot detail over the current tab. Set by the
+    /// Universal Link router after fetching the linked spot; cleared when the sheet
+    /// closes. See `DeepLink` in App.swift.
+    @Published var deepLinkedSpot: SpotSummary?
 
     private let tokenKey = "nl.devrijehond.native.token"
     private let expiresKey = "nl.devrijehond.native.expiresAt"
