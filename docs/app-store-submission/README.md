@@ -136,7 +136,6 @@ moet kloppen met het privacy-manifest in de app:
 - Naam -> gekoppeld -> App-functionaliteit
 - Locatie (precies) -> niet gekoppeld -> App-functionaliteit (kaart + nabij)
 - Foto's of video's -> gekoppeld -> App-functionaliteit (plek-foto's)
-- Productinteractie -> niet gekoppeld -> Analyse (Firebase Analytics)
 - Crashgegevens -> niet gekoppeld -> App-functionaliteit (Sentry)
 
 ## 6. Leeftijdsclassificatie (Age Rating)
@@ -194,9 +193,9 @@ de App Store-tab -> sectie "Build" dat build 49 staat geselecteerd.
 11. [ ] Build 49 gekoppeld
 12. [ ] "Add for Review" / indienen
 
-## Aandachtspunt
+## Tracking / Firebase
 
-Je hebt Firebase Analytics in de app. Dat vereist de tracking-purpose-string
-(staat erin) en maakt de privacy-labels iets uitgebreider (productinteractie +
-crashgegevens). Wil je de review simpeler, dan kunnen we Firebase Analytics
-eruit halen; dan vervallen die twee data-types. Laat maar weten.
+Firebase Analytics is uit de app verwijderd (build 50), dus de app trackt niet
+en bevat geen IDFA of tracking-tekst meer. In App Privacy zet je Tracking dus op
+"Nee". Koppel build 50 (niet 49) aan versie 1.0; daarmee vervalt de
+tracking-blokker die App Store Connect bij build 49 toonde.
