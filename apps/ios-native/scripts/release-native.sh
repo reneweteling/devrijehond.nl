@@ -59,6 +59,7 @@ fastlane sigh \
   --api_key_path /tmp/asc_api_key.json \
   --app_identifier "$BUNDLE_ID" \
   --platform ios \
+  --force \
   --output_path /tmp/profiles_native
 PROFILE_PATH="$(ls /tmp/profiles_native/*.mobileprovision | head -1)"
 PROFILE_NAME="$(security cms -D -i "$PROFILE_PATH" | plutil -extract Name raw -)"

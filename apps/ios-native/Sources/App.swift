@@ -121,6 +121,13 @@ struct DeVrijeHondNativeApp: App {
         let comps = URLComponents(url: url, resolvingAgainstBaseURL: false)
         guard let token = comps?.queryItems?.first(where: { $0.name == "token" })?.value,
               !token.isEmpty else { return }
+        redeemMagicLink(token)
+    }
+
+    /// Exchange a magic-link token for a session. Shared by the vrijehond:// deep
+    /// link and the https /verify-mobile Universal Link.
+    @MainActor
+    private func redeemMagicLink(_ token: String) {
         Task { @MainActor in
             do {
                 let auth = try await AuthService.verifyMagicLink(token: token)
@@ -137,7 +144,17 @@ struct DeVrijeHondNativeApp: App {
     /// Works on both a cold start (the link launches the app) and a warm start.
     @MainActor
     private func openWebLink(_ url: URL) {
+        let comps = URLComponents(url: url, resolvingAgainstBaseURL: false)
         let parts = url.path.split(separator: "/", omittingEmptySubsequences: true).map(String.init)
+        // Magic-link via Universal Link: https://www.devrijehond.nl/verify-mobile?token=...
+        // (when the app is installed iOS opens this instead of the web interstitial).
+        if parts.first == "verify-mobile" {
+            if let token = comps?.queryItems?.first(where: { $0.name == "token" })?.value,
+               !token.isEmpty {
+                redeemMagicLink(token)
+            }
+            return
+        }
         // Expect ["plek", "<slug>"] or ["gebied", "<slug>"].
         guard parts.count >= 2, parts[0] == "plek" || parts[0] == "gebied" else { return }
         let slug = parts[1]
