@@ -29,13 +29,12 @@ met verwerken, dan verschijnt het.
 
 ## 2. Screenshots
 
-Map: `screenshots-6.9/` (4 stuks, 1320x2868 = de 6.9"-maat). Upload deze onder de
-iPhone 6.9"-set. Apple gebruikt de 6.9"-set automatisch ook voor kleinere
-toestellen, dus dit volstaat.
+Map: `screenshots-6.7/` (4 stuks, 1284x2778 = de 6.7"-maat, een door ASC
+geaccepteerde maat). Upload deze onder de iPhone 6.7"-set.
 
 Waar in ASC: App Store-tab -> versie 1.0 -> sectie "App Previews and Screenshots"
--> iPhone 6.9". Sleep de 4 PNG's erin in deze volgorde: 01 kaart, 02 nabij,
-03 wensen, 04 inloggen.
+-> iPhone 6.7" Display. Sleep de 4 PNG's erin in deze volgorde: 01 kaart,
+02 nabij, 03 wensen, 04 inloggen.
 
 ## 3. Teksten (App Store-tab -> versie 1.0)
 
@@ -183,7 +182,7 @@ de App Store-tab -> sectie "Build" dat build 49 staat geselecteerd.
 ## Indien-checklist (in ASC afvinken)
 
 1. [ ] App-icon zichtbaar linksboven (komt vanzelf na build-verwerking)
-2. [ ] Screenshots 6.9" geupload (4 stuks uit screenshots-6.9/)
+2. [ ] Screenshots 6.7" geupload (4 stuks uit screenshots-6.7/)
 3. [ ] Ondertitel, promotietekst, beschrijving, sleutelwoorden, release notes
 4. [ ] Support-URL (+ marketing-URL)
 5. [ ] Categorie (Reizen / Lifestyle)
