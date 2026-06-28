@@ -76,7 +76,10 @@ struct SignInView: View {
             }
         }
         .onChange(of: session.isAuthenticated) { _, authed in
-            if authed { dismiss() }
+            // Only auto-dismiss when presented as a gating sheet. When used inline
+            // as the signed-out Profile root, the parent swaps us out for the
+            // profile, so calling dismiss() here would act on the wrong context.
+            if authed && dismissable { dismiss() }
         }
     }
 

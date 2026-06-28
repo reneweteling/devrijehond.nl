@@ -50,7 +50,10 @@ final class Session: ObservableObject {
         Keychain.set(token, for: tokenKey)
         if let expiresAt { Keychain.set(expiresAt, for: expiresKey) }
         self.token = token
-        Task { await hydrate() }
+        // A freshly minted bearer can lag a beat server-side; allow one retry on
+        // 401 before bouncing back to sign-in (otherwise a just-logged-in user
+        // gets kicked straight to the sign-in screen).
+        Task { await hydrate(allowRetryOn401: true) }
     }
 
     func signOut() {
@@ -87,19 +90,35 @@ final class Session: ObservableObject {
         profile = p
     }
 
-    func hydrate() async {
+    func hydrate(allowRetryOn401: Bool = false) async {
         if mockMode { return }
         guard let token else { return }
         hydrating = true
         defer { hydrating = false }
         do {
             profile = try await APIClient.me(token: token)
-        } catch let APIError.server(_, _, status) where status == 401 {
-            signOut()
-        } catch APIError.badStatus(401) {
+        } catch where Self.isUnauthorized(error) {
+            if allowRetryOn401 {
+                // Give the new session a moment to settle, then try once more.
+                try? await Task.sleep(nanoseconds: 700_000_000)
+                // Bail if the token changed (signed out / re-signed) meanwhile.
+                guard self.token == token else { return }
+                if let retried = try? await APIClient.me(token: token) {
+                    profile = retried
+                    return
+                }
+            }
             signOut()
         } catch {
             // Offline or transient: keep the token, try again next launch.
+        }
+    }
+
+    private static func isUnauthorized(_ error: Error) -> Bool {
+        switch error {
+        case let APIError.server(_, _, status): return status == 401
+        case APIError.badStatus(401): return true
+        default: return false
         }
     }
 }

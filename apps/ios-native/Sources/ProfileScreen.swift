@@ -23,22 +23,28 @@ struct ProfileScreen: View {
     @State private var deleteError: String?
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if session.isAuthenticated {
+        // Keep sign-in and the signed-in stack as two separate roots instead of
+        // swapping the root *inside* one NavigationStack: swapping a NavigationStack
+        // root between two unrelated views can leave the old view on screen. With
+        // the split, flipping `isAuthenticated` swaps the whole subtree cleanly.
+        Group {
+            if session.isAuthenticated {
+                NavigationStack {
                     if let me = session.profile {
                         profileContent(me)
                     } else {
                         ProgressView("Profiel laden…")
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .background(Brand.sand)
+                            .dvhScreenBackground()
                     }
-                } else {
-                    SignInView()
                 }
+            } else {
+                SignInView()
             }
         }
-        .task {
+        // Re-run when auth flips (login / logout), not just on first appear, so a
+        // sign-in that happened on another tab still hydrates here.
+        .task(id: session.isAuthenticated) {
             if session.isAuthenticated && session.profile == nil {
                 await session.hydrate()
             }
@@ -371,12 +377,11 @@ struct ProfileDogRow: View {
     @ViewBuilder
     private var dogThumb: some View {
         if let photo = dog.photoUrl, let url = URL(string: photo) {
-            AsyncImage(url: url) { img in
+            CachedImage(url: url) { img in
                 img.resizable().scaledToFill()
             } placeholder: {
                 Circle().fill(Brand.mossSoft)
             }
-            .id(photo) // reload when a freshly-uploaded photo URL arrives
             .frame(width: 44, height: 44).clipShape(Circle())
             .overlay(Circle().strokeBorder(Brand.ink.opacity(0.07)))
         } else {

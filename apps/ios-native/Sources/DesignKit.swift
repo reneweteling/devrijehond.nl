@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 // De Vrije Hond design system for the native app. Warm, earthy, friendly:
 // rounded type, soft surfaces on a sand/cream ground, moss + terracotta accents.
@@ -179,6 +180,63 @@ struct VerifiedBadge: View {
     }
 }
 
+// MARK: - Cached remote image
+
+/// Small in-memory image cache shared across the app. Decoded once per URL and
+/// kept alive, so an avatar/dog photo survives the frequent re-renders of a
+/// ScrollView.
+final class ImageCache {
+    static let shared = ImageCache()
+    private let cache = NSCache<NSURL, UIImage>()
+    func image(for url: URL) -> UIImage? { cache.object(forKey: url as NSURL) }
+    func insert(_ image: UIImage, for url: URL) { cache.setObject(image, forKey: url as NSURL) }
+}
+
+/// A robust replacement for `AsyncImage` inside scrolling content.
+///
+/// `AsyncImage(...).id(url)` re-creates the loader whenever the surrounding view
+/// is re-evaluated, which on the Profile screen happens repeatedly (the
+/// moderator-application `.task` flips state right while the avatar is still
+/// downloading). The in-flight request gets cancelled and the view sticks on the
+/// placeholder. `CachedImage` instead keeps a stable identity (no `.id`), holds
+/// the decoded image in `@State`, and serves from a shared cache, so it loads
+/// once and keeps showing across re-renders. `.task(id:)` only restarts when the
+/// URL itself changes (e.g. nil -> url after an upload).
+struct CachedImage<Content: View, Placeholder: View>: View {
+    let url: URL?
+    @ViewBuilder var content: (Image) -> Content
+    @ViewBuilder var placeholder: () -> Placeholder
+
+    @State private var uiImage: UIImage?
+
+    var body: some View {
+        Group {
+            if let uiImage {
+                content(Image(uiImage: uiImage))
+            } else {
+                placeholder()
+            }
+        }
+        .task(id: url) { await load() }
+    }
+
+    private func load() async {
+        guard let url else { uiImage = nil; return }
+        if let cached = ImageCache.shared.image(for: url) {
+            uiImage = cached
+            return
+        }
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            guard !Task.isCancelled, let img = UIImage(data: data) else { return }
+            ImageCache.shared.insert(img, for: url)
+            uiImage = img
+        } catch {
+            // Keep the placeholder; a later re-render / pull-to-refresh retries.
+        }
+    }
+}
+
 // MARK: - Avatar
 
 struct Avatar: View {
@@ -195,15 +253,11 @@ struct Avatar: View {
     var body: some View {
         Group {
             if let url, let u = URL(string: url) {
-                AsyncImage(url: u) { img in
+                CachedImage(url: u) { img in
                     img.resizable().scaledToFill()
                 } placeholder: {
                     placeholder
                 }
-                // Re-init when the URL changes (nil -> url after an upload), so a
-                // freshly-saved avatar actually loads instead of keeping the old
-                // placeholder state.
-                .id(url)
             } else {
                 placeholder
             }
