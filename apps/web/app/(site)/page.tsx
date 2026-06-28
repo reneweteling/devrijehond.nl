@@ -11,14 +11,16 @@ import { Reveal, FadeIn } from './motion';
  * app-download push) over the public data. Per-spot SSR pages remain the
  * deep-indexable surface.
  *
- * Rendered dynamically (not prerendered at build): the build container has no
- * DB, so a build-time render would bake in the loadData() catch fallback
- * (0 plekken). The page stays dynamic so it queries the live DB at runtime (the
- * build has no DB access), but the category counts / featured / stats are cached
- * at runtime via unstable_cache so they aren't re-queried on every request. Map
- * markers load client-side from the API and aren't part of this render.
+ * Served as cached HTML (ISR), not rendered per request. On this shared host a
+ * per-request dynamic render goes cold within seconds of idle and then costs
+ * several seconds; static/ISR pages serve from cache in ~100ms regardless. The
+ * build container has no DB, so the build render bakes in the loadData() catch
+ * fallback (0 plekken); the in-process keep-warm pinger calls
+ * /api/internal/revalidate-home right after startup to regenerate with live
+ * data, and `revalidate` keeps it fresh afterwards. Map markers load client-side
+ * from the API and aren't part of this render.
  */
-export const dynamic = 'force-dynamic';
+export const revalidate = 300;
 
 const IOS_URL = 'https://apps.apple.com/app/de-vrije-hond/id6782167612';
 const ANDROID_URL = 'https://play.google.com/store/apps/details?id=nl.devrijehond.app';
@@ -98,28 +100,12 @@ async function loadData() {
   }
 }
 
-// Cache the (live-DB) home data at runtime so the dynamic page stays fast without
-// re-querying on every request. A plain module-level memo (one value per process)
-// instead of unstable_cache, which on this deployment added ~2.8s of cache-handler
-// overhead per miss (measured) versus ~50ms for the actual queries.
-type HomeData = Awaited<ReturnType<typeof loadData>>;
-let homeCache: { at: number; data: HomeData } | null = null;
-const HOME_TTL_MS = 300_000;
-
-async function getHomeData(): Promise<HomeData> {
-  const now = Date.now();
-  if (homeCache && now - homeCache.at < HOME_TTL_MS) return homeCache.data;
-  const data = await loadData();
-  homeCache = { at: now, data };
-  return data;
-}
-
 function detailHref(type: 'REGION' | 'POI', slug: string) {
   return `/${type === 'REGION' ? 'gebied' : 'plek'}/${slug}`;
 }
 
 export default async function HomePage() {
-  const { cats, featured, stats } = await getHomeData();
+  const { cats, featured, stats } = await loadData();
 
   return (
     <main>

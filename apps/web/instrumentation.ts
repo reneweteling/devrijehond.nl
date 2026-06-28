@@ -12,17 +12,27 @@ export async function register() {
 }
 
 /**
- * Keep the homepage render hot. On this low-traffic, shared host an idle dynamic
- * render goes cold after ~25s and a cold render costs several seconds, so the
- * first real visitor after a quiet spell waits. A lightweight self-ping every
- * 15s keeps the render path (and the in-process data memo) warm, so visitors
- * land on the ~100ms path. Node runtime only; failures are ignored.
+ * Keep the ISR homepage fresh. The homepage is served as cached HTML (it renders
+ * far too slowly per-request on this shared host when cold). The build render has
+ * no DB (so 0 plekken); this triggers an on-demand revalidation shortly after
+ * startup to replace it with live data, then periodically so counts stay current
+ * on a low-traffic site. Node runtime only; failures are ignored.
  */
 function startKeepWarm() {
-  const url = `http://127.0.0.1:${process.env.PORT || '3000'}/`;
-  const ping = () => void fetch(url, { headers: { 'x-keep-warm': '1' } }).catch(() => {});
-  setTimeout(ping, 5_000);
-  setInterval(ping, 15_000);
+  const base = `http://127.0.0.1:${process.env.PORT || '3000'}`;
+  const token = process.env.WARM_TOKEN ?? 'dvh-warm';
+  const refresh = async () => {
+    try {
+      await fetch(`${base}/api/internal/revalidate-home`, { headers: { 'x-warm': token } });
+      // Pull once so the regeneration runs now (this request absorbs it), leaving
+      // fresh cached HTML for real visitors.
+      await fetch(`${base}/`);
+    } catch {
+      /* ignore */
+    }
+  };
+  setTimeout(refresh, 6_000);
+  setInterval(refresh, 240_000);
 }
 
 export const onRequestError = Sentry.captureRequestError;
