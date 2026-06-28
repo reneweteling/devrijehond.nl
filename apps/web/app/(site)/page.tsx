@@ -65,7 +65,6 @@ type FeaturedRow = {
 type Stats = { spots: number; cats: number };
 
 async function loadData() {
-  const __q0 = Date.now();
   try {
     const [cats, featured, stats] = await Promise.all([
       pgQuery<CatRow>(
@@ -93,7 +92,6 @@ async function loadData() {
             (SELECT COUNT(*)::int FROM "Category" WHERE visible = true) AS cats`,
       ),
     ]);
-    console.log('[perf] home loadData queries', Date.now() - __q0, 'ms');
     return { cats, featured, stats: stats[0] ?? { spots: 0, cats: 0 } };
   } catch {
     return { cats: [], featured: [], stats: { spots: 0, cats: 0 } };
@@ -121,9 +119,7 @@ function detailHref(type: 'REGION' | 'POI', slug: string) {
 }
 
 export default async function HomePage() {
-  const __t0 = Date.now();
   const { cats, featured, stats } = await getHomeData();
-  console.log('[perf] home getHomeData', Date.now() - __t0, 'ms');
 
   return (
     <main>
