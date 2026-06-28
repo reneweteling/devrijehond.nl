@@ -40,7 +40,7 @@ function StarDisplay({ value }: { value: number }) {
  * participation island for signed-in users.
  */
 
-const IOS_URL = 'https://apps.apple.com/app/de-vrije-hond/id000000000';
+const IOS_URL = 'https://apps.apple.com/app/de-vrije-hond/id6782167612';
 const ANDROID_URL = 'https://play.google.com/store/apps/details?id=nl.devrijehond.app';
 
 /* Small inline icons tinted with currentColor, in the PawMark line style. */

@@ -16,7 +16,7 @@ export function GET(): NextResponse {
     minSupportedVersion: process.env.APP_MIN_SUPPORTED_VERSION ?? '0.1.0',
     latestVersion: process.env.APP_LATEST_VERSION ?? '0.1.0',
     updateUrl: {
-      ios: process.env.APP_IOS_URL ?? 'https://apps.apple.com/app/de-vrije-hond/id000000000',
+      ios: process.env.APP_IOS_URL ?? 'https://apps.apple.com/app/de-vrije-hond/id6782167612',
       android:
         process.env.APP_ANDROID_URL ??
         'https://play.google.com/store/apps/details?id=nl.devrijehond.app',

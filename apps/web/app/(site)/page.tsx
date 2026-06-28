@@ -21,7 +21,7 @@ import { Reveal, FadeIn } from './motion';
  */
 export const dynamic = 'force-dynamic';
 
-const IOS_URL = 'https://apps.apple.com/app/de-vrije-hond/id000000000';
+const IOS_URL = 'https://apps.apple.com/app/de-vrije-hond/id6782167612';
 const ANDROID_URL = 'https://play.google.com/store/apps/details?id=nl.devrijehond.app';
 
 const CATEGORY_EMOJI: Record<string, string> = {

@@ -8,7 +8,7 @@ import Image from 'next/image';
 
 import { HeaderAccount } from './header-account';
 
-const IOS_URL = 'https://apps.apple.com/app/de-vrije-hond/id000000000';
+const IOS_URL = 'https://apps.apple.com/app/de-vrije-hond/id6782167612';
 const ANDROID_URL = 'https://play.google.com/store/apps/details?id=nl.devrijehond.app';
 
 export function PawMark({ size = 26, color = 'var(--moss)' }: { size?: number; color?: string }) {
@@ -44,9 +44,9 @@ function PlayGlyph() {
 }
 
 export function StoreButton({ href, kind }: { href: string; kind: 'ios' | 'android' }) {
-  // Pre-launch: the store listings don't exist yet (placeholder id / unpublished
-  // package). Render a non-clickable "Binnenkort" pill instead of a dead link.
-  const comingSoon = href.includes('id000000000') || href.includes('details?id=nl.devrijehond.app');
+  // iOS is live; the Play listing isn't published yet. Render a non-clickable
+  // "Binnenkort" pill for the unpublished package instead of a dead link.
+  const comingSoon = href.includes('details?id=nl.devrijehond.app');
   const glyph = kind === 'ios' ? <AppleGlyph /> : <PlayGlyph />;
   const small = comingSoon
     ? kind === 'ios'
@@ -145,7 +145,7 @@ export function AppCta() {
             <StoreButton href={ANDROID_URL} kind="android" />
           </div>
           <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.85)' }}>
-            Binnenkort te downloaden
+            Nu in de App Store, binnenkort op Google Play
           </span>
         </div>
       </div>
