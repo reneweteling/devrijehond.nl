@@ -68,9 +68,13 @@ struct MapScreen: View {
         }
         // Legend, right-aligned and lifted clear of the Apple Maps attribution
         // (logo + legal link) at the very bottom — covering those risks rejection.
-        .overlay(alignment: .bottomTrailing) {
+        .overlay(alignment: .bottom) {
+            // Same container as the search pill: full width, trailing-aligned,
+            // horizontal inset DVH.s4 — so the legend's right edge lines up
+            // exactly with the search pill and the tab bar.
             legend
-                .padding(.trailing, DVH.s4)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .padding(.horizontal, DVH.s4)
                 .padding(.bottom, 34) // clear the Apple Maps attribution at the very bottom
         }
         // Floating controls layered above the map
@@ -83,9 +87,12 @@ struct MapScreen: View {
             }
             .padding(.top, DVH.s2)
         }
-        .overlay(alignment: .bottomTrailing) {
+        .overlay(alignment: .bottom) {
+            // Same container as the search pill (full width, trailing-aligned,
+            // horizontal inset DVH.s4) so the controls align with everything else.
             mapControls
-                .padding(.trailing, DVH.s4)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .padding(.horizontal, DVH.s4)
                 .padding(.bottom, 96) // sit above the legend (which clears the attribution)
         }
         .task {
@@ -136,9 +143,7 @@ struct MapScreen: View {
             }
             .padding(.horizontal, DVH.s4)
             .frame(height: 46)
-            .background(.bar, in: Capsule())
-            .overlay(Capsule().strokeBorder(Brand.ink.opacity(0.08)))
-            .shadow(color: Brand.ink.opacity(0.08), radius: 8, y: 2)
+            .mapGlass(Capsule())
         }
         .buttonStyle(.plain)
         .padding(.horizontal, DVH.s4)
@@ -149,7 +154,7 @@ struct MapScreen: View {
     private var categoryChips: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: DVH.s2) {
-                DVHChip(
+                MapFilterChip(
                     label: "Alles",
                     selected: selectedCategoryId == nil,
                     tint: Brand.moss
@@ -158,7 +163,7 @@ struct MapScreen: View {
                 }
 
                 ForEach(categories) { cat in
-                    DVHChip(
+                    MapFilterChip(
                         label: cat.label,
                         icon: cat.icon,
                         selected: selectedCategoryId == cat.id,
@@ -203,7 +208,7 @@ struct MapScreen: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 9)
-        .background(.bar, in: Capsule())
+        .mapGlass(Capsule())
     }
 
     private func legendLabel(color: Color, text: String, dashed: Bool = false) -> some View {
@@ -229,12 +234,81 @@ private struct MapControlButton: View {
                 .font(.system(size: 17, weight: .semibold))
                 .foregroundStyle(Brand.mossDark)
                 .frame(width: 44, height: 44)
-                .background(.bar, in: RoundedRectangle(cornerRadius: DVH.rSm))
-                .overlay(RoundedRectangle(cornerRadius: DVH.rSm)
-                    .strokeBorder(Brand.ink.opacity(0.10)))
-                .shadow(color: Brand.ink.opacity(0.10), radius: 6, y: 2)
+                .mapGlass(RoundedRectangle(cornerRadius: DVH.rSm))
         }
         .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Glass surface for floating map overlays
+
+/// Frosted blur with a light tint, the same "glass + lighten" treatment the tab
+/// bar uses. Shared by the search pill, the filter chips, the legend and the map
+/// control buttons so every floating overlay reads as one consistent surface.
+private struct MapGlass<S: InsettableShape>: ViewModifier {
+    let shape: S
+    func body(content: Content) -> some View {
+        content
+            .background {
+                ZStack {
+                    shape.fill(.ultraThinMaterial)
+                    shape.fill(.white.opacity(0.35))
+                }
+            }
+            .overlay(shape.strokeBorder(.white.opacity(0.55)))
+            .shadow(color: Brand.ink.opacity(0.10), radius: 8, y: 2)
+    }
+}
+
+extension View {
+    fileprivate func mapGlass<S: InsettableShape>(_ shape: S) -> some View {
+        modifier(MapGlass(shape: shape))
+    }
+}
+
+// MARK: - Filter chip (glass-on-map variant)
+
+/// Like DVHChip, but the unselected state uses the shared map-glass surface so
+/// the chips sit in the same visual language as the search pill and controls.
+/// Selected chips keep their solid category tint.
+private struct MapFilterChip: View {
+    let label: String
+    var icon: String?
+    var selected: Bool
+    var tint: Color = Brand.moss
+    var action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                if let icon { Image(systemName: icon).font(.caption2.weight(.semibold)) }
+                Text(label).font(.dvhCaption.weight(.semibold))
+            }
+            .padding(.horizontal, DVH.s3)
+            .padding(.vertical, DVH.s2 + 1)
+            .foregroundStyle(selected ? .white : Brand.mossDark)
+            .background {
+                if selected {
+                    Capsule().fill(tint)
+                        .shadow(color: tint.opacity(0.30), radius: 6, y: 2)
+                }
+            }
+            .modifier(ChipGlassIfUnselected(selected: selected))
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+/// Applies the map-glass surface only when the chip is unselected; selected
+/// chips already carry their tint fill from MapFilterChip.
+private struct ChipGlassIfUnselected: ViewModifier {
+    let selected: Bool
+    func body(content: Content) -> some View {
+        if selected {
+            content
+        } else {
+            content.mapGlass(Capsule())
+        }
     }
 }
 

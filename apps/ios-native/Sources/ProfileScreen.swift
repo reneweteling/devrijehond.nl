@@ -211,11 +211,23 @@ struct ProfileScreen: View {
                             ProfileModStatusRow(status: app.status)
                         }
                         .buttonStyle(.plain)
-                    } else {
+                    } else if profileComplete(me) {
                         NavigationLink(value: ProfileRoute.moderatorApply) {
                             ProfileActionRow(icon: "person.badge.plus", label: "Word moderator")
                         }
                         .buttonStyle(.plain)
+                    } else {
+                        // A moderator only makes sense once people can recognise you:
+                        // require a profile photo and a name before this unlocks
+                        // (mirrors the gate in AboutView).
+                        VStack(alignment: .leading, spacing: 0) {
+                            ProfileActionRow(icon: "person.badge.plus", label: "Word moderator")
+                                .opacity(0.4)
+                            Text("Voeg eerst een profielfoto en je naam toe.")
+                                .font(.dvhCaption).foregroundStyle(Brand.ink2)
+                                .padding(.horizontal, DVH.s4)
+                                .padding(.bottom, DVH.s4)
+                        }
                     }
                 } else {
                     HStack {
@@ -289,6 +301,16 @@ struct ProfileScreen: View {
             .disabled(deleting)
         }
         .dvhCard(padding: 0)
+    }
+
+    // MARK: - Gating
+
+    /// A moderator application only makes sense once people can recognise you:
+    /// require a profile photo and a name. Mirrors `profileComplete` in AboutView.
+    private func profileComplete(_ me: MeProfile) -> Bool {
+        let hasPhoto = !(me.image ?? "").isEmpty
+        let hasName = !(me.name ?? "").trimmingCharacters(in: .whitespaces).isEmpty
+        return hasPhoto && hasName
     }
 
     // MARK: - Data
