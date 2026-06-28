@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- De Vrije Hond brand palette (mirrors the iOS Theme.swift + web globals.css). -->
+    <color name="moss">#FF6E7B33</color>
+    <color name="moss_dark">#FF4C5622</color>
+    <color name="moss_soft">#FFE7E9D5</color>
+    <color name="cream">#FFFFFDF7</color>
+    <color name="sand">#FFF3EFE3</color>
+    <color name="terra">#FFC2762E</color>
+    <color name="rust">#FFA33B2D</color>
+    <color name="ink">#FF2B3320</color>
+    <color name="ink2">#FF5A6151</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>

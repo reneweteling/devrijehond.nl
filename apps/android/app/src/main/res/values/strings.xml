@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">De Vrije Hond</string>
+    <string name="tab_map">Kaart</string>
+    <string name="tab_nearby">Nabij</string>
+    <string name="tab_add">Toevoegen</string>
+    <string name="tab_wishes">Wensen</string>
+    <string name="tab_profile">Profiel</string>
+</resources>

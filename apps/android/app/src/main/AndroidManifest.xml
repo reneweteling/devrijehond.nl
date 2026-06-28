@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- Android 11+ package visibility for the apps/schemes we hand off to. -->
+    <queries>
+        <package android:name="com.google.android.apps.maps" />
+        <package android:name="com.waze" />
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="geo" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.DIAL" />
+            <data android:scheme="tel" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.SEND" />
+            <data android:mimeType="text/plain" />
+        </intent>
+    </queries>
+
+    <application
+        android:name=".DvhApp"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.DeVrijeHond">
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${MAPS_API_KEY}" />
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.DeVrijeHond">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- Magic-link app scheme: vrijehond://verify?token=... -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="vrijehond" android:host="verify" />
+            </intent-filter>
+
+            <!-- Magic-link App Link via the https interstitial. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="www.devrijehond.nl"
+                    android:pathPrefix="/verify-mobile" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

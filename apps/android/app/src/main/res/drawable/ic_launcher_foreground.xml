@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Simple paw print placeholder icon, white on moss. -->
+    <group android:translateX="0" android:translateY="2">
+        <!-- main pad -->
+        <path
+            android:fillColor="#FFFDF7"
+            android:pathData="M54,58m-15,0a15,17 0,1 1,30 0a15,17 0,1 1,-30 0" />
+        <!-- toes -->
+        <path
+            android:fillColor="#FFFDF7"
+            android:pathData="M38,40m-7,0a7,9 0,1 1,14 0a7,9 0,1 1,-14 0" />
+        <path
+            android:fillColor="#FFFDF7"
+            android:pathData="M54,36m-7,0a7,9 0,1 1,14 0a7,9 0,1 1,-14 0" />
+        <path
+            android:fillColor="#FFFDF7"
+            android:pathData="M70,40m-7,0a7,9 0,1 1,14 0a7,9 0,1 1,-14 0" />
+    </group>
+</vector>

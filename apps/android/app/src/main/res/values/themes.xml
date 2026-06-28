@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App is light-locked to match the iOS app. The Compose theme drives the real
+         styling; this platform theme only sets the window chrome before Compose draws. -->
+    <style name="Theme.DeVrijeHond" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/sand</item>
+        <item name="android:statusBarColor">@color/sand</item>
+        <item name="android:navigationBarColor">@color/sand</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
+</resources>
