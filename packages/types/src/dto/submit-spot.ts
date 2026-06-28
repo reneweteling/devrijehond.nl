@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { UuidSchema, SpotTypeSchema, GeoPointSchema } from './common';
+import { UuidSchema, SpotTypeSchema, SpotStatusSchema, GeoPointSchema } from './common';
 import { SpotDetailSchema } from './spots';
 import '../registry';
 
@@ -98,3 +98,24 @@ export const UpdateSpotRequestSchema = z
     description: 'Body for `PATCH /api/v1/me/spots/:id` (owner edit while UNVERIFIED).',
   });
 export type UpdateSpotRequestDto = z.infer<typeof UpdateSpotRequestSchema>;
+
+/**
+ * PATCH /api/v1/me/spots/:id/moderate, staff-only status change (ADMIN /
+ * MODERATOR). Sets the spot status; the API derives `verifiedAt` / `hiddenAt`.
+ */
+export const ModerateSpotRequestSchema = z
+  .object({
+    status: SpotStatusSchema.openapi({
+      description: 'New spot status: VERIFIED | UNVERIFIED | HIDDEN | REMOVED.',
+    }),
+  })
+  .openapi('ModerateSpotRequest', {
+    description: 'Body for `PATCH /api/v1/me/spots/:id/moderate` (staff only).',
+  });
+export type ModerateSpotRequestDto = z.infer<typeof ModerateSpotRequestSchema>;
+
+/** Generic `{ ok: true }` acknowledgement returned by some mutation endpoints. */
+export const OkResponseSchema = z
+  .object({ ok: z.literal(true) })
+  .openapi('OkResponse', { description: 'A simple success acknowledgement.' });
+export type OkResponseDto = z.infer<typeof OkResponseSchema>;

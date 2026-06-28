@@ -116,6 +116,15 @@ export const SpotsResponseSchema = paginatedSchema(SpotSummarySchema).openapi('S
 });
 export type SpotsResponseDto = z.infer<typeof SpotsResponseSchema>;
 
+/**
+ * GET /api/v1/me/spots, the signed-in user's own submissions across all statuses
+ * (UNVERIFIED / VERIFIED / HIDDEN), newest first. Not paginated (capped at 200).
+ */
+export const MeSpotsResponseSchema = z
+  .object({ items: z.array(SpotSummarySchema) })
+  .openapi('MeSpotsResponse', { description: "The signed-in user's own submitted spots." });
+export type MeSpotsResponseDto = z.infer<typeof MeSpotsResponseSchema>;
+
 /** GET /api/v1/spots, query parameters. */
 export const SpotsQuerySchema = z
   .object({
