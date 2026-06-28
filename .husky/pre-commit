@@ -1,1 +1,11 @@
 pnpm exec lint-staged
+
+# Non-blocking reminder: docs/mobile-app-spec.md is the parity board for the iOS +
+# Android apps. If a Swift change adds or changes a feature, update the spec.
+if git diff --cached --name-only | grep -q '^apps/ios-native/Sources/.*\.swift$' && \
+   ! git diff --cached --name-only | grep -q '^docs/mobile-app-spec\.md$'; then
+  echo ""
+  echo "ℹ︎  apps/ios-native changed without touching docs/mobile-app-spec.md."
+  echo "   If this adds or changes a feature, update the spec (iOS + Android parity board)."
+  echo ""
+fi

@@ -37,6 +37,14 @@ Monorepo (pnpm + Turborepo). Scope `@devrijehond/*`.
 - **Taxonomy is data, community-growable, admin-curated.** Categories + amenities are rows with `visible`/`sortOrder`/`status` (`ACTIVE`|`PROPOSED`). New community terms land as `PROPOSED`; admin promotes/merges. Don't hardcode categories.
 - **Auth deep-link**: the magic-link email links to an HTTPS `/verify-mobile` interstitial (Gmail won't rewrite it), which hops to the app's `vrijehond://` deep link. Native Apple/Google exchange an idToken at `/api/auth/mobile/{apple,google}-native` for a bearer token stored in the iOS Keychain.
 - **SSR for SEO**: each spot is a crawlable server-rendered URL with `generateMetadata`.
+- **Mobile spec is the source of truth.** `docs/mobile-app-spec.md` is the
+  canonical, framework-agnostic feature + API-contract spec, the parity board for
+  the native iOS app and the native Android (Kotlin/Compose) app. Whenever you add
+  or change a mobile feature (`apps/ios-native`) or a `/api/v1` (or `/api/auth`)
+  endpoint the apps use, update `docs/mobile-app-spec.md` in the same change. The
+  app clients are driven by the OAS3 contract under `packages/types/openapi/`;
+  changes to the contract must stay backwards-compatible with the snapshot the
+  shipped apps pin to (additive only).
 
 ## Commands
 
