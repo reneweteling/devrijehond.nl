@@ -1,5 +1,4 @@
 import Image from 'next/image';
-import { unstable_cache } from 'next/cache';
 import { pgQuery } from '@devrijehond/server';
 
 import { MapIsland } from './map-island';
@@ -102,9 +101,20 @@ async function loadData() {
 }
 
 // Cache the (live-DB) home data at runtime so the dynamic page stays fast without
-// re-querying on every request. Runs at request time, not at build, so the DB is
-// available and the counts are real.
-const getHomeData = unstable_cache(loadData, ['home-data-v1'], { revalidate: 300 });
+// re-querying on every request. A plain module-level memo (one value per process)
+// instead of unstable_cache, which on this deployment added ~2.8s of cache-handler
+// overhead per miss (measured) versus ~50ms for the actual queries.
+type HomeData = Awaited<ReturnType<typeof loadData>>;
+let homeCache: { at: number; data: HomeData } | null = null;
+const HOME_TTL_MS = 300_000;
+
+async function getHomeData(): Promise<HomeData> {
+  const now = Date.now();
+  if (homeCache && now - homeCache.at < HOME_TTL_MS) return homeCache.data;
+  const data = await loadData();
+  homeCache = { at: now, data };
+  return data;
+}
 
 function detailHref(type: 'REGION' | 'POI', slug: string) {
   return `/${type === 'REGION' ? 'gebied' : 'plek'}/${slug}`;
