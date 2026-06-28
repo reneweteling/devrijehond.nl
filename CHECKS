@@ -2,3 +2,5 @@ WAIT=10
 ATTEMPTS=8
 TIMEOUT=20
 /api/health
+/
+/kaart
