@@ -1,0 +1,3398 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "De Vrije Hond API",
+    "version": "v1",
+    "description": "Typed contract between the De Vrije Hond website/API (apps/web) and the Expo mobile app. Generated from Zod schemas in @devrijehond/types. The community-driven map of dog-friendly spots, public reads are anonymous + CDN-cacheable; user-scoped writes live under `/me/*`."
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "BetterAuth session token",
+        "description": "BetterAuth-issued session token. Session cookies are the canonical auth for the website; the bearer scheme is used by the Expo mobile client and documented here for SDK compatibility."
+      }
+    },
+    "schemas": {
+      "UserRole": {
+        "type": "string",
+        "enum": ["USER", "MODERATOR", "ADMIN"],
+        "description": "Application role. `USER` = mobile app + website. `ADMIN` = moderation safety-net.",
+        "example": "USER"
+      },
+      "SpotType": {
+        "type": "string",
+        "enum": ["REGION", "POI"],
+        "description": "Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point.",
+        "example": "REGION"
+      },
+      "SpotStatus": {
+        "type": "string",
+        "enum": ["UNVERIFIED", "VERIFIED", "HIDDEN", "REMOVED"],
+        "description": "Moderation lifecycle. `UNVERIFIED` = live, awaiting community confirmation. `VERIFIED` = net weighted score reached threshold. `HIDDEN`/`REMOVED` = admin-only.",
+        "example": "UNVERIFIED"
+      },
+      "VoteValue": {
+        "type": "string",
+        "enum": ["CONFIRM", "DENY"],
+        "description": "Community verification vote. `CONFIRM` raises the score, `DENY` lowers it.",
+        "example": "CONFIRM"
+      },
+      "ReportReason": {
+        "type": "string",
+        "enum": ["DUPLICATE", "SPAM", "WRONG_INFO", "INAPPROPRIATE", "OTHER"],
+        "description": "Why a piece of content was reported.",
+        "example": "WRONG_INFO"
+      },
+      "ReportTarget": {
+        "type": "string",
+        "enum": ["SPOT", "PHOTO", "REVIEW"],
+        "description": "What kind of entity a report targets.",
+        "example": "SPOT"
+      },
+      "FeatureStatus": {
+        "type": "string",
+        "enum": ["CONSIDERING", "PLANNED", "DONE", "DECLINED"],
+        "description": "Product-roadmap state of a community feature request.",
+        "example": "CONSIDERING"
+      },
+      "GeoPoint": {
+        "type": "object",
+        "properties": {
+          "lat": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90,
+            "description": "Latitude in decimal degrees (WGS84 / EPSG:4326).",
+            "example": 52.3006
+          },
+          "lng": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180,
+            "description": "Longitude in decimal degrees (WGS84 / EPSG:4326).",
+            "example": 4.8368
+          }
+        },
+        "required": ["lat", "lng"],
+        "description": "A geographic point, latitude/longitude in WGS84."
+      },
+      "ApiError": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Machine-readable error code in UPPER_SNAKE_CASE.",
+            "example": "VALIDATION_FAILED"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable explanation. Safe to display to end users.",
+            "example": "categoryId is not a valid UUID."
+          },
+          "details": {
+            "description": "Optional structured detail payload. For validation errors this is the Zod `flatten()` output."
+          }
+        },
+        "required": ["error", "message"],
+        "description": "Uniform error envelope used by every API endpoint.",
+        "example": {
+          "error": "VALIDATION_FAILED",
+          "message": "categoryId is required"
+        }
+      },
+      "Category": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "RFC 4122 UUID (v4).",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/SpotType"
+          },
+          "icon": {
+            "type": ["string", "null"],
+            "description": "Icon name (Tabler on web, mapped to SF Symbol / Material on mobile)."
+          },
+          "color": {
+            "type": ["string", "null"],
+            "description": "Pin colour (hex).",
+            "example": "#3F6B4C"
+          },
+          "sortOrder": {
+            "type": "integer"
+          }
+        },
+        "required": ["id", "slug", "label", "type", "icon", "color", "sortOrder"],
+        "description": "A spot category."
+      },
+      "CategoriesResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Category"
+            }
+          }
+        },
+        "required": ["items"],
+        "description": "All visible, active categories."
+      },
+      "Amenity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "RFC 4122 UUID (v4).",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "icon": {
+            "type": ["string", "null"],
+            "description": "Icon name (Tabler / SF Symbol / Material)."
+          },
+          "sortOrder": {
+            "type": "integer"
+          },
+          "categoryIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "description": "RFC 4122 UUID (v4).",
+              "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+            },
+            "description": "Categories this amenity applies to (from `AmenityOnCategory`). Empty = applicable everywhere."
+          }
+        },
+        "required": ["id", "slug", "label", "icon", "sortOrder", "categoryIds"],
+        "description": "A spot amenity / facility tag."
+      },
+      "AmenitiesResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Amenity"
+            }
+          }
+        },
+        "required": ["items"],
+        "description": "All visible, active amenities with their category mapping."
+      },
+      "SpotGeometry": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["Point", "Polygon"],
+            "description": "GeoJSON geometry type."
+          },
+          "coordinates": {
+            "description": "GeoJSON coordinates. Point → `[lng, lat]`. Polygon → `[[[lng, lat], …]]` (one or more linear rings, first/last point equal)."
+          }
+        },
+        "required": ["type"],
+        "description": "GeoJSON geometry (WGS84). Point for a POI, Polygon for a REGION. Coordinate order is [longitude, latitude]."
+      },
+      "SpotPhoto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "RFC 4122 UUID (v4).",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "sortOrder": {
+            "type": "integer"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "RFC 3339 datetime in UTC.",
+            "example": "2026-06-19T12:00:00Z"
+          }
+        },
+        "required": ["id", "url", "sortOrder", "createdAt"],
+        "description": "One photo attached to a spot."
+      },
+      "SpotRating": {
+        "type": "object",
+        "properties": {
+          "average": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 5,
+            "description": "Mean star rating (0–5).",
+            "example": 4.3
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of reviews.",
+            "example": 27
+          }
+        },
+        "required": ["average", "count"],
+        "description": "Denormalised review aggregate."
+      },
+      "SpotVerification": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/SpotStatus"
+          },
+          "netScore": {
+            "type": "number",
+            "description": "Weighted confirm − deny score.",
+            "example": 6.5
+          },
+          "confirmCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "denyCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "verifiedAt": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "When the spot reached VERIFIED, or null.",
+            "example": "2026-06-19T12:00:00Z"
+          }
+        },
+        "required": ["status", "netScore", "confirmCount", "denyCount", "verifiedAt"],
+        "description": "Community-verification status + denormalised vote score."
+      },
+      "SpotAuthor": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "RFC 4122 UUID (v4).",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "handle": {
+            "type": ["string", "null"]
+          },
+          "name": {
+            "type": ["string", "null"]
+          },
+          "image": {
+            "type": ["string", "null"],
+            "format": "uri"
+          }
+        },
+        "required": ["id", "handle", "name", "image"],
+        "description": "Public reference to the user who submitted the spot."
+      },
+      "SpotSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "RFC 4122 UUID (v4).",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "description": "URL-safe slug (lowercase, hyphenated).",
+            "example": "amsterdamse-bos"
+          },
+          "type": {
+            "$ref": "#/components/schemas/SpotType"
+          },
+          "name": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "RFC 4122 UUID (v4).",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SpotStatus"
+          },
+          "lat": {
+            "type": ["number", "null"],
+            "minimum": -90,
+            "maximum": 90,
+            "description": "Latitude in decimal degrees (WGS84 / EPSG:4326).",
+            "example": 52.3006
+          },
+          "lng": {
+            "type": ["number", "null"],
+            "minimum": -180,
+            "maximum": 180,
+            "description": "Longitude in decimal degrees (WGS84 / EPSG:4326).",
+            "example": 4.8368
+          },
+          "rating": {
+            "$ref": "#/components/schemas/SpotRating"
+          },
+          "photoUrl": {
+            "type": ["string", "null"],
+            "format": "uri",
+            "description": "First photo URL for the list thumbnail, or null."
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "RFC 3339 datetime in UTC.",
+            "example": "2026-06-19T12:00:00Z"
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "type",
+          "name",
+          "categoryId",
+          "status",
+          "lat",
+          "lng",
+          "rating",
+          "photoUrl",
+          "updatedAt"
+        ],
+        "description": "Lightweight spot summary for map markers + list rows."
+      },
+      "SpotsResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpotSummary"
+            }
+          },
+          "nextCursor": {
+            "type": ["string", "null"],
+            "description": "Cursor for the next page, or null when this is the last page."
+          }
+        },
+        "required": ["items", "nextCursor"],
+        "description": "Cursor-paginated list of spots."
+      },
+      "SpotsMapResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpotSummary"
+            }
+          },
+          "clusters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MapCluster"
+            },
+            "default": []
+          }
+        },
+        "required": ["items"],
+        "description": "Individual spots plus clustered groups within the requested viewport."
+      },
+      "MapCluster": {
+        "type": "object",
+        "properties": {
+          "lat": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90,
+            "description": "Latitude in decimal degrees (WGS84 / EPSG:4326).",
+            "example": 52.3006
+          },
+          "lng": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180,
+            "description": "Longitude in decimal degrees (WGS84 / EPSG:4326).",
+            "example": 4.8368
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 2,
+            "description": "Number of spots in this cluster."
+          }
+        },
+        "required": ["lat", "lng", "count"],
+        "description": "A clustered group of nearby spots on the map."
+      },
+      "SpotDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "RFC 4122 UUID (v4).",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "description": "URL-safe slug (lowercase, hyphenated).",
+            "example": "amsterdamse-bos"
+          },
+          "type": {
+            "$ref": "#/components/schemas/SpotType"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": ["string", "null"]
+          },
+          "category": {
+            "$ref": "#/components/schemas/Category"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SpotStatus"
+          },
+          "geometry": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SpotGeometry"
+              },
+              {
+                "type": ["object", "null"]
+              }
+            ]
+          },
+          "lat": {
+            "type": ["number", "null"],
+            "minimum": -90,
+            "maximum": 90,
+            "description": "Latitude in decimal degrees (WGS84 / EPSG:4326).",
+            "example": 52.3006
+          },
+          "lng": {
+            "type": ["number", "null"],
+            "minimum": -180,
+            "maximum": 180,
+            "description": "Longitude in decimal degrees (WGS84 / EPSG:4326).",
+            "example": 4.8368
+          },
+          "address": {
+            "type": ["string", "null"]
+          },
+          "hours": {
+            "description": "Opening-hours structure (loose JSON, validated at the API boundary)."
+          },
+          "phone": {
+            "type": ["string", "null"]
+          },
+          "website": {
+            "type": ["string", "null"],
+            "format": "uri"
+          },
+          "amenities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Amenity"
+            }
+          },
+          "photos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpotPhoto"
+            }
+          },
+          "rating": {
+            "$ref": "#/components/schemas/SpotRating"
+          },
+          "verification": {
+            "$ref": "#/components/schemas/SpotVerification"
+          },
+          "submittedBy": {
+            "$ref": "#/components/schemas/SpotAuthor"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "RFC 3339 datetime in UTC.",
+            "example": "2026-06-19T12:00:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "RFC 3339 datetime in UTC.",
+            "example": "2026-06-19T12:00:00Z"
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "type",
+          "name",
+          "description",
+          "category",
+          "status",
+          "geometry",
+          "lat",
+          "lng",
+          "address",
+          "phone",
+          "website",
+          "amenities",
+          "photos",
+          "rating",
+          "verification",
+          "submittedBy",
+          "createdAt",
+          "updatedAt"
+        ],
+        "description": "Full spot detail. Server-rendered as the crawlable spot page."
+      },
+      "MeSpotsResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpotSummary"
+            }
+          }
+        },
+        "required": ["items"],
+        "description": "The signed-in user's own submitted spots."
+      },
+      "SubmitSpotRequest": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/SpotType"
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Category the spot belongs to.",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 120
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "geometry": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["Point", "Polygon"]
+              },
+              "coordinates": {
+                "description": "GeoJSON coordinates. Point → `[lng, lat]`; Polygon → `[[[lng, lat], …]]`."
+              }
+            },
+            "required": ["type"],
+            "description": "GeoJSON geometry. Provide this OR `point`/`polygon`."
+          },
+          "point": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GeoPoint"
+              },
+              {
+                "description": "Single lat/lng for a POI. Alternative to `geometry`."
+              }
+            ]
+          },
+          "polygon": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GeoPoint"
+            },
+            "minItems": 3,
+            "description": "Polygon ring (≥ 3 lat/lng points) for a REGION. Alternative to `geometry`. The API closes the ring."
+          },
+          "amenityIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "description": "RFC 4122 UUID (v4).",
+              "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+            },
+            "default": [],
+            "description": "Amenities offered at this spot."
+          },
+          "photos": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            },
+            "maxItems": 10,
+            "default": [],
+            "description": "Uploaded photo URLs (the client uploads to S3 first, then submits the resulting URLs)."
+          },
+          "address": {
+            "type": "string",
+            "maxLength": 240
+          },
+          "phone": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "website": {
+            "type": "string",
+            "format": "uri"
+          },
+          "hours": {
+            "description": "Opening-hours structure (loose JSON, validated at the boundary)."
+          }
+        },
+        "required": ["type", "categoryId", "name"],
+        "description": "Body for `POST /api/v1/me/spots`. A submitted spot goes live immediately as UNVERIFIED."
+      },
+      "SubmitSpotResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "RFC 4122 UUID (v4).",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "description": "URL-safe slug (lowercase, hyphenated).",
+            "example": "amsterdamse-bos"
+          },
+          "type": {
+            "$ref": "#/components/schemas/SpotType"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": ["string", "null"]
+          },
+          "category": {
+            "$ref": "#/components/schemas/Category"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SpotStatus"
+          },
+          "geometry": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SpotGeometry"
+              },
+              {
+                "type": ["object", "null"]
+              }
+            ]
+          },
+          "lat": {
+            "type": ["number", "null"],
+            "minimum": -90,
+            "maximum": 90,
+            "description": "Latitude in decimal degrees (WGS84 / EPSG:4326).",
+            "example": 52.3006
+          },
+          "lng": {
+            "type": ["number", "null"],
+            "minimum": -180,
+            "maximum": 180,
+            "description": "Longitude in decimal degrees (WGS84 / EPSG:4326).",
+            "example": 4.8368
+          },
+          "address": {
+            "type": ["string", "null"]
+          },
+          "hours": {
+            "description": "Opening-hours structure (loose JSON, validated at the API boundary)."
+          },
+          "phone": {
+            "type": ["string", "null"]
+          },
+          "website": {
+            "type": ["string", "null"],
+            "format": "uri"
+          },
+          "amenities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Amenity"
+            }
+          },
+          "photos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpotPhoto"
+            }
+          },
+          "rating": {
+            "$ref": "#/components/schemas/SpotRating"
+          },
+          "verification": {
+            "$ref": "#/components/schemas/SpotVerification"
+          },
+          "submittedBy": {
+            "$ref": "#/components/schemas/SpotAuthor"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "RFC 3339 datetime in UTC.",
+            "example": "2026-06-19T12:00:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "RFC 3339 datetime in UTC.",
+            "example": "2026-06-19T12:00:00Z"
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "type",
+          "name",
+          "description",
+          "category",
+          "status",
+          "geometry",
+          "lat",
+          "lng",
+          "address",
+          "phone",
+          "website",
+          "amenities",
+          "photos",
+          "rating",
+          "verification",
+          "submittedBy",
+          "createdAt",
+          "updatedAt"
+        ],
+        "description": "The created spot (status UNVERIFIED)."
+      },
+      "UpdateSpotRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 120
+          },
+          "description": {
+            "type": ["string", "null"],
+            "maxLength": 4000
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "RFC 4122 UUID (v4).",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "amenityIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "description": "RFC 4122 UUID (v4).",
+              "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+            }
+          },
+          "geometry": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["Point", "Polygon"]
+              },
+              "coordinates": {
+                "description": "GeoJSON coordinates. Point → `[lng, lat]`; Polygon → `[[[lng, lat], …]]`."
+              }
+            },
+            "required": ["type"],
+            "description": "Raw GeoJSON geometry (WGS84, [lng, lat] order)."
+          },
+          "point": {
+            "$ref": "#/components/schemas/GeoPoint"
+          },
+          "polygon": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GeoPoint"
+            },
+            "minItems": 3
+          },
+          "address": {
+            "type": ["string", "null"],
+            "maxLength": 240
+          },
+          "phone": {
+            "type": ["string", "null"],
+            "maxLength": 40
+          },
+          "website": {
+            "type": ["string", "null"],
+            "format": "uri"
+          },
+          "hours": {},
+          "photoUrls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            },
+            "maxItems": 10
+          }
+        },
+        "description": "Body for `PATCH /api/v1/me/spots/:id` (owner edit while UNVERIFIED)."
+      },
+      "ModerateSpotRequest": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SpotStatus"
+              },
+              {
+                "description": "New spot status: VERIFIED | UNVERIFIED | HIDDEN | REMOVED."
+              }
+            ]
+          }
+        },
+        "required": ["status"],
+        "description": "Body for `PATCH /api/v1/me/spots/:id/moderate` (staff only)."
+      },
+      "OkResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "enum": [true]
+          }
+        },
+        "required": ["ok"],
+        "description": "A simple success acknowledgement."
+      },
+      "SubmitVoteRequest": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/VoteValue"
+          },
+          "proof": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GeoPoint"
+              },
+              {
+                "description": "Voter's current location, used for the proximity gate. When present and within range the vote is marked `proximityVerified` and weighted more heavily."
+              }
+            ]
+          }
+        },
+        "required": ["value"],
+        "description": "Body for `POST /api/v1/me/spots/:id/vote`."
+      },
+      "Vote": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "RFC 4122 UUID (v4).",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "spotId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "RFC 4122 UUID (v4).",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "value": {
+            "$ref": "#/components/schemas/VoteValue"
+          },
+          "proximityVerified": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "RFC 3339 datetime in UTC.",
+            "example": "2026-06-19T12:00:00Z"
+          }
+        },
+        "required": ["id", "spotId", "value", "proximityVerified", "createdAt"],
+        "description": "The signed-in user's vote on a spot."
+      },
+      "VoteResponse": {
+        "type": "object",
+        "properties": {
+          "vote": {
+            "$ref": "#/components/schemas/Vote"
+          },
+          "netScore": {
+            "type": "number",
+            "description": "Spot net weighted score after this vote."
+          },
+          "confirmCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "denyCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "status": {
+            "type": "string",
+            "description": "Spot status after recompute (may flip to VERIFIED / HIDDEN).",
+            "example": "VERIFIED"
+          }
+        },
+        "required": ["vote", "netScore", "confirmCount", "denyCount", "status"],
+        "description": "Result of casting a verification vote."
+      },
+      "Review": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "RFC 4122 UUID (v4).",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "spotId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "RFC 4122 UUID (v4).",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "stars": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 5,
+            "description": "Star rating, 0–5.",
+            "example": 4
+          },
+          "body": {
+            "type": ["string", "null"]
+          },
+          "helpfulCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "author": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "RFC 4122 UUID (v4).",
+                "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+              },
+              "handle": {
+                "type": ["string", "null"]
+              },
+              "name": {
+                "type": ["string", "null"]
+              },
+              "image": {
+                "type": ["string", "null"],
+                "format": "uri"
+              }
+            },
+            "required": ["id", "handle", "name", "image"],
+            "description": "Public reference to the review author."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "RFC 3339 datetime in UTC.",
+            "example": "2026-06-19T12:00:00Z"
+          }
+        },
+        "required": ["id", "spotId", "stars", "body", "helpfulCount", "author", "createdAt"],
+        "description": "A spot review."
+      },
+      "ReviewsResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Review"
+            }
+          },
+          "nextCursor": {
+            "type": ["string", "null"],
+            "description": "Cursor for the next page, or null when this is the last page."
+          }
+        },
+        "required": ["items", "nextCursor"],
+        "description": "Cursor-paginated reviews for a spot."
+      },
+      "SubmitReviewRequest": {
+        "type": "object",
+        "properties": {
+          "stars": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 5,
+            "description": "Star rating, 0–5.",
+            "example": 4
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 4000
+          }
+        },
+        "required": ["stars"],
+        "description": "Body for `POST /api/v1/me/spots/:id/reviews`."
+      },
+      "SubmitReportRequest": {
+        "type": "object",
+        "properties": {
+          "targetType": {
+            "$ref": "#/components/schemas/ReportTarget"
+          },
+          "targetId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Id of the spot / photo / review being reported.",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/ReportReason"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 2000
+          }
+        },
+        "required": ["targetType", "targetId", "reason"],
+        "description": "Body for `POST /api/v1/me/reports`."
+      },
+      "ReportResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "RFC 4122 UUID (v4).",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "RFC 3339 datetime in UTC.",
+            "example": "2026-06-19T12:00:00Z"
+          }
+        },
+        "required": ["id", "createdAt"],
+        "description": "Acknowledgement that a report was filed."
+      },
+      "Dog": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "RFC 4122 UUID (v4).",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "name": {
+            "type": "string"
+          },
+          "breed": {
+            "type": ["string", "null"]
+          },
+          "birthYear": {
+            "type": ["integer", "null"]
+          },
+          "birthDate": {
+            "type": ["string", "null"],
+            "description": "ISO date of birth (YYYY-MM-DD).",
+            "example": "2021-06-15"
+          },
+          "photoUrl": {
+            "type": ["string", "null"],
+            "format": "uri"
+          },
+          "note": {
+            "type": ["string", "null"]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "RFC 3339 datetime in UTC.",
+            "example": "2026-06-19T12:00:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "RFC 3339 datetime in UTC.",
+            "example": "2026-06-19T12:00:00Z"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "breed",
+          "birthYear",
+          "birthDate",
+          "photoUrl",
+          "note",
+          "createdAt",
+          "updatedAt"
+        ],
+        "description": "A dog profile."
+      },
+      "DogsResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Dog"
+            }
+          }
+        },
+        "required": ["items"],
+        "description": "The signed-in user's dogs."
+      },
+      "CreateDogRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "breed": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "birthYear": {
+            "type": "integer",
+            "minimum": 1990,
+            "maximum": 2026,
+            "description": "Year of birth (legacy, prefer birthDate).",
+            "example": 2021
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Date of birth (YYYY-MM-DD).",
+            "example": "2021-06-15"
+          },
+          "photoUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 500
+          }
+        },
+        "required": ["name"],
+        "description": "Body for `POST /api/v1/me/dogs`."
+      },
+      "UpdateDogRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "breed": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "birthYear": {
+            "type": "integer",
+            "minimum": 1990,
+            "maximum": 2026,
+            "description": "Year of birth (legacy, prefer birthDate).",
+            "example": 2021
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Date of birth (YYYY-MM-DD).",
+            "example": "2021-06-15"
+          },
+          "photoUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 500
+          }
+        },
+        "description": "Body for `PATCH /api/v1/me/dogs/:id`."
+      },
+      "MeProfile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "RFC 4122 UUID (v4).",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "name": {
+            "type": ["string", "null"]
+          },
+          "handle": {
+            "type": ["string", "null"],
+            "description": "@username.",
+            "example": "maxdehond"
+          },
+          "bio": {
+            "type": ["string", "null"]
+          },
+          "image": {
+            "type": ["string", "null"],
+            "format": "uri",
+            "description": "Avatar URL."
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "reputation": {
+            "type": "integer",
+            "description": "Contribution reputation score."
+          },
+          "dogs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Dog"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "RFC 3339 datetime in UTC.",
+            "example": "2026-06-19T12:00:00Z"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "name",
+          "handle",
+          "bio",
+          "image",
+          "role",
+          "reputation",
+          "dogs",
+          "createdAt"
+        ],
+        "description": "Authenticated user profile (`GET /api/v1/me`)."
+      },
+      "MeProfilePatch": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": ["string", "null"],
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "handle": {
+            "type": ["string", "null"],
+            "minLength": 3,
+            "maxLength": 30,
+            "pattern": "^[a-z0-9_]+$",
+            "description": "Unique @username (lowercase, 3–30 chars)."
+          },
+          "bio": {
+            "type": ["string", "null"],
+            "maxLength": 280
+          },
+          "image": {
+            "type": ["string", "null"],
+            "format": "uri",
+            "description": "Avatar URL (uploaded to S3 first)."
+          }
+        },
+        "description": "Body for `PATCH /api/v1/me`."
+      },
+      "FeatureRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "RFC 4122 UUID (v4).",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "title": {
+            "type": "string"
+          },
+          "body": {
+            "type": ["string", "null"]
+          },
+          "component": {
+            "type": ["string", "null"],
+            "description": "Area of the app this concerns.",
+            "example": "Kaart"
+          },
+          "status": {
+            "$ref": "#/components/schemas/FeatureStatus"
+          },
+          "upvoteCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "viewerHasVoted": {
+            "type": "boolean",
+            "description": "Whether the signed-in user has upvoted. False for anonymous reads."
+          },
+          "author": {
+            "type": "object",
+            "properties": {
+              "handle": {
+                "type": ["string", "null"]
+              },
+              "image": {
+                "type": ["string", "null"]
+              }
+            },
+            "required": ["handle", "image"],
+            "description": "The submitter (username + avatar only)."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "RFC 3339 datetime in UTC.",
+            "example": "2026-06-19T12:00:00Z"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "body",
+          "component",
+          "status",
+          "upvoteCount",
+          "viewerHasVoted",
+          "author",
+          "createdAt"
+        ],
+        "description": "A community feature request."
+      },
+      "FeatureRequestsResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FeatureRequest"
+            }
+          },
+          "nextCursor": {
+            "type": ["string", "null"],
+            "description": "Cursor for the next page, or null when this is the last page."
+          }
+        },
+        "required": ["items", "nextCursor"],
+        "description": "Cursor-paginated feature requests."
+      },
+      "CreateFeatureRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 4,
+            "maxLength": 140
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "component": {
+            "type": "string",
+            "maxLength": 40,
+            "description": "Area of the app: Kaart / Inzenden / Profiel / Anders."
+          }
+        },
+        "required": ["title"],
+        "description": "Body for `POST /api/v1/me/feature-requests`."
+      },
+      "FeatureVoteResponse": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "RFC 4122 UUID (v4).",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "upvoteCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "viewerHasVoted": {
+            "type": "boolean"
+          }
+        },
+        "required": ["requestId", "upvoteCount", "viewerHasVoted"],
+        "description": "Result of toggling an upvote on a feature request."
+      },
+      "GeocodeHit": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "Human-readable place label.",
+            "example": "Amsterdamse Bos, Amstelveen"
+          },
+          "lat": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90,
+            "description": "Latitude in decimal degrees (WGS84 / EPSG:4326).",
+            "example": 52.3006
+          },
+          "lng": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180,
+            "description": "Longitude in decimal degrees (WGS84 / EPSG:4326).",
+            "example": 4.8368
+          }
+        },
+        "required": ["label", "lat", "lng"],
+        "description": "A single geocoding result."
+      },
+      "GeocodeResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GeocodeHit"
+            }
+          }
+        },
+        "required": ["items"],
+        "description": "Ranked geocoding results (NL-biased)."
+      },
+      "UploadResponse": {
+        "type": "object",
+        "properties": {
+          "publicUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Public CloudFront URL of the stored image.",
+            "example": "https://media.devrijehond.nl/spots/3fa85f64/abcd.jpg"
+          },
+          "key": {
+            "type": "string",
+            "description": "S3 object key of the stored image.",
+            "example": "spots/3fa85f64-5717-4562-b3fc-2c963f66afa6/abcd.jpg"
+          }
+        },
+        "required": ["publicUrl", "key"],
+        "description": "Result of an image upload."
+      },
+      "AccountDeletionResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "enum": [true],
+            "description": "The account was deleted (or already gone)."
+          }
+        },
+        "required": ["ok"],
+        "description": "Acknowledgement that the account was deleted."
+      },
+      "AppConfig": {
+        "type": "object",
+        "properties": {
+          "minSupportedVersion": {
+            "type": "string",
+            "description": "Lowest app version still allowed to run. Below this, force an update.",
+            "example": "0.1.0"
+          },
+          "latestVersion": {
+            "type": "string",
+            "description": "Latest released app version.",
+            "example": "0.1.0"
+          },
+          "updateUrl": {
+            "type": "object",
+            "properties": {
+              "ios": {
+                "type": "string",
+                "format": "uri",
+                "description": "App Store URL."
+              },
+              "android": {
+                "type": "string",
+                "format": "uri",
+                "description": "Play Store URL."
+              }
+            },
+            "required": ["ios", "android"],
+            "description": "Per-platform store URLs for the update prompt."
+          }
+        },
+        "required": ["minSupportedVersion", "latestVersion", "updateUrl"],
+        "description": "Runtime configuration read by the mobile app on boot."
+      },
+      "ModeratorApplicationStatus": {
+        "type": "string",
+        "enum": ["PENDING", "APPROVED", "REJECTED"],
+        "description": "Decision state of a moderator application.",
+        "example": "PENDING"
+      },
+      "ModeratorApplication": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "RFC 4122 UUID (v4).",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ModeratorApplicationStatus"
+          },
+          "motivation": {
+            "type": "string",
+            "description": "Why the user wants to moderate."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "RFC 3339 datetime in UTC.",
+            "example": "2026-06-19T12:00:00Z"
+          }
+        },
+        "required": ["id", "status", "motivation", "createdAt"],
+        "description": "The signed-in user's moderator application."
+      },
+      "ModeratorApplicationResponse": {
+        "type": "object",
+        "properties": {
+          "application": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ModeratorApplication"
+              },
+              {
+                "type": ["object", "null"],
+                "description": "The existing application, or null if the user has not applied."
+              }
+            ]
+          }
+        },
+        "required": ["application"],
+        "description": "The signed-in user's moderator application, or null."
+      },
+      "ApplyModeratorRequest": {
+        "type": "object",
+        "properties": {
+          "motivation": {
+            "type": "string",
+            "minLength": 10,
+            "description": "Motivation (min 10 chars).",
+            "example": "Ik wil graag helpen..."
+          }
+        },
+        "required": ["motivation"],
+        "description": "Body for `POST /api/v1/me/moderator-application`."
+      },
+      "AuthToken": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "BetterAuth signed session token. Sent as `Authorization: Bearer <token>`."
+          },
+          "expiresAt": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "When the token expires, or null when the API does not surface it.",
+            "example": "2026-06-19T12:00:00Z"
+          }
+        },
+        "required": ["token", "expiresAt"],
+        "description": "A bearer session token + optional expiry."
+      },
+      "NativeIdTokenRequest": {
+        "type": "object",
+        "properties": {
+          "idToken": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Identity token from the native Apple / Google sign-in sheet."
+          }
+        },
+        "required": ["idToken"],
+        "description": "Body for `POST /api/auth/mobile/{apple,google}-native`."
+      },
+      "MagicLinkRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email to send the magic link to."
+          },
+          "callbackURL": {
+            "type": "string",
+            "description": "Deep link the interstitial hops to after verifying.",
+            "example": "vrijehond://verify"
+          }
+        },
+        "required": ["email"],
+        "description": "Body for `POST /api/auth/sign-in/magic-link`."
+      }
+    },
+    "parameters": {}
+  },
+  "paths": {
+    "/api/v1/categories": {
+      "get": {
+        "tags": ["categories"],
+        "summary": "List spot categories",
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/components/schemas/SpotType"
+            },
+            "required": false,
+            "description": "Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point.",
+            "name": "type",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All visible categories.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoriesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/amenities": {
+      "get": {
+        "tags": ["amenities"],
+        "summary": "List amenities",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": false,
+            "name": "categoryId",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All visible amenities.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AmenitiesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/spots": {
+      "get": {
+        "tags": ["spots"],
+        "summary": "List spots (paginated, delta-sync)",
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/components/schemas/SpotType"
+            },
+            "required": false,
+            "description": "Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point.",
+            "name": "type",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "RFC 4122 UUID (v4).",
+              "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+            },
+            "required": false,
+            "description": "RFC 4122 UUID (v4).",
+            "name": "categoryId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": ["string", "null"]
+            },
+            "required": false,
+            "name": "cursor",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": ["string", "null"],
+              "format": "date-time",
+              "description": "Delta-sync cursor, return only spots changed at/after this timestamp.",
+              "example": "2026-06-19T12:00:00Z"
+            },
+            "required": false,
+            "description": "Delta-sync cursor, return only spots changed at/after this timestamp.",
+            "name": "since",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": ["number", "null"],
+              "minimum": -90,
+              "maximum": 90
+            },
+            "required": false,
+            "name": "nearLat",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": ["number", "null"],
+              "minimum": -180,
+              "maximum": 180
+            },
+            "required": false,
+            "name": "nearLng",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cursor-paginated spots.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpotsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/spots/map": {
+      "get": {
+        "tags": ["spots"],
+        "summary": "Spots within a map viewport (bbox)",
+        "parameters": [
+          {
+            "schema": {
+              "type": "number",
+              "minimum": -180,
+              "maximum": 180,
+              "description": "West edge of the viewport.",
+              "example": 4.8
+            },
+            "required": true,
+            "description": "West edge of the viewport.",
+            "name": "minLng",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90,
+              "description": "South edge of the viewport.",
+              "example": 52.28
+            },
+            "required": true,
+            "description": "South edge of the viewport.",
+            "name": "minLat",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "number",
+              "minimum": -180,
+              "maximum": 180,
+              "description": "East edge of the viewport.",
+              "example": 4.9
+            },
+            "required": true,
+            "description": "East edge of the viewport.",
+            "name": "maxLng",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90,
+              "description": "North edge of the viewport.",
+              "example": 52.34
+            },
+            "required": true,
+            "description": "North edge of the viewport.",
+            "name": "maxLat",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": ["string", "null"],
+              "format": "date-time",
+              "description": "Return only spots changed at or after this timestamp (delta refresh).",
+              "example": "2026-06-19T12:00:00Z"
+            },
+            "required": false,
+            "description": "Return only spots changed at or after this timestamp (delta refresh).",
+            "name": "since",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/SpotType"
+            },
+            "required": false,
+            "description": "Kind of spot. `REGION` = polygon area (off-leash zone, swim beach). `POI` = point.",
+            "name": "type",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "RFC 4122 UUID (v4).",
+              "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+            },
+            "required": false,
+            "description": "RFC 4122 UUID (v4).",
+            "name": "categoryId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "boolean",
+              "description": "When true, collapse dense viewport grid cells into `clusters` (count bubbles) and return only lone spots in `items`, keeping the payload bounded. When false/omitted, every spot is returned in `items`."
+            },
+            "required": false,
+            "description": "When true, collapse dense viewport grid cells into `clusters` (count bubbles) and return only lone spots in `items`, keeping the payload bounded. When false/omitted, every spot is returned in `items`.",
+            "name": "cluster",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Spots intersecting the viewport.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpotsMapResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/spots/{slug}": {
+      "get": {
+        "tags": ["spots"],
+        "summary": "Spot detail",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "slug",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Full spot detail.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpotDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/spots/{slug}/reviews": {
+      "get": {
+        "tags": ["reviews"],
+        "summary": "List reviews for a spot",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "slug",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "cursor",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cursor-paginated reviews.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/feature-requests": {
+      "get": {
+        "tags": ["feature-requests"],
+        "summary": "List community feature requests",
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/components/schemas/FeatureStatus"
+            },
+            "required": false,
+            "description": "Product-roadmap state of a community feature request.",
+            "name": "status",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cursor-paginated feature requests.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeatureRequestsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/geocode": {
+      "get": {
+        "tags": ["geocode"],
+        "summary": "Forward geocoding (place/address search)",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Free-text place / street / address query (min 2 chars).",
+              "example": "amsterdamse bos"
+            },
+            "required": true,
+            "description": "Free-text place / street / address query (min 2 chars).",
+            "name": "q",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ranked geocoding results (NL-biased).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeocodeResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Geocoding provider unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/app-config": {
+      "get": {
+        "tags": ["app-config"],
+        "summary": "Runtime app config (force-update flow)",
+        "responses": {
+          "200": {
+            "description": "Mobile runtime configuration.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppConfig"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me": {
+      "get": {
+        "tags": ["me"],
+        "summary": "Get my profile",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authenticated user profile.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeProfile"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["me"],
+        "summary": "Update my profile",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeProfilePatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated profile.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeProfile"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/dogs": {
+      "get": {
+        "tags": ["dogs"],
+        "summary": "List my dogs",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "My dogs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DogsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["dogs"],
+        "summary": "Add a dog",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDogRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created dog.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Dog"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/dogs/{id}": {
+      "patch": {
+        "tags": ["dogs"],
+        "summary": "Update a dog",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDogRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated dog.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Dog"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["dogs"],
+        "summary": "Delete a dog",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted."
+          },
+          "400": {
+            "description": "Validation failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/spots": {
+      "get": {
+        "tags": ["spots"],
+        "summary": "List my submitted spots",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "My spots across all statuses, newest first.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeSpotsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["spots"],
+        "summary": "Submit a new spot",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitSpotRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created spot (UNVERIFIED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmitSpotResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/spots/{id}": {
+      "patch": {
+        "tags": ["spots"],
+        "summary": "Edit my unverified spot",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSpotRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated spot.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmitSpotResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/spots/{id}/moderate": {
+      "patch": {
+        "tags": ["spots"],
+        "summary": "Set spot status (staff only)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModerateSpotRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Status updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Staff role required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/spots/{id}/vote": {
+      "post": {
+        "tags": ["votes"],
+        "summary": "Cast a verification vote",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitVoteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Vote recorded; spot tally recomputed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoteResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/spots/{id}/reviews": {
+      "post": {
+        "tags": ["reviews"],
+        "summary": "Write a review",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitReviewRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created review.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Review"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/reports": {
+      "post": {
+        "tags": ["reports"],
+        "summary": "Report content",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitReportRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Report filed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/feature-requests": {
+      "post": {
+        "tags": ["feature-requests"],
+        "summary": "Create a feature request",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFeatureRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created feature request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeatureRequest"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/feature-requests/{id}/vote": {
+      "post": {
+        "tags": ["feature-requests"],
+        "summary": "Toggle an upvote on a feature request",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Upvote toggled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeatureVoteResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/account": {
+      "delete": {
+        "tags": ["me"],
+        "summary": "Delete my account",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account deleted (or already gone).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountDeletionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Deletion failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/uploads": {
+      "post": {
+        "tags": ["uploads"],
+        "summary": "Upload an image",
+        "description": "Multipart upload (`multipart/form-data`, field `file`). The image is resized + JPEG-compressed server-side and stored on S3; the response carries the public URL + key.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": ["file"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The stored image.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/moderator-application": {
+      "get": {
+        "tags": ["moderator"],
+        "summary": "Get my moderator application",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "My application, or null if none.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModeratorApplicationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["moderator"],
+        "summary": "Apply to become a moderator",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyModeratorRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Application filed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModeratorApplication"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "An application already exists.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/mobile/apple-native": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Exchange a native Apple idToken for a bearer",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NativeIdTokenRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bearer session token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthToken"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/mobile/google-native": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Exchange a native Google idToken for a bearer",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NativeIdTokenRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bearer session token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthToken"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/sign-in/magic-link": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Request a magic-link email",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MagicLinkRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Magic-link email sent (if the address exists)."
+          },
+          "400": {
+            "description": "Invalid body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/magic-link/verify": {
+      "get": {
+        "tags": ["auth"],
+        "summary": "Redeem a magic-link token",
+        "description": "Redeems the token from the magic-link email. BetterAuth returns the bearer in the `set-auth-token` response header (alongside a redirect), so native clients must NOT follow the redirect. The body shape below mirrors the token surfaced to the client.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "token",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token redeemed; bearer in `set-auth-token` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthToken"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "Redirect to the callback (header carries the bearer)."
+          },
+          "401": {
+            "description": "Invalid or expired token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {}
+}
