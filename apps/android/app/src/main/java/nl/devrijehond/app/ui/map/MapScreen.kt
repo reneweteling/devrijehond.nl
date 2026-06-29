@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +16,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.activity.compose.BackHandler
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -80,6 +84,7 @@ fun MapScreen(
     val scope = rememberCoroutineScope()
 
     var isSatellite by remember { mutableStateOf(false) }
+    var showSearch by remember { mutableStateOf(false) }
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(LatLng(52.3676, 4.9041), 11f)
     }
@@ -103,14 +108,23 @@ fun MapScreen(
             onSelectSpot = onSelectSpot,
         )
 
-        // Category filter row (glass pills), overlaid at the top like iOS.
-        if (categories.isNotEmpty()) {
-            CategoryFilterRow(
-                categories = categories,
-                selectedId = selectedCategoryId,
-                onSelect = vm::setCategory,
-                modifier = Modifier.align(Alignment.TopStart),
+        // Top overlay: search pill above the category filter chips, like iOS.
+        Column(
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .fillMaxWidth(),
+        ) {
+            SearchPill(
+                onClick = { showSearch = true },
+                modifier = Modifier.padding(horizontal = Dvh.s3, vertical = Dvh.s2),
             )
+            if (categories.isNotEmpty()) {
+                CategoryFilterRow(
+                    categories = categories,
+                    selectedId = selectedCategoryId,
+                    onSelect = vm::setCategory,
+                )
+            }
         }
 
         // Legend pill, bottom-centre, lifted clear of the Google logo (bottom-left)
@@ -138,6 +152,30 @@ fun MapScreen(
                 .align(Alignment.BottomEnd)
                 .padding(Dvh.s4),
         )
+
+        // Search surface, layered above the map. Picking a location recenters the
+        // camera; picking a spot opens its detail sheet via onSelectSpot.
+        if (showSearch) {
+            BackHandler { showSearch = false }
+            MapSearchScreen(
+                spots = items,
+                categoriesById = categoriesById,
+                onSelectPlace = { lat, lng ->
+                    showSearch = false
+                    scope.launch {
+                        cameraPositionState.animate(
+                            CameraUpdateFactory.newLatLngZoom(LatLng(lat, lng), 14f),
+                        )
+                    }
+                },
+                onSelectSpot = { slug ->
+                    showSearch = false
+                    onSelectSpot(slug)
+                },
+                onClose = { showSearch = false },
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
     }
 }
 
@@ -244,6 +282,34 @@ private fun SpotMap(
                 ClusterBubble(count = cluster.count)
             }
         }
+    }
+}
+
+@Composable
+private fun SearchPill(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Dvh.s2),
+        modifier = modifier
+            .fillMaxWidth()
+            .shadow(4.dp, CircleShape, clip = false, spotColor = Brand.Ink)
+            .clip(CircleShape)
+            .background(Brand.Cream)
+            .border(1.dp, Brand.Ink.copy(alpha = 0.08f), CircleShape)
+            .clickable { onClick() }
+            .padding(horizontal = Dvh.s4, vertical = 14.dp),
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Search,
+            contentDescription = null,
+            tint = Brand.Moss,
+            modifier = Modifier.size(20.dp),
+        )
+        Text(
+            text = "Zoek een plek, gebied of adres",
+            style = MaterialTheme.typography.bodyLarge,
+            color = Brand.Ink2,
+        )
     }
 }
 
