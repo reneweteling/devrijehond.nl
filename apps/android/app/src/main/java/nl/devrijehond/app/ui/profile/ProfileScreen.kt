@@ -54,6 +54,7 @@ import nl.devrijehond.app.AppGraph
 import nl.devrijehond.app.api.models.Dog
 import nl.devrijehond.app.api.models.MeProfile
 import nl.devrijehond.app.api.models.ModeratorApplicationStatus
+import nl.devrijehond.app.ui.auth.SignInScreen
 import nl.devrijehond.app.ui.theme.Brand
 import nl.devrijehond.app.ui.theme.Dvh
 
@@ -87,7 +88,9 @@ fun ProfileScreen(
             .background(Brand.Sand),
     ) {
         when {
-            token == null -> SignedOut(onRequireSignIn)
+            // Signed out: show the sign-in surface directly in the tab (like iOS),
+            // no intermediate "inloggen of registreren" step.
+            token == null -> SignInScreen(onSignedIn = {}, modifier = Modifier.fillMaxSize())
             profile == null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = Brand.Moss)
             }
@@ -107,43 +110,6 @@ fun ProfileScreen(
     }
 }
 
-@Composable
-private fun SignedOut(onRequireSignIn: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(Dvh.s6),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        androidx.compose.foundation.Image(
-            painter = androidx.compose.ui.res.painterResource(nl.devrijehond.app.R.drawable.dvh_logo),
-            contentDescription = "De Vrije Hond",
-            modifier = Modifier.size(width = 190.dp, height = 158.dp),
-        )
-        Text(
-            "Welkom bij De Vrije Hond",
-            style = MaterialTheme.typography.titleLarge,
-            color = Brand.Ink,
-            modifier = Modifier.padding(top = Dvh.s4),
-        )
-        Text(
-            "Log in om je honden toe te voegen, plekken in te zenden en mee te stemmen.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = Brand.Ink2,
-            modifier = Modifier.padding(top = Dvh.s2),
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-        )
-        Button(
-            onClick = onRequireSignIn,
-            colors = ButtonDefaults.buttonColors(containerColor = Brand.Moss),
-            modifier = Modifier
-                .padding(top = Dvh.s5)
-                .fillMaxWidth()
-                .height(Dvh.controlHeight),
-        ) { Text("Inloggen of registreren") }
-    }
-}
 
 @Composable
 private fun SignedIn(

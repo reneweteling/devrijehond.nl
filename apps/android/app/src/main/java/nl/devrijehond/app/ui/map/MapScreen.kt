@@ -188,8 +188,15 @@ private fun SpotMap(
             // it is ignored, so drop it to avoid a no-op style pass.
             mapStyleOptions = if (isSatellite) null else mapStyle,
             mapType = if (isSatellite) MapType.SATELLITE else MapType.NORMAL,
+            // Show the blue current-location dot (location permission is already granted).
+            isMyLocationEnabled = true,
         ),
-        uiSettings = MapUiSettings(zoomControlsEnabled = false, mapToolbarEnabled = false),
+        // Hide the built-in my-location button; we have our own locate control.
+        uiSettings = MapUiSettings(
+            zoomControlsEnabled = false,
+            mapToolbarEnabled = false,
+            myLocationButtonEnabled = false,
+        ),
         contentPadding = PaddingValues(top = 64.dp),
     ) {
         items.forEach { item ->
