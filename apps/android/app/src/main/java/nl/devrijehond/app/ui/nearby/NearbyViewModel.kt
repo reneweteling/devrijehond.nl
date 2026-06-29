@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import nl.devrijehond.app.AppGraph
+import nl.devrijehond.app.api.models.Category
 import nl.devrijehond.app.api.models.SpotSummary
 import nl.devrijehond.app.ui.location.DeviceLocation
 import java.math.BigDecimal
@@ -35,8 +36,25 @@ class NearbyViewModel : ViewModel() {
     private val _state = MutableStateFlow(State())
     val state: StateFlow<State> = _state.asStateFlow()
 
+    // categoryId -> Category, for per-row colour + glyph (matches the iOS SpotRow).
+    private val _categoriesById = MutableStateFlow<Map<String, Category>>(emptyMap())
+    val categoriesById: StateFlow<Map<String, Category>> = _categoriesById.asStateFlow()
+
     // Default centre (Amsterdam) when there is no location fix yet.
     private var origin: LatLng = LatLng(52.3676, 4.9041)
+
+    init {
+        viewModelScope.launch {
+            try {
+                val resp = AppGraph.api.categories.apiV1CategoriesGet(type = null)
+                if (resp.isSuccessful) {
+                    _categoriesById.value = resp.body()?.items.orEmpty().associateBy { it.id.toString() }
+                }
+            } catch (_: Exception) {
+                // Non-fatal: rows fall back to the default tint + paw glyph.
+            }
+        }
+    }
 
     fun load(context: Context) {
         viewModelScope.launch {

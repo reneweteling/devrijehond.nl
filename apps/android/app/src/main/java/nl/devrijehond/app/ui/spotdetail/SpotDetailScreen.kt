@@ -59,6 +59,8 @@ import nl.devrijehond.app.api.models.UserRole
 import nl.devrijehond.app.api.models.VoteValue
 import nl.devrijehond.app.ui.theme.Brand
 import nl.devrijehond.app.ui.theme.Dvh
+import nl.devrijehond.app.ui.theme.categoryIcon
+import nl.devrijehond.app.ui.theme.dvhCard
 
 /**
  * Spot detail. Loads the full detail + reviews for [slug], shows the community
@@ -375,8 +377,9 @@ private fun DetailBody(
 @Composable
 private fun HeroPhoto(detail: SpotDetail) {
     val url = detail.photos.firstOrNull()?.url?.toString()
+    val tint = Brand.categoryColor(detail.category.slug)
     Box(
-        modifier = Modifier.fillMaxWidth().height(240.dp).background(Brand.MossSoft),
+        modifier = Modifier.fillMaxWidth().height(240.dp),
         contentAlignment = Alignment.Center,
     ) {
         if (url != null) {
@@ -387,12 +390,33 @@ private fun HeroPhoto(detail: SpotDetail) {
                 contentScale = androidx.compose.ui.layout.ContentScale.Crop,
             )
         } else {
-            Icon(
-                Icons.Filled.Place,
-                contentDescription = null,
-                tint = Brand.MossDark,
-                modifier = Modifier.size(52.dp),
-            )
+            // Branded empty state: a soft category-colour gradient with a large glyph,
+            // mirroring the iOS placeholder hero instead of a flat block + tiny pin.
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        androidx.compose.ui.graphics.Brush.linearGradient(
+                            colors = listOf(tint.copy(alpha = 0.32f), tint.copy(alpha = 0.14f)),
+                        ),
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(96.dp)
+                        .clip(androidx.compose.foundation.shape.CircleShape)
+                        .background(Brand.Cream.copy(alpha = 0.7f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        categoryIcon(detail.category.slug),
+                        contentDescription = null,
+                        tint = tint,
+                        modifier = Modifier.size(48.dp),
+                    )
+                }
+            }
         }
     }
 }
@@ -583,9 +607,7 @@ fun DvhCard(content: @Composable androidx.compose.foundation.layout.ColumnScope.
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(Dvh.rMd))
-            .background(Brand.Cream)
-            .padding(Dvh.s4),
+            .dvhCard(),
         content = content,
     )
 }

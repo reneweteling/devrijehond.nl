@@ -8,10 +8,13 @@ import androidx.compose.material3.Typography
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import nl.devrijehond.app.R
 
 // Spacing scale (mirrors DVH.s* in the iOS DesignKit): 4/8/12/16/20/24/32.
 object Dvh {
@@ -50,15 +53,39 @@ private val DvhColorScheme = lightColorScheme(
     outline = Brand.Ink2,
 )
 
-// SansSerif stands in for the iOS "rounded" system face. Swap for a bundled rounded
-// font later if we want exact parity.
-private val Rounded = FontFamily.SansSerif
+// Nunito (bundled variable font) is the Android stand-in for the iOS "SF Rounded"
+// system face: a warm, humanist, rounded sans that matches the brand voice. One
+// variable .ttf serves every weight via FontVariation, so the type scale below
+// reads as the same friendly family as iOS instead of stock Roboto.
+@OptIn(androidx.compose.ui.text.ExperimentalTextApi::class)
+private fun nunito(weight: FontWeight, axis: Int) = Font(
+    R.font.nunito,
+    weight = weight,
+    variationSettings = FontVariation.Settings(FontVariation.weight(axis)),
+)
+
+private val Rounded = FontFamily(
+    nunito(FontWeight.Normal, 400),
+    nunito(FontWeight.Medium, 500),
+    nunito(FontWeight.SemiBold, 600),
+    nunito(FontWeight.Bold, 700),
+    nunito(FontWeight.ExtraBold, 800),
+)
 
 private val DvhTypography = Typography(
-    displaySmall = TextStyle(fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 30.sp),
-    headlineMedium = TextStyle(fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 24.sp),
-    titleLarge = TextStyle(fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 22.sp),
-    titleMedium = TextStyle(fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 17.sp),
+    displaySmall = TextStyle(
+        fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 30.sp,
+        letterSpacing = (-0.5).sp,
+    ),
+    headlineMedium = TextStyle(
+        fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 24.sp,
+        letterSpacing = (-0.3).sp,
+    ),
+    titleLarge = TextStyle(
+        fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 22.sp,
+        letterSpacing = (-0.2).sp,
+    ),
+    titleMedium = TextStyle(fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 17.sp),
     bodyLarge = TextStyle(fontFamily = Rounded, fontWeight = FontWeight.Normal, fontSize = 16.sp),
     bodyMedium = TextStyle(fontFamily = Rounded, fontWeight = FontWeight.Normal, fontSize = 15.sp),
     labelLarge = TextStyle(fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 14.sp),

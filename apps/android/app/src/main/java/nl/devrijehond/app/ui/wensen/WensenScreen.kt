@@ -58,6 +58,7 @@ import nl.devrijehond.app.api.models.FeatureRequest
 import nl.devrijehond.app.api.models.FeatureStatus
 import nl.devrijehond.app.ui.theme.Brand
 import nl.devrijehond.app.ui.theme.Dvh
+import nl.devrijehond.app.ui.theme.dvhCardSurface
 
 /**
  * Wensen tab: community feature requests. Anyone can browse and filter; voting and
@@ -226,8 +227,7 @@ private fun WishCard(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(Dvh.rLg))
-            .background(Brand.Cream)
+            .dvhCardSurface()
             .padding(Dvh.s4),
         horizontalArrangement = Arrangement.spacedBy(Dvh.s3),
     ) {

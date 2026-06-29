@@ -3,6 +3,7 @@ package nl.devrijehond.app.ui.auth
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,7 +26,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MailOutline
-import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,13 +43,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import nl.devrijehond.app.AppGraph
+import nl.devrijehond.app.R
 import nl.devrijehond.app.ui.theme.Brand
 import nl.devrijehond.app.ui.theme.Dvh
 
@@ -171,20 +172,11 @@ private fun Hero(reason: String?) {
         verticalArrangement = Arrangement.spacedBy(Dvh.s4),
         modifier = Modifier.padding(top = Dvh.s6),
     ) {
-        Box(
-            modifier = Modifier
-                .size(96.dp)
-                .clip(CircleShape)
-                .background(Brand.MossSoft),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                Icons.Filled.Pets,
-                contentDescription = null,
-                tint = Brand.Moss,
-                modifier = Modifier.size(48.dp),
-            )
-        }
+        Image(
+            painter = painterResource(R.drawable.dvh_logo),
+            contentDescription = "De Vrije Hond",
+            modifier = Modifier.size(width = 180.dp, height = 150.dp),
+        )
         Text(
             text = "Welkom",
             style = MaterialTheme.typography.displaySmall,
@@ -438,17 +430,12 @@ private fun OutlinedTile(
     }
 }
 
-/** A simple "G" stand-in for the Google mark until the brand asset ships. */
+/** The real four-colour Google mark (vector), matching the iOS GoogleLogo asset. */
 @Composable
 private fun GoogleGlyph() {
-    Box(
-        modifier = Modifier
-            .size(22.dp)
-            .clip(CircleShape)
-            .background(Color.White)
-            .border(BorderStroke(1.dp, Brand.Ink2.copy(alpha = 0.2f)), CircleShape),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text("G", color = Color(0xFF4285F4), fontWeight = FontWeight.Bold, fontSize = 16.sp)
-    }
+    Image(
+        painter = painterResource(R.drawable.ic_google),
+        contentDescription = null,
+        modifier = Modifier.size(20.dp),
+    )
 }

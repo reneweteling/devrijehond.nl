@@ -21,8 +21,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -44,9 +44,12 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import nl.devrijehond.app.api.models.Category
 import nl.devrijehond.app.api.models.SpotSummary
 import nl.devrijehond.app.ui.theme.Brand
 import nl.devrijehond.app.ui.theme.Dvh
+import nl.devrijehond.app.ui.theme.categoryIcon
+import nl.devrijehond.app.ui.theme.dvhCardSurface
 
 /**
  * Nabij tab. A nearest-first list of spots, fetched from GET /api/v1/spots with the
@@ -66,6 +69,7 @@ fun NearbyScreen(
 ) {
     val vm: NearbyViewModel = viewModel()
     val state by vm.state.collectAsState()
+    val categoriesById by vm.categoriesById.collectAsState()
     val context = LocalContext.current
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -140,6 +144,7 @@ fun NearbyScreen(
                 items(state.items, key = { it.id.toString() }) { spot ->
                     NearbyRow(
                         spot = spot,
+                        category = categoriesById[spot.categoryId.toString()],
                         distanceMeters = vm.distanceMeters(spot),
                         onClick = { onSelectSpot(spot.slug) },
                     )
@@ -152,15 +157,16 @@ fun NearbyScreen(
 @Composable
 private fun NearbyRow(
     spot: SpotSummary,
+    category: Category?,
     distanceMeters: Double?,
     onClick: () -> Unit,
 ) {
+    val tint = Brand.categoryColor(category?.slug)
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(Dvh.rLg))
-            .background(Brand.Cream)
+            .dvhCardSurface()
             .clickable { onClick() }
             .padding(Dvh.s3),
     ) {
@@ -179,10 +185,15 @@ private fun NearbyRow(
                 modifier = Modifier
                     .size(56.dp)
                     .clip(RoundedCornerShape(Dvh.rMd))
-                    .background(Brand.MossSoft),
+                    .background(tint.copy(alpha = 0.16f)),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(Icons.Filled.Place, contentDescription = null, tint = Brand.Moss)
+                Icon(
+                    categoryIcon(category?.slug),
+                    contentDescription = null,
+                    tint = tint,
+                    modifier = Modifier.size(26.dp),
+                )
             }
         }
 
@@ -200,29 +211,31 @@ private fun NearbyRow(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(top = Dvh.s1),
             ) {
+                if (category != null) {
+                    Text(
+                        text = category.label,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Brand.Ink2,
+                    )
+                }
                 if (spot.rating.count > 0) {
+                    Text("  ·  ", style = MaterialTheme.typography.labelSmall, color = Brand.Ink2)
                     Icon(
                         Icons.Filled.Star,
                         contentDescription = null,
                         tint = Brand.Terra,
-                        modifier = Modifier.size(14.dp),
+                        modifier = Modifier.size(13.dp),
                     )
-                    Spacer(Modifier.width(4.dp))
+                    Spacer(Modifier.width(3.dp))
                     Text(
-                        text = "${"%.1f".format(spot.rating.average.toDouble())} (${spot.rating.count})",
+                        text = "${"%.1f".format(spot.rating.average.toDouble())}",
                         style = MaterialTheme.typography.labelSmall,
                         color = Brand.Ink2,
                     )
                 }
                 val distance = distanceMeters
                 if (distance != null) {
-                    if (spot.rating.count > 0) {
-                        Text(
-                            "  ·  ",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Brand.Ink2,
-                        )
-                    }
+                    Text("  ·  ", style = MaterialTheme.typography.labelSmall, color = Brand.Ink2)
                     Text(
                         text = formatDistance(distance),
                         style = MaterialTheme.typography.labelSmall,
@@ -230,12 +243,38 @@ private fun NearbyRow(
                     )
                 }
             }
+            // Verified badge, mirroring the iOS SpotRow capsule.
+            Spacer(Modifier.padding(top = Dvh.s1))
+            VerifiedBadge(verified = spot.status.value == "VERIFIED")
         }
 
         Icon(
             Icons.Filled.ChevronRight,
             contentDescription = null,
             tint = Brand.Ink2.copy(alpha = 0.4f),
+        )
+    }
+}
+
+@Composable
+private fun VerifiedBadge(verified: Boolean) {
+    val color = if (verified) Brand.MossDark else Brand.Terra
+    val bg = if (verified) Brand.MossSoft else Brand.Terra.copy(alpha = 0.14f)
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(3.dp),
+        modifier = Modifier
+            .clip(androidx.compose.foundation.shape.CircleShape)
+            .background(bg)
+            .padding(horizontal = Dvh.s2, vertical = 2.dp),
+    ) {
+        if (verified) {
+            Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = color, modifier = Modifier.size(12.dp))
+        }
+        Text(
+            text = if (verified) "Geverifieerd" else "Niet geverifieerd",
+            style = MaterialTheme.typography.labelSmall,
+            color = color,
         )
     }
 }

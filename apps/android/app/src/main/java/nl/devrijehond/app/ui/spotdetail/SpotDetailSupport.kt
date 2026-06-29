@@ -62,8 +62,8 @@ fun StatusPill(status: String, modifier: Modifier = Modifier) {
     val color = statusColor(status)
     Box(
         modifier = modifier
-            .background(color.copy(alpha = 0.15f), RoundedCornerShape(Dvh.rSm))
-            .padding(horizontal = Dvh.s3, vertical = Dvh.s1),
+            .background(color.copy(alpha = 0.15f), androidx.compose.foundation.shape.CircleShape)
+            .padding(horizontal = Dvh.s3, vertical = Dvh.s1 + 1.dp),
     ) {
         Text(
             text = statusLabel(status),

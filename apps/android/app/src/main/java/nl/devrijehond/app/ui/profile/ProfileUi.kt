@@ -1,6 +1,7 @@
 package nl.devrijehond.app.ui.profile
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -36,10 +38,13 @@ import nl.devrijehond.app.ui.theme.Dvh
  * its sub-screens.
  */
 
-/** Cream rounded surface, the standard card used everywhere in the app. */
+/** Cream rounded surface, the standard card used everywhere in the app. Soft
+ *  shadow + hairline border so it lifts off the sand ground, matching iOS. */
 fun Modifier.dvhCard(padding: Dp = Dvh.s4): Modifier = this
+    .shadow(elevation = 6.dp, shape = RoundedCornerShape(Dvh.rLg), clip = false, spotColor = Brand.Ink)
     .clip(RoundedCornerShape(Dvh.rLg))
     .background(Brand.Cream)
+    .border(1.dp, Brand.Ink.copy(alpha = 0.06f), RoundedCornerShape(Dvh.rLg))
     .padding(padding)
 
 @Composable

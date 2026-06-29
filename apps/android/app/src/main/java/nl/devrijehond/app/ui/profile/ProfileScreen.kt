@@ -23,7 +23,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.PersonAddAlt
 import androidx.compose.material.icons.filled.Verified
@@ -117,15 +116,11 @@ private fun SignedOut(onRequireSignIn: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Box(
-            modifier = Modifier
-                .size(84.dp)
-                .clip(CircleShape)
-                .background(Brand.MossSoft),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(Icons.Filled.Pets, contentDescription = null, tint = Brand.Moss, modifier = Modifier.size(40.dp))
-        }
+        androidx.compose.foundation.Image(
+            painter = androidx.compose.ui.res.painterResource(nl.devrijehond.app.R.drawable.dvh_logo),
+            contentDescription = "De Vrije Hond",
+            modifier = Modifier.size(width = 190.dp, height = 158.dp),
+        )
         Text(
             "Welkom bij De Vrije Hond",
             style = MaterialTheme.typography.titleLarge,
