@@ -54,11 +54,13 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.Polygon
 import com.google.maps.android.compose.rememberCameraPositionState
+import nl.devrijehond.app.ui.map.MapControls
 import nl.devrijehond.app.ui.theme.Brand
 import nl.devrijehond.app.ui.theme.Dvh
 
@@ -100,6 +102,7 @@ fun GeometryStep(
         position = CameraPosition.fromLatLngZoom(NlCenter, 7.5f)
     }
     var didCenterOnUser by remember { mutableStateOf(false) }
+    var isSatellite by remember { mutableStateOf(false) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
@@ -124,9 +127,14 @@ fun GeometryStep(
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
-            properties = MapProperties(isMyLocationEnabled = hasLocationPermission),
+            properties = MapProperties(
+                mapType = if (isSatellite) MapType.SATELLITE else MapType.NORMAL,
+                // Blue current-location dot, matching the Kaart tab.
+                isMyLocationEnabled = hasLocationPermission,
+            ),
+            // Hide the built-in my-location button; we use our own bottom-right control.
             uiSettings = MapUiSettings(
-                myLocationButtonEnabled = hasLocationPermission,
+                myLocationButtonEnabled = false,
                 zoomControlsEnabled = false,
                 mapToolbarEnabled = false,
             ),
@@ -192,10 +200,33 @@ fun GeometryStep(
             }
         }
 
-        // Bottom controls card.
+        // Bottom-right stacked glass controls: satellite toggle + locate-me, mirroring the Kaart tab.
+        MapControls(
+            isSatellite = isSatellite,
+            onToggleSatellite = { isSatellite = !isSatellite },
+            onLocate = {
+                val loc = userLocation
+                if (loc != null) {
+                    cameraPositionState.position = CameraPosition.fromLatLngZoom(loc, 14f)
+                } else if (hasLocationPermission) {
+                    requestLastLocation(context) {
+                        userLocation = it
+                        cameraPositionState.position = CameraPosition.fromLatLngZoom(it, 14f)
+                    }
+                } else {
+                    permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                }
+            },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(Dvh.s4),
+        )
+
+        // Bottom controls card. Kept narrower than full width so it clears the
+        // bottom-right map controls and sits to their left.
         Column(
             modifier = Modifier
-                .align(Alignment.BottomCenter)
+                .align(Alignment.BottomStart)
                 .fillMaxWidth()
                 .padding(Dvh.s4),
         ) {
@@ -203,7 +234,9 @@ fun GeometryStep(
                 color = Brand.Cream,
                 shape = RoundedCornerShape(Dvh.rLg),
                 shadowElevation = 6.dp,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 44.dp + Dvh.s2),
             ) {
                 Column(
                     modifier = Modifier.padding(Dvh.s4),
