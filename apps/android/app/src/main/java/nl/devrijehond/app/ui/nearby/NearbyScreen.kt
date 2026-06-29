@@ -23,17 +23,25 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -71,6 +79,21 @@ fun NearbyScreen(
     val state by vm.state.collectAsState()
     val categoriesById by vm.categoriesById.collectAsState()
     val context = LocalContext.current
+
+    // Inline, client-side filter over the loaded spots (name or category label),
+    // mirroring the iOS NearbyScreen searchField. Plain list filter, no geocode.
+    var query by remember { mutableStateOf("") }
+    val filtered = remember(query, state.items, categoriesById) {
+        val q = query.trim().lowercase()
+        if (q.isEmpty()) {
+            state.items
+        } else {
+            state.items.filter { spot ->
+                spot.name.lowercase().contains(q) ||
+                    (categoriesById[spot.categoryId.toString()]?.label?.lowercase()?.contains(q) == true)
+            }
+        }
+    }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
@@ -137,21 +160,91 @@ fun NearbyScreen(
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(
                     start = Dvh.s4,
                     end = Dvh.s4,
+                    top = Dvh.s1,
                     bottom = Dvh.s6,
                 ),
                 verticalArrangement = Arrangement.spacedBy(Dvh.s3),
             ) {
-                items(state.items, key = { it.id.toString() }) { spot ->
-                    NearbyRow(
-                        spot = spot,
-                        category = categoriesById[spot.categoryId.toString()],
-                        distanceMeters = vm.distanceMeters(spot),
-                        onClick = { onSelectSpot(spot.slug) },
+                // Search field scrolls with the content, like iOS.
+                item(key = "search") {
+                    NearbySearchField(
+                        query = query,
+                        onQueryChange = { query = it },
                     )
+                }
+
+                if (filtered.isEmpty()) {
+                    item(key = "empty") {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = Dvh.s6),
+                        ) {
+                            Icon(
+                                Icons.Filled.Search,
+                                contentDescription = null,
+                                tint = Brand.MossSoft,
+                                modifier = Modifier.size(40.dp),
+                            )
+                            Text(
+                                "Niets gevonden",
+                                color = Brand.Ink,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.padding(top = Dvh.s3),
+                            )
+                            Text(
+                                "Geen plekken voor '${query.trim()}'. Probeer een andere zoekterm.",
+                                color = Brand.Ink2,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(top = Dvh.s1),
+                            )
+                        }
+                    }
+                } else {
+                    items(filtered, key = { it.id.toString() }) { spot ->
+                        NearbyRow(
+                            spot = spot,
+                            category = categoriesById[spot.categoryId.toString()],
+                            distanceMeters = vm.distanceMeters(spot),
+                            onClick = { onSelectSpot(spot.slug) },
+                        )
+                    }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun NearbySearchField(
+    query: String,
+    onQueryChange: (String) -> Unit,
+) {
+    OutlinedTextField(
+        value = query,
+        onValueChange = onQueryChange,
+        placeholder = { Text("Zoek op naam of categorie", color = Brand.Ink2) },
+        leadingIcon = {
+            Icon(Icons.Filled.Search, contentDescription = null, tint = Brand.Moss)
+        },
+        trailingIcon = {
+            if (query.isNotEmpty()) {
+                IconButton(onClick = { onQueryChange("") }) {
+                    Icon(Icons.Filled.Close, contentDescription = "Wissen", tint = Brand.Ink2)
+                }
+            }
+        },
+        singleLine = true,
+        shape = CircleShape,
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedContainerColor = Brand.Cream,
+            unfocusedContainerColor = Brand.Cream,
+            focusedBorderColor = Brand.Moss,
+            unfocusedBorderColor = Brand.Ink.copy(alpha = 0.10f),
+        ),
+        modifier = Modifier.fillMaxWidth(),
+    )
 }
 
 @Composable

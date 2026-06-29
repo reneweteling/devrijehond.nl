@@ -4,9 +4,11 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,14 +20,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Undo
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -41,15 +46,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
@@ -60,7 +69,10 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.Polygon
 import com.google.maps.android.compose.rememberCameraPositionState
+import kotlinx.coroutines.launch
 import nl.devrijehond.app.ui.map.MapControls
+import nl.devrijehond.app.ui.map.MapItemDto
+import nl.devrijehond.app.ui.map.MapSearchScreen
 import nl.devrijehond.app.ui.theme.Brand
 import nl.devrijehond.app.ui.theme.Dvh
 
@@ -86,7 +98,10 @@ fun GeometryStep(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val mapsKeyPresent = remember { mapsApiKeyPresent(context) }
+
+    var showSearch by remember { mutableStateOf(false) }
 
     var userLocation by remember { mutableStateOf<LatLng?>(null) }
     var hasLocationPermission by remember {
@@ -184,15 +199,23 @@ fun GeometryStep(
                 .padding(Dvh.s3),
             verticalArrangement = Arrangement.spacedBy(Dvh.s2),
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            // One row, mirroring iOS: close, then the frosted search pill, with the
+            // Gebied/Plek toggle to its right. Tapping the pill opens the shared
+            // search surface so the user can jump the map to an address or area.
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Dvh.s2),
+            ) {
                 FloatingPillIconButton(onClick = onClose) {
                     Icon(Icons.Filled.Close, contentDescription = "Sluiten", tint = Brand.Ink2)
                 }
-                Spacer(Modifier.width(Dvh.s2))
+                AddSearchPill(
+                    onClick = { showSearch = true },
+                    modifier = Modifier.weight(1f),
+                )
                 TypeToggle(
                     isRegion = vm.isRegion,
                     onSelect = vm::setType,
-                    modifier = Modifier.weight(1f),
                 )
             }
             if (!mapsKeyPresent) {
@@ -317,6 +340,57 @@ fun GeometryStep(
                 }
             }
         }
+
+        // Shared search surface, layered above the add-spot map. Picking a
+        // geocoded location animates the camera there so the user can place the
+        // spot; picking a known spot recenters on it if a coordinate is available.
+        if (showSearch) {
+            BackHandler { showSearch = false }
+            MapSearchScreen(
+                spots = emptyList<MapItemDto>(),
+                categoriesById = emptyMap(),
+                onSelectPlace = { lat, lng ->
+                    showSearch = false
+                    scope.launch {
+                        cameraPositionState.animate(
+                            CameraUpdateFactory.newLatLngZoom(LatLng(lat, lng), 15f),
+                        )
+                    }
+                },
+                onSelectSpot = { showSearch = false },
+                onClose = { showSearch = false },
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+    }
+}
+
+@Composable
+private fun AddSearchPill(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Dvh.s2),
+        modifier = modifier
+            .shadow(4.dp, CircleShape, clip = false, spotColor = Brand.Ink)
+            .clip(CircleShape)
+            .background(Brand.Cream)
+            .border(1.dp, Brand.Ink.copy(alpha = 0.08f), CircleShape)
+            .clickable { onClick() }
+            .padding(horizontal = Dvh.s4, vertical = 14.dp),
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Search,
+            contentDescription = null,
+            tint = Brand.Moss,
+            modifier = Modifier.size(20.dp),
+        )
+        Text(
+            text = "Zoek locatie",
+            style = MaterialTheme.typography.bodyLarge,
+            color = Brand.Ink2,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }
 
@@ -333,8 +407,8 @@ private fun TypeToggle(
         modifier = modifier,
     ) {
         Row(modifier = Modifier.padding(3.dp)) {
-            ToggleSegment("Gebied", selected = isRegion, modifier = Modifier.weight(1f)) { onSelect(true) }
-            ToggleSegment("Plek", selected = !isRegion, modifier = Modifier.weight(1f)) { onSelect(false) }
+            ToggleSegment("Gebied", selected = isRegion) { onSelect(true) }
+            ToggleSegment("Plek", selected = !isRegion) { onSelect(false) }
         }
     }
 }
@@ -351,7 +425,8 @@ private fun ToggleSegment(
             .clip(RoundedCornerShape(Dvh.rXl))
             .background(if (selected) Brand.Moss else Brand.Cream)
             .height(38.dp)
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick)
+            .padding(horizontal = Dvh.s3),
         contentAlignment = Alignment.Center,
     ) {
         Text(
