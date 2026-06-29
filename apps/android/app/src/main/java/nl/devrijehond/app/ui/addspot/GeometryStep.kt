@@ -15,19 +15,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Search
@@ -35,7 +31,6 @@ import androidx.compose.material.icons.filled.Undo
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -191,24 +186,21 @@ fun GeometryStep(
             }
         }
 
-        // Top overlay: close + type toggle, plus the optional Maps-key banner.
+        // Top overlay: the search pill with the Gebied/Plek toggle on one row, at the
+        // same height as the Kaart search pill, plus the optional Maps-key banner.
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .windowInsetsPadding(WindowInsets.statusBars)
-                .padding(Dvh.s3),
+                .padding(horizontal = Dvh.s3, vertical = Dvh.s2),
             verticalArrangement = Arrangement.spacedBy(Dvh.s2),
         ) {
-            // One row, mirroring iOS: close, then the frosted search pill, with the
-            // Gebied/Plek toggle to its right. Tapping the pill opens the shared
-            // search surface so the user can jump the map to an address or area.
+            // One row, mirroring iOS: the frosted search pill with the Gebied/Plek
+            // toggle to its right. Tapping the pill opens the shared search surface
+            // so the user can jump the map to an address or area.
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(Dvh.s2),
             ) {
-                FloatingPillIconButton(onClick = onClose) {
-                    Icon(Icons.Filled.Close, contentDescription = "Sluiten", tint = Brand.Ink2)
-                }
                 AddSearchPill(
                     onClick = { showSearch = true },
                     modifier = Modifier.weight(1f),
@@ -435,17 +427,6 @@ private fun ToggleSegment(
             fontWeight = FontWeight.SemiBold,
             style = MaterialTheme.typography.labelLarge,
         )
-    }
-}
-
-@Composable
-private fun FloatingPillIconButton(onClick: () -> Unit, content: @Composable () -> Unit) {
-    Surface(
-        color = Brand.Cream,
-        shape = RoundedCornerShape(Dvh.rXl),
-        shadowElevation = 4.dp,
-    ) {
-        IconButton(onClick = onClick) { content() }
     }
 }
 
