@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Fully transparent icon for the Android-12 system splash. We deliberately show no
+     masked launcher icon (no circle): the warm sand background is held for a beat and
+     the real animated dog logo is drawn by the Compose SplashScreen right after. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@android:color/transparent" />
+</shape>

@@ -9,4 +9,18 @@
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowLightNavigationBar">true</item>
     </style>
+
+    <!-- Android-12 system splash: just the warm sand ground, no masked launcher icon
+         (the default would be the adaptive icon clipped into a circle, which we do not
+         want). The real dog logo + tagline animate in via the Compose SplashScreen.
+         postSplashScreenTheme hands back to the normal app theme once Compose draws. -->
+    <style name="Theme.DeVrijeHond.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/sand</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_transparent</item>
+        <item name="postSplashScreenTheme">@style/Theme.DeVrijeHond</item>
+        <item name="android:statusBarColor">@color/sand</item>
+        <item name="android:navigationBarColor">@color/sand</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
 </resources>
