@@ -32,8 +32,8 @@ import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 /**
- * Drives the three sign-in flows (magic link, Google, Apple) and stores the
- * resulting bearer via [Session]. Mirrors the iOS `AuthService` + `APIClient` auth
+ * Drives the sign-in flows (magic link, Google) and stores the resulting bearer
+ * via [Session]. Mirrors the iOS `AuthService` + `APIClient` auth
  * bridge. Bearer-only transport: the OkHttp clients keep no cookie jar, so a
  * BetterAuth Set-Cookie is never replayed (which would trip the CSRF guard).
  *
@@ -224,16 +224,6 @@ class AuthRepository(
                 AuthResult.Error("Inloggen mislukt. Probeer het opnieuw.")
             }
         }
-
-    // MARK: - Apple
-
-    /**
-     * Apple has no native SDK on Android, so this is not available yet. The wired
-     * path would be a web-OAuth (Custom Tab) round trip that ends on the same
-     * `vrijehond://` deep link as the magic link and exchanges the idToken at
-     * /api/auth/mobile/apple-native. See the report for the blocker.
-     */
-    fun appleAvailable(): Boolean = false
 
     private companion object {
         const val MAGIC_LINK_CALLBACK = "vrijehond://verify"

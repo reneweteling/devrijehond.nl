@@ -13,17 +13,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -39,14 +37,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
+import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.MapsComposeExperimentalApi
 import com.google.maps.android.compose.MarkerComposable
@@ -54,19 +55,18 @@ import com.google.maps.android.compose.Polygon
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 import kotlinx.coroutines.launch
-import nl.devrijehond.app.BuildConfig
 import nl.devrijehond.app.api.models.Category
+import nl.devrijehond.app.ui.location.DeviceLocation
 import nl.devrijehond.app.ui.theme.Brand
 import nl.devrijehond.app.ui.theme.Dvh
 import nl.devrijehond.app.ui.theme.categoryIcon
-import nl.devrijehond.app.ui.theme.dvhCardSurface
 
 /**
  * Kaart tab. Shows the live spots on a Google map with custom, category-tinted pins
- * that mirror the iOS MapKit markers, plus a category filter row. A list view is
- * available as a fallback (and the default when no Maps key is configured).
+ * that mirror the iOS MapKit markers, plus a category filter row and bottom-right
+ * controls (satellite toggle + locate-me).
  *
- * @param onSelectSpot opens a spot detail by slug (marker tap or list-row tap).
+ * @param onSelectSpot opens a spot detail by slug (marker tap).
  * @param refreshKey bump from the shell to force a refetch after a create/edit.
  */
 @Composable
@@ -80,10 +80,14 @@ fun MapScreen(
     val clusters by vm.clusters.collectAsState()
     val categories by vm.categories.collectAsState()
     val selectedCategoryId by vm.selectedCategoryId.collectAsState()
-    val error by vm.error.collectAsState()
 
-    val hasMapsKey = BuildConfig.MAPS_API_KEY.isNotBlank()
-    var listMode by remember { mutableStateOf(!hasMapsKey) }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    var isSatellite by remember { mutableStateOf(false) }
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(LatLng(52.3676, 4.9041), 11f)
+    }
 
     val categoriesById = remember(categories) { categories.associateBy { it.id.toString() } }
 
@@ -94,20 +98,18 @@ fun MapScreen(
             .fillMaxSize()
             .background(Brand.Sand),
     ) {
-        if (listMode) {
-            MapList(items = items, categoriesById = categoriesById, error = error, onSelectSpot = onSelectSpot)
-        } else {
-            SpotMap(
-                vm = vm,
-                items = items,
-                clusters = clusters,
-                categoriesById = categoriesById,
-                onSelectSpot = onSelectSpot,
-            )
-        }
+        SpotMap(
+            vm = vm,
+            items = items,
+            clusters = clusters,
+            categoriesById = categoriesById,
+            cameraPositionState = cameraPositionState,
+            isSatellite = isSatellite,
+            onSelectSpot = onSelectSpot,
+        )
 
         // Category filter row (glass pills), overlaid at the top like iOS.
-        if (!listMode && categories.isNotEmpty()) {
+        if (categories.isNotEmpty()) {
             CategoryFilterRow(
                 categories = categories,
                 selectedId = selectedCategoryId,
@@ -117,29 +119,30 @@ fun MapScreen(
         }
 
         // Legend pill, bottom-centre, lifted clear of the Google logo (bottom-left)
-        // and the toggle control (bottom-right), mirroring iOS.
-        if (!listMode) {
-            MapLegend(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = Dvh.s4),
-            )
-        }
-
-        SmallFloatingActionButton(
-            onClick = { listMode = !listMode },
-            containerColor = Brand.Cream,
-            contentColor = Brand.Moss,
+        // and the controls (bottom-right), mirroring iOS.
+        MapLegend(
             modifier = Modifier
-                .align(if (listMode) Alignment.TopEnd else Alignment.BottomEnd)
+                .align(Alignment.BottomCenter)
+                .padding(bottom = Dvh.s4),
+        )
+
+        // Bottom-right stacked glass controls: satellite toggle + locate-me, mirroring iOS.
+        MapControls(
+            isSatellite = isSatellite,
+            onToggleSatellite = { isSatellite = !isSatellite },
+            onLocate = {
+                scope.launch {
+                    DeviceLocation.current(context)?.let { here ->
+                        cameraPositionState.animate(
+                            CameraUpdateFactory.newLatLngZoom(here, 14f),
+                        )
+                    }
+                }
+            },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
                 .padding(Dvh.s4),
-        ) {
-            if (listMode) {
-                Icon(Icons.Filled.Map, contentDescription = "Toon kaart")
-            } else {
-                Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Toon lijst")
-            }
-        }
+        )
     }
 }
 
@@ -150,11 +153,10 @@ private fun SpotMap(
     items: List<MapItemDto>,
     clusters: List<MapClusterDto>,
     categoriesById: Map<String, Category>,
+    cameraPositionState: CameraPositionState,
+    isSatellite: Boolean,
     onSelectSpot: (String) -> Unit,
 ) {
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(LatLng(52.3676, 4.9041), 11f)
-    }
     val scope = rememberCoroutineScope()
 
     // Push the viewport bounds into the ViewModel once the camera settles.
@@ -181,7 +183,12 @@ private fun SpotMap(
     GoogleMap(
         modifier = Modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState,
-        properties = MapProperties(mapStyleOptions = mapStyle),
+        properties = MapProperties(
+            // The custom clean style only applies to the normal base map; on satellite
+            // it is ignored, so drop it to avoid a no-op style pass.
+            mapStyleOptions = if (isSatellite) null else mapStyle,
+            mapType = if (isSatellite) MapType.SATELLITE else MapType.NORMAL,
+        ),
         uiSettings = MapUiSettings(zoomControlsEnabled = false, mapToolbarEnabled = false),
         contentPadding = PaddingValues(top = 64.dp),
     ) {
@@ -335,73 +342,58 @@ private fun LegendDot(color: Color, dashed: Boolean, label: String) {
     }
 }
 
+/**
+ * Bottom-right stacked map controls, mirroring the iOS `mapControls`: a
+ * satellite/standard toggle and a locate-me button. Both use the same frosted
+ * glass surface as the filter chips and legend.
+ */
 @Composable
-private fun MapList(
-    items: List<MapItemDto>,
-    categoriesById: Map<String, Category>,
-    error: String?,
-    onSelectSpot: (String) -> Unit,
+private fun MapControls(
+    isSatellite: Boolean,
+    onToggleSatellite: () -> Unit,
+    onLocate: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        Text(
-            text = "Kaart",
-            style = MaterialTheme.typography.displaySmall,
-            color = Brand.Ink,
-            modifier = Modifier.padding(start = Dvh.s4, top = Dvh.s4),
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(Dvh.s2),
+    ) {
+        // Globe when standard (tap to go satellite), map when satellite (tap to return).
+        MapControlButton(
+            icon = if (isSatellite) Icons.Filled.Map else Icons.Filled.Public,
+            contentDescription = if (isSatellite) "Toon standaardkaart" else "Toon satelliet",
+            onClick = onToggleSatellite,
         )
-        Text(
-            text = "Plekken in beeld. Tik om te openen.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = Brand.Ink2,
-            modifier = Modifier.padding(start = Dvh.s4, top = Dvh.s1, bottom = Dvh.s3),
+        MapControlButton(
+            icon = Icons.Filled.MyLocation,
+            contentDescription = "Ga naar mijn locatie",
+            onClick = onLocate,
         )
+    }
+}
 
-        if (error != null && items.isEmpty()) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Kon niet laden: $error", color = Brand.Rust)
-            }
-            return@Column
-        }
-
-        LazyColumn(
-            contentPadding = PaddingValues(start = Dvh.s4, end = Dvh.s4, bottom = Dvh.s6),
-            verticalArrangement = Arrangement.spacedBy(Dvh.s3),
-        ) {
-            items(items, key = { it.id }) { item ->
-                val cat = categoriesById[item.categoryId]
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .dvhCardSurface()
-                        .clickable { onSelectSpot(item.slug) }
-                        .padding(Dvh.s3),
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .clip(RoundedCornerShape(Dvh.rMd))
-                            .background(Brand.categoryColor(cat?.slug).copy(alpha = 0.16f)),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(
-                            categoryIcon(cat?.slug),
-                            contentDescription = null,
-                            tint = Brand.categoryColor(cat?.slug),
-                            modifier = Modifier.size(22.dp),
-                        )
-                    }
-                    Column(modifier = Modifier.padding(start = Dvh.s3)) {
-                        Text(item.name, color = Brand.Ink, style = MaterialTheme.typography.titleMedium)
-                        Text(
-                            text = if (item.isVerified) "Geverifieerd" else "Nog niet geverifieerd",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = if (item.isVerified) Brand.MossDark else Brand.Ink2,
-                        )
-                    }
-                }
-            }
-        }
+@Composable
+private fun MapControlButton(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    contentDescription: String,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .size(44.dp)
+            .shadow(4.dp, RoundedCornerShape(Dvh.rSm), clip = false, spotColor = Brand.Ink)
+            .clip(RoundedCornerShape(Dvh.rSm))
+            .background(Brand.Cream)
+            .border(1.dp, Brand.Ink.copy(alpha = 0.08f), RoundedCornerShape(Dvh.rSm))
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            tint = Brand.MossDark,
+            modifier = Modifier.size(22.dp),
+        )
     }
 }
 

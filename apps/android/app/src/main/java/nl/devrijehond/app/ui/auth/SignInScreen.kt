@@ -41,7 +41,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -55,8 +54,8 @@ import nl.devrijehond.app.ui.theme.Brand
 import nl.devrijehond.app.ui.theme.Dvh
 
 /**
- * Sign-in surface: native Google, Apple (binnenkort), and magic-link e-mail. Mirrors
- * the iOS SignInView. On a successful sign-in the bearer lands in the shared Session;
+ * Sign-in surface: native Google and magic-link e-mail. Mirrors the iOS SignInView.
+ * On a successful sign-in the bearer lands in the shared Session;
  * this screen observes that token and calls [onSignedIn] once it appears (covers both
  * the in-screen Google flow and a magic-link deep link redeemed elsewhere).
  *
@@ -106,7 +105,6 @@ fun SignInScreen(
                 DvhCard {
                     ProviderButtons(
                         working = state.working,
-                        onApple = vm::signInWithApple,
                         onGoogle = { vm.signInWithGoogle(context) },
                     )
                     OrDivider()
@@ -209,18 +207,9 @@ private fun DvhCard(content: @Composable ColumnScope.() -> Unit) {
 @Composable
 private fun ProviderButtons(
     working: Boolean,
-    onApple: () -> Unit,
     onGoogle: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(Dvh.s3)) {
-        // Apple: shown for parity with iOS, but not yet available on Android.
-        FilledTile(
-            label = "Doorgaan met Apple",
-            container = Color.Black,
-            contentColor = Color.White,
-            enabled = !working,
-            onClick = onApple,
-        )
         OutlinedTile(
             label = "Verder met Google",
             enabled = !working,
@@ -368,34 +357,6 @@ private fun PrimaryTile(
                 )
             }
             Text(label, color = Brand.Cream, style = MaterialTheme.typography.titleMedium)
-        }
-    }
-}
-
-@Composable
-private fun FilledTile(
-    label: String,
-    container: Color,
-    contentColor: Color,
-    enabled: Boolean,
-    onClick: () -> Unit,
-    leading: @Composable (() -> Unit)? = null,
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(Dvh.controlHeight)
-            .clip(RoundedCornerShape(Dvh.rMd))
-            .background(container.copy(alpha = if (enabled) 1f else 0.5f))
-            .clickable(enabled = enabled, onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Dvh.s2),
-        ) {
-            leading?.invoke()
-            Text(label, color = contentColor, style = MaterialTheme.typography.titleMedium)
         }
     }
 }

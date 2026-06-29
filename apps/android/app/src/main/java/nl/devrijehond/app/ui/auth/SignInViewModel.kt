@@ -34,8 +34,6 @@ class SignInViewModel(
     private val _state = MutableStateFlow(State())
     val state: StateFlow<State> = _state.asStateFlow()
 
-    val appleAvailable: Boolean get() = repo.appleAvailable()
-
     fun onEmailChange(value: String) {
         _state.update { it.copy(email = value, error = null) }
     }
@@ -70,13 +68,6 @@ class SignInViewModel(
                 is AuthRepository.AuthResult.Error ->
                     _state.update { it.copy(working = false, error = result.message) }
             }
-        }
-    }
-
-    fun signInWithApple() {
-        // Apple has no native Android SDK yet (see AuthRepository.appleAvailable).
-        _state.update {
-            it.copy(error = "Inloggen met Apple kan binnenkort op Android. Gebruik Google of je e-mail.")
         }
     }
 
