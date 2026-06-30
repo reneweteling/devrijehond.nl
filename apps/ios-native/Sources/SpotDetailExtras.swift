@@ -76,7 +76,7 @@ struct ReviewRow: View {
 
 struct WriteReviewView: View {
     let spotId: String
-    let onSuccess: () -> Void
+    let onSuccess: (Review) -> Void
 
     @EnvironmentObject var session: Session
     @Environment(\.dismiss) private var dismiss
@@ -165,13 +165,13 @@ struct WriteReviewView: View {
         let bodyText = comment.trimmingCharacters(in: .whitespacesAndNewlines)
         Task {
             do {
-                _ = try await APIClient.submitReview(
+                let created = try await APIClient.submitReview(
                     spotId: spotId,
                     stars: rating,
                     body: bodyText.isEmpty ? nil : bodyText,
                     token: token
                 )
-                onSuccess()
+                onSuccess(created)
                 dismiss()
             } catch let e as APIError {
                 _ = session.signOutIfUnauthorized(e)

@@ -214,6 +214,13 @@ struct SpotDetailView: View {
             if reviews.isEmpty {
                 reviews = (try? await APIClient.spotReviews(slug: spot.slug)) ?? []
             }
+            // Load the user's existing vote so a returning voter sees that they
+            // already confirmed/denied this spot (the buttons show otherwise).
+            if voteResult == nil, let token = session.token, !isOwner {
+                if let mine = try? await APIClient.myVote(spotId: spotId, token: token) {
+                    voteResult = mine.asVoteResult
+                }
+            }
         }
         .sheet(item: $activeSheet) { sheet in
             switch sheet {
@@ -221,10 +228,13 @@ struct SpotDetailView: View {
                 SignInView(reason: reason, dismissable: true)
                     .environmentObject(session)
             case .writeReview:
-                WriteReviewView(spotId: spotId) {
-                    Task {
-                        reviews = (try? await APIClient.spotReviews(slug: spot.slug)) ?? []
-                    }
+                WriteReviewView(spotId: spotId) { newReview in
+                    // Insert the freshly created review straight away. The public
+                    // reviews list is CDN/URLSession-cached (s-maxage), so a
+                    // refetch right after posting can still return the old set.
+                    reviews.removeAll { $0.id == newReview.id }
+                    reviews.insert(newReview, at: 0)
+                    onChanged?()
                 }
                 .environmentObject(session)
             case .report:

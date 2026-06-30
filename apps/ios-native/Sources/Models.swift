@@ -212,6 +212,26 @@ struct VoteResponse: Decodable {
     let status: String
 }
 
+/// GET /api/v1/me/spots/:id/vote, the signed-in user's current vote (or nil)
+/// plus the spot's stored tally. Lets the detail screen show "you already
+/// confirmed/denied" after re-opening a spot.
+struct MyVoteResponse: Decodable {
+    let vote: Vote?
+    let netScore: Double
+    let confirmCount: Int
+    let denyCount: Int
+    let status: String
+
+    /// Promote to a `VoteResponse` when the user has actually voted, so the
+    /// detail UI (which keys off `VoteResponse`) can reuse the same rendering.
+    var asVoteResult: VoteResponse? {
+        guard let vote else { return nil }
+        return VoteResponse(
+            vote: vote, netScore: netScore, confirmCount: confirmCount,
+            denyCount: denyCount, status: status)
+    }
+}
+
 // MARK: - Feature requests (Wensen)
 
 struct FeatureAuthor: Decodable, Hashable {

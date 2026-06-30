@@ -186,14 +186,22 @@ struct EditProfileView: View {
         uploadedImageUrl = me.image
     }
 
-    private func uploadImage(_ img: UIImage) async {
-        guard let token = session.token else { return }
+    @discardableResult
+    private func uploadImage(_ img: UIImage) async -> String? {
+        guard let token = session.token else { return nil }
         localImage = img
+        // The picked image is now the pending avatar; drop any previously
+        // uploaded URL so a failed upload re-runs at save instead of silently
+        // keeping the old (or empty) value.
+        uploadedImageUrl = nil
         uploading = true
         error = nil
+        defer { uploading = false }
         do {
             let jpeg = ImageUtil.squareJPEG(img)
-            uploadedImageUrl = try await APIClient.uploadPhoto(jpeg: jpeg, token: token)
+            let url = try await APIClient.uploadPhoto(jpeg: jpeg, token: token)
+            uploadedImageUrl = url
+            return url
         } catch let e as APIError {
             if session.signOutIfUnauthorized(e) {
                 error = "Je sessie is verlopen. Log opnieuw in."
@@ -203,13 +211,22 @@ struct EditProfileView: View {
         } catch {
             self.error = "Foto uploaden mislukt. Probeer het opnieuw."
         }
-        uploading = false
+        return nil
     }
 
     private func save() async {
         guard let token = session.token else { return }
         saving = true
         error = nil
+        // If a new avatar was picked but its upload never landed (failed or
+        // still pending), upload it now so we never save an empty avatar.
+        if uploadedImageUrl == nil, let img = localImage {
+            if await uploadImage(img) == nil {
+                error = error ?? "Foto uploaden mislukt. Probeer het opnieuw."
+                saving = false
+                return
+            }
+        }
         let nameTrimmed = name.trimmingCharacters(in: .whitespaces)
         let handleTrimmed = handle.trimmingCharacters(in: .whitespaces)
         let bioTrimmed = bio.trimmingCharacters(in: .whitespacesAndNewlines)

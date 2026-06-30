@@ -312,6 +312,12 @@ struct APIClient {
         try await patch("/api/v1/me/spots/\(id)", body: body, token: token, as: SpotDetail.self)
     }
 
+    /// The signed-in user's current vote on a spot (nil `vote` when they haven't
+    /// voted). Used on detail open so a returning voter sees their own vote.
+    static func myVote(spotId: String, token: String) async throws -> MyVoteResponse {
+        try await get("/api/v1/me/spots/\(spotId)/vote", token: token, as: MyVoteResponse.self)
+    }
+
     static func vote(
         spotId: String, value: String, proof: GeoPoint?, token: String
     ) async throws -> VoteResponse {
