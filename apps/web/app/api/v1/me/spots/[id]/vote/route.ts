@@ -1,7 +1,11 @@
 import type { NextRequest } from 'next/server';
 import { authDb } from '@devrijehond/db';
 import { requireAuth } from '@devrijehond/server';
-import { SubmitVoteRequestSchema, type VoteResponseDto } from '@devrijehond/types';
+import {
+  SubmitVoteRequestSchema,
+  type VoteResponseDto,
+  type MyVoteResponseDto,
+} from '@devrijehond/types';
 import { ok, error, NO_STORE_CACHE_CONTROL } from '@/lib/api-response';
 import { tallyVotes, resolveStatus } from '@/lib/verification';
 import { haversineMeters, PROXIMITY_RADIUS_M } from '@/lib/geo';
@@ -24,6 +28,56 @@ import { haversineMeters, PROXIMITY_RADIUS_M } from '@/lib/geo';
  * Returns the new vote + recomputed tally + status.
  */
 export const runtime = 'nodejs';
+
+/**
+ * GET /api/v1/me/spots/:id/vote, the signed-in user's current vote on a spot
+ * (or null) plus the spot's stored tally. Lets a client show "you already
+ * confirmed/denied this" after re-opening the spot. The vote endpoint lives
+ * under `/me/*`, so the response is never cached.
+ */
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  let ctx;
+  try {
+    ctx = await requireAuth(request);
+  } catch (res) {
+    return res as Response;
+  }
+  const { user } = ctx;
+  const { id: spotId } = await params;
+
+  const db = authDb({ id: user.id, role: user.role });
+
+  const spot = await db.spot.findUnique({
+    where: { id: spotId },
+    select: { id: true, status: true, netScore: true, confirmCount: true, denyCount: true },
+  });
+  if (!spot) {
+    return error('NOT_FOUND', 'Spot not found.', { status: 404 });
+  }
+
+  const vote = await db.vote.findUnique({
+    where: { spotId_userId: { spotId, userId: user.id } },
+    select: { id: true, value: true, proximityVerified: true, createdAt: true },
+  });
+
+  const body: MyVoteResponseDto = {
+    vote: vote
+      ? {
+          id: vote.id,
+          spotId,
+          value: vote.value,
+          proximityVerified: vote.proximityVerified,
+          createdAt: vote.createdAt.toISOString(),
+        }
+      : null,
+    netScore: spot.netScore,
+    confirmCount: spot.confirmCount,
+    denyCount: spot.denyCount,
+    status: spot.status,
+  };
+
+  return ok(body, { cacheControl: NO_STORE_CACHE_CONTROL });
+}
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   let ctx;

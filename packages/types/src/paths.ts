@@ -55,7 +55,12 @@ import {
   ModerateSpotRequestSchema,
   OkResponseSchema,
 } from './dto/submit-spot';
-import { SubmitVoteRequestSchema, VoteSchema, VoteResponseSchema } from './dto/votes';
+import {
+  SubmitVoteRequestSchema,
+  VoteSchema,
+  VoteResponseSchema,
+  MyVoteResponseSchema,
+} from './dto/votes';
 import { ReviewSchema, ReviewsResponseSchema, SubmitReviewRequestSchema } from './dto/reviews';
 import { SubmitReportRequestSchema, ReportResponseSchema } from './dto/reports';
 import {
@@ -129,6 +134,7 @@ registry.register('OkResponse', OkResponseSchema);
 registry.register('SubmitVoteRequest', SubmitVoteRequestSchema);
 registry.register('Vote', VoteSchema);
 registry.register('VoteResponse', VoteResponseSchema);
+registry.register('MyVoteResponse', MyVoteResponseSchema);
 
 // Reviews
 registry.register('Review', ReviewSchema);
@@ -432,6 +438,22 @@ registry.registerPath({
     200: { description: 'Status updated.', ...json(OkResponseSchema) },
     ...errorResponses,
     403: { description: 'Staff role required.', ...json(ApiErrorSchema) },
+  },
+});
+
+registry.registerPath({
+  method: 'get',
+  path: '/api/v1/me/spots/{id}/vote',
+  tags: ['votes'],
+  summary: "Get the signed-in user's vote on a spot",
+  security: bearer,
+  request: { params: z.object({ id: z.string() }) },
+  responses: {
+    200: {
+      description: "The user's current vote (or null) plus the spot tally.",
+      ...json(MyVoteResponseSchema),
+    },
+    ...errorResponses,
   },
 });
 

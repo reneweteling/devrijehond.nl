@@ -53,3 +53,20 @@ export const VoteResponseSchema = z
   })
   .openapi('VoteResponse', { description: 'Result of casting a verification vote.' });
 export type VoteResponseDto = z.infer<typeof VoteResponseSchema>;
+
+/**
+ * The signed-in user's current vote on a spot, plus the spot's stored tally.
+ * `vote` is null when the user has not voted yet. Served by
+ * `GET /api/v1/me/spots/:id/vote` so a client can show "you already confirmed"
+ * after re-opening the spot.
+ */
+export const MyVoteResponseSchema = z
+  .object({
+    vote: VoteSchema.nullable(),
+    netScore: z.number().openapi({ description: 'Spot net weighted score.' }),
+    confirmCount: z.number().int().nonnegative(),
+    denyCount: z.number().int().nonnegative(),
+    status: z.string().openapi({ description: 'Current spot status.', example: 'UNVERIFIED' }),
+  })
+  .openapi('MyVoteResponse', { description: "The signed-in user's vote on a spot (or null)." });
+export type MyVoteResponseDto = z.infer<typeof MyVoteResponseSchema>;
