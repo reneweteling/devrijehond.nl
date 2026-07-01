@@ -1,5 +1,6 @@
 package nl.devrijehond.app.ui
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
@@ -145,17 +146,24 @@ fun AppShell() {
             }
         },
     ) { innerPadding ->
+        // The map tabs (Kaart, Toevoegen) draw edge-to-edge behind the status bar:
+        // they only take the bottom inset (clearing the nav bar) and handle the top
+        // status-bar inset on their own overlays. Every other screen keeps the full
+        // inset so its content stays clear of the system bars.
+        val contentInset = Modifier.padding(innerPadding)
+        val mapInset = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
         NavHost(
             navController = navController,
             startDestination = Tab.Map.route,
-            modifier = Modifier.padding(innerPadding),
         ) {
             // Tabs
             composable(Tab.Map.route) {
-                MapScreen(onSelectSpot = ::openSpot, refreshKey = refreshKey)
+                MapScreen(onSelectSpot = ::openSpot, refreshKey = refreshKey, modifier = mapInset)
             }
             composable(Tab.Nearby.route) {
-                NearbyScreen(onSelectSpot = ::openSpot, refreshKey = refreshKey)
+                Box(contentInset) {
+                    NearbyScreen(onSelectSpot = ::openSpot, refreshKey = refreshKey)
+                }
             }
             composable(Tab.Add.route) {
                 AddSpotScreen(
@@ -173,21 +181,26 @@ fun AppShell() {
                             restoreState = true
                         }
                     },
+                    modifier = mapInset,
                 )
             }
             composable(Tab.Wishes.route) {
-                WensenScreen(onRequireSignIn = ::goSignIn)
+                Box(contentInset) {
+                    WensenScreen(onRequireSignIn = ::goSignIn)
+                }
             }
             composable(Tab.Profile.route) {
-                ProfileScreen(
-                    onRequireSignIn = ::goSignIn,
-                    onEditProfile = { navController.navigate("editprofile") },
-                    onAddDog = { navController.navigate("dog") },
-                    onEditDog = { dogId -> navController.navigate("dog?dogId=$dogId") },
-                    onMySpots = { navController.navigate("myspots") },
-                    onModeratorApply = { navController.navigate("moderatorapply") },
-                    onAbout = { navController.navigate("about") },
-                )
+                Box(contentInset) {
+                    ProfileScreen(
+                        onRequireSignIn = ::goSignIn,
+                        onEditProfile = { navController.navigate("editprofile") },
+                        onAddDog = { navController.navigate("dog") },
+                        onEditDog = { dogId -> navController.navigate("dog?dogId=$dogId") },
+                        onMySpots = { navController.navigate("myspots") },
+                        onModeratorApply = { navController.navigate("moderatorapply") },
+                        onAbout = { navController.navigate("about") },
+                    )
+                }
             }
 
             // Pushed routes. The POI detail is not here: it opens as a bottom sheet
@@ -197,23 +210,29 @@ fun AppShell() {
                 arguments = listOf(navArgument("slug") { type = NavType.StringType }),
             ) { entry ->
                 val slug = entry.arguments?.getString("slug").orEmpty()
-                SpotEditScreen(
-                    slug = slug,
-                    onSaved = {
-                        refreshKey++
-                        navController.popBackStack()
-                    },
-                    onBack = { navController.popBackStack() },
-                )
+                Box(contentInset) {
+                    SpotEditScreen(
+                        slug = slug,
+                        onSaved = {
+                            refreshKey++
+                            navController.popBackStack()
+                        },
+                        onBack = { navController.popBackStack() },
+                    )
+                }
             }
             composable("signin") {
-                SignInScreen(
-                    onSignedIn = { navController.popBackStack() },
-                    onClose = { navController.popBackStack() },
-                )
+                Box(contentInset) {
+                    SignInScreen(
+                        onSignedIn = { navController.popBackStack() },
+                        onClose = { navController.popBackStack() },
+                    )
+                }
             }
             composable("editprofile") {
-                EditProfileScreen(onDone = { navController.popBackStack() })
+                Box(contentInset) {
+                    EditProfileScreen(onDone = { navController.popBackStack() })
+                }
             }
             composable(
                 route = "dog?dogId={dogId}",
@@ -225,14 +244,16 @@ fun AppShell() {
                     },
                 ),
             ) { entry ->
-                DogEditScreen(
-                    dogId = entry.arguments?.getString("dogId"),
-                    onDone = { navController.popBackStack() },
-                )
+                Box(contentInset) {
+                    DogEditScreen(
+                        dogId = entry.arguments?.getString("dogId"),
+                        onDone = { navController.popBackStack() },
+                    )
+                }
             }
-            composable("myspots") { MySpotsScreen() }
-            composable("moderatorapply") { ModeratorApplyScreen() }
-            composable("about") { AboutScreen() }
+            composable("myspots") { Box(contentInset) { MySpotsScreen() } }
+            composable("moderatorapply") { Box(contentInset) { ModeratorApplyScreen() } }
+            composable("about") { Box(contentInset) { AboutScreen() } }
         }
     }
 

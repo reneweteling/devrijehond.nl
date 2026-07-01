@@ -1,9 +1,11 @@
 package nl.devrijehond.app
 
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
@@ -32,7 +34,14 @@ class MainActivity : ComponentActivity() {
         // draws, then we cross-fade from the custom splash to the app shell.
         installSplashScreen()
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        // The app is light-locked, so force dark system-bar icons (a "light" bar style)
+        // with transparent scrims instead of letting edge-to-edge follow the device's
+        // dark theme, which would render the clock/wifi/battery white and illegible on
+        // the sand background.
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
+        )
         // Cold start: the launching intent may carry a magic-link uri.
         handleDeepLink(intent?.data)
         setContent {

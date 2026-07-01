@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -140,11 +141,13 @@ fun MapScreen(
             onSelectSpot = onSelectSpot,
         )
 
-        // Top overlay: search pill above the category filter chips, like iOS.
+        // Top overlay: search pill above the category filter chips, like iOS. The map
+        // draws behind the status bar (edge-to-edge), so inset the overlay itself.
         Column(
             modifier = Modifier
                 .align(Alignment.TopStart)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .statusBarsPadding(),
         ) {
             SearchPill(
                 onClick = { showSearch = true },

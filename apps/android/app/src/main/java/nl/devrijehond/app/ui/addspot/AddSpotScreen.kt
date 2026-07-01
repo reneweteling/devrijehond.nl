@@ -2,6 +2,7 @@ package nl.devrijehond.app.ui.addspot
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -57,7 +58,9 @@ fun AddSpotScreen(
                     }
                 }
             },
-            modifier = modifier.fillMaxSize(),
+            // The form step is not edge-to-edge; add the status-bar inset that the
+            // geometry step deliberately skips so the "Terug" row clears the clock.
+            modifier = modifier.statusBarsPadding().fillMaxSize(),
         )
     }
 }
