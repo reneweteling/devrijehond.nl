@@ -16,7 +16,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import android.Manifest
+import android.content.pm.PackageManager
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
@@ -83,6 +88,17 @@ fun MapScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
+    // Guard the blue my-location dot and the locate control behind the runtime
+    // permission. Enabling my-location without it throws a SecurityException that
+    // crashes the map, so this must reflect the real grant, not an assumption.
+    var hasLocationPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+            ) == PackageManager.PERMISSION_GRANTED,
+        )
+    }
     var isSatellite by remember { mutableStateOf(false) }
     var showSearch by remember { mutableStateOf(false) }
     val cameraPositionState = rememberCameraPositionState {
@@ -90,6 +106,21 @@ fun MapScreen(
     }
 
     val categoriesById = remember(categories) { categories.associateBy { it.id.toString() } }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        hasLocationPermission = granted
+        if (granted) {
+            scope.launch {
+                DeviceLocation.current(context)?.let { here ->
+                    cameraPositionState.animate(
+                        CameraUpdateFactory.newLatLngZoom(here, 14f),
+                    )
+                }
+            }
+        }
+    }
 
     LaunchedEffect(refreshKey) { vm.retry() }
 
@@ -105,6 +136,7 @@ fun MapScreen(
             categoriesById = categoriesById,
             cameraPositionState = cameraPositionState,
             isSatellite = isSatellite,
+            hasLocationPermission = hasLocationPermission,
             onSelectSpot = onSelectSpot,
         )
 
@@ -140,12 +172,16 @@ fun MapScreen(
             isSatellite = isSatellite,
             onToggleSatellite = { isSatellite = !isSatellite },
             onLocate = {
-                scope.launch {
-                    DeviceLocation.current(context)?.let { here ->
-                        cameraPositionState.animate(
-                            CameraUpdateFactory.newLatLngZoom(here, 14f),
-                        )
+                if (hasLocationPermission) {
+                    scope.launch {
+                        DeviceLocation.current(context)?.let { here ->
+                            cameraPositionState.animate(
+                                CameraUpdateFactory.newLatLngZoom(here, 14f),
+                            )
+                        }
                     }
+                } else {
+                    permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
                 }
             },
             modifier = Modifier
@@ -188,6 +224,7 @@ private fun SpotMap(
     categoriesById: Map<String, Category>,
     cameraPositionState: CameraPositionState,
     isSatellite: Boolean,
+    hasLocationPermission: Boolean,
     onSelectSpot: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -221,8 +258,9 @@ private fun SpotMap(
             // it is ignored, so drop it to avoid a no-op style pass.
             mapStyleOptions = if (isSatellite) null else mapStyle,
             mapType = if (isSatellite) MapType.SATELLITE else MapType.NORMAL,
-            // Show the blue current-location dot (location permission is already granted).
-            isMyLocationEnabled = true,
+            // Show the blue current-location dot only once the permission is granted;
+            // enabling it without the grant throws a SecurityException.
+            isMyLocationEnabled = hasLocationPermission,
         ),
         // Hide the built-in my-location button; we have our own locate control.
         uiSettings = MapUiSettings(
