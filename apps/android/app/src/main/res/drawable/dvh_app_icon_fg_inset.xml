@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Scales the icon artwork down into the adaptive-icon safe zone. The raw
+  foreground bleeds close to the edges, so the round/rounded-square launcher
+  mask clips the dog's nose and tail. A ~16% inset pulls it inside the safe
+  zone. Background stays @color/sand, which matches the PNG's own square, so
+  the inset is seamless.
+-->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/dvh_app_icon_fg"
+    android:inset="16%" />
