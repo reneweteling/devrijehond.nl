@@ -27,7 +27,7 @@ android {
         minSdk = 26
         targetSdk = 35
         versionCode = 1
-        versionName = "0.1.0"
+        versionName = "1.0.0"
 
         // Injected into AndroidManifest as com.google.android.geo.API_KEY.
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
