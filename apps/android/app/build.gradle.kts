@@ -1,3 +1,5 @@
+import com.github.triplet.gradle.androidpublisher.ReleaseStatus
+import java.io.File
 import java.util.Properties
 
 plugins {
@@ -5,6 +7,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.play.publisher)
 }
 
 // Read the Google Maps key from local.properties (gitignored) or a -P gradle property.
@@ -18,6 +21,14 @@ val mapsApiKey: String = run {
     fromProp ?: fromLocal ?: ""
 }
 
+// Release signing. The upload keystore and its passwords live in keystore.properties
+// (gitignored), never in the repo. When the file is absent (CI, a fresh clone, a debug
+// build) the release build stays unsigned so non-publishing builds still work; uploading
+// a bundle to Play requires the file to be present.
+val keystoreProps: Properties? = rootProject.file("keystore.properties")
+    .takeIf { it.exists() }
+    ?.let { file -> Properties().apply { file.inputStream().use { load(it) } } }
+
 android {
     namespace = "nl.devrijehond.app"
     compileSdk = 35
@@ -26,11 +37,23 @@ android {
         applicationId = "nl.devrijehond.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0"
+        // Versions live in gradle.properties so release-android.sh can bump the code.
+        versionCode = (project.findProperty("VERSION_CODE") as String? ?: "1").toInt()
+        versionName = project.findProperty("VERSION_NAME") as String? ?: "1.0.0"
 
         // Injected into AndroidManifest as com.google.android.geo.API_KEY.
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
+    }
+
+    signingConfigs {
+        keystoreProps?.let { props ->
+            create("release") {
+                storeFile = rootProject.file(props.getProperty("storeFile"))
+                storePassword = props.getProperty("storePassword")
+                keyAlias = props.getProperty("keyAlias")
+                keyPassword = props.getProperty("keyPassword")
+            }
+        }
     }
 
     buildTypes {
@@ -41,6 +64,11 @@ android {
             buildConfigField("String", "MAPS_API_KEY", "\"$mapsApiKey\"")
         }
         release {
+            // Only wire the signing config when the keystore is present, so a plain
+            // `assembleRelease` on a machine without the key still configures.
+            if (keystoreProps != null) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             isMinifyEnabled = false
             buildConfigField("String", "API_BASE_URL", "\"https://api.devrijehond.nl/\"")
             buildConfigField("String", "MAPS_API_KEY", "\"$mapsApiKey\"")
@@ -114,4 +142,20 @@ dependencies {
 
     // Image cropping (add-spot, profile/dog photos)
     implementation(libs.android.image.cropper)
+}
+
+// Gradle Play Publisher: `./gradlew publishReleaseBundle` builds the signed AAB and
+// uploads it to Google Play. The service-account JSON (publish rights, gitignored) is
+// taken from PLAY_SERVICE_ACCOUNT_JSON, else secrets/play-service-account.json at the
+// repo root, mirroring where the iOS release script keeps its App Store key. Absent
+// credentials leave the tasks registered but failing, so normal builds are unaffected.
+play {
+    val credsFile: File = System.getenv("PLAY_SERVICE_ACCOUNT_JSON")?.let { File(it) }
+        ?: rootProject.file("../../secrets/play-service-account.json")
+    if (credsFile.exists()) {
+        serviceAccountCredentials.set(credsFile)
+    }
+    track.set("internal")
+    defaultToAppBundles.set(true)
+    releaseStatus.set(ReleaseStatus.COMPLETED)
 }

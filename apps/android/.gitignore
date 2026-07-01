@@ -9,3 +9,8 @@
 .cxx
 local.properties
 app/build/
+
+# Release signing: never commit the upload keystore or its passwords.
+keystore.properties
+*.jks
+*.keystore
