@@ -71,7 +71,7 @@ fun AboutScreen(modifier: Modifier = Modifier) {
         Column(modifier = Modifier.dvhCard(), verticalArrangement = Arrangement.spacedBy(Dvh.s2)) {
             Text("Wat is De Vrije Hond?", style = MaterialTheme.typography.titleMedium, color = Brand.Ink)
             Text(
-                "Een community-kaart van hondvriendelijke plekken in Nederland: losloopgebieden, " +
+                "Een community-kaart van hondvriendelijke plekken in Nederland en België: losloopgebieden, " +
                     "hondenstranden, hondvriendelijke horeca, waterpunten en meer. Toegevoegd en " +
                     "geverifieerd door hondenbazen zelf. De community houdt zichzelf op orde: je " +
                     "stemt plekken naar geverifieerd, en moderators uit de community springen bij " +

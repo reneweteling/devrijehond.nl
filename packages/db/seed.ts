@@ -60,9 +60,18 @@ type RawLosloop = {
   osmTags?: Record<string, string>;
   geometry?: number[][]; // real [lng,lat] polygon ring (OSM); else circle from centroid
 };
-const LOSLOOP: RawLosloop[] = JSON.parse(
-  readFileSync(new URL('./data/losloopgebieden.json', import.meta.url), 'utf8'),
-);
+function loadJsonFile<T>(file: string): T[] {
+  const url = new URL(`./data/${file}`, import.meta.url);
+  if (!existsSync(url)) return [];
+  return JSON.parse(readFileSync(url, 'utf8')) as T[];
+}
+
+const LOSLOOP: RawLosloop[] = loadJsonFile<RawLosloop>('losloopgebieden.json');
+
+// Belgian off-leash areas come from OSM dog_park (scrape:osm off-leash --country
+// be), not a curated directory, so they carry geometry rings and land UNVERIFIED
+// for the community to confirm, same as any OSM auto-import.
+const BE_OFFLEASH: RawLosloop[] = loadJsonFile<RawLosloop>('be-osm-dogparks.json');
 
 // ---------------------------------------------------------------------------
 // Scraped POI categories (OSM via scrape/osm.ts). Each file is optional; a
@@ -106,8 +115,14 @@ function dedupePois<T extends { category: string; lat: number; lng: number }>(it
   return out;
 }
 
-// category slug -> scraped data file. Add entries as scrapers land.
-const POI_SOURCES: { category: string; file: string; descFallback: string }[] = [
+// category slug -> scraped data file. `fallbackCity` fills the city label when a
+// record has no town/province (OSM often omits addr:city); defaults to Nederland.
+const POI_SOURCES: {
+  category: string;
+  file: string;
+  descFallback: string;
+  fallbackCity?: string;
+}[] = [
   {
     category: 'drinking-point',
     file: 'drinkpunten.json',
@@ -157,6 +172,38 @@ const POI_SOURCES: { category: string; file: string; descFallback: string }[] = 
     category: 'horeca',
     file: 'horeca-curated.json',
     descFallback: 'Hondvriendelijke horeca.',
+  },
+  // Belgium (OSM via scrape:osm --country be). Off-leash is handled separately
+  // (BE_OFFLEASH); these are the point categories. Missing files are skipped.
+  {
+    category: 'drinking-point',
+    file: 'be-drinkpunten.json',
+    descFallback: 'Drinkwaterpunt waar je hond kan drinken.',
+    fallbackCity: 'België',
+  },
+  {
+    category: 'shop',
+    file: 'be-winkels.json',
+    descFallback: 'Dierenwinkel met spullen voor je hond.',
+    fallbackCity: 'België',
+  },
+  {
+    category: 'horeca',
+    file: 'be-horeca.json',
+    descFallback: 'Hondvriendelijke horeca.',
+    fallbackCity: 'België',
+  },
+  {
+    category: 'swim-beach',
+    file: 'be-zwemstranden.json',
+    descFallback: 'Hondenstrand waar je hond mag zwemmen.',
+    fallbackCity: 'België',
+  },
+  {
+    category: 'vet',
+    file: 'be-dierenartsen.json',
+    descFallback: 'Dierenarts.',
+    fallbackCity: 'België',
   },
 ];
 
@@ -560,30 +607,35 @@ const RESEARCH: {
   website?: string | null;
   raw: RawLosloop | RawPoi;
 }[] = [
-  ...LOSLOOP.map((r) => {
-    const amenities: string[] = ['free'];
-    if (r.fenced) amenities.push('fenced');
-    if (r.parking) amenities.push('parking');
-    return {
-      name: r.name,
-      category: 'off-leash',
-      city: r.town ?? r.province ?? 'Nederland',
-      lat: r.lat,
-      lng: r.lng,
-      description: r.description ?? 'Hondenlosloopgebied.',
-      radiusM: r.source === 'osm' ? 130 : 400,
-      amenities,
-      raw: r,
-    };
-  }),
+  ...[
+    { records: LOSLOOP, fallbackCity: 'Nederland' },
+    { records: BE_OFFLEASH, fallbackCity: 'België' },
+  ].flatMap(({ records, fallbackCity }) =>
+    records.map((r) => {
+      const amenities: string[] = ['free'];
+      if (r.fenced) amenities.push('fenced');
+      if (r.parking) amenities.push('parking');
+      return {
+        name: r.name,
+        category: 'off-leash',
+        city: r.town ?? r.province ?? fallbackCity,
+        lat: r.lat,
+        lng: r.lng,
+        description: r.description ?? 'Hondenlosloopgebied.',
+        radiusM: r.source === 'osm' ? 130 : 400,
+        amenities,
+        raw: r,
+      };
+    }),
+  ),
   // Scraped POIs (drinking points, vets, shops, etc.) -> POI spots, no geometry.
   // Deduped across sources so OSM + Ranzijn don't double up at the same address.
   ...dedupePois(
-    POI_SOURCES.flatMap(({ category, file, descFallback }) =>
+    POI_SOURCES.flatMap(({ category, file, descFallback, fallbackCity }) =>
       loadPoiFile(file).map((r) => ({
         name: r.name,
         category,
-        city: r.town ?? r.province ?? 'Nederland',
+        city: r.town ?? r.province ?? fallbackCity ?? 'Nederland',
         lat: r.lat,
         lng: r.lng,
         description: r.description ?? descFallback,

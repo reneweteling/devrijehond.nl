@@ -52,7 +52,7 @@ struct AboutView: View {
         VStack(alignment: .leading, spacing: DVH.s3) {
             Text("Wat is De Vrije Hond?").font(.dvhHeadline).foregroundStyle(Brand.ink)
             Text(
-                "Een community-kaart van hondvriendelijke plekken in Nederland: losloopgebieden, "
+                "Een community-kaart van hondvriendelijke plekken in Nederland en België: losloopgebieden, "
                 + "hondenstranden, hondvriendelijke horeca, waterpunten en meer. Toegevoegd en "
                 + "geverifieerd door hondenbazen zelf. De community houdt zichzelf op orde: je stemt "
                 + "plekken naar geverifieerd, en moderators uit de community springen bij waar nodig."
