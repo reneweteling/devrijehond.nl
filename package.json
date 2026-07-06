@@ -17,6 +17,8 @@
     "db:up": "docker compose up -d db",
     "db:down": "docker compose down",
     "generate": "turbo run generate",
+    "release:ios": "bash apps/ios-native/scripts/release-native.sh",
+    "release:android": "bash apps/android/scripts/release-android.sh",
     "prepare": "husky"
   },
   "devDependencies": {

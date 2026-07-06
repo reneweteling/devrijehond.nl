@@ -49,6 +49,15 @@ cp "$ROOT/secrets/AuthKey_${ASC_KEY_ID}.p8" "$KEYFILE"
 jq -n --arg kid "$ASC_KEY_ID" --arg iss "$ASC_ISSUER_ID" --arg key "$(cat "$KEYFILE")" \
   '{key_id:$kid, issuer_id:$iss, key:$key, in_house:false}' >/tmp/asc_api_key.json
 
+echo "▸ Bump build number"
+# TestFlight rejects a build number it has already seen, so bump
+# CURRENT_PROJECT_VERSION on every release (mirrors the Android script's versionCode).
+CURRENT_BUILD="$(sed -n -E "s/^[[:space:]]*CURRENT_PROJECT_VERSION:[[:space:]]*'?([0-9]+)'?.*/\1/p" project.yml)"
+: "${CURRENT_BUILD:?CURRENT_PROJECT_VERSION not found in project.yml}"
+NEXT_BUILD=$((CURRENT_BUILD + 1))
+sed -i '' -E "s/^([[:space:]]*CURRENT_PROJECT_VERSION:[[:space:]]*)'?[0-9]+'?.*/\1'${NEXT_BUILD}'/" project.yml
+echo "  build $CURRENT_BUILD → $NEXT_BUILD"
+
 echo "▸ Generate Xcode project"
 xcodegen generate
 
