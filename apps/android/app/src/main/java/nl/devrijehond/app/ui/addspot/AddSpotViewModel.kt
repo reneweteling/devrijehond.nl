@@ -100,9 +100,13 @@ class AddSpotViewModel(app: Application) : AndroidViewModel(app) {
                 photos.none { it.uploading }
         }
 
-    /** Categories valid for the current type, falling back to all if none tagged. */
+    /**
+     * A REGION is scoped to REGION categories (with a fallback to all if none are
+     * tagged); a POI may use any category, so the picker shows the full list.
+     */
     val pickableCategories: List<Category>
         get() {
+            if (!isRegion) return categories
             val matched = categories.filter { it.type == type }
             return matched.ifEmpty { categories }
         }

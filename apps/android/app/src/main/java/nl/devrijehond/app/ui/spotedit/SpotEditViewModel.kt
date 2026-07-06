@@ -11,6 +11,7 @@ import nl.devrijehond.app.AppGraph
 import nl.devrijehond.app.api.models.Amenity
 import nl.devrijehond.app.api.models.Category
 import nl.devrijehond.app.api.models.SpotDetail
+import nl.devrijehond.app.api.models.SpotType
 import nl.devrijehond.app.api.models.UpdateSpotRequest
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
@@ -80,9 +81,16 @@ class SpotEditViewModel : ViewModel() {
                     _state.update { it.copy(loading = false, loadError = "Kon de plek niet laden (${detailResp.code()}).") }
                     return@launch
                 }
-                val categories = runCatching {
-                    AppGraph.api.categories.apiV1CategoriesGet(type = detail.type).body()?.items.orEmpty()
+                // A REGION is scoped to REGION categories; a POI may use any category,
+                // so load the full taxonomy and only narrow it for a region.
+                val allCategories = runCatching {
+                    AppGraph.api.categories.apiV1CategoriesGet(type = null).body()?.items.orEmpty()
                 }.getOrDefault(emptyList())
+                val categories = if (detail.type == SpotType.REGION) {
+                    allCategories.filter { it.type == SpotType.REGION }.ifEmpty { allCategories }
+                } else {
+                    allCategories
+                }
                 _state.update {
                     it.copy(
                         loading = false,

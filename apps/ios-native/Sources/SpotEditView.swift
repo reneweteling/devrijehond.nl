@@ -41,7 +41,9 @@ struct SpotEditView: View {
 
     private var typeString: String { detail?.type ?? spot.type }
 
+    // A REGION is scoped to REGION categories; a POI may use any category.
     private var pickableCategories: [Category] {
+        guard typeString == "REGION" else { return categories }
         let matched = categories.filter { $0.type == typeString }
         return matched.isEmpty ? categories : matched
     }

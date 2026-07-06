@@ -29,7 +29,9 @@ struct SpotFormView: View {
 
     private var typeString: String { isRegion ? "REGION" : "POI" }
 
+    // A REGION is scoped to REGION categories; a POI may use any category.
     private var pickableCategories: [Category] {
+        guard isRegion else { return categories }
         let matched = categories.filter { $0.type == typeString }
         return matched.isEmpty ? categories : matched
     }

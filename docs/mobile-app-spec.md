@@ -104,8 +104,9 @@ resource, `staff` = moderator/admin.
     verplaatsen, "Ongedaan" (laatste punt) en "Wis alles". De polygon wordt live
     hertekend; ≥ 3 punten nodig.
 - Locatie zoeken (geocoder) om de kaart naar een plaats te springen
-- Detailformulier: naam, categorie (gefilterd op type), beschrijving, amenities
-  (gefilterd op categorie), foto's, en voor POI ook adres/website
+- Detailformulier: naam, categorie (REGION toont alleen REGION-categorieën; POI
+  toont alle categorieën), beschrijving, amenities (gefilterd op categorie),
+  foto's, en voor POI ook adres/website
 - Foto-upload met **vierkante crop** (camera + bibliotheek via
   `UIImagePickerController` met `allowsEditing = true`), los upload-endpoint, dan
   de URL's meesturen. Tot 10 foto's bij het toevoegen.
