@@ -5,6 +5,12 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
+    <!-- Phone-only distribution. Requiring telephony hardware filters the app out of
+         tablets and Chromebooks on Google Play (they have no cellular radio). The app
+         never calls telephony APIs; this is purely a Play device-compatibility filter.
+         Takes effect once a build with this manifest is uploaded. -->
+    <uses-feature android:name="android.hardware.telephony" android:required="true" />
+
     <!-- Android 11+ package visibility for the apps/schemes we hand off to. -->
     <queries>
         <package android:name="com.google.android.apps.maps" />
