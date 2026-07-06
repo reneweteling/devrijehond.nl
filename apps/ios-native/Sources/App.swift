@@ -17,6 +17,7 @@ struct DeVrijeHondNativeApp: App {
     init() {
         Self.startSentry()
         Self.configureNavigationBar()
+        Self.configureTabBar()
     }
 
     private static func startSentry() {
@@ -60,6 +61,34 @@ struct DeVrijeHondNativeApp: App {
         bar.standardAppearance = standard
         bar.compactAppearance = standard
         bar.scrollEdgeAppearance = scrollEdge
+    }
+
+    /// iOS 26 renders the system Liquid Glass tab bar, so leave the default there.
+    /// On older iOS, pin an opaque cream appearance (moss selected, ink2 unselected,
+    /// mirroring Android) so the bar always has a solid background and can never read
+    /// as "missing" against full-bleed content like the map.
+    private static func configureTabBar() {
+        if #available(iOS 26, *) { return }
+        let appearance = UITabBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = UIColor(hex: 0xFFFDF7) // cream
+
+        let moss = UIColor(hex: 0x6E7B33)
+        let ink2 = UIColor(hex: 0x5A6151)
+        for item in [
+            appearance.stackedLayoutAppearance,
+            appearance.inlineLayoutAppearance,
+            appearance.compactInlineLayoutAppearance,
+        ] {
+            item.selected.iconColor = moss
+            item.selected.titleTextAttributes = [.foregroundColor: moss]
+            item.normal.iconColor = ink2
+            item.normal.titleTextAttributes = [.foregroundColor: ink2]
+        }
+
+        let bar = UITabBar.appearance()
+        bar.standardAppearance = appearance
+        bar.scrollEdgeAppearance = appearance
     }
 
     var body: some Scene {
