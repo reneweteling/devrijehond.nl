@@ -177,8 +177,8 @@ function Footer() {
               maxWidth: '40ch',
             }}
           >
-            De community-kaart van hondvriendelijke plekken in Nederland. Toegevoegd en geverifieerd
-            door hondenbezitters zelf.
+            De community-kaart van hondvriendelijke plekken in Nederland en België. Toegevoegd en
+            geverifieerd door hondenbezitters zelf.
           </p>
         </div>
 

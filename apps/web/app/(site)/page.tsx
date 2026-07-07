@@ -49,7 +49,7 @@ const FAQS = [
   },
   {
     q: 'Welke plekken staan erop?',
-    a: 'Losloopgebieden en hondenstranden als gebieden, plus hondvriendelijke horeca, waterpunten, was- en spoelplekken en winkels, in heel Nederland.',
+    a: 'Losloopgebieden en hondenstranden als gebieden, plus hondvriendelijke horeca, waterpunten, was- en spoelplekken en winkels, in heel Nederland en België.',
   },
 ];
 
@@ -115,7 +115,7 @@ export default async function HomePage() {
           <FadeIn>
             <span className="eyebrow">🐾 Voor hondenbazen, door hondenbazen</span>
             <h1>
-              Vind de fijnste <em>hondenplekken</em> van Nederland
+              Vind de fijnste <em>hondenplekken</em> van Nederland en België
             </h1>
             <p className="hero-lead">
               Losloopgebieden, hondenstranden, hondvriendelijke horeca en waterpunten. Eén kaart,

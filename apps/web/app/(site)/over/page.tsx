@@ -15,7 +15,7 @@ export default function OverPage() {
   return (
     <LegalPage title="Over De Vrije Hond" updated="20 juni 2026">
       <p>
-        De Vrije Hond is een community-kaart van hondvriendelijke plekken in Nederland:
+        De Vrije Hond is een community-kaart van hondvriendelijke plekken in Nederland en België:
         losloopgebieden, hondenstranden, hondvriendelijke horeca, waterpunten en meer. Toegevoegd en
         geverifieerd door hondenbazen zelf.
       </p>

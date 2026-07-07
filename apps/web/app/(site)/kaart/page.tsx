@@ -4,7 +4,7 @@ import { FullMap } from '../full-map';
 export const metadata: Metadata = {
   title: 'Kaart',
   description:
-    'Bekijk alle hondvriendelijke plekken in Nederland op de kaart: losloopgebieden, hondenstranden, horeca en waterpunten.',
+    'Bekijk alle hondvriendelijke plekken in Nederland en België op de kaart: losloopgebieden, hondenstranden, horeca en waterpunten.',
 };
 
 /**

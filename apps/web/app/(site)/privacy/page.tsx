@@ -12,8 +12,8 @@ export default function PrivacyPage() {
   return (
     <LegalPage title="Privacyverklaring" updated="19 juni 2026">
       <p>
-        De Vrije Hond is een community-kaart van hondvriendelijke plekken in Nederland. Deze
-        verklaring legt uit welke gegevens we verzamelen, waarom, en welke rechten je hebt. We
+        De Vrije Hond is een community-kaart van hondvriendelijke plekken in Nederland en België.
+        Deze verklaring legt uit welke gegevens we verzamelen, waarom, en welke rechten je hebt. We
         verwerken zo min mogelijk en verkopen je gegevens nooit.
       </p>
 

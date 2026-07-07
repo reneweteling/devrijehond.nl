@@ -14,7 +14,7 @@ const body = Inter({ subsets: ['latin'], variable: '--font-body', display: 'swap
 
 const SITE_NAME = 'De Vrije Hond';
 const DESCRIPTION =
-  'Ontdek losloopgebieden, hondenstranden, hondvriendelijke horeca en meer. Community-gedreven en geverifieerd door hondenbezitters in heel Nederland.';
+  'Ontdek losloopgebieden, hondenstranden, hondvriendelijke horeca en meer. Community-gedreven en geverifieerd door hondenbezitters in heel Nederland en België.';
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.devrijehond.nl'),
@@ -31,6 +31,7 @@ export const metadata: Metadata = {
     'hondvriendelijke horeca',
     'honden uitlaten',
     'Nederland',
+    'België',
     'hondenkaart',
   ],
   authors: [{ name: 'Felobo B.V.', url: 'https://www.weteling.com' }],
