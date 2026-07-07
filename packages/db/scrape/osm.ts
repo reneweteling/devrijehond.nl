@@ -170,13 +170,34 @@ async function runOverpass(query: string): Promise<OverpassElement[]> {
 }
 
 // A closed way from `out geom` yields a ring [{lat,lon}...]; turn it into the
-// [lng,lat] ring the seeder stores as PostGIS geometry, and its centroid so
-// lat/lng still mirror the polygon. Returns null for degenerate rings.
+// [lng,lat] ring the seeder stores as a PostGIS polygon, plus its centroid so
+// lat/lng still mirror the shape. Returns null for anything that can't be a
+// polygon ring: an open way (dog=unleashed paths are lines, not areas) or a
+// degenerate ring. Self-intersecting-but-closed rings still pass here; the
+// seeder repairs those with ST_MakeValid.
 function ringFromGeometry(
   geometry: { lat: number; lon: number }[],
 ): { ring: number[][]; lat: number; lng: number } | null {
   if (!geometry || geometry.length < 3) return null;
   const ring = geometry.map((p) => [p.lon, p.lat]);
+  // A GeoJSON polygon ring must be closed. Only close a ring that is nearly
+  // closed already (a real area whose first/last node coincide in OSM but got
+  // dropped); an open line (start far from end) is not an area -> reject it.
+  const first = ring[0];
+  const last = ring[ring.length - 1];
+  if (!first || !last) return null;
+  const x0 = first[0];
+  const y0 = first[1];
+  const xn = last[0];
+  const yn = last[1];
+  if (x0 === undefined || y0 === undefined || xn === undefined || yn === undefined) return null;
+  if (x0 !== xn || y0 !== yn) {
+    const closed = Math.abs(x0 - xn) < 1e-7 && Math.abs(y0 - yn) < 1e-7;
+    if (!closed) return null;
+    ring.push([x0, y0]);
+  }
+  // Need >= 4 positions for a closed ring (triangle = A,B,C,A).
+  if (ring.length < 4) return null;
   let sumLat = 0;
   let sumLng = 0;
   for (const p of geometry) {

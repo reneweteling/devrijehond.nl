@@ -648,6 +648,28 @@ const RESEARCH: {
   ),
 ];
 
+// Normalise a raw [lng,lat] ring into a valid GeoJSON polygon ring: close it if
+// its ends nearly coincide, reject an open line, and require >= 4 positions.
+// Returns null when it can't be a polygon (the caller then keeps a centroid
+// point). Mirrors the scraper guard so directly-fed data is safe too.
+function closedRing(coords: number[][]): number[][] | null {
+  if (!coords || coords.length < 3) return null;
+  const ring = coords.slice();
+  const first = ring[0];
+  const last = ring[ring.length - 1];
+  if (!first || !last) return null;
+  const x0 = first[0];
+  const y0 = first[1];
+  const xn = last[0];
+  const yn = last[1];
+  if (x0 === undefined || y0 === undefined || xn === undefined || yn === undefined) return null;
+  if (x0 !== xn || y0 !== yn) {
+    if (Math.abs(x0 - xn) >= 1e-7 || Math.abs(y0 - yn) >= 1e-7) return null;
+    ring.push([x0, y0]);
+  }
+  return ring.length >= 4 ? ring : null;
+}
+
 function slugify(s: string): string {
   return s
     .toLowerCase()
@@ -1032,11 +1054,32 @@ async function main() {
        WHERE geom IS NULL AND lat IS NOT NULL AND lng IS NOT NULL;`,
   );
   for (const r of regionGeoms) {
-    const geojson = JSON.stringify({ type: 'Polygon', coordinates: [r.coords] });
-    await pool.query(
-      `UPDATE "Spot" SET geom = ST_SetSRID(ST_GeomFromGeoJSON($1), 4326) WHERE id = $2;`,
-      [geojson, r.id],
-    );
+    const ring = closedRing(r.coords);
+    // Degenerate ring (open line / too few points) -> leave the centroid point
+    // set above; the app draws a fallback circle.
+    if (!ring) continue;
+    const geojson = JSON.stringify({ type: 'Polygon', coordinates: [ring] });
+    try {
+      // ST_MakeValid repairs self-intersecting OSM rings; ST_Dump + largest
+      // POLYGON collapses any resulting multipolygon to a single ring the apps
+      // can draw (they only render GeoJSON "Polygon"). If nothing valid comes
+      // out, COALESCE keeps the existing centroid point. An invalid geom here
+      // would break the KNN `<->` nearby query for the whole table.
+      await pool.query(
+        `UPDATE "Spot" SET geom = COALESCE(
+           (SELECT g FROM (
+              SELECT (ST_Dump(ST_MakeValid(ST_SetSRID(ST_GeomFromGeoJSON($1), 4326)))).geom AS g
+            ) parts
+            WHERE GeometryType(g) = 'POLYGON'
+            ORDER BY ST_Area(g) DESC
+            LIMIT 1),
+           geom
+         ) WHERE id = $2;`,
+        [geojson, r.id],
+      );
+    } catch (err) {
+      console.warn(`[seed] region geometry skipped for ${r.id}: ${String(err)}`);
+    }
   }
 
   await pool.end();
