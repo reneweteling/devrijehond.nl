@@ -76,6 +76,12 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            // Bundle native debug symbols so native crashes/ANRs (from Maps SDK and
+            // other .so deps) symbolicate in Play. SYMBOL_TABLE keeps function names
+            // at a modest size; use FULL to also get line numbers.
+            ndk {
+                debugSymbolLevel = "SYMBOL_TABLE"
+            }
         }
     }
 
