@@ -8,7 +8,7 @@ import Image from 'next/image';
 
 import { HeaderAccount } from './header-account';
 
-const IOS_URL = 'https://apps.apple.com/app/de-vrije-hond/id6782167612';
+const IOS_URL = 'https://apps.apple.com/nl/app/de-vrije-hond/id6782167612';
 const ANDROID_URL = 'https://play.google.com/store/apps/details?id=nl.devrijehond.app';
 
 export function PawMark({ size = 26, color = 'var(--moss)' }: { size?: number; color?: string }) {
@@ -44,20 +44,11 @@ function PlayGlyph() {
 }
 
 export function StoreButton({ href, kind }: { href: string; kind: 'ios' | 'android' }) {
-  // iOS is live; the Play listing isn't published yet. Render a non-clickable
-  // "Binnenkort" pill for the unpublished package instead of a dead link.
-  const comingSoon = href.includes('details?id=nl.devrijehond.app');
   const glyph = kind === 'ios' ? <AppleGlyph /> : <PlayGlyph />;
-  const small = comingSoon
-    ? kind === 'ios'
-      ? 'Binnenkort in de'
-      : 'Binnenkort op'
-    : kind === 'ios'
-      ? 'Download in de'
-      : 'Ontdek op';
+  const small = kind === 'ios' ? 'Download in de' : 'Ontdek op';
   const big = kind === 'ios' ? 'App Store' : 'Google Play';
-  const inner = (
-    <>
+  return (
+    <a className="store-btn" href={href} target="_blank" rel="noreferrer">
       {glyph}
       <span>
         <span className="store-small" style={{ display: 'block' }}>
@@ -67,18 +58,6 @@ export function StoreButton({ href, kind }: { href: string; kind: 'ios' | 'andro
           {big}
         </span>
       </span>
-    </>
-  );
-  if (comingSoon) {
-    return (
-      <span className="store-btn" aria-disabled="true" style={{ opacity: 0.62, cursor: 'default' }}>
-        {inner}
-      </span>
-    );
-  }
-  return (
-    <a className="store-btn" href={href} target="_blank" rel="noreferrer">
-      {inner}
     </a>
   );
 }
@@ -145,7 +124,7 @@ export function AppCta() {
             <StoreButton href={ANDROID_URL} kind="android" />
           </div>
           <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.85)' }}>
-            Nu in de App Store, binnenkort op Google Play
+            Nu in de App Store en Google Play
           </span>
         </div>
       </div>

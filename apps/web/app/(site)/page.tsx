@@ -22,7 +22,7 @@ import { Reveal, FadeIn } from './motion';
  */
 export const revalidate = 300;
 
-const IOS_URL = 'https://apps.apple.com/app/de-vrije-hond/id6782167612';
+const IOS_URL = 'https://apps.apple.com/nl/app/de-vrije-hond/id6782167612';
 const ANDROID_URL = 'https://play.google.com/store/apps/details?id=nl.devrijehond.app';
 
 const CATEGORY_EMOJI: Record<string, string> = {
@@ -129,7 +129,7 @@ export default async function HomePage() {
               </a>
             </div>
             <p style={{ margin: '10px 0 0', fontSize: 13.5, color: 'var(--ink-2, #6b6b63)' }}>
-              De app is binnenkort te downloaden. Bekijk nu alvast de kaart in je browser.
+              De app staat in de App Store en Google Play. Of bekijk de kaart in je browser.
             </p>
             <div className="hero-stats">
               <div>
