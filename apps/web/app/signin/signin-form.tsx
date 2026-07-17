@@ -18,15 +18,21 @@ export function SignInForm({ next = '/account' }: { next?: string }) {
     if (!email.trim()) return;
     setState('sending');
     setMessage('');
-    const { error } = await authClient.signIn.magicLink({
-      email: email.trim(),
-      callbackURL: next,
-    });
-    if (error) {
+    try {
+      const { error } = await authClient.signIn.magicLink({
+        email: email.trim(),
+        callbackURL: next,
+      });
+      if (error) {
+        setState('error');
+        setMessage('Versturen mislukt. Probeer het opnieuw.');
+      } else {
+        setState('sent');
+      }
+    } catch {
+      // A dropped connection rejects rather than returning { error }.
       setState('error');
-      setMessage('Versturen mislukt. Probeer het opnieuw.');
-    } else {
-      setState('sent');
+      setMessage('Geen verbinding. Check je internet en probeer het opnieuw.');
     }
   };
 
@@ -43,7 +49,12 @@ export function SignInForm({ next = '/account' }: { next?: string }) {
 
   const google = async () => {
     setMessage('');
-    await authClient.signIn.social({ provider: 'google', callbackURL: next });
+    try {
+      await authClient.signIn.social({ provider: 'google', callbackURL: next });
+    } catch {
+      setState('error');
+      setMessage('Geen verbinding. Check je internet en probeer het opnieuw.');
+    }
   };
 
   return (
