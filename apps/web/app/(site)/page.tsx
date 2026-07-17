@@ -65,38 +65,54 @@ type FeaturedRow = {
   photo: string | null;
 };
 type Stats = { spots: number; cats: number };
+type HomeRow = { cats: CatRow[]; featured: FeaturedRow[]; spots: number; cat_count: number };
 
+const EMPTY_DATA: { cats: CatRow[]; featured: FeaturedRow[]; stats: Stats } = {
+  cats: [],
+  featured: [],
+  stats: { spots: 0, cats: 0 },
+};
+
+/**
+ * Everything the page needs in one round trip. The three result sets used to be
+ * three `pgQuery` calls in a `Promise.all`, which each checked out their own
+ * pool connection and tripped Sentry's N+1 detector on every render.
+ */
 async function loadData() {
   try {
-    const [cats, featured, stats] = await Promise.all([
-      pgQuery<CatRow>(
-        `SELECT c.slug, c.label, c.color, COUNT(s.id)::int AS n
-           FROM "Category" c
-           LEFT JOIN "Spot" s ON s."categoryId" = c.id AND s.status IN ('VERIFIED','UNVERIFIED')
-          WHERE c.visible = true
-          GROUP BY c.id
-          ORDER BY c."sortOrder"`,
-      ),
-      pgQuery<FeaturedRow>(
-        `SELECT s.slug, s.name, s.type,
-                c.label AS cat_label, c.color AS cat_color,
-                s."ratingAvg" AS rating_avg, s."ratingCount" AS rating_count,
-                (SELECT url FROM "SpotPhoto" p WHERE p."spotId" = s.id ORDER BY p."sortOrder" LIMIT 1) AS photo
-           FROM "Spot" s
-           JOIN "Category" c ON c.id = s."categoryId"
-          WHERE s.status = 'VERIFIED'
-          ORDER BY s."ratingCount" DESC NULLS LAST, s."netScore" DESC
-          LIMIT 6`,
-      ),
-      pgQuery<Stats>(
-        `SELECT
-            (SELECT COUNT(*)::int FROM "Spot" WHERE status IN ('VERIFIED','UNVERIFIED')) AS spots,
-            (SELECT COUNT(*)::int FROM "Category" WHERE visible = true) AS cats`,
-      ),
-    ]);
-    return { cats, featured, stats: stats[0] ?? { spots: 0, cats: 0 } };
+    const rows = await pgQuery<HomeRow>(
+      `SELECT
+          (SELECT COALESCE(json_agg(c), '[]'::json) FROM (
+             SELECT c.slug, c.label, c.color, COUNT(s.id)::int AS n
+               FROM "Category" c
+               LEFT JOIN "Spot" s ON s."categoryId" = c.id AND s.status IN ('VERIFIED','UNVERIFIED')
+              WHERE c.visible = true
+              GROUP BY c.id
+              ORDER BY c."sortOrder"
+           ) c) AS cats,
+          (SELECT COALESCE(json_agg(f), '[]'::json) FROM (
+             SELECT s.slug, s.name, s.type,
+                    c.label AS cat_label, c.color AS cat_color,
+                    s."ratingAvg" AS rating_avg, s."ratingCount" AS rating_count,
+                    (SELECT url FROM "SpotPhoto" p WHERE p."spotId" = s.id ORDER BY p."sortOrder" LIMIT 1) AS photo
+               FROM "Spot" s
+               JOIN "Category" c ON c.id = s."categoryId"
+              WHERE s.status = 'VERIFIED'
+              ORDER BY s."ratingCount" DESC NULLS LAST, s."netScore" DESC
+              LIMIT 6
+           ) f) AS featured,
+          (SELECT COUNT(*)::int FROM "Spot" WHERE status IN ('VERIFIED','UNVERIFIED')) AS spots,
+          (SELECT COUNT(*)::int FROM "Category" WHERE visible = true) AS cat_count`,
+    );
+    const row = rows[0];
+    if (!row) return EMPTY_DATA;
+    return {
+      cats: row.cats,
+      featured: row.featured,
+      stats: { spots: row.spots, cats: row.cat_count },
+    };
   } catch {
-    return { cats: [], featured: [], stats: { spots: 0, cats: 0 } };
+    return EMPTY_DATA;
   }
 }
 
