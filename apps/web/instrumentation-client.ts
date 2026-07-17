@@ -8,6 +8,12 @@ Sentry.init({
   replaysOnErrorSampleRate: 1.0,
   enableLogs: true,
   integrations: [Sentry.replayIntegration()],
+  ignoreErrors: [
+    // Thrown inside the Google Maps loader (main.js) when one of its own
+    // sub-libraries fails to fetch, usually a flaky network or an adblocker.
+    // Nothing on our side to fix and the map recovers on reload.
+    /^Could not load "[^"]+"\.$/,
+  ],
 });
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
