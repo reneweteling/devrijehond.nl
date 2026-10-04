@@ -31,12 +31,12 @@ val keystoreProps: Properties? = rootProject.file("keystore.properties")
 
 android {
     namespace = "nl.devrijehond.app"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "nl.devrijehond.app"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         // Versions live in gradle.properties so release-android.sh can bump the code.
         versionCode = (project.findProperty("VERSION_CODE") as String? ?: "1").toInt()
         versionName = project.findProperty("VERSION_NAME") as String? ?: "1.0.0"
