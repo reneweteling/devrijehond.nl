@@ -17,17 +17,17 @@
   },
   "dependencies": {
     "@react-email/components": "^0.0.36",
-    "@react-email/render": "^1.0.5",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "resend": "^4.5.1"
+    "@react-email/render": "^1.4.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "resend": "^4.8.0"
   },
   "devDependencies": {
-    "@types/node": "^22.10.5",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
     "@react-email/preview-server": "5.2.11",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "react-email": "5.2.11",
-    "typescript": "^5.7.2"
+    "typescript": "^5.9.3"
   }
 }

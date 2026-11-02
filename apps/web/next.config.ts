@@ -1,5 +1,5 @@
 import type { NextConfig } from 'next';
-import { withSentryConfig } from '@sentry/nextjs';
+import { withSentryConfig } from '@sentry/nextjs/config';
 
 /**
  * Next.js config for apps/web — the De Vrije Hond public website + API + the
