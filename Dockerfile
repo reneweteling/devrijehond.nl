@@ -41,6 +41,13 @@ ENV WEB_SENTRY_DSN=$WEB_SENTRY_DSN
 RUN --mount=type=cache,target=/app/apps/web/.next/cache pnpm --filter web build
 
 ENV NODE_ENV=production
+# Runtime memory guards. glibc gives every thread its own malloc arena, and
+# sharp/libvips plus Node's worker pool fragment those badly, so RSS keeps
+# climbing although the JS heap is fine. Two arenas keeps native memory flat.
+# The heap cap makes a JS-side leak crash and restart the container instead
+# of pushing the whole host into swap. Set after the build, which needs more.
+ENV MALLOC_ARENA_MAX=2
+ENV NODE_OPTIONS=--max-old-space-size=768
 EXPOSE 3000
 
 # `next start` honours $PORT (Dokku maps host 80 → container 3000 via ports:add).

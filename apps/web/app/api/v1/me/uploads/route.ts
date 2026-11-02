@@ -5,6 +5,9 @@ import { requireAuth } from '@devrijehond/server';
 import { uploadObject } from '@devrijehond/s3';
 import { ok, error, NO_STORE_CACHE_CONTROL } from '@/lib/api-response';
 
+// Each upload is decoded once, so libvips' operation cache only holds memory.
+sharp.cache(false);
+
 /**
  * POST /api/v1/me/uploads — upload an image. Auth required.
  *
