@@ -35,6 +35,12 @@ ENV NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=$NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 ARG WEB_SENTRY_DSN
 ENV WEB_SENTRY_DSN=$WEB_SENTRY_DSN
 
+# Release name for Sentry Release Health (Crash Free Sessions). Dokku exposes
+# the deployed commit as GIT_REV. It is needed at build time for the browser
+# bundle, and the ENV keeps it for the server at runtime.
+ARG GIT_REV
+ENV SENTRY_RELEASE=$GIT_REV
+
 # Persist Next's build cache (.next/cache) across rebuilds via a BuildKit cache
 # mount, so rebuilds aren't cold ("No build cache found"). Needs BuildKit, which
 # Dokku uses for Dockerfile builds by default.

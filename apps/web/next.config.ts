@@ -41,7 +41,14 @@ const nextConfig: NextConfig = {
   },
 };
 
+// Release health needs a release name on every session. The Docker build has
+// no .git (see .dockerignore), so Sentry cannot detect one itself. Dokku
+// passes the deployed commit as GIT_REV, the Dockerfile maps it to
+// SENTRY_RELEASE. Sessions without a release are dropped by Sentry.
+const release = process.env.SENTRY_RELEASE || process.env.GIT_REV || undefined;
+
 export default withSentryConfig(nextConfig, {
+  release: { name: release },
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,
   authToken: process.env.SENTRY_AUTH_TOKEN,
